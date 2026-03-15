@@ -5,8 +5,7 @@ public sealed record TechnicianAccountProvisioned(
     Guid AppUserId,
     Guid TenantId,
     Guid? BranchId,
-    string FirstName,
-    string LastName,
+    string Name,
     string Email,
     string? PhoneNumber,
     DateTimeOffset OccurredAtUtc);

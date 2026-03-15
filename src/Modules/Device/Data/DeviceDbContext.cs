@@ -23,6 +23,8 @@ public sealed class DeviceDbContext : DbContext
             b.Property(x => x.Brand).HasMaxLength(128).IsRequired();
             b.Property(x => x.Model).HasMaxLength(128).IsRequired();
             b.Property(x => x.SerialNumber).HasMaxLength(128).IsRequired();
+            b.Property(x => x.ProblemDescription).HasMaxLength(4000);
+            b.Property(x => x.GuaranteePeriod).HasDefaultValue(0);
 
             b.HasIndex(x => new { x.TenantId, x.SerialNumber }).IsUnique();
             b.HasIndex(x => new { x.TenantId, x.BranchId });

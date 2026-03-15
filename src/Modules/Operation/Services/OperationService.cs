@@ -61,7 +61,29 @@ public sealed class OperationService : IOperationService
         _db.Operations.Add(op);
         await _db.SaveChangesAsync(ct);
 
-    await _bus.Publish(new OperationCreated(op.Id, op.TenantId, op.BranchId, op.CustomerId, op.DeviceId, op.CreatedByUserId, op.FieldTechnicianUserId, op.Title, op.Description, DateTimeOffset.UtcNow), ct);
+        var now = DateTimeOffset.UtcNow;
+
+        await _bus.Publish(new OperationCreated(
+            op.Id,
+            op.TenantId,
+            op.BranchId,
+            op.CustomerId,
+            op.DeviceId,
+            op.CreatedByUserId,
+            op.FieldTechnicianUserId,
+            op.Title,
+            op.Description,
+            now), ct);
+
+        if (toTechnician.HasValue)
+        {
+            await _bus.Publish(new OperationAssignedToTechnician(
+                op.Id,
+                op.TenantId,
+                op.BranchId,
+                toTechnician.Value,
+                now), ct);
+        }
 
         return op;
     }

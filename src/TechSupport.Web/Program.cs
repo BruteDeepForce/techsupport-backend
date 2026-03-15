@@ -10,6 +10,7 @@ using TechSupport.User;
 using TechSupport.Reports;
 using TechSupport.Technician;
 using TechSupport.Reports.Consumers;
+using TechSupport.Operation.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +33,12 @@ builder.Services.AddMassTransit(x =>
     // Register both consumers that handle the same CustomerCreated event
     x.AddConsumer<TechSupport.Reports.Consumers.CustomerCreatedConsumer>();
     x.AddConsumer<TechSupport.Technician.Consumers.OperationCreatedConsumer>();
-    x.AddConsumer<TechnicianAccountProvisionedConsumer>();
+    x.AddConsumer<TechSupport.Reports.Consumers.OperationCreatedConsumer>();
+    x.AddConsumer<OperationAssignedToTechnicianConsumer>();
+    x.AddConsumer<OperationStatusChangedConsumer>();
+    x.AddConsumer<TechSupport.Reports.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechnicianAccountProvisionFailedConsumer>();
+    x.AddConsumer<TechnicianOperationStatusChangedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {

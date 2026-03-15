@@ -12,6 +12,8 @@ public class ReportDbContext : DbContext
     public DbSet<TenantReportSummary> TenantReportSummaries => Set<TenantReportSummary>();
     public DbSet<BranchReportSummary> BranchReportSummaries => Set<BranchReportSummary>();
     public DbSet<ReportMetric> ReportMetrics => Set<ReportMetric>();
+    public DbSet<TechnicianReportSummary> TechnicianReportSummaries => Set<TechnicianReportSummary>();
+    public DbSet<TechnicianReportMetric> TechnicianReportMetrics => Set<TechnicianReportMetric>();
     public DbSet<GeneratedReport> GeneratedReports => Set<GeneratedReport>();
     public DbSet<ProcessedReportEvent> ProcessedReportEvents => Set<ProcessedReportEvent>();
 
@@ -38,6 +40,24 @@ public class ReportDbContext : DbContext
             b.ToTable("report_metrics");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.BranchId, x.MetricType, x.PeriodType, x.PeriodDate }).IsUnique();
+        });
+
+        modelBuilder.Entity<TechnicianReportSummary>(b =>
+        {
+            b.ToTable("technician_report_summaries");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Name).HasMaxLength(128).IsRequired();
+            b.Property(x => x.Email).HasMaxLength(256).IsRequired();
+            b.Property(x => x.PhoneNumber).HasMaxLength(32);
+            b.HasIndex(x => new { x.TenantId, x.TechnicianUserId }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.BranchId, x.TechnicianUserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<TechnicianReportMetric>(b =>
+        {
+            b.ToTable("technician_report_metrics");
+            b.HasKey(x => x.Id);
+            b.HasIndex(x => new { x.TenantId, x.BranchId, x.TechnicianUserId, x.MetricType, x.PeriodType, x.PeriodDate }).IsUnique();
         });
 
         modelBuilder.Entity<GeneratedReport>(b =>

@@ -21,8 +21,7 @@ public sealed class TechnicianAccountProvisionedConsumer : IConsumer<TechnicianA
             message.AppUserId,
             message.TenantId,
             message.BranchId,
-            message.FirstName,
-            message.LastName,
+            message.Name,
             message.Email,
             message.PhoneNumber,
             context.CancellationToken);

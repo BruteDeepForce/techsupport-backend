@@ -7,5 +7,9 @@ public enum ReportMetricType
     OperationCompletedCount = 3,
     OperationDeliveredCount = 4,
     OpenOperationCount = 5,
-    OperationFailedCount = 6
+    OperationFailedCount = 6,
+    TechnicianCreatedCount = 7,
+    TechnicianActiveCount = 8,
+    OperationAssignedToTechnicianCount = 9,
+    TechnicianAssignedOperationCount = 10
 }

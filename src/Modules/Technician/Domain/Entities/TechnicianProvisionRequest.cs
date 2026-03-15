@@ -6,8 +6,7 @@ public sealed class TechnicianProvisionRequest
     public Guid CorrelationId { get; set; }
     public Guid TenantId { get; set; }
     public Guid? BranchId { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public ProvisioningStatus Status { get; set; } = ProvisioningStatus.Pending;

@@ -86,4 +86,34 @@ public sealed class TicketService : ITicketService
         //! admin-customer-technician için publish event gidecek - operation created, ticket converted to operation gibi.
         return op;
     }
+
+    public async Task<Ticket?> RejectAsync(Guid tenantId, Guid ticketId, Guid adminUserId, string reason, CancellationToken ct)
+    {
+        var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.TenantId == tenantId && t.Id == ticketId, ct);
+        if (ticket is null) return null;
+
+        if (ticket.OperationId.HasValue)
+        {
+            // Cannot reject a ticket that already became an operation
+            throw new InvalidOperationException("Cannot reject a ticket that was already converted to an operation.");
+        }
+
+        if (ticket.Status == TicketStatus.Rejected)
+        {
+            // idempotent: already rejected
+            return ticket;
+        }
+
+        ticket.Status = TicketStatus.Rejected;
+        ticket.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        // TODO: persist rejection reason (not modeled in entity) or publish an event
+
+        await _db.SaveChangesAsync(ct);
+
+        //! Optionally publish an event for the rejection so other modules can react
+        //await _bus.Publish(new TicketRejected(ticket.Id, ticket.TenantId, adminUserId, reason, DateTimeOffset.UtcNow), ct);
+
+        return ticket;
+    }
 }

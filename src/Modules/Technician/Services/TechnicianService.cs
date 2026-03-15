@@ -9,14 +9,16 @@ namespace TechSupport.Technician.Services;
 
 public interface ITechnicianService
 {
-    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
+    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName,  string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
     Task<TechnicianProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct);
-    Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, CancellationToken ct);
+    Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct);
     Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
     Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
     Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
     Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct);
+
+    Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string status, CancellationToken ct);
 }
 
 public sealed class TechnicianService : ITechnicianService
@@ -47,7 +49,7 @@ public sealed class TechnicianService : ITechnicianService
             BranchId = branchId,
             CustomerId = customerId,
             AssignedAtUtc = DateTimeOffset.UtcNow,
-            AssignedTechnicianId = operationId, // Initially set to operationId for correlation. Actual technician assignment can be done later.
+            AssignedTechnicianId = technician.Id, //! fırlayabilir!!!
             DeviceId = deviceId,
             Title = title,
             Description = description,
@@ -56,10 +58,45 @@ public sealed class TechnicianService : ITechnicianService
         };
 
         _db.TechnicianOperations.Add(item);
+        technician.IsActive = true; //* Ensure technician is active
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct)
+    public async Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(
+        Guid tenantId,
+        Guid operationId,
+        Guid technicianUserId,
+        string status,
+        CancellationToken ct)
+    {
+        var op = await _db.TechnicianOperations
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.OperationId == operationId, ct);
+
+        if (op is null)
+            throw new InvalidOperationException("Technician operation not found");
+
+        if (!Enum.TryParse<TechnicianOperationStatus>(status, true, out var newStatus))
+            throw new InvalidOperationException("Invalid status value");
+
+        var oldStatus = op.Status;
+        if (oldStatus == newStatus)
+            return op;
+
+        op.Status = newStatus;
+        await _db.SaveChangesAsync(ct);
+
+        await _bus.Publish(new TechnicianOperationStatusChanged(
+            op.OperationId,
+            op.TenantId,
+            op.BranchId,
+            technicianUserId,
+            newStatus.ToString(),
+            DateTimeOffset.UtcNow), ct);
+
+        return op;
+    }
+
+    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid();
 
@@ -69,8 +106,7 @@ public sealed class TechnicianService : ITechnicianService
             CorrelationId = correlationId,
             TenantId = tenantId,
             BranchId = branchId,
-            FirstName = firstName.Trim(),
-            LastName = lastName.Trim(),
+            Name = firstName.Trim(),
             Email = email.Trim(),
             PhoneNumber = phoneNumber?.Trim() ?? string.Empty,
             Status = ProvisioningStatus.Pending,
@@ -84,11 +120,11 @@ public sealed class TechnicianService : ITechnicianService
             request.CorrelationId,
             request.TenantId,
             request.BranchId,
-            request.FirstName,
-            request.LastName,
+            request.Name,
             request.Email,
             request.PhoneNumber,
             temporaryPassword), ct);
+
 
         return request;
     }
@@ -98,7 +134,7 @@ public sealed class TechnicianService : ITechnicianService
         return _db.TechnicianProvisionRequests.AsNoTracking().FirstOrDefaultAsync(x => x.CorrelationId == correlationId, ct);
     }
 
-    public async Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, CancellationToken ct)
+    public async Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct)
     {
         var request = await _db.TechnicianProvisionRequests.FirstOrDefaultAsync(x => x.CorrelationId == correlationId, ct);
         if (request is null || request.Status == ProvisioningStatus.Completed)
@@ -116,7 +152,6 @@ public sealed class TechnicianService : ITechnicianService
                 TenantId = tenantId,
                 BranchId = branchId,
                 FirstName = firstName,
-                LastName = lastName,
                 Email = email,
                 PhoneNumber = phoneNumber ?? string.Empty,
                 IsActive = true
@@ -128,7 +163,6 @@ public sealed class TechnicianService : ITechnicianService
         {
             existing.AppUserId = appUserId;
             existing.FirstName = firstName;
-            existing.LastName = lastName;
             existing.Email = email;
             existing.PhoneNumber = phoneNumber ?? string.Empty;
             existing.BranchId = branchId;
@@ -170,7 +204,6 @@ public sealed class TechnicianService : ITechnicianService
         .AsNoTracking()
             .Where(x => x.TenantId == tenantId)
             .OrderBy(x => x.FirstName)
-            .ThenBy(x => x.LastName)
             .ToListAsync(ct);
     }
 

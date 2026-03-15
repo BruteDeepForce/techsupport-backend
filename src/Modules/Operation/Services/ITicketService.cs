@@ -9,4 +9,5 @@ public interface ITicketService
     Task<IEnumerable<Ticket>> AdminGetAllAsync(Guid tenantId, CancellationToken ct);
     Task<IEnumerable<Ticket>> CustomerGetAllAsync(Guid tenantId, Guid customerId, CancellationToken ct);
     Task<OperationRecord> ConvertAsync(Guid tenantId, Guid ticketId, Guid adminUserId, Guid? toTechnician, string? internalNote, OperationPriority priority, CancellationToken ct);
+    Task<Ticket?> RejectAsync(Guid tenantId, Guid ticketId, Guid adminUserId, string reason, CancellationToken ct);
 }

@@ -78,6 +78,27 @@ public sealed class TicketsController : ControllerBase
         return Ok(new { operationId = op.Id });
     }
 
+    [Authorize]
+    [HttpPost("{id:guid}/reject")]
+    public async Task<IActionResult> Reject([FromRoute] Guid id, [FromBody] RejectTicketDto dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var userId = GetUserIdFromClaims();
+        if (tenantId == null || userId == null) return Unauthorized();
+        var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+        if (role != "admin") return Forbid();
+
+        try
+        {
+            var ticket = await _tickets.RejectAsync(tenantId.Value, id, userId.Value, dto.Reason, ct);
+            return ticket is null ? NotFound() : Ok(ToResponse(ticket));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     private Guid? GetTenantIdFromClaims()
     {
         var tenantClaim = User.Claims.FirstOrDefault(c => c.Type == "tenant_id");

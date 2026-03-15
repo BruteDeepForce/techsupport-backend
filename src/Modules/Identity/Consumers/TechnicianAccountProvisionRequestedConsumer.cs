@@ -50,7 +50,7 @@ public sealed class TechnicianAccountProvisionRequestedConsumer : IConsumer<Tech
 
         var user = new AppUser
         {
-            UserName = message.Email,
+            UserName = message.Name,
             Email = message.Email
         };
 
@@ -73,8 +73,7 @@ public sealed class TechnicianAccountProvisionRequestedConsumer : IConsumer<Tech
             user.Id,
             message.TenantId,
             message.BranchId,
-            message.FirstName,
-            message.LastName,
+            message.Name,
             message.Email,
             message.PhoneNumber,
             DateTimeOffset.UtcNow));

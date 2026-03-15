@@ -17,6 +17,7 @@ public class TechnicianController : ControllerBase
 
     public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, string? PhoneNumber, string TemporaryPassword);
     public sealed record SetActiveDto(bool IsActive);
+    public sealed record UpdateWorkItemStatusDto(string Status);
 
     [Authorize(Roles = "admin")]
     [HttpPost]
@@ -26,7 +27,7 @@ public class TechnicianController : ControllerBase
         var branchId = GetBranchIdFromClaims();
         if (tenantId is null) return Unauthorized();
 
-        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber, dto.TemporaryPassword, ct);
+        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.Email, dto.PhoneNumber, dto.TemporaryPassword, ct);
         return Accepted(new
         {
             correlationId = request.CorrelationId,
@@ -83,6 +84,22 @@ public class TechnicianController : ControllerBase
 
         var updated = await _technicians.SetActiveAsync(tenantId.Value, technicianId, dto.IsActive, ct);
         return updated ? NoContent() : NotFound();
+    }
+
+    [Authorize(Roles = "technician")]
+    [HttpPatch("operations/{operationId:guid}/status")]
+    public async Task<IActionResult> UpdateWorkItemStatus(Guid operationId, [FromBody] UpdateWorkItemStatusDto dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        // We keep userId as technician identity; Operation module will validate/translate as needed.
+        var techClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "user_id" || c.Type.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase));
+        if (techClaim is null || !Guid.TryParse(techClaim.Value, out var technicianUserId))
+            return Unauthorized();
+
+        var op = await _technicians.UpdateOperationStatusAsync(tenantId.Value, operationId, technicianUserId, dto.Status, ct);
+        return Ok(new { op.OperationId, Status = op.Status.ToString() });
     }
 
     private Guid? GetTenantIdFromClaims()

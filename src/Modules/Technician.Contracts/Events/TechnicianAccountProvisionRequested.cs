@@ -4,8 +4,7 @@ public sealed record TechnicianAccountProvisionRequested(
     Guid CorrelationId,
     Guid TenantId,
     Guid? BranchId,
-    string FirstName,
-    string LastName,
+    string Name,
     string Email,
     string? PhoneNumber,
     string TemporaryPassword);

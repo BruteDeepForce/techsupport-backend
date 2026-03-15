@@ -23,7 +23,6 @@ public sealed class TechnicianDbContext : DbContext
             b.HasKey(x => x.Id);
             b.Property(x => x.AppUserId).IsRequired(false);
             b.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
-            b.Property(x => x.LastName).HasMaxLength(100).IsRequired();
             b.Property(x => x.Email).HasMaxLength(320).IsRequired();
             b.Property(x => x.PhoneNumber).HasMaxLength(32);
             b.HasIndex(x => new { x.TenantId, x.Email }).IsUnique();
@@ -34,8 +33,7 @@ public sealed class TechnicianDbContext : DbContext
         {
             b.ToTable("technician_provision_requests");
             b.HasKey(x => x.Id);
-            b.Property(x => x.FirstName).HasMaxLength(100).IsRequired();
-            b.Property(x => x.LastName).HasMaxLength(100).IsRequired();
+            b.Property(x => x.Name).HasMaxLength(100).IsRequired();
             b.Property(x => x.Email).HasMaxLength(320).IsRequired();
             b.Property(x => x.PhoneNumber).HasMaxLength(32);
             b.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
