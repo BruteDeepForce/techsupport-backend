@@ -1,0 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Technician.Data;
+using TechSupport.Technician.Services;
+
+namespace TechSupport.Technician;
+
+public static class ModuleExtensions
+{
+    public static IServiceCollection AddTechnicianModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        var conn = configuration.GetConnectionString("DefaultConnection") ?? configuration["ConnectionStrings:DefaultConnection"];
+
+        services.AddDbContext<TechnicianDbContext>(opt =>
+            opt.UseNpgsql(conn));
+
+        services.AddScoped<ITechnicianService, TechnicianService>();
+
+        return services;
+    }
+}

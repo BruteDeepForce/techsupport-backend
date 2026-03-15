@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+   db:
+    image: postgres:15
+    container_name: techsupport_tech
+    environment:
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: myappdb
+      POSTGRES_USER: myappuser
+    volumes:
+      - db_data:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
+   rabbitmq:
+    image: rabbitmq:3-management
+    container_name: techsupport_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+volumes:
+  db_data:

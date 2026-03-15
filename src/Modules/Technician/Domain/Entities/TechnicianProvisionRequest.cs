@@ -1,0 +1,26 @@
+namespace TechSupport.Technician.Domain.Entities;
+
+public sealed class TechnicianProvisionRequest
+{
+    public Guid Id { get; set; }
+    public Guid CorrelationId { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public ProvisioningStatus Status { get; set; } = ProvisioningStatus.Pending;
+    public Guid? AppUserId { get; set; }
+    public Guid? TechnicianId { get; set; }
+    public string? FailureReason { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? CompletedAtUtc { get; set; }
+}
+
+public enum ProvisioningStatus
+{
+    Pending = 0,
+    Completed = 1,
+    Failed = 2
+}

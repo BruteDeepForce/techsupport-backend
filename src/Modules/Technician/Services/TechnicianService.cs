@@ -1,0 +1,186 @@
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using TechSupport.Identity.Contracts.Events;
+using TechSupport.Technician.Contracts.Events;
+using TechSupport.Technician.Data;
+using TechSupport.Technician.Domain.Entities;
+
+namespace TechSupport.Technician.Services;
+
+public interface ITechnicianService
+{
+    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
+    Task<TechnicianProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct);
+    Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, CancellationToken ct);
+    Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
+    Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
+    Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
+    Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
+    Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct);
+}
+
+public sealed class TechnicianService : ITechnicianService
+{
+    private readonly TechnicianDbContext _db;
+    private readonly IBus _bus;
+
+    public TechnicianService(TechnicianDbContext db, IBus bus)
+    {
+        _db = db;
+        _bus = bus;
+    }
+
+    public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    {
+        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.IsActive && x.TenantId == tenantId, ct);
+        if (technician is null)
+        {
+            // No active technician found, log and exit. Operation will remain unassigned until a technician is provisioned.
+            // In a real system, you might want to implement retry logic or alerting here.
+            return;
+        }
+        var item = new Technician.Domain.Entities.TechnicianOperation
+        {
+            Id = Guid.NewGuid(),
+            OperationId = operationId,
+            TenantId = tenantId,
+            BranchId = branchId,
+            CustomerId = customerId,
+            AssignedAtUtc = DateTimeOffset.UtcNow,
+            AssignedTechnicianId = operationId, // Initially set to operationId for correlation. Actual technician assignment can be done later.
+            DeviceId = deviceId,
+            Title = title,
+            Description = description,
+            CreatedAtUtc = occurredAtUtc,
+            Status = TechnicianOperationStatus.Assigned
+        };
+
+        _db.TechnicianOperations.Add(item);
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct)
+    {
+        var correlationId = Guid.NewGuid();
+
+        var request = new TechnicianProvisionRequest
+        {
+            Id = Guid.NewGuid(),
+            CorrelationId = correlationId,
+            TenantId = tenantId,
+            BranchId = branchId,
+            FirstName = firstName.Trim(),
+            LastName = lastName.Trim(),
+            Email = email.Trim(),
+            PhoneNumber = phoneNumber?.Trim() ?? string.Empty,
+            Status = ProvisioningStatus.Pending,
+            CreatedAtUtc = DateTimeOffset.UtcNow
+        };
+
+        _db.TechnicianProvisionRequests.Add(request);
+        await _db.SaveChangesAsync(ct);
+
+        await _bus.Publish(new TechnicianAccountProvisionRequested(
+            request.CorrelationId,
+            request.TenantId,
+            request.BranchId,
+            request.FirstName,
+            request.LastName,
+            request.Email,
+            request.PhoneNumber,
+            temporaryPassword), ct);
+
+        return request;
+    }
+
+    public Task<TechnicianProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct)
+    {
+        return _db.TechnicianProvisionRequests.AsNoTracking().FirstOrDefaultAsync(x => x.CorrelationId == correlationId, ct);
+    }
+
+    public async Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string lastName, string email, string? phoneNumber, CancellationToken ct)
+    {
+        var request = await _db.TechnicianProvisionRequests.FirstOrDefaultAsync(x => x.CorrelationId == correlationId, ct);
+        if (request is null || request.Status == ProvisioningStatus.Completed)
+        {
+            return;
+        }
+
+        var existing = await _db.Technicians.FirstOrDefaultAsync(x => x.AppUserId == appUserId || (x.TenantId == tenantId && x.Email == email), ct);
+        if (existing is null)
+        {
+            existing = new Technician.Domain.Entities.Technician
+            {
+                Id = Guid.NewGuid(),
+                AppUserId = appUserId,
+                TenantId = tenantId,
+                BranchId = branchId,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                PhoneNumber = phoneNumber ?? string.Empty,
+                IsActive = true
+            };
+
+            _db.Technicians.Add(existing);
+        }
+        else
+        {
+            existing.AppUserId = appUserId;
+            existing.FirstName = firstName;
+            existing.LastName = lastName;
+            existing.Email = email;
+            existing.PhoneNumber = phoneNumber ?? string.Empty;
+            existing.BranchId = branchId;
+            existing.IsActive = true;
+        }
+
+        request.Status = ProvisioningStatus.Completed;
+        request.AppUserId = appUserId;
+        request.TechnicianId = existing.Id;
+        request.CompletedAtUtc = DateTimeOffset.UtcNow;
+        request.FailureReason = null;
+
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct)
+    {
+        var request = await _db.TechnicianProvisionRequests.FirstOrDefaultAsync(x => x.CorrelationId == correlationId, ct);
+        if (request is null || request.Status == ProvisioningStatus.Completed)
+        {
+            return;
+        }
+
+        request.Status = ProvisioningStatus.Failed;
+        request.FailureReason = reason;
+        request.CompletedAtUtc = DateTimeOffset.UtcNow;
+
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct)
+    {
+        return _db.Technicians.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
+    }
+
+    public async Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct)
+    {
+        return await _db.Technicians
+        .AsNoTracking()
+            .Where(x => x.TenantId == tenantId)
+            .OrderBy(x => x.FirstName)
+            .ThenBy(x => x.LastName)
+            .ToListAsync(ct);
+    }
+
+    public async Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct)
+    {
+        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
+        if (technician is null) return false;
+
+        technician.IsActive = isActive;
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+}

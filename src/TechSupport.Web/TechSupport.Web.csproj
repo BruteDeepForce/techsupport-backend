@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TechSupport.Web</RootNamespace>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Shared/Shared.csproj" />
+    <ProjectReference Include="../Modules/Identity/Identity.csproj" />
+    <ProjectReference Include="../Modules/Identity.Contracts/Identity.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Device.Contracts/Device.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Device/Device.csproj" />
+  <ProjectReference Include="../Modules/Operation.Contracts/Operation.Contracts.csproj" />
+  <ProjectReference Include="../Modules/Operation/Operation.csproj" />
+    <ProjectReference Include="../Modules/User.Contracts/User.Contracts.csproj" />
+    <ProjectReference Include="../Modules/User/User.csproj" />
+    <ProjectReference Include="../Modules/Customer/Customer.csproj" />
+    <ProjectReference Include= "../Modules/Customer.Contracts/Customer.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Reports/Reports.csproj" />
+    <ProjectReference Include="../Modules/Reports.Contracts/Reports.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Technician/Technician.csproj" />
+    <ProjectReference Include="../Modules/Technician.Contracts/Technician.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.0.7" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Swagger for quick testing in Development -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>

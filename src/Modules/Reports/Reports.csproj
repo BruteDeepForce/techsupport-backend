@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reports.Contracts\Reports.Contracts.csproj" />
+    <ProjectReference Include="..\Operation.Contracts\Operation.Contracts.csproj" />
+    <ProjectReference Include="..\Customer.Contracts\Customer.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
+    <PackageReference Include="MassTransit" Version="8.0.7" />
+  </ItemGroup>
+
+</Project>
