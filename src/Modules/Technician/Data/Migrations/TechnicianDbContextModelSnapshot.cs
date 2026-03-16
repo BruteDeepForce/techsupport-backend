@@ -4,26 +4,26 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TechSupport.Customer.Data;
+using TechSupport.Technician.Data;
 
 #nullable disable
 
-namespace TechSupport.Customer.Data.Migrations
+namespace TechSupport.Technician.Data.Migrations
 {
-    [DbContext(typeof(CustomerDbContext))]
-    partial class CustomerDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TechnicianDbContext))]
+    partial class TechnicianDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("customers")
+                .HasDefaultSchema("technicians")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TechSupport.Customer.Domain.Entities.Customer", b =>
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.Technician", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,10 +40,13 @@ namespace TechSupport.Customer.Data.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -61,54 +64,62 @@ namespace TechSupport.Customer.Data.Migrations
                     b.HasIndex("TenantId", "Email")
                         .IsUnique();
 
-                    b.ToTable("customers", "customers");
+                    b.ToTable("technicians", "technicians");
                 });
 
-            modelBuilder.Entity("TechSupport.Customer.Domain.Entities.CustomerDevice", b =>
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianOperation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("AssignedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("AssignedTechnicianId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("BranchId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAtUtc")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("DeletedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeviceGuaranteeEndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeviceGuaranteePeriod")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("DeviceGuaranteeStartDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId", "DeviceId")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "OperationId");
 
-                    b.ToTable("customer_devices", "customers");
+                    b.ToTable("technician_operations", "technicians");
                 });
 
-            modelBuilder.Entity("TechSupport.Customer.Domain.Entities.CustomerProvisionRequest", b =>
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianProvisionRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,9 +140,6 @@ namespace TechSupport.Customer.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(320)
@@ -143,8 +151,8 @@ namespace TechSupport.Customer.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
@@ -156,6 +164,9 @@ namespace TechSupport.Customer.Data.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<Guid?>("TechnicianId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
@@ -166,23 +177,7 @@ namespace TechSupport.Customer.Data.Migrations
 
                     b.HasIndex("TenantId", "Email");
 
-                    b.ToTable("customer_provision_requests", "customers");
-                });
-
-            modelBuilder.Entity("TechSupport.Customer.Domain.Entities.CustomerDevice", b =>
-                {
-                    b.HasOne("TechSupport.Customer.Domain.Entities.Customer", "Customer")
-                        .WithMany("Devices")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("TechSupport.Customer.Domain.Entities.Customer", b =>
-                {
-                    b.Navigation("Devices");
+                    b.ToTable("technician_provision_requests", "technicians");
                 });
 #pragma warning restore 612, 618
         }
