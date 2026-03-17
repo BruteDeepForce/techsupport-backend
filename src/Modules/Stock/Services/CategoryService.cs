@@ -20,7 +20,7 @@ namespace TechSupport.Stock.Services
 
         public async Task<StockCategories> CreateAsync(Guid tenantId, Guid? branchId, string name, CancellationToken ct = default)
         {
-            // check duplicate
+            // check duplicate name for the same tenant with a single DB call to reduce roundtrips
             if (await _db.StockCategories.AnyAsync(x => x.TenantId == tenantId && x.Name == name, ct))
                 throw new InvalidOperationException($"Category '{name}' already exists for tenant {tenantId}");
 
