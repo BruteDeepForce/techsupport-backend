@@ -24,6 +24,7 @@
     <ProjectReference Include="../Modules/Reports.Contracts/Reports.Contracts.csproj" />
     <ProjectReference Include="../Modules/Technician/Technician.csproj" />
     <ProjectReference Include="../Modules/Technician.Contracts/Technician.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Stock/Stock.csproj" />
   </ItemGroup>
 
   <ItemGroup>

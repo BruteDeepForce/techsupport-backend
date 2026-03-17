@@ -1,3 +1,3 @@
 namespace TechSupport.Identity.Contracts.Events;
 
-public record TenantCreated(Guid TenantId, string Name);
+public record TenantCreated(Guid TenantId, string Name, DateTimeOffset OccurredAtUtc);

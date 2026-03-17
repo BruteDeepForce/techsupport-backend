@@ -1,6 +1,7 @@
 using MassTransit;
 using TechSupport.Device;
 using TechSupport.Customer;
+using TechSupport.Stock;
 using TechSupport.Customer.Consumers;
 using TechSupport.Operation;
 using TechSupport.Identity;
@@ -11,6 +12,7 @@ using TechSupport.Reports;
 using TechSupport.Technician;
 using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
+using Reports.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +39,10 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<OperationAssignedToTechnicianConsumer>();
     x.AddConsumer<OperationStatusChangedConsumer>();
     x.AddConsumer<TechSupport.Reports.Consumers.TechnicianAccountProvisionedConsumer>();
+    x.AddConsumer<TechSupport.Technician.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechnicianAccountProvisionFailedConsumer>();
     x.AddConsumer<TechnicianOperationStatusChangedConsumer>();
+    x.AddConsumer<TenantCreatedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -55,6 +59,7 @@ builder.Services.AddCustomerModule(builder.Configuration);
 builder.Services.AddOperationModule(builder.Configuration);
 builder.Services.AddReportsModule(builder.Configuration);
 builder.Services.AddTechnicianModule(builder.Configuration);
+builder.Services.AddStockModule(builder.Configuration);
 
 var app = builder.Build();
 

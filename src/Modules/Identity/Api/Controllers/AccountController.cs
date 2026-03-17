@@ -1,7 +1,9 @@
+using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Identity.Contracts.Events;
 using TechSupport.Identity.Data;
 using TechSupport.Identity.Services;
 using TechSupport.User.Services;
@@ -17,14 +19,19 @@ public class AccountController : ControllerBase
     private readonly RoleManager<AppRole> _roleManager;
     private readonly ITokenService _tokenService;
     private readonly IUserService _userService;
+    private readonly IdentityDbContext _dbContext;
 
-    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService)
+    private readonly IBus _bus;
+
+    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService, IdentityDbContext dbContext, IBus bus  )
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _roleManager = roleManager;
         _tokenService = tokenService;
         _userService = userService;
+        _dbContext = dbContext;
+        _bus = bus;
     }
 
     public record RegisterDto(string Email, string Password, string Role, Guid TenantId, Guid? BranchId);
@@ -84,6 +91,16 @@ public class AccountController : ControllerBase
         var res = await roleMgr.CreateAsync(r);
         if (!res.Succeeded) return BadRequest(res.Errors);
         return Ok(r);
+    }
+    [HttpPost("create-tenant")]
+    public async Task<IActionResult> CreateTenant([FromBody] string tenantName, CancellationToken ct)
+    {
+        var tenant = new Tenant { Name = tenantName };
+        await _dbContext.Tenants.AddAsync(tenant, ct);
+        await _dbContext.SaveChangesAsync(ct); 
+
+        await _bus.Publish(new TenantCreated(tenant.Id, tenant.Name, DateTimeOffset.UtcNow), ct); 
+        return Ok(new { tenantId = tenant.Id });
     }
 
     [HttpPost("seed-role")]

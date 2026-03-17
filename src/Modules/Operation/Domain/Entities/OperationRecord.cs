@@ -19,6 +19,8 @@ public sealed class OperationRecord
     public OperationStatus Status { get; set; } = OperationStatus.Created;
     public OperationPriority Priority { get; set; } = OperationPriority.Normal;
 
+    //! public OperationType Type { get; set; } = new OperationType(); ileri süreçte eklenecek.
+
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? InternalNote { get; set; }
@@ -47,3 +49,10 @@ public enum OperationPriority
     High,
     Urgent
 }
+
+// public class OperationType
+// {
+//     public Guid Id { get; set; }
+//     public Guid TenantId { get; set; }
+//     public string Name { get; set; } = string.Empty;
+// }

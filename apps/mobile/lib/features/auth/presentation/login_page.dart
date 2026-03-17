@@ -14,19 +14,34 @@ class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscure = true;
+  final _usernameFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  bool _hasFocus = false;
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _usernameFocus.dispose();
+    _passwordFocus.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameFocus.addListener(_updateFocus);
+    _passwordFocus.addListener(_updateFocus);
+  }
+
+  void _updateFocus() {
+    final has = _usernameFocus.hasFocus || _passwordFocus.hasFocus;
+    if (has != _hasFocus) setState(() => _hasFocus = has);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Dark green used for primary sign-in button (matches reference)
-    const signInColor = Color(0xFF073B2E);
 
     return Scaffold(
       body: SafeArea(
@@ -46,129 +61,108 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 18),
-                      // centered emblem / logo
-                      Container(
-                        width: 84,
-                        height: 84,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border:
-                              Border.all(color: AppColors.border, width: 1.2),
-                          boxShadow: AppShadows.card,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'T',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900, fontSize: 28),
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-
-                      // username field
-                      SizedBox(
-                        width: formWidth,
-                        child: TextField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            hintText: 'Kullanıcı Adı',
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 22, vertical: 18),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: AppColors.border),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: AppColors.border),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: AppColors.brandDark),
-                            ),
+                      // animated emblem / logo
+                      AnimatedScale(
+                        scale: _hasFocus ? 0.9 : 1.0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: Container(
+                          width: 84,
+                          height: 84,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border:
+                                Border.all(color: AppColors.border, width: 1.2),
+                            boxShadow: AppShadows.card,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'T',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w900, fontSize: 28),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 40),
 
-                      // password field
-                      SizedBox(
-                        width: formWidth,
-                        child: TextField(
-                          controller: _passwordController,
-                          obscureText: _obscure,
-                          decoration: InputDecoration(
-                            hintText: 'Şifre',
-                            filled: true,
-                            fillColor: Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 22, vertical: 18),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: AppColors.border),
+                      // form card wrapper
+                      AppSurfaceCard(
+                        minHeight: null,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 22),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // username field
+                            SizedBox(
+                              width: formWidth - 40,
+                              child: TextFormField(
+                                focusNode: _usernameFocus,
+                                controller: _usernameController,
+                                decoration: const InputDecoration(
+                                    hintText: 'Kullanıcı Adı'),
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (_) => FocusScope.of(context)
+                                    .requestFocus(_passwordFocus),
+                              ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide(color: AppColors.border),
+                            const SizedBox(height: 14),
+
+                            // password field
+                            SizedBox(
+                              width: formWidth - 40,
+                              child: TextFormField(
+                                focusNode: _passwordFocus,
+                                controller: _passwordController,
+                                obscureText: _obscure,
+                                decoration: InputDecoration(
+                                  hintText: 'Şifre',
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _obscure
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    onPressed: () =>
+                                        setState(() => _obscure = !_obscure),
+                                  ),
+                                ),
+                                textInputAction: TextInputAction.done,
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: AppColors.brandDark),
+                            const SizedBox(height: 18),
+
+                            // Sign in button (use FilledButton to pick up theme)
+                            SizedBox(
+                              width: formWidth - 40,
+                              child: FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute<void>(
+                                        builder: (_) =>
+                                            const RoleSelectionPage()),
+                                  );
+                                },
+                                child: Text('Giriş Yap',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800)),
+                              ),
                             ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                  _obscure
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                  color: AppColors.textSecondary),
-                              onPressed: () =>
-                                  setState(() => _obscure = !_obscure),
+
+                            const SizedBox(height: 12),
+
+                            TextButton(
+                              onPressed: () {},
+                              child: Text('Şifremi Unuttum?',
+                                  style: theme.textTheme.bodyLarge),
                             ),
-                          ),
+                            const SizedBox(height: 4),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 28),
-
-                      // Sign in button
-                      SizedBox(
-                        width: formWidth,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute<void>(
-                                  builder: (_) => const RoleSelectionPage()),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: signInColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            elevation: 6,
-                            shadowColor: Colors.black26,
-                          ),
-                          child: Text('Giriş Yap',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800)),
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      TextButton(
-                        onPressed: () {},
-                        child: Text('Şifremi Unuttum?',
-                            style: theme.textTheme.bodyLarge),
-                      ),
-
-                      const SizedBox(height: 8),
-
                       const SizedBox(height: 28),
                     ],
                   ),

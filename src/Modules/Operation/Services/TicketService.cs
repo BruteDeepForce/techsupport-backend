@@ -83,7 +83,7 @@ public sealed class TicketService : ITicketService
 
         await _db.SaveChangesAsync(ct);
 
-        //! admin-customer-technician için publish event gidecek - operation created, ticket converted to operation gibi.
+        //! customer-technician için publish event gidecek - operation created, ticket converted to operation gibi.
         return op;
     }
 

@@ -296,6 +296,10 @@ namespace Reports.Data.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("TenantName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("TotalCustomers")
                         .HasColumnType("integer");
 

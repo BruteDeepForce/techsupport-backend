@@ -11,11 +11,17 @@
     <ProjectReference Include="..\Operation.Contracts\Operation.Contracts.csproj" />
     <ProjectReference Include="..\Customer.Contracts\Customer.Contracts.csproj" />
     <ProjectReference Include="..\Technician.Contracts\Technician.Contracts.csproj" />
+    <ProjectReference Include="..\Identity.Contracts\Identity.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
     <PackageReference Include="MassTransit" Version="8.0.7" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <!-- Allow module to host minimal Api controllers by referencing the ASP.NET Core shared framework -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

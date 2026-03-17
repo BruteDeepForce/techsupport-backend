@@ -7,63 +7,131 @@ class CustomerHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppPageScaffold(
-      bottomNavBar: AppBottomNavBar(
+    return AppPageScaffold(
+      bottomNavBar: const AppBottomNavBar(
         items: [
           AppBottomNavItemData(
-              icon: Icons.grid_view_rounded, label: 'Ana Sayfa', active: true),
+            icon: Icons.grid_view_rounded,
+            label: 'Ana Sayfa',
+            active: true,
+          ),
           AppBottomNavItemData(
-              icon: Icons.confirmation_number_outlined, label: 'Taleplerim'),
+            icon: Icons.confirmation_number_outlined,
+            label: 'Taleplerim',
+          ),
           AppBottomNavItemData(
-              icon: Icons.devices_other_outlined, label: 'Cihazlarım'),
-          AppBottomNavItemData(icon: Icons.logout_rounded, label: 'Çıkış Yap'),
+            icon: Icons.devices_other_outlined,
+            label: 'Cihazlarım',
+          ),
+          AppBottomNavItemData(
+            icon: Icons.logout_rounded,
+            label: 'Çıkış Yap',
+          ),
         ],
       ),
       children: [
-        AppBrandHeader(
+        const AppBrandHeader(
           title: 'Panel',
-          subtitle: 'Yönetici Portalı > Panel',
+          subtitle: 'Müşteri Portalı > Panel',
           trailingText: 'AM',
         ),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
+
+        // KPI grid (denser + more “tech” feel)
         Row(
           children: [
             Expanded(
-              child: MetricTile(
-                title: 'Açık Talepler',
+              child: AppTechStatCard(
+                label: 'Açık Talepler',
                 value: '3',
                 icon: Icons.confirmation_number_outlined,
-                leadingColor: AppColors.brand,
+                tint: AppColors.infoSoft,
+                accent: AppColors.brand,
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
-              child: MetricTile(
-                title: 'Cihazlarım',
-                value: '2',
-                icon: Icons.devices_other_outlined,
-                leadingColor: Color(0xFFCBD5E1),
+              child: AppTechStatCard(
+                label: 'Devam Eden',
+                value: '1',
+                icon: Icons.sync_rounded,
+                tint: AppColors.warningSoft,
+                accent: AppColors.warning,
               ),
             ),
           ],
         ),
-        SizedBox(height: 26),
-        AppSectionHeader(title: 'Son Talepler'),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: AppTechStatCard(
+                label: 'Çözülen',
+                value: '12',
+                icon: Icons.verified_rounded,
+                tint: AppColors.successSoft,
+                accent: AppColors.success,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AppTechStatCard(
+                label: 'Cihazlarım',
+                value: '2',
+                icon: Icons.devices_other_outlined,
+                tint: AppColors.headerTint,
+                accent: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+        AppSurfaceCard(
+          minHeight: 96,
+          alignment: Alignment.topLeft,
+          child: Row(
+            children: [
+              Expanded(
+                child: _QuickAction(
+                  icon: Icons.add_circle_outline_rounded,
+                  title: 'Yeni Talep',
+                  subtitle: 'Hızlı destek iste',
+                  tint: AppColors.infoSoft,
+                  accent: AppColors.brand,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickAction(
+                  icon: Icons.search_rounded,
+                  title: 'Takip Et',
+                  subtitle: 'Talep durumunu gör',
+                  tint: AppColors.headerTint,
+                  accent: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 26),
+        const AppSectionHeader(title: 'Son Talepler'),
+        const SizedBox(height: 12),
         CustomerTicketCard(
           title: 'Laptop screen flickering randomly',
           subtitle:
               'The screen of Office Laptop #1 flickers every few minutes...',
           device: 'Office Laptop #1',
           severityLabel: 'HIGH',
-          severityBg: Color(0xFFFDE7D6),
-          severityFg: Color(0xFFF97316),
+          severityBg: const Color(0xFFFDE7D6),
+          severityFg: const Color(0xFFF97316),
           stateLabel: 'Açık',
           stateBg: AppColors.infoSoft,
           stateFg: AppColors.brand,
-          accent: Color(0xFFF97316),
+          accent: const Color(0xFFF97316),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         CustomerTicketCard(
           title: 'Printer not responding to print jobs',
           subtitle:
@@ -74,10 +142,10 @@ class CustomerHomePage extends StatelessWidget {
           severityFg: AppColors.critical,
           stateLabel: 'Devam Ediyor',
           stateBg: AppColors.warningSoft,
-          stateFg: Color(0xFFC26A00),
+          stateFg: const Color(0xFFC26A00),
           accent: AppColors.critical,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         CustomerTicketCard(
           title: 'Software installation request',
           subtitle:
@@ -88,12 +156,12 @@ class CustomerHomePage extends StatelessWidget {
           severityFg: AppColors.brand,
           stateLabel: 'Çözüldü',
           stateBg: AppColors.successSoft,
-          stateFg: Color(0xFF0D9A5C),
+          stateFg: const Color(0xFF0D9A5C),
           accent: AppColors.info,
         ),
-        SizedBox(height: 22),
-        AppSectionHeader(title: 'Cihazlarım'),
-        SizedBox(height: 12),
+        const SizedBox(height: 22),
+        const AppSectionHeader(title: 'Cihazlarım'),
+        const SizedBox(height: 12),
         DeviceInventoryCard(
           title: 'Office Laptop #1',
           subtitle: 'Dell XPS 15',
@@ -101,10 +169,10 @@ class CustomerHomePage extends StatelessWidget {
           owner: 'Alice Morgan',
           statusLabel: 'Aktif',
           statusBg: AppColors.successSoft,
-          statusFg: Color(0xFF0D9A5C),
+          statusFg: const Color(0xFF0D9A5C),
           iconTint: AppColors.success,
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         DeviceInventoryCard(
           title: 'Reception Printer',
           subtitle: 'HP LaserJet Pro',
@@ -112,10 +180,73 @@ class CustomerHomePage extends StatelessWidget {
           owner: 'Alice Morgan',
           statusLabel: 'Tamir/Bakım Devam Ediyor',
           statusBg: AppColors.warningSoft,
-          statusFg: Color(0xFFE56D00),
+          statusFg: const Color(0xFFE56D00),
           iconTint: AppColors.warning,
         ),
       ],
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.tint,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color tint;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      onTap: () {},
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: tint,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Icon(icon, color: accent),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodyMedium
+                        ?.copyWith(color: AppColors.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
+          ],
+        ),
+      ),
     );
   }
 }

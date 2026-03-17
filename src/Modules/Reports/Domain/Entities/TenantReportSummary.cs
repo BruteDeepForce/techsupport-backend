@@ -4,6 +4,7 @@ public sealed class TenantReportSummary
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
+    public string TenantName { get; set; } = string.Empty;
     public int TotalCustomers { get; set; }
     public int TotalOperations { get; set; }
     public int CompletedOperations { get; set; }

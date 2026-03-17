@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Reports.Services;
 using TechSupport.Customer.Contracts.Events;
+using TechSupport.Identity.Contracts.Events;
 using TechSupport.Operation.Contracts.Events;
 using TechSupport.Technician.Contracts.Events;
 
@@ -11,17 +13,20 @@ public sealed class ReportService : IReportService
     private readonly ICustomerReportSetService _customerSet;
     private readonly IOperationReportSetService _operationSet;
     private readonly ITechnicianReportSetService _technicianSet;
+    private readonly ITenantSetService _tenantSet;
 
     public ReportService(
         ReportSetStore store,
         ICustomerReportSetService customerSet,
         IOperationReportSetService operationSet,
-        ITechnicianReportSetService technicianSet)
+        ITechnicianReportSetService technicianSet,
+        ITenantSetService tenantSet)
     {
         _store = store;
         _customerSet = customerSet;
         _operationSet = operationSet;
         _technicianSet = technicianSet;
+        _tenantSet = tenantSet;
     }
 
     public async Task HandleCustomerCreatedAsync(CustomerCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct)
@@ -50,6 +55,20 @@ public sealed class ReportService : IReportService
         }
 
         await _operationSet.HandleOperationCreatedAsync(message, ct);
+
+        await tx.CommitAsync(ct);
+    }
+    public async Task HandleTenantCreatedAsync(TenantCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct)
+    {
+        await using var tx = await _store.BeginTransactionAsync(ct);
+
+        if (!await _store.TryRegisterProcessedEventAsync(nameof(TenantCreated), messageId, correlationId, message.TenantId, ct))
+        {
+            await tx.RollbackAsync(ct);
+            return;
+        }
+
+        await _tenantSet.HandleTenantCreatedAsync(message, ct);
 
         await tx.CommitAsync(ct);
     }

@@ -108,6 +108,7 @@ class _RoleCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       child: InkWell(
         borderRadius: BorderRadius.circular(28),
         onTap: onTap,

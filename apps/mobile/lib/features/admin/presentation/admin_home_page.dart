@@ -7,7 +7,7 @@ class AdminHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppPageScaffold(
+    return AppPageScaffold(
       bottomNavBar: AppBottomNavBar(
         items: [
           AppBottomNavItemData(
@@ -29,47 +29,59 @@ class AdminHomePage extends StatelessWidget {
           subtitle: 'Admin Portal > Platform Overview',
           trailingText: 'AU',
         ),
-        SizedBox(height: 18),
-        MetricTile(
-          title: 'Toplam Talepler',
-          value: '6',
-          icon: Icons.show_chart_rounded,
-          leadingColor: AppColors.info,
-          trailing: Text('↗12%',
-              style: TextStyle(
-                  color: Color(0xFF16A34A), fontWeight: FontWeight.w700)),
+        const SizedBox(height: 18),
+
+        // Top KPI grid (more visual, "tech" feel)
+        Row(
+          children: const [
+            Expanded(
+              child: AppTechStatCard(
+                tint: AppColors.infoSoft,
+                accent: AppColors.info,
+                icon: Icons.show_chart_rounded,
+                value: '6',
+                label: 'Toplam Talepler',
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: AppTechStatCard(
+                tint: AppColors.warningSoft,
+                accent: AppColors.warning,
+                icon: Icons.warning_amber_rounded,
+                value: '3',
+                label: 'Açık Talepler',
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 14),
-        MetricTile(
-          title: 'Açık Talepler',
-          value: '3',
-          icon: Icons.warning_amber_rounded,
-          leadingColor: AppColors.warning,
-          trailing: Text('↗4%',
-              style: TextStyle(
-                  color: Color(0xFF16A34A), fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        Row(
+          children: const [
+            Expanded(
+              child: AppTechStatCard(
+                tint: Color(0xFFEEF2FF),
+                accent: Color(0xFF6366F1),
+                icon: Icons.timelapse_rounded,
+                value: '2',
+                label: 'Devam Ediyor',
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: AppTechStatCard(
+                tint: AppColors.successSoft,
+                accent: AppColors.success,
+                icon: Icons.check_circle_outline_rounded,
+                value: '1',
+                label: 'Çözüldü',
+              ),
+            ),
+          ],
         ),
-        SizedBox(height: 14),
-        MetricTile(
-          title: 'Devam Ediyor',
-          value: '2',
-          icon: Icons.timelapse_rounded,
-          leadingColor: Color(0xFF6366F1),
-          trailing: Text('↘2%',
-              style: TextStyle(
-                  color: Color(0xFFDC2626), fontWeight: FontWeight.w700)),
-        ),
-        SizedBox(height: 14),
-        MetricTile(
-          title: 'Çözüldü',
-          value: '1',
-          icon: Icons.check_circle_outline_rounded,
-          leadingColor: AppColors.success,
-          trailing: Text('↗18%',
-              style: TextStyle(
-                  color: Color(0xFF16A34A), fontWeight: FontWeight.w700)),
-        ),
-        SizedBox(height: 16),
+
+        const SizedBox(height: 12),
+
         Row(
           children: [
             Expanded(
@@ -78,14 +90,14 @@ class AdminHomePage extends StatelessWidget {
                     value: '4',
                     accent: Color(0xFF64748B),
                     icon: Icons.devices_other_outlined)),
-            SizedBox(width: 10),
+            SizedBox(width: 12),
             Expanded(
                 child: _MiniMetric(
                     title: 'Tamir/Bakım Devam Ediyor',
                     value: '1',
                     accent: AppColors.warning,
                     icon: Icons.build_circle_outlined)),
-            SizedBox(width: 10),
+            SizedBox(width: 12),
             Expanded(
                 child: _MiniMetric(
                     title: 'Toplam Personel',
@@ -94,11 +106,11 @@ class AdminHomePage extends StatelessWidget {
                     icon: Icons.group_outlined)),
           ],
         ),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
         _RecentTicketsSection(),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
         _DeviceStatusSection(),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
         _SystemHealthSection(),
       ],
     );

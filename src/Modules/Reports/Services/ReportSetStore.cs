@@ -37,6 +37,28 @@ public sealed class ReportSetStore
     public Task UpsertBranchSummaryAsync(Guid tenantId, Guid branchId, int totalCustomersDelta, int totalOperationsDelta, int completedOperationsDelta, int failedOperationsDelta, int deliveredOperationsDelta, int openOperationsDelta, CancellationToken ct)
         => UpsertBranchSummaryInternalAsync(tenantId, branchId, totalCustomersDelta, totalOperationsDelta, completedOperationsDelta, failedOperationsDelta, deliveredOperationsDelta, openOperationsDelta, ct);
 
+    public async Task CreateTenantSummaryAsync(Guid tenantId, string tenantName, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    {
+        var entity = new TenantReportSummary
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            TenantName = tenantName,
+            TotalCustomers = 0,
+            TotalOperations = 0,
+            CompletedOperations = 0,
+            FailedOperations = 0,
+            DeliveredOperations = 0,
+            OpenOperations = 0,
+            CreatedAtUtc = occurredAtUtc,
+            UpdatedAtUtc = occurredAtUtc
+        };
+
+        var entry = await _db.TenantReportSummaries.AddAsync(entity, ct);
+        //! entry kullanabilir miyiz?
+
+        await _db.SaveChangesAsync(ct);
+    }
     public Task UpsertTechnicianSummaryAsync(
         Guid tenantId,
         Guid? branchId,

@@ -1,4 +1,5 @@
 using TechSupport.Customer.Contracts.Events;
+using TechSupport.Identity.Contracts.Events;
 using TechSupport.Operation.Contracts.Events;
 using TechSupport.Technician.Contracts.Events;
 
@@ -8,6 +9,7 @@ public interface IReportService
 {
     Task HandleCustomerCreatedAsync(CustomerCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
     Task HandleOperationCreatedAsync(OperationCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
+    Task HandleTenantCreatedAsync(TenantCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
 
     Task HandleOperationAssignedToTechnicianAsync(OperationAssignedToTechnician message, Guid? messageId, Guid? correlationId, CancellationToken ct);
     Task HandleOperationStatusChangedAsync(OperationStatusChanged message, Guid? messageId, Guid? correlationId, CancellationToken ct);

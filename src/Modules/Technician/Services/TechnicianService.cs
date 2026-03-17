@@ -1,5 +1,7 @@
 using MassTransit;
+using MassTransit.Futures.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TechSupport.Identity.Contracts.Events;
 using TechSupport.Technician.Contracts.Events;
 using TechSupport.Technician.Data;
@@ -26,10 +28,13 @@ public sealed class TechnicianService : ITechnicianService
     private readonly TechnicianDbContext _db;
     private readonly IBus _bus;
 
-    public TechnicianService(TechnicianDbContext db, IBus bus)
+    private readonly ILogger<TechnicianService> _logger;
+
+    public TechnicianService(TechnicianDbContext db, IBus bus, ILogger<TechnicianService> logger)
     {
         _db = db;
         _bus = bus;
+        _logger = logger;
     }
 
     public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
@@ -113,7 +118,7 @@ public sealed class TechnicianService : ITechnicianService
             CreatedAtUtc = DateTimeOffset.UtcNow
         };
 
-        _db.TechnicianProvisionRequests.Add(request);
+        await _db.TechnicianProvisionRequests.AddAsync(request, ct);
         await _db.SaveChangesAsync(ct);
 
         await _bus.Publish(new TechnicianAccountProvisionRequested(
@@ -125,7 +130,8 @@ public sealed class TechnicianService : ITechnicianService
             request.PhoneNumber,
             temporaryPassword), ct);
 
-
+        //! direkt requesti neden dönüyorsun saçma pending dönüyor çünkü. consume edip tekrar bakmamız lazım.
+        
         return request;
     }
 
@@ -141,10 +147,12 @@ public sealed class TechnicianService : ITechnicianService
         {
             return;
         }
+        _logger.LogInformation("{CorrelationId}: Starting provisioning completion for AppUserId {AppUserId}, TenantId {TenantId}, Email {Email}", correlationId, appUserId, tenantId, email);
 
         var existing = await _db.Technicians.FirstOrDefaultAsync(x => x.AppUserId == appUserId || (x.TenantId == tenantId && x.Email == email), ct);
         if (existing is null)
         {
+            _logger.LogInformation("Creating new technician record for AppUserId {AppUserId}, TenantId {TenantId}, Email {Email}", appUserId, tenantId, email);
             existing = new Technician.Domain.Entities.Technician
             {
                 Id = Guid.NewGuid(),
@@ -157,7 +165,7 @@ public sealed class TechnicianService : ITechnicianService
                 IsActive = true
             };
 
-            _db.Technicians.Add(existing);
+            await _db.Technicians.AddAsync(existing, ct);
         }
         else
         {
@@ -168,7 +176,7 @@ public sealed class TechnicianService : ITechnicianService
             existing.BranchId = branchId;
             existing.IsActive = true;
         }
-
+        _logger.LogInformation("Completed");
         request.Status = ProvisioningStatus.Completed;
         request.AppUserId = appUserId;
         request.TechnicianId = existing.Id;

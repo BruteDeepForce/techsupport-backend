@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Reports.Data;
 using TechSupport.Reports.Services;
+using Reports.Services;
 
 namespace TechSupport.Reports;
 
@@ -18,9 +19,10 @@ public static class ModuleExtensions
         services.AddScoped<ReportSetStore>();
         services.AddScoped<ICustomerReportSetService, CustomerReportSetService>();
         services.AddScoped<IOperationReportSetService, OperationReportSetService>();
-    services.AddScoped<ITechnicianReportSetService, TechnicianReportSetService>();
-
+        services.AddScoped<ITechnicianReportSetService, TechnicianReportSetService>();
+        services.AddScoped<ITenantSetService, TenantSetService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IReportQueryService, ReportQueryService>();
 
         return services;
     }

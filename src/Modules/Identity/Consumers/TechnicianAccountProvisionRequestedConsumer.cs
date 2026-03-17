@@ -66,7 +66,7 @@ public sealed class TechnicianAccountProvisionRequestedConsumer : IConsumer<Tech
         }
 
         await _userManager.AddToRoleAsync(user, "technician");
-        await _userService.CreateAsync(user.Id, message.TenantId, message.BranchId, message.Email, "technician", context.CancellationToken);
+        //await _userService.CreateAsync(user.Id, message.TenantId, message.BranchId, message.Email, "technician", context.CancellationToken);
 
         await context.Publish(new TechnicianAccountProvisioned(
             message.CorrelationId,

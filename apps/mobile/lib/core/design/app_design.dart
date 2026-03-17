@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
 class AppColors {
   static const background = Color(0xFFF3F5F9);
@@ -41,11 +42,17 @@ class AppRadius {
 }
 
 class AppShadows {
+  // Softer, layered card shadow for a more modern / elevated look
   static const card = [
     BoxShadow(
-      color: Color(0x110E1726),
-      blurRadius: 20,
-      offset: Offset(0, 6),
+      color: Color(0x1A0E1726), // slightly stronger soft shadow
+      blurRadius: 10,
+      offset: Offset(0, 4),
+    ),
+    BoxShadow(
+      color: Color(0x0A0E1726),
+      blurRadius: 2,
+      offset: Offset(0, 1),
     ),
   ];
 }
@@ -152,7 +159,7 @@ class AppSurfaceCard extends StatelessWidget {
   const AppSurfaceCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(16),
     this.height,
     this.minHeight,
     this.alignment,
@@ -166,19 +173,24 @@ class AppSurfaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      constraints:
-          minHeight != null ? BoxConstraints(minHeight: minHeight!) : null,
-      alignment: alignment,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xxl),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+    // Use Material to get native elevation and ink behavior. Slightly tighter
+    // radius and reduced default padding for a more refined, modern card.
+    return Material(
+      color: AppColors.surface,
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        side: BorderSide(color: AppColors.border, width: 0.8),
       ),
-      child: child,
+      child: Container(
+        height: height,
+        constraints:
+            minHeight != null ? BoxConstraints(minHeight: minHeight!) : null,
+        alignment: alignment,
+        padding: padding,
+        child: child,
+      ),
     );
   }
 }
@@ -199,6 +211,17 @@ class AppAccentTopCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // compute gradient colors derived from accent to get a brighter/tech look
+    final _h = HSLColor.fromColor(accent);
+    final _gradStart = _h
+        .withSaturation(math.min(1.0, _h.saturation * 1.25))
+        .withLightness(math.min(1.0, _h.lightness + 0.06))
+        .toColor();
+    final _gradEnd = _h
+        .withSaturation(math.min(1.0, _h.saturation * 1.05))
+        .withLightness(math.min(1.0, _h.lightness + 0.18))
+        .toColor();
+
     return AppSurfaceCard(
       minHeight: minHeight,
       alignment: Alignment.topLeft,
@@ -209,7 +232,7 @@ class AppAccentTopCard extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [accent, accent.withValues(alpha: 0.84)],
+                colors: [_gradStart, _gradEnd],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -238,6 +261,7 @@ class AppTechStatCard extends StatelessWidget {
     required this.icon,
     required this.value,
     required this.label,
+    this.showAccentBand = true,
   });
 
   final Color tint;
@@ -246,58 +270,94 @@ class AppTechStatCard extends StatelessWidget {
   final String value;
   final String label;
 
+  // When true (default) show the bright top accent gradient band.
+  // Set to false to render a plain card without the band.
+  final bool showAccentBand;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // compute a slightly brighter gradient for accent to make the top band pop
+    final _h = HSLColor.fromColor(accent);
+    final _gradStart = _h
+        .withSaturation(math.min(1.0, _h.saturation * 1.25))
+        .withLightness(math.min(1.0, _h.lightness + 0.06))
+        .toColor();
+    final _gradEnd = _h
+        .withSaturation(math.min(1.0, _h.saturation * 1.05))
+        .withLightness(math.min(1.0, _h.lightness + 0.18))
+        .toColor();
 
+    // Build a single card where the top gradient band is flush with the
+    // card edge (no gap). The inner content has the tint background and the
+    // band and content share the same corner radii so they appear as one unit.
     return AppSurfaceCard(
-      minHeight: 126,
+      minHeight: 108,
       alignment: Alignment.topLeft,
-      padding: const EdgeInsets.all(8),
-      child: SizedBox(
-        width: double.infinity,
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
         child: Container(
-          constraints: const BoxConstraints(minHeight: 108),
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
           decoration: BoxDecoration(
-            color: tint,
             borderRadius: BorderRadius.circular(AppRadius.xl),
-            border:
-                Border.all(color: accent.withValues(alpha: 0.26), width: 1.3),
-            boxShadow: [
-              BoxShadow(
-                color: accent.withValues(alpha: 0.05),
-                blurRadius: 18,
-                offset: const Offset(0, 5),
-              ),
-            ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Top gradient band (slightly thicker for more presence)
+              showAccentBand
+                  ? Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [_gradStart, _gradEnd],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        // no separate borderRadius here; outer ClipRRect will handle clipping
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+
+              // Content area — no extra border so band and content touch directly
               Container(
-                width: 32,
-                height: 32,
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                 decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
+                  color: tint,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(AppRadius.xl),
+                    bottomRight: Radius.circular(AppRadius.xl),
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Icon(icon, color: accent, size: 18),
-              ),
-              const SizedBox(height: 16),
-              Text(value,
-                  style: theme.textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w800, fontSize: 24)),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyLarge
-                    ?.copyWith(color: AppColors.textSecondary, height: 1.35),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(icon, color: accent, size: 18),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(value,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800, fontSize: 22)),
+                    const SizedBox(height: 6),
+                    Text(
+                      label,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                          color: AppColors.textSecondary, height: 1.28),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
