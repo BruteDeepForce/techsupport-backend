@@ -17,6 +17,7 @@ class TechSupportMobileApp extends StatelessWidget {
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       home: const LoginPage(),
     );
   }
