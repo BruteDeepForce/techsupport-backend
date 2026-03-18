@@ -37,6 +37,7 @@ public sealed class TechnicianService : ITechnicianService
         _logger = logger;
     }
 
+    //!burası yanlış
     public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.IsActive && x.TenantId == tenantId, ct);

@@ -63,6 +63,8 @@ public sealed class OperationService : IOperationService
 
         var now = DateTimeOffset.UtcNow;
 
+        //! teknisyen ve reports modülüne teknisye id yoksa asenkron publish
+        //! tenant bazlı operasyon reports modülünde oluşturur. 
         await _bus.Publish(new OperationCreated(
             op.Id,
             op.TenantId,

@@ -20,6 +20,7 @@ public sealed class OperationCreatedConsumer : IConsumer<OperationCreated>
 
         // Create a work item in the Technician module's database so assignment/acceptance
         // is handled inside the Technician module.
+        //! teknisyen id nerede ???
         await _technicianService.OperationAssignAsync(
             message.TenantId,
             message.OperationId,

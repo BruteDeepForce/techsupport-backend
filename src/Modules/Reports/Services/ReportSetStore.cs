@@ -59,7 +59,7 @@ public sealed class ReportSetStore
 
         await _db.SaveChangesAsync(ct);
     }
-    public Task UpsertTechnicianSummaryAsync(
+    public async Task UpsertTechnicianSummaryAsync(
         Guid tenantId,
         Guid? branchId,
         Guid technicianUserId,
@@ -68,8 +68,8 @@ public sealed class ReportSetStore
         string? phoneNumber,
         DateTimeOffset occurredAtUtc,
         CancellationToken ct)
-        => UpsertTechnicianSummaryInternalAsync(tenantId, branchId, technicianUserId, name, email, phoneNumber, occurredAtUtc, ct);
-    public Task IncrementTechnicianMetricAsync(
+        => await UpsertTechnicianSummaryInternalAsync(tenantId, branchId, technicianUserId, name, email, phoneNumber, occurredAtUtc, ct);
+    public async Task IncrementTechnicianMetricAsync(
         Guid tenantId,
         Guid? branchId,
         Guid technicianUserId,
@@ -78,9 +78,9 @@ public sealed class ReportSetStore
         DateOnly? periodDate,
         long delta,
         CancellationToken ct)
-        => IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
+        => await IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
 
-    private async Task IncrementMetricInternalAsync(
+    private async Task IncrementMetricInternalAsync( //! olay burada teknisyen userid var ise metrikler ekleniyor.
         Guid tenantId,
         Guid? branchId,
         ReportMetricType metricType,
