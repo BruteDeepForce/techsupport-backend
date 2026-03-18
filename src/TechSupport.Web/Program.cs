@@ -9,6 +9,7 @@ using TechSupport.Identity.Consumers;
 using TechSupport.Technician.Consumers;
 using TechSupport.User;
 using TechSupport.Reports;
+using TechSupport.Ai;
 using TechSupport.Technician;
 using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
@@ -56,6 +57,7 @@ builder.Services.AddUserModule(builder.Configuration);
 builder.Services.AddCustomerModule(builder.Configuration);
 builder.Services.AddOperationModule(builder.Configuration);
 builder.Services.AddReportsModule(builder.Configuration);
+builder.Services.AddAiModule(builder.Configuration);
 builder.Services.AddTechnicianModule(builder.Configuration);
 builder.Services.AddStockModule(builder.Configuration);
 
