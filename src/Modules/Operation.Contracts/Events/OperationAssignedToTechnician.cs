@@ -9,4 +9,8 @@ public sealed record OperationAssignedToTechnician(
     Guid TenantId,
     Guid? BranchId,
     Guid TechnicianUserId,
+    Guid CustomerId,
+    Guid DeviceId,
+    string Title,
+    string Description,
     DateTimeOffset OccurredAtUtc);

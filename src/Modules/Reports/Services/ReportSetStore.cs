@@ -1,18 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
+using Reports.Domain.Entities;
+using Reports.Domain.Enums;
 using TechSupport.Reports.Data;
 using TechSupport.Reports.Domain.Entities;
 using TechSupport.Reports.Domain.Enums;
 
 namespace TechSupport.Reports.Services;
 
-/// <summary>
-/// Low-level SET store for the Reports module.
-///
-/// Intentionally contains no business meaning (customer/operation/technician);
-/// it only knows how to upsert summaries/metrics with concurrency-safe patterns.
-/// </summary>
 public sealed class ReportSetStore
 {
     private readonly ReportDbContext _db;
@@ -80,6 +76,21 @@ public sealed class ReportSetStore
         CancellationToken ct)
         => await IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
 
+    public async Task TechnicianWorksSetAsync (Guid tenantId, Guid technicianId, string operationDescription, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    {
+        var work = new TechnicianWork
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            TechnicianId = technicianId,
+            OperationDescription = operationDescription,
+            Status = WorkStatus.Assigned,
+            AssignedAtUtc = occurredAtUtc,
+        };
+        await _db.TechnicianWorks.AddAsync(work);
+
+        await _db.SaveChangesAsync(ct);
+    }
     private async Task IncrementMetricInternalAsync( //! olay burada teknisyen userid var ise metrikler ekleniyor.
         Guid tenantId,
         Guid? branchId,

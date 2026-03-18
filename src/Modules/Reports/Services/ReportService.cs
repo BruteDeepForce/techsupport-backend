@@ -43,7 +43,7 @@ public sealed class ReportService : IReportService
 
         await tx.CommitAsync(ct);
     }
-
+        //! OperationCreated event'ı rapor modülünde ilgili tenantın operasyon count oluşturmak için kullanılıyor.
     public async Task HandleOperationCreatedAsync(OperationCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct)
     {
         await using var tx = await _store.BeginTransactionAsync(ct);
@@ -53,7 +53,12 @@ public sealed class ReportService : IReportService
             await tx.RollbackAsync(ct);
             return;
         }
-
+        //! burası vital dikkat et
+        if(message.FieldTechnicianUserId.HasValue)
+        {
+            await _operationSet.HandleOperationCreatedAsync (message, ct);
+            await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.FieldTechnicianUserId ?? Guid.Empty, message.Description, message.OccurredAtUtc, ct);
+        }
         await _operationSet.HandleOperationCreatedAsync(message, ct);
 
         await tx.CommitAsync(ct);
@@ -73,17 +78,18 @@ public sealed class ReportService : IReportService
         await tx.CommitAsync(ct);
     }
 
-    public async Task HandleOperationAssignedToTechnicianAsync(OperationAssignedToTechnician message, Guid? messageId, Guid? correlationId, CancellationToken ct)
+    //!! DEPRECATED METOT, OPERATION CREATED EVENT'I İLE BİRLEŞTİRİLDİ. TEKNİSYEN RAPOR SETİNDEKİ OPERATION ASSIGNED TO TECHNICIAN HANDLER'INA TAŞINDI.
+    public async Task HandleOperationAssignedToTechnicianAsync(OperationCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct)
     {
         await using var tx = await _store.BeginTransactionAsync(ct);
 
-        if (!await _store.TryRegisterProcessedEventAsync(nameof(OperationAssignedToTechnician), messageId, correlationId, message.TenantId, ct)) //!corelationid nerden ???
+        if (!await _store.TryRegisterProcessedEventAsync(nameof(OperationCreated), messageId, correlationId, message.TenantId, ct)) //!corelationid nerden ???
         {
             await tx.RollbackAsync(ct);
             return;
         }
 
-        await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.TechnicianUserId, message.OccurredAtUtc, ct);
+        await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.FieldTechnicianUserId ?? Guid.Empty, message.Description, message.OccurredAtUtc, ct);
 
         await tx.CommitAsync(ct);
     }

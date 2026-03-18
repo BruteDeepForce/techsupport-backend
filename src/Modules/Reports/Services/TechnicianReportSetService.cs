@@ -1,5 +1,6 @@
 namespace TechSupport.Reports.Services;
 
+using global::Reports.Domain.Entities;
 using TechSupport.Reports.Domain.Enums;
 
 /// <summary>
@@ -17,19 +18,21 @@ public sealed class TechnicianReportSetService : ITechnicianReportSetService
         _store = store;
     }
 
-    public Task HandleOperationAssignedToTechnicianAsync(Guid tenantId, Guid? branchId, Guid technicianUserId, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    public async Task HandleOperationAssignedToTechnicianAsync(Guid tenantId, Guid? branchId, Guid technicianUserId, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var day = DateOnly.FromDateTime(occurredAtUtc.UtcDateTime);
 
         // Tenant/branch-level: how many assignments happened.
         // These are useful for dashboards without joining a technician dimension.
-        return Task.WhenAll(
-            _store.IncrementMetricAsync(tenantId, branchId, ReportMetricType.OperationAssignedToTechnicianCount, ReportPeriodType.AllTime, null, 1, ct),
-            _store.IncrementMetricAsync(tenantId, branchId, ReportMetricType.OperationAssignedToTechnicianCount, ReportPeriodType.Daily, day, 1, ct),
 
-            // Per-technician: assignment volume.
-            _store.IncrementTechnicianMetricAsync(tenantId, branchId, technicianUserId, ReportMetricType.TechnicianAssignedOperationCount, ReportPeriodType.AllTime, null, 1, ct),
-            _store.IncrementTechnicianMetricAsync(tenantId, branchId, technicianUserId, ReportMetricType.TechnicianAssignedOperationCount, ReportPeriodType.Daily, day, 1, ct)
-        );
+        await _store.TechnicianWorksSetAsync(tenantId, technicianUserId, description, occurredAtUtc, ct);
+
+        await _store.IncrementMetricAsync(tenantId, branchId, ReportMetricType.OperationAssignedToTechnicianCount, ReportPeriodType.AllTime, null, 1, ct);
+        await _store.IncrementMetricAsync(tenantId, branchId, ReportMetricType.OperationAssignedToTechnicianCount, ReportPeriodType.Daily, day, 1, ct);
+
+        // Per-technician: assignment volume.
+        await _store.IncrementTechnicianMetricAsync(tenantId, branchId, technicianUserId, ReportMetricType.TechnicianAssignedOperationCount, ReportPeriodType.AllTime, null, 1, ct);
+        await _store.IncrementTechnicianMetricAsync(tenantId, branchId, technicianUserId, ReportMetricType.TechnicianAssignedOperationCount, ReportPeriodType.Daily, day, 1, ct);
+
     }
 }

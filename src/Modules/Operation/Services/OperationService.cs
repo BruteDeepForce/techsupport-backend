@@ -8,7 +8,7 @@ namespace TechSupport.Operation.Services;
 
 public interface IOperationService
 {
-    Task<OperationRecord>   CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, Guid customerId, Guid deviceId, Guid? toTechnician, string title, string description, string? internalNote, Guid? ticketId, OperationPriority priority, CancellationToken ct);
+    Task<OperationRecord> CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, Guid customerId, Guid deviceId, Guid? toTechnician, string title, string description, string? internalNote, Guid? ticketId, OperationPriority priority, CancellationToken ct);
     Task<OperationRecord?> GetAsync(Guid tenantId, Guid operationId, CancellationToken ct);
     Task<IEnumerable<OperationRecord>> AdminGetAllAsync(Guid tenantId, CancellationToken ct);
 
@@ -63,8 +63,15 @@ public sealed class OperationService : IOperationService
 
         var now = DateTimeOffset.UtcNow;
 
-        //! teknisyen ve reports modülüne teknisye id yoksa asenkron publish
-        //! tenant bazlı operasyon reports modülünde oluşturur. 
+        /// koşul teknisyenid var mı ??? 
+        /// varsa teknisyen modülüne teknisyen operation assign et.
+        /// 
+        /// 
+        //! sistemi değiştirdim.
+        //! bir operasyon için teknisyenid yoksa sadece operasyon raporu oluşturuyor.
+        //! teknisyenid varsa operasyon raporu oluşturuyor ve rapor modülünde teknisyene atanmış operasyon için metricler güncelleniyor
+        //! ayrıca teknisyenid var ise teknisyen modülünde de teknisyene atanmış operasyon oluşturuluyor. 
+        //! Böylece teknisyen modülü teknisyene atanmış operasyonları kendi veritabanında tutuyor ve operasyon modülüne bağımlılığı kalmıyor.
         await _bus.Publish(new OperationCreated(
             op.Id,
             op.TenantId,
@@ -76,17 +83,19 @@ public sealed class OperationService : IOperationService
             op.Title,
             op.Description,
             now), ct);
-
         if (toTechnician.HasValue)
         {
-            await _bus.Publish(new OperationAssignedToTechnician(
-                op.Id,
-                op.TenantId,
-                op.BranchId,
-                toTechnician.Value,
-                now), ct);
+        await _bus.Publish(new OperationAssignedToTechnician(
+            op.Id,
+            op.TenantId,
+            op.BranchId,
+            op.FieldTechnicianUserId ?? Guid.Empty,
+            op.CustomerId,
+            op.DeviceId,
+            op.Title,
+            op.Description,
+            now), ct);
         }
-
         return op;
     }
 

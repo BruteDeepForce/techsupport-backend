@@ -18,7 +18,7 @@ public interface ITechnicianService
     Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
     Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
-    Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct);
+    Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct);
 
     Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string status, CancellationToken ct);
 }
@@ -38,14 +38,13 @@ public sealed class TechnicianService : ITechnicianService
     }
 
     //!burası yanlış
-    public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
-        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.IsActive && x.TenantId == tenantId, ct);
-        if (technician is null)
+        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
+        if (technician is null)        
         {
-            // No active technician found, log and exit. Operation will remain unassigned until a technician is provisioned.
-            // In a real system, you might want to implement retry logic or alerting here.
-            return;
+            _logger.LogError("Technician with ID {TechnicianId} not found for tenant {TenantId}", technicianId, tenantId);
+            throw new InvalidOperationException("Technician not found");
         }
         var item = new Technician.Domain.Entities.TechnicianOperation
         {
@@ -55,7 +54,7 @@ public sealed class TechnicianService : ITechnicianService
             BranchId = branchId,
             CustomerId = customerId,
             AssignedAtUtc = DateTimeOffset.UtcNow,
-            AssignedTechnicianId = technician.Id, //! fırlayabilir!!!
+            AssignedTechnicianId = technician.Id, 
             DeviceId = deviceId,
             Title = title,
             Description = description,
