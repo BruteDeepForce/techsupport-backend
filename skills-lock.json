@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-development": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "0aaf288afd17b30d3bdba25ff4e5c5fe834d403a9f3f3d0a223121f69eceaee1"
+    },
+    "brand-guidelines": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "4aa754f4f7fc54ac3e7f6e2fb55c0e2fb14b7d70da077b41a86bd1889ff9094c"
+    },
+    "canvas-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "a2fe47d24b3fd8e52faef731fff099c557e698083cd644b2e5695cc4dd8c7715"
+    },
+    "claude-automation-recommender": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "47e672bfcaa399d473cb33f2f298263d8554774314a71ef8761bd8d040351ceb"
+    },
+    "claude-md-improver": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "d6707ed0467d9664d0f9d2c44724c8fb1814475ec6d3c62a5d54bbbe807e0775"
+    },
+    "command-development": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "8967433d02e75488416723becfcc9e6a3d1bcdf3c8915646a0f3637fda7e2f2a"
+    },
+    "context7-cli": {
+      "source": "upstash/context7",
+      "sourceType": "github",
+      "computedHash": "2c09d102a9a6c5e6a06e2cc8a5641947270aa977e8e37c7e532719badf1575e6"
+    },
+    "context7-mcp": {
+      "source": "upstash/context7",
+      "sourceType": "github",
+      "computedHash": "6b02383f86f87e81a722b3b6c6d6e06efa5c72f23bc87bb02599e3d499ca2c58"
+    },
+    "figma": {
+      "source": "hoodini/ai-agents-skills",
+      "sourceType": "github",
+      "computedHash": "31776d07ec44f5e948f3f0bd14aa421a872a97883a2a90c3bfb391e0bfaf336b"
+    },
+    "find-docs": {
+      "source": "upstash/context7",
+      "sourceType": "github",
+      "computedHash": "b631499b08026841fe535f17927d692fc37d29111032ee1991e55ecec1f937be"
+    },
+    "frontend-design": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "e8118284a6365753790d44bb2758a6032b3af27fa84696428d9233f2be0f4e78"
+    },
+    "hook-development": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "7bda9057df5162ac7a141dab5d5b4876c2fa37516eb757f3efc6f7dcebe73aa2"
+    },
+    "mcp-integration": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "b2d798c608538e611b3c64aa5941a18822f5c4cf5b42fea3d32ea5cd37c664a9"
+    },
+    "playground": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "a499ef286b1bcda80afe4de53b2d0a5a84c317c11cfdafc2af6e53985c77940d"
+    },
+    "plugin-settings": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "39f295af247420627c1fd06d7dd9659c461b87f0bb0b5ed718fc4f23c3a25af2"
+    },
+    "plugin-structure": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "1fd8152a20ae6b51e75064619cdf87db5d487c8514506774c66d2708001148a9"
+    },
+    "skill-creator": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "9b03bb78ec5c81c4e0546dbb78cfc970368c72dcae5482e8c59690175abbc8e7"
+    },
+    "skill-development": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "5f30c8717078c18ae0be71dcd3309a27730432e38b9d958b22ebb6ea33e5941a"
+    },
+    "stripe-best-practices": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "4b3e66fe21b41d61903031bee94649c8fde4af57bb6bed6e9f14a6b361f3f82e"
+    },
+    "theme-factory": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "93e78aa44f8fa00bb2c0608f400de1e1dcd6494611dd8ea27c867654240c7bcd"
+    },
+    "writing-hookify-rules": {
+      "source": "anthropics/claude-plugins-official",
+      "sourceType": "github",
+      "computedHash": "f9705872d7d4b8bd1a6e941f818cdd547a87bac334ee066ad46ec7fa14e3c73b"
+    }
+  }
+}
