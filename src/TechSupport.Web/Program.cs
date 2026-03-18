@@ -32,11 +32,9 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<CustomerAccountProvisionedConsumer>();
     x.AddConsumer<CustomerAccountProvisionFailedConsumer>();
     x.AddConsumer<TechnicianAccountProvisionRequestedConsumer>();
-    // Register both consumers that handle the same CustomerCreated event
     x.AddConsumer<TechSupport.Reports.Consumers.CustomerCreatedConsumer>();
-    x.AddConsumer<TechSupport.Technician.Consumers.OperationCreatedConsumer>();
+    x.AddConsumer<TechSupport.Technician.Consumers.OperationAssignedToTechnicianConsumer>();
     x.AddConsumer<TechSupport.Reports.Consumers.OperationCreatedConsumer>();
-    x.AddConsumer<OperationAssignedToTechnicianConsumer>();
     x.AddConsumer<OperationStatusChangedConsumer>();
     x.AddConsumer<TechSupport.Reports.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechSupport.Technician.Consumers.TechnicianAccountProvisionedConsumer>();

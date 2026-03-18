@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Reports.Domain.Entities;
 using TechSupport.Reports.Domain.Entities;
 
 namespace TechSupport.Reports.Data;
@@ -16,6 +17,7 @@ public class ReportDbContext : DbContext
     public DbSet<TechnicianReportMetric> TechnicianReportMetrics => Set<TechnicianReportMetric>();
     public DbSet<GeneratedReport> GeneratedReports => Set<GeneratedReport>();
     public DbSet<ProcessedReportEvent> ProcessedReportEvents => Set<ProcessedReportEvent>();
+    public DbSet<TechnicianWork> TechnicianWorks => Set<TechnicianWork>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +60,15 @@ public class ReportDbContext : DbContext
             b.ToTable("technician_report_metrics");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.BranchId, x.TechnicianUserId, x.MetricType, x.PeriodType, x.PeriodDate }).IsUnique();
+        });
+
+        modelBuilder.Entity<TechnicianWork>(b =>
+        {
+            b.ToTable("technician_works");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.OperationDescription).HasMaxLength(4000);
+            b.Property(x => x.Status).HasConversion<string>().HasMaxLength(64);
+            b.HasIndex(x => new { x.TenantId, x.TechnicianId });
         });
 
         modelBuilder.Entity<GeneratedReport>(b =>

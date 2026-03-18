@@ -12,4 +12,6 @@ public sealed class TechnicianReportSummary
     public DateTimeOffset? LastProfileUpdateAtUtc { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    
 }

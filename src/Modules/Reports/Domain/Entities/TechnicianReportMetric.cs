@@ -2,9 +2,6 @@ using TechSupport.Reports.Domain.Enums;
 
 namespace TechSupport.Reports.Domain.Entities;
 
-/// <summary>
-/// Per-technician metric time series.
-/// </summary>
 public sealed class TechnicianReportMetric
 {
     public Guid Id { get; set; }
