@@ -287,7 +287,15 @@ class _LandingPageState extends State<LandingPage> {
                               children: [
                                 Expanded(child: _HeroContent(onLogin: _navigateToLogin)),
                                 const SizedBox(width: 80),
-                                Expanded(child: _HeroImage()),
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(32),
+                                    child: Image.asset(
+                                      'assets/mockups.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
                               ],
                             )
                           : Column(
@@ -323,68 +331,71 @@ class _LandingPageState extends State<LandingPage> {
                           subtitle: 'Lineer Destek ile teknik servis süreçlerinizi uçtan uca dijitalleştirin.',
                         ),
                         const SizedBox(height: 60),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            final crossAxisCount = constraints.maxWidth > 900 
-                                ? 3 
-                                : constraints.maxWidth > 600 ? 2 : 1;
-                            
-                            return GridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: crossAxisCount,
-                              mainAxisSpacing: 24,
-                              crossAxisSpacing: 24,
-                              childAspectRatio: constraints.maxWidth > 900 ? 1.3 : 1.1,
-                              children: [
-                                _FeatureCard(
-                                  icon: Icons.auto_awesome,
-                                  title: 'Yapay Zeka Atama',
-                                  description: 'Talepleri konuma ve uzmanlığa göre en uygun teknisyene anında yönlendirin.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.location_on,
-                                  title: 'Saha Takibi',
-                                  description: 'Teknisyenlerinizi harita üzerinde canlı izleyin ve rota optimizasyonu yapın.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.inventory,
-                                  title: 'Stok Yönetimi',
-                                  description: 'Araçlardaki ve ana depodaki yedek parçaları gerçek zamanlı kontrol edin.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.analytics,
-                                  title: 'Gelişmiş Raporlama',
-                                  description: 'Servis performansını, maliyetleri ve müşteri memnuniyetini anlık izleyin.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.draw,
-                                  title: 'Dijital Onay ve İmza',
-                                  description: 'Servis formlarını sahada dijital imza ile anında onaylatın ve PDF yapın.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.timer,
-                                  title: 'SLA Takibi',
-                                  description: 'Müşteri sözleşmelerine göre müdahale ve çözüm sürelerini garanti altına alın.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.person_search,
-                                  title: 'Müşteri Portalı',
-                                  description: 'Müşterileriniz kendi taleplerini açsın ve sürecini şeffafça takip etsin.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.route,
-                                  title: 'Rota Optimizasyonu',
-                                  description: 'Teknisyenleriniz için en kısa ve verimli günlük çalışma rotasını oluşturun.',
-                                ),
-                                _FeatureCard(
-                                  icon: Icons.receipt_long,
-                                  title: 'Hakediş & Faturalama',
-                                  description: 'Teknisyen hakedişlerini ve servis maliyetlerini otomatik olarak hesaplayın.',
-                                ),
-                              ],
-                            );
-                          },
+                        Column(
+                          children: [
+                            _FeatureRow(
+                              title: 'Yapay Zeka Atama',
+                              description: 'Talepleri konuma ve uzmanlığa göre en uygun teknisyene anında yönlendirin.',
+                              imagePath: 'assets/photos/7.png',
+                              isReversed: false,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Saha Takibi',
+                              description: 'Teknisyenlerinizi harita üzerinde canlı izleyin ve rota optimizasyonu yapın.',
+                              imagePath: 'assets/photos/4.png',
+                              isReversed: true,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Stok Yönetimi',
+                              description: 'Araçlardaki ve ana depodaki yedek parçaları gerçek zamanlı kontrol edin.',
+                              imagePath: 'assets/photos/8.png',
+                              isReversed: false,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Gelişmiş Raporlama',
+                              description: 'Servis performansını, maliyetleri ve müşteri memnuniyetini anlık izleyin.',
+                              imagePath: 'assets/photos/5.png',
+                              isReversed: true,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Dijital Onay ve İmza',
+                              description: 'Servis formlarını sahada dijital imza ile anında onaylatın ve PDF yapın.',
+                              imagePath: 'assets/photos/9.png',
+                              isReversed: false,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'SLA Takibi',
+                              description: 'Müşteri sözleşmelerine göre müdahale ve çözüm sürelerini garanti altına alın.',
+                              imagePath: 'assets/photos/4.png',
+                              isReversed: true,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Müşteri Portalı',
+                              description: 'Müşterileriniz kendi taleplerini açsın ve sürecini şeffafça takip etsin.',
+                              imagePath: 'assets/photos/3.png',
+                              isReversed: false,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Rota Optimizasyonu',
+                              description: 'Teknisyenleriniz için en kısa ve verimli günlük çalışma rotasını oluşturun.',
+                              imagePath: 'assets/photos/2.png',
+                              isReversed: true,
+                            ),
+                            const SizedBox(height: 80),
+                            _FeatureRow(
+                              title: 'Hakediş & Faturalama',
+                              description: 'Teknisyen hakedişlerini ve servis maliyetlerini otomatik olarak hesaplayın.',
+                              imagePath: 'assets/photos/10.png',
+                              isReversed: false,
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -717,9 +728,12 @@ class _HeroImage extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(12),
-      child: Image.asset(
-        'assets/mockups.png',
-        fit: BoxFit.contain,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Image.asset(
+          'assets/photos/2.png',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }
@@ -776,52 +790,87 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _FeatureCard extends StatelessWidget {
-  final IconData icon;
+
+class _FeatureRow extends StatelessWidget {
   final String title;
   final String description;
+  final String imagePath;
+  final bool isReversed;
 
-  const _FeatureCard({
-    required this.icon,
+  const _FeatureRow({
     required this.title,
     required this.description,
+    required this.imagePath,
+    required this.isReversed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return LinearCard(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: AppColors.accent, size: 24),
+    final size = MediaQuery.of(context).size;
+    final isMobile = size.width < 900;
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            letterSpacing: -1,
           ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          description,
+          style: const TextStyle(
+            fontSize: 18,
+            height: 1.6,
+            color: AppColors.textSecondary,
           ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: const TextStyle(
-              fontSize: 14,
-              height: 1.5,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
+        ),
+        const SizedBox(height: 32),
+        _OutlinedHeroButton(
+          onPressed: () {},
+          label: 'Detayları İncele',
+        ),
+      ],
+    );
+
+    final image = ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        height: isMobile ? 300 : 450,
+        width: double.infinity,
       ),
+    );
+
+    if (isMobile) {
+      return Column(
+        children: [
+          image,
+          const SizedBox(height: 40),
+          content,
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        if (!isReversed) ...[
+          Expanded(child: content),
+          const SizedBox(width: 80),
+          Expanded(child: image),
+        ] else ...[
+          Expanded(child: image),
+          const SizedBox(width: 80),
+          Expanded(child: content),
+        ],
+      ],
     );
   }
 }
@@ -1410,5 +1459,6 @@ class _PremiumButton extends StatelessWidget {
     );
   }
 }
+
 
 
