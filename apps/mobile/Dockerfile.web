@@ -1,13 +1,14 @@
 # Stage 1: Build
 FROM ghcr.io/cirruslabs/flutter:stable AS build
 
+# Sets the work directory in the build container
 WORKDIR /app
 
-# Dokploy Setup:
-# Build Path: /
-# Docker Context Path: .
-# Copy only the mobile app from the monorepo to the build container
-COPY apps/mobile/ .
+# Dokploy Recommended Setup:
+# Docker Context Path: apps/mobile
+# Docker File: Dockerfile.web
+# Copy everything from the context (which is apps/mobile)
+COPY . .
 
 # Enable web support in Flutter
 RUN flutter config --enable-web
