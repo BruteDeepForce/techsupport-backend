@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../design/app_design.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme => lightTheme; 
+  static ThemeData get darkTheme => lightTheme;
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -19,7 +19,6 @@ class AppTheme {
         secondary: AppColors.textSecondary,
         outline: AppColors.border,
       ),
-
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.bgSurface,
         foregroundColor: AppColors.textPrimary,
@@ -33,7 +32,6 @@ class AppTheme {
           color: AppColors.textPrimary,
         ),
       ),
-
       cardTheme: CardThemeData(
         color: AppColors.bgSurface,
         elevation: 0,
@@ -43,32 +41,34 @@ class AppTheme {
           side: const BorderSide(color: AppColors.border, width: 1.0),
         ),
       ),
-
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
+          // Use a finite minimum width to avoid layout errors in unconstrained
+          // contexts (Size.fromHeight sets infinite width which can break
+          // rendering inside some parents like SingleChildScrollView).
+          minimumSize: const Size(88, 44),
           backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.sm)),
-          textStyle: GoogleFonts.inter(
-              fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
+          // Use a finite minimum width to avoid layout errors in unconstrained
+          // contexts.
+          minimumSize: const Size(88, 44),
           side: const BorderSide(color: AppColors.border, width: 1.0),
           foregroundColor: AppColors.textPrimary,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppRadius.sm)),
-          textStyle: GoogleFonts.inter(
-              fontSize: 14, fontWeight: FontWeight.w500),
+          textStyle:
+              GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.bgSurface,
@@ -78,7 +78,8 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1.0),
+          borderSide:
+              const BorderSide(color: AppColors.borderSubtle, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -91,7 +92,6 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-
       textTheme: TextTheme(
         headlineLarge: GoogleFonts.inter(
           fontSize: 24,
