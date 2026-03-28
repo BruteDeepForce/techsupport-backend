@@ -5,6 +5,8 @@ on:
     branches:
       - Backend-Lead
       - main
+permissions:
+  contents: write
 
 jobs:
   build:
