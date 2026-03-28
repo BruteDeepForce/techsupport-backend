@@ -12,6 +12,19 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
       - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+  postgres_backup:
+    image: pgvector/pgvector:0.8.1-pg18-trixie
+    container_name: techsupport_postgres_backup
+    restart: always
+    environment:
+      POSTGRES_USER: myappuser
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: backupdb
+    ports:
+      - "5440:5432"
+    volumes:
+      - pgdata_backup:/var/lib/postgresql
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -24,3 +37,4 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
 volumes:
   pgdata:
+  pgdata_backup:
