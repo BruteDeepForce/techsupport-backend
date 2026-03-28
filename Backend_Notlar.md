@@ -13,12 +13,19 @@ device işlemler fikirleri :
 - müşteri sisteme kayıt- müşteriye ürün satışı sonrası garanti periyodu vs tüm device bilgileri ile device kayıt. device müşteri mapping. [STANDBY]
 
 - Device oluşturup müşteriye maplendikten sonra operasyon yaratılacak mı? [AR-GE]
-** tercihen device oluşturulup müşteriye maplenirken zaten Status alıyoruz. Status eğer ki inrepair ya da maintenance ise direkt operasyon modülüne event publishlenebilir. [OPERASYON MODÜLÜNDEKİ OPERATION CREATE SERVİSİNE TYPE İLE GİDER]
+** tercihen device oluşturulup müşteriye maplenirken zaten Status alıyoruz. Status eğer ki inrepair ya da maintenance ise direkt operasyon modülüne event publishlenebilir. [OPERASYON MODÜLÜNDEKİ OPERATION CREATE SERVİSİNE TYPE İLE GİDER] [DEĞİŞME-1] 
+** Device ve müşteri yaratıldığında operasyon create işlemini opsiyonel bırakacağım. [DEĞİŞME-2] [OPTIONAL]
 
  Operation fikir: 
-- operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek.
+- operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek. [STANDBY]
+
+
+
+
 
  RAPORLAR MODÜLÜ:
 - Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
 - Teknisyen metriklerinde operasyonid gelmiyor [URGENT] [BUG] [SOLVED] operasyonid kayıt işlemi yapılıyor artık.
+
+
 
