@@ -15,6 +15,10 @@ device işlemler fikirleri :
 - Device oluşturup müşteriye maplendikten sonra operasyon yaratılacak mı? [AR-GE]
 ** tercihen device oluşturulup müşteriye maplenirken zaten Status alıyoruz. Status eğer ki inrepair ya da maintenance ise direkt operasyon modülüne event publishlenebilir. [OPERASYON MODÜLÜNDEKİ OPERATION CREATE SERVİSİNE TYPE İLE GİDER]
 
-Operation fikir: 
+ Operation fikir: 
 - operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek.
+
+ RAPORLAR MODÜLÜ:
+- Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
+- Teknisyen metriklerinde operasyonid gelmiyor [URGENT] [BUG] [SOLVED] operasyonid kayıt işlemi yapılıyor artık.
 
