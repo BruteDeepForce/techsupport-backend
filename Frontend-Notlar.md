@@ -14,4 +14,6 @@
 - Teknisyen ekleme silme CRUD işlemleri başlatılacak.  [COMPLETED] [DELETE HARİÇ] []
 - Teknisyenlerin Profil fotoğrafları da upload olmalı. UI için upgrade level [UI]   
 
+- 
+
 

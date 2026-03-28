@@ -47,175 +47,138 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
     String? firstName, lastName, email, phone, tempPassword;
 
     showDialog(
-        context: context,
-        builder: (ctx) {
-          // Modern, app-themed dialog using design system components
-          return Dialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.xl)),
-            insetPadding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Yeni Teknisyen Ekle',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 12),
-                  LinearCard(
-                    padding: const EdgeInsets.all(12),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // name row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildStyledField(
-                                  label: 'İsim',
-                                  onSaved: (v) => firstName = v,
-                                  validator: (v) => (v == null || v.isEmpty)
-                                      ? 'Gerekli'
-                                      : null,
-                                ),
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl)),
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Yeni Teknisyen Ekle',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                LinearCard(
+                  padding: const EdgeInsets.all(12),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStyledField(
+                                label: 'İsim',
+                                onSaved: (v) => firstName = v,
+                                validator: (v) =>
+                                    (v == null || v.isEmpty) ? 'Gerekli' : null,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildStyledField(
-                                  label: 'Soyisim',
-                                  onSaved: (v) => lastName = v,
-                                ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildStyledField(
+                                label: 'Soyisim',
+                                onSaved: (v) => lastName = v,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          _buildStyledField(
-                              label: 'E-posta',
-                              onSaved: (v) => email = v,
-                              validator: (v) =>
-                                  (v == null || v.isEmpty) ? 'Gerekli' : null),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                  child: _buildStyledField(
-                                      label: 'Telefon',
-                                      onSaved: (v) => phone = v)),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                  child: _buildStyledField(
-                                      label: 'Geçici Şifre',
-                                      onSaved: (v) => tempPassword = v,
-                                      validator: (v) => (v == null || v.isEmpty)
-                                          ? 'Gerekli'
-                                          : null)),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        _buildStyledField(
+                            label: 'E-posta',
+                            onSaved: (v) => email = v,
+                            validator: (v) =>
+                                (v == null || v.isEmpty) ? 'Gerekli' : null),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                                child: _buildStyledField(
+                                    label: 'Telefon',
+                                    onSaved: (v) => phone = v)),
+                            const SizedBox(width: 12),
+                            Expanded(
+                                child: _buildStyledField(
+                                    label: 'Geçici Şifre',
+                                    onSaved: (v) => tempPassword = v,
+                                    validator: (v) => (v == null || v.isEmpty)
+                                        ? 'Gerekli'
+                                        : null)),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('İptal')),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: () async {
-                          if (!(_formKey.currentState?.validate() ?? false))
-                            return;
-                          _formKey.currentState?.save();
-                          Navigator.of(ctx).pop();
-                          // show simple progress
-                          showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (_) => const Center(
-                                  child: CircularProgressIndicator()));
-                          try {
-                            final correlationId =
-                                await _techService.createTechnician(
-                                    firstName: firstName ?? '',
-                                    lastName: lastName,
-                                    email: email ?? '',
-                                    phoneNumber: phone,
-                                    temporaryPassword:
-                                        tempPassword ?? 'Temp123!');
-                            if (correlationId == null) {
-                              Navigator.of(context).pop(); // pop progress
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Teknisyen oluşturulamadı')));
-                              return;
-                            }
-
-                            // Poll provisioning status until completed/failed or timeout
-                            const maxAttempts = 30; // ~30s
-                            var attempts = 0;
-                            while (attempts < maxAttempts) {
-                              final status = await _techService
-                                  .getProvisioningStatus(correlationId);
-                              final s = (status?['status'] ?? status?['Status'])
-                                  ?.toString()
-                                  .toLowerCase();
-                              if (s == 'completed') {
-                                Navigator.of(context).pop(); // pop progress
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('Teknisyen eklendi')));
-                                await _loadTechnicians();
-                                return;
-                              }
-                              if (s == 'failed') {
-                                Navigator.of(context).pop(); // pop progress
-                                final reason = status?['failureReason'] ??
-                                    'Bilinmeyen hata';
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content: Text(
-                                            'Provisioning failed: $reason')));
-                                await _loadTechnicians();
-                                return;
-                              }
-                              await Future.delayed(const Duration(seconds: 1));
-                              attempts++;
-                            }
-
-                            // timeout
-                            Navigator.of(context).pop(); // pop progress
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Teknisyen oluşturma zaman aşımına uğradı. Liste güncelleniyor.')));
-                            await _loadTechnicians();
-                          } catch (e) {
-                            Navigator.of(context).pop(); // pop progress
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('İptal')),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: () async {
+                        if (!(_formKey.currentState?.validate() ?? false))
+                          return;
+                        _formKey.currentState?.save();
+                        Navigator.of(ctx).pop();
+                        // show simple progress
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()));
+                        try {
+                          final correlationId =
+                              await _techService.createTechnician(
+                                  firstName: firstName ?? '',
+                                  lastName: lastName,
+                                  email: email ?? '',
+                                  phoneNumber: phone,
+                                  temporaryPassword:
+                                      tempPassword ?? 'Temp123!');
+                          Navigator.of(context).pop(); // pop progress
+                          if (correlationId == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     content: Text('Teknisyen oluşturulamadı')));
+                            return;
                           }
-                        },
-                        child: const Text('Oluştur'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+
+                          // Do NOT poll provisioning status. User will refresh the page manually.
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text(
+                                  'Teknisyen oluşturma başlatıldı. Sayfayı yenileyin.')));
+                          return;
+                        } catch (e) {
+                          Navigator.of(context).pop(); // pop progress
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Teknisyen oluşturulamadı')));
+                        }
+                      },
+                      child: const Text('Oluştur'),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildStyledField(
