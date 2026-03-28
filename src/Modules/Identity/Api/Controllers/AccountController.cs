@@ -20,10 +20,12 @@ public class AccountController : ControllerBase
     private readonly ITokenService _tokenService;
     private readonly IUserService _userService;
     private readonly IdentityDbContext _dbContext;
-
+    private readonly ITenantService _tenantService;
     private readonly IBus _bus;
 
-    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService, IdentityDbContext dbContext, IBus bus  )
+    public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+    RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService,
+    IdentityDbContext dbContext, ITenantService tenantService, IBus bus)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -32,13 +34,14 @@ public class AccountController : ControllerBase
         _userService = userService;
         _dbContext = dbContext;
         _bus = bus;
+        _tenantService = tenantService;
     }
 
-    public record RegisterDto(string Email, string Password, string Role, Guid TenantId, Guid? BranchId);
+    public record RegisterDto(string Email, string Password, string Role, string tenantName, Guid? BranchId);
     public record LoginDto(string Email, string Password);
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
         var user = new AppUser { UserName = dto.Email, Email = dto.Email };
         var result = await _userManager.CreateAsync(user, dto.Password);
@@ -48,7 +51,9 @@ public class AccountController : ControllerBase
         if (role == null) return BadRequest($"Role '{dto.Role}' does not exist");
 
         await _userManager.AddToRoleAsync(user, dto.Role);
-        await _userService.CreateAsync(user.Id, dto.TenantId, dto.BranchId, dto.Email, dto.Role, CancellationToken.None);
+        var tenantId = await _tenantService.CreateTenantAsync(dto.tenantName, CancellationToken.None);
+        if (tenantId == Guid.Empty) return BadRequest("Failed to create tenant");
+        await _userService.CreateAsync(user.Id, tenantId, dto.BranchId, dto.Email, dto.Role, CancellationToken.None);
 
         var token = await _tokenService.CreateTokenForUserAsync(user);
 
@@ -97,9 +102,9 @@ public class AccountController : ControllerBase
     {
         var tenant = new Tenant { Name = tenantName };
         await _dbContext.Tenants.AddAsync(tenant, ct);
-        await _dbContext.SaveChangesAsync(ct); 
+        await _dbContext.SaveChangesAsync(ct);
 
-        await _bus.Publish(new TenantCreated(tenant.Id, tenant.Name, DateTimeOffset.UtcNow), ct); 
+        await _bus.Publish(new TenantCreated(tenant.Id, tenant.Name, DateTimeOffset.UtcNow), ct);
         return Ok(new { tenantId = tenant.Id });
     }
 

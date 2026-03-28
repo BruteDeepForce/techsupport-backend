@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/design/app_design.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/network/auth_interceptor.dart';
+import '../../auth/data/auth_service.dart';
+import '../../auth/data/token_storage.dart';
 import 'role_selection_page.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,6 +36,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final _authService = AuthService();
+    final _tokenStorage = TokenStorage();
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -71,7 +78,8 @@ class _LoginPageState extends State<LoginPage> {
                         height: 96,
                         decoration: BoxDecoration(
                           color: AppColors.bgSurface,
-                          border: Border.all(color: AppColors.border, width: 0.5),
+                          border:
+                              Border.all(color: AppColors.border, width: 0.5),
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
@@ -155,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Primary button
                             FilledButton(
                               style: FilledButton.styleFrom(
@@ -171,19 +179,61 @@ class _LoginPageState extends State<LoginPage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute<void>(
-                                      builder: (_) => const RoleSelectionPage()),
+                              onPressed: () async {
+                                final email = _usernameController.text.trim();
+                                final password = _passwordController.text;
+                                if (email.isEmpty || password.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Lütfen e-posta ve şifre girin')));
+                                  return;
+                                }
+
+                                showDialog<void>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => const Center(
+                                      child: CircularProgressIndicator()),
                                 );
+
+                                try {
+                                  final token =
+                                      await _authService.login(email, password);
+                                  await _tokenStorage.saveToken(token);
+
+                                  // Register interceptor so subsequent requests include the token
+                                  ApiClient().dio.interceptors.add(
+                                        AuthInterceptor(_tokenStorage.getToken),
+                                      );
+
+                                  if (context.mounted) {
+                                    Navigator.of(context)
+                                        .pop(); // close loading
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              const RoleSelectionPage()),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    Navigator.of(context)
+                                        .pop(); // close loading
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Giriş başarısız: ${e.toString()}')));
+                                  }
+                                }
                               },
                               child: const Text('Devam Et'),
                             ),
                           ],
                         ),
                       ),
-                      
-                      const SizedBox(height: 32),
+
+                      const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () {},
                         child: Text(
@@ -191,9 +241,18 @@ class _LoginPageState extends State<LoginPage> {
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: AppColors.textSecondary,
                             decoration: TextDecoration.underline,
-                            decorationColor: AppColors.textSecondary.withValues(alpha: 0.5),
+                            decorationColor:
+                                AppColors.textSecondary.withValues(alpha: 0.5),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterPage()),
+                        ),
+                        child: const Text('Hesap Oluştur'),
                       ),
                     ],
                   ),
@@ -239,7 +298,8 @@ class _SaaSInput extends StatelessWidget {
         hintStyle: TextStyle(color: AppColors.textTertiary, fontSize: 14),
         filled: true,
         fillColor: AppColors.bgSurface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.border),
@@ -259,5 +319,3 @@ class _SaaSInput extends StatelessWidget {
     );
   }
 }
-
-
