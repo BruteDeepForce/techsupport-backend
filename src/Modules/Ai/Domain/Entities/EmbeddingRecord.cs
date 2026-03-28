@@ -1,10 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Numerics;
+
 
 namespace TechSupport.Ai.Domain.Entities;
 
 public class EmbeddingRecord
 {
-    [Key]
     public Guid Id { get; set; }
 
     public Guid TenantId { get; set; }
@@ -17,10 +19,11 @@ public class EmbeddingRecord
 
     public Guid? EntityId { get; set; }
 
+//!burada chunktext embeddinge vektörleniyor. vektörel sorgulama ile yakın chunktext bilgisine başvuruluyor.
     public string ChunkText { get; set; } = null!;
 
-    // For prototype store embedding as JSON string; later switch to vector type (PGVector)
-    public string? EmbeddingJson { get; set; }
+    [Column(TypeName = "vector(3072)")]
+    public Pgvector.Vector? Embedding { get; set; }
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }

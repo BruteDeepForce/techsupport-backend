@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TechSupport.Operation.Contracts.Events;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
+using TechSupport.Operation.DTO;
 
 namespace TechSupport.Operation.Services;
 
@@ -62,7 +63,7 @@ public sealed class TicketService : ITicketService
         return await _db.Tickets.AsNoTracking().Where(t => t.TenantId == tenantId && t.CustomerId == customerId).OrderByDescending(t => t.CreatedAtUtc).ToListAsync(ct);
     }
 
-    public async Task<OperationRecord> ConvertAsync(Guid tenantId, Guid ticketId, Guid adminUserId, Guid? toTechnician, string? internalNote, OperationPriority priority, CancellationToken ct)
+    public async Task<OperationRecord> ConvertAsync(Guid tenantId, Guid ticketId, Guid adminUserId, TechnicianInfo? technicianInfo, OperationType operationType, string? internalNote, OperationPriority priority, CancellationToken ct)
     {
         //! burası admin yetkisinde ticket to operation dönüşümü için. 
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.TenantId == tenantId && t.Id == ticketId, ct);
@@ -75,7 +76,24 @@ public sealed class TicketService : ITicketService
             return null;
         }
         // create operation and associate ticketId
-        var op = await _ops.CreateAsync(tenantId, ticket.BranchId, adminUserId, ticket.CustomerId, ticket.DeviceId ?? Guid.Empty, toTechnician, ticket.Title, ticket.Description, internalNote, ticket.Id, priority, ct);
+        var op = await _ops.CreateAsync(
+            tenantId,
+            ticket.BranchId,
+            adminUserId,
+            technicianInfo?.Name ?? string.Empty,
+            ticket.CustomerId,
+            ticket.DeviceId ?? Guid.Empty,
+            technicianInfo?.TechnicianId,
+            ticket.Title,
+            ticket.Description,
+            internalNote,
+            ticket.Id,
+            priority,
+            operationType,
+            null,
+            null,
+            ct);
+            
         // update ticket
         ticket.OperationId = op.Id;
         ticket.Status = TicketStatus.CreatedOperation;

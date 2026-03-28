@@ -15,12 +15,13 @@ public class AiDbContext : DbContext
     {
         modelBuilder.HasDefaultSchema("ai");
 
+        // Pgvector.Vector must be treated as a scalar (handled by Npgsql pgvector plugin),
+        // not discovered as an entity/owned type by EF conventions.
+        modelBuilder.Ignore<Pgvector.Vector>();
+
         modelBuilder.Entity<EmbeddingRecord>(b =>
         {
-            b.ToTable("embeddings");
-            b.HasKey(x => x.Id);
-            b.Property(x => x.ChunkText).HasMaxLength(4000);
-            b.HasIndex(x => new { x.TenantId, x.Entity, x.EntityId });
+            b.ToTable("embeddings");     
         });
 
         base.OnModelCreating(modelBuilder);

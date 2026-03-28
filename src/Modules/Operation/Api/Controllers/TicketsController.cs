@@ -74,7 +74,7 @@ public sealed class TicketsController : ControllerBase
         var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
         if (role != "admin") return Forbid();
 
-        var op = await _tickets.ConvertAsync(tenantId.Value, id, userId.Value, dto.ToTechnician, dto.InternalNote, dto.priority, ct);
+        var op = await _tickets.ConvertAsync(tenantId.Value, id, userId.Value, dto.TechnicianInfo, dto.operationType, dto.InternalNote, dto.priority, ct);
         return Ok(new { operationId = op.Id });
     }
 

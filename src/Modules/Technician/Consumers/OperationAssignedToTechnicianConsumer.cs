@@ -30,6 +30,7 @@ public sealed class OperationAssignedToTechnicianConsumer : IConsumer<OperationA
             message.DeviceId,
                 message.Title,
                 message.Description,
+                message.operationType,
                 message.OccurredAtUtc,
             ct);
     }

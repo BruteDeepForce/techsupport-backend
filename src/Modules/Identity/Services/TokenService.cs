@@ -52,7 +52,8 @@ public class TokenService : ITokenService
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new Claim("user_id", user.Id.ToString())
+            new Claim("user_id", user.Id.ToString()),
+            new Claim("username", user.UserName ?? string.Empty)
         };
 
         var profile = await _userService.GetByAppUserIdAsync(user.Id, ct);

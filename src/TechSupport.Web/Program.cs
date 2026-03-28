@@ -25,6 +25,19 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Register AI module (pgvector mapping + AiDbContext) before MassTransit builds consumers
+// to avoid EF model finalization issues around Pgvector.Vector.
+builder.Services.AddAiModule(builder.Configuration);
+
+builder.Services.AddIdentityModule(builder.Configuration);
+builder.Services.AddDeviceModule(builder.Configuration);
+builder.Services.AddUserModule(builder.Configuration);
+builder.Services.AddCustomerModule(builder.Configuration);
+builder.Services.AddOperationModule(builder.Configuration);
+builder.Services.AddReportsModule(builder.Configuration);
+builder.Services.AddTechnicianModule(builder.Configuration);
+builder.Services.AddStockModule(builder.Configuration);
+
 // MassTransit + RabbitMQ configuration
 builder.Services.AddMassTransit(x =>
 {
@@ -42,6 +55,9 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechnicianAccountProvisionFailedConsumer>();
     x.AddConsumer<TechnicianOperationStatusChangedConsumer>();
     x.AddConsumer<TenantCreatedConsumer>();
+    x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
+    x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
+    x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -51,15 +67,7 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-builder.Services.AddIdentityModule(builder.Configuration);
-builder.Services.AddDeviceModule(builder.Configuration);
-builder.Services.AddUserModule(builder.Configuration);
-builder.Services.AddCustomerModule(builder.Configuration);
-builder.Services.AddOperationModule(builder.Configuration);
-builder.Services.AddReportsModule(builder.Configuration);
-builder.Services.AddAiModule(builder.Configuration);
-builder.Services.AddTechnicianModule(builder.Configuration);
-builder.Services.AddStockModule(builder.Configuration);
+
 
 var app = builder.Build();
 

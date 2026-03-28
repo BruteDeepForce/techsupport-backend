@@ -70,8 +70,16 @@ namespace TechSupport.Customer.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BarcodeNumber")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
                     b.Property<Guid?>("BranchId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -82,22 +90,41 @@ namespace TechSupport.Customer.Data.Migrations
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("DeviceGuaranteeEndDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeviceGuaranteePeriod")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("DeviceGuaranteeStartDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<Guid>("DeviceId")
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("GuaranteePeriod")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("ProblemDescription")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WarrantyEndAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WarrantyStartAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");

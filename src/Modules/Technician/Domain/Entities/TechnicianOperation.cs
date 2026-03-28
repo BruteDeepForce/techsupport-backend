@@ -13,6 +13,8 @@ public sealed class TechnicianOperation
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
+    public string OperationType { get; set; } = string.Empty;
+
     public Guid? AssignedTechnicianId { get; set; }
     public DateTimeOffset? AssignedAtUtc { get; set; }
 

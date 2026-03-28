@@ -13,4 +13,5 @@ public sealed record OperationAssignedToTechnician(
     Guid DeviceId,
     string Title,
     string Description,
+    string operationType,
     DateTimeOffset OccurredAtUtc);
