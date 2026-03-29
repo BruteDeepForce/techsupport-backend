@@ -29,6 +29,9 @@ namespace TechSupport.Device.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BarcodeNumber")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid");
 
@@ -39,6 +42,12 @@ namespace TechSupport.Device.Data.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("DeactivatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -65,10 +74,21 @@ namespace TechSupport.Device.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WarrantyEndAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("WarrantyStartAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");

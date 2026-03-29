@@ -23,6 +23,200 @@ namespace TechSupport.Operation.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BrandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BrandName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid?>("ClassId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClassName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid?>("ProductTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProductTypeName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("ProductTypeId");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.ToTable("maintenance_templates", "operations");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplateChecklist", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("MaintenanceTemplateId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaintenanceTemplateId", "SortOrder");
+
+                    b.ToTable("maintenance_template_checklists", "operations");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationBrand", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("brands", "operations");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationProductClass", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("classes", "operations");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationProductType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "IsActive");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("product_types", "operations");
+                });
+
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -71,10 +265,16 @@ namespace TechSupport.Operation.Data.Migrations
                     b.Property<DateTimeOffset?>("LastStatusChangedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("MaintenanceTemplateId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset?>("ScheduledAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -92,12 +292,19 @@ namespace TechSupport.Operation.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("FieldTechnicianUserId");
+
+                    b.HasIndex("MaintenanceTemplateId");
 
                     b.HasIndex("TicketId")
                         .IsUnique();
@@ -107,6 +314,8 @@ namespace TechSupport.Operation.Data.Migrations
                     b.HasIndex("TenantId", "CustomerId");
 
                     b.HasIndex("TenantId", "DeviceId");
+
+                    b.HasIndex("TenantId", "Type");
 
                     b.ToTable("operations", "operations");
                 });
@@ -207,12 +416,54 @@ namespace TechSupport.Operation.Data.Migrations
                     b.ToTable("ticket_attachments", "operations");
                 });
 
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", b =>
+                {
+                    b.HasOne("TechSupport.Operation.Domain.Entities.OperationBrand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TechSupport.Operation.Domain.Entities.OperationProductClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TechSupport.Operation.Domain.Entities.OperationProductType", "ProductType")
+                        .WithMany()
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Class");
+
+                    b.Navigation("ProductType");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplateChecklist", b =>
+                {
+                    b.HasOne("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", "MaintenanceTemplate")
+                        .WithMany("Checklists")
+                        .HasForeignKey("MaintenanceTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MaintenanceTemplate");
+                });
+
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationRecord", b =>
                 {
+                    b.HasOne("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", "MaintenanceTemplate")
+                        .WithMany()
+                        .HasForeignKey("MaintenanceTemplateId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("TechSupport.Operation.Domain.Entities.Ticket", "Ticket")
                         .WithOne("Operation")
                         .HasForeignKey("TechSupport.Operation.Domain.Entities.OperationRecord", "TicketId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("MaintenanceTemplate");
 
                     b.Navigation("Ticket");
                 });
@@ -225,6 +476,11 @@ namespace TechSupport.Operation.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Ticket");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", b =>
+                {
+                    b.Navigation("Checklists");
                 });
 
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.Ticket", b =>

@@ -39,10 +39,13 @@ public sealed class OperationReportSetService : IOperationReportSetService
         }
 
         var day = DateOnly.FromDateTime(message.OccurredAtUtc.UtcDateTime);
+        var month = new DateOnly(message.OccurredAtUtc.UtcDateTime.Year, message.OccurredAtUtc.UtcDateTime.Month, 1);
         await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OperationCreatedCount, ReportPeriodType.AllTime, null, 1, ct);
         await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OpenOperationCount, ReportPeriodType.AllTime, null, 1, ct);
         await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OperationCreatedCount, ReportPeriodType.Daily, day, 1, ct);
         await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OpenOperationCount, ReportPeriodType.Daily, day, 1, ct);
+        await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OperationCreatedCount, ReportPeriodType.Monthly, month, 1, ct);
+        await _store.IncrementMetricAsync(message.TenantId, message.BranchId, ReportMetricType.OpenOperationCount, ReportPeriodType.Monthly, month, 1, ct);
     }
 
     public Task IncrementOperationCompletedAsync(Guid tenantId, Guid? branchId, DateTimeOffset occurredAtUtc, CancellationToken ct)

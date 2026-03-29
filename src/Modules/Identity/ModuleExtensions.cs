@@ -49,6 +49,7 @@ public static class ModuleExtensions
         });
 
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ITenantService, TenantService>();
 
         // Add Identity role seed or management services here if needed
 

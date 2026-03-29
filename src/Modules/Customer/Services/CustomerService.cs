@@ -17,7 +17,11 @@ namespace TechSupport.Customer.Services
         Task<bool> GetCustomerExistsAsync(Guid customerId);
         Task<TechSupport.Customer.Domain.Entities.Customer> CreateCustomerAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, CancellationToken ct);
         Task<bool> DeleteCustomerAsync(Guid customerId, CancellationToken ct);
-        Task<bool> AssignDeviceToCustomerAsync(Guid customerId, Guid deviceId, Guid? branchId, CancellationToken ct);
+        Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid deviceId, 
+        string? deviceSerialNumber, string? barcodeNumber, string? problemDescription, 
+        string? model, string status, CancellationToken ct,
+        string? brand = null, bool isActive = true, int? guaranteePeriod = null,
+        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null);
         Task<TechSupport.Customer.Domain.Entities.Customer?> GetByIdAsync(Guid tenantId, Guid customerId, CancellationToken ct);
         Task<IReadOnlyList<TechSupport.Customer.Domain.Entities.Customer>> ListAsync(Guid tenantId, CancellationToken ct);
         Task<CustomerProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
@@ -37,23 +41,54 @@ namespace TechSupport.Customer.Services
             _bus = bus;
         }
 
-        public async Task<bool> AssignDeviceToCustomerAsync(Guid customerId, Guid deviceId, Guid? branchId, CancellationToken ct)
+        public async Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid deviceId, 
+        string? deviceSerialNumber, string? barcodeNumber, string? problemDescription,
+        string? model, string status, CancellationToken ct,
+        string? brand = null, bool isActive = true, int? guaranteePeriod = null,
+        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null)
         {
-            var customer = await _db.Customers.FirstOrDefaultAsync(x => x.Id == customerId, ct);
+            var customer = await _db.Customers.FirstOrDefaultAsync(x => x.Id == customerId && x.TenantId == tenantId, ct);
             if (customer is null) return false;
 
-            var exists = await _db.CustomerDevices.AnyAsync(x => x.CustomerId == customerId && x.DeviceId == deviceId, ct);
-            if (exists) return true;
+            var existing = await _db.CustomerDevices
+                .FirstOrDefaultAsync(x => x.CustomerId == customerId && x.DeviceId == deviceId, ct);
 
-            _db.CustomerDevices.Add(new CustomerDevice
+            if (existing is null)
             {
-                Id = Guid.NewGuid(),
-                TenantId = customer.TenantId,
-                BranchId = branchId ?? customer.BranchId,
-                CustomerId = customerId,
-                DeviceId = deviceId,
-                CreatedAtUtc = DateTime.UtcNow
-            });
+                existing = new CustomerDevice
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = customer.TenantId,
+                    BranchId = branchId ?? customer.BranchId,
+                    CustomerId = customerId,
+                    DeviceId = deviceId,
+                    CreatedAtUtc = DateTime.UtcNow
+                };
+
+                await _db.CustomerDevices.AddAsync(existing, ct);
+            }
+
+            existing.TenantId = customer.TenantId;
+            existing.BranchId = branchId ?? customer.BranchId;
+            existing.Brand = brand?.Trim();
+            existing.Model = model?.Trim();
+            existing.SerialNumber = deviceSerialNumber?.Trim();
+            existing.BarcodeNumber = barcodeNumber?.Trim();
+            existing.ProblemDescription = problemDescription?.Trim();
+            existing.Status = string.IsNullOrWhiteSpace(status) ? null : status.Trim();
+            existing.IsActive = isActive;
+            existing.GuaranteePeriod = guaranteePeriod;
+            existing.WarrantyStartAtUtc = warrantyStartAtUtc;
+            existing.WarrantyEndAtUtc = warrantyEndAtUtc;
+            existing.UpdatedAtUtc = DateTime.UtcNow;
+            if (!isActive && existing.DeletedAtUtc is null)
+            {
+                existing.DeletedAtUtc = DateTime.UtcNow;
+            }
+            else if (isActive)
+            {
+                existing.DeletedAtUtc = null;
+            }
 
             await _db.SaveChangesAsync(ct);
             return true;
@@ -153,7 +188,7 @@ namespace TechSupport.Customer.Services
                 CreatedAtUtc = DateTimeOffset.UtcNow
             };
 
-            _db.CustomerProvisionRequests.Add(request);
+            await _db.CustomerProvisionRequests.AddAsync(request, ct);
             await _db.SaveChangesAsync(ct);
 
             await _bus.Publish(new CustomerAccountProvisionRequested(
@@ -196,7 +231,7 @@ namespace TechSupport.Customer.Services
                     PhoneNumber = phoneNumber ?? string.Empty
                 };
 
-                _db.Customers.Add(existingCustomer);
+                await _db.Customers.AddAsync(existingCustomer, ct);
             }
             else
             {

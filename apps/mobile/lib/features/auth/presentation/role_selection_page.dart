@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../../core/design/app_design.dart';
 import '../../admin/presentation/admin_home_page.dart';
 import '../../customer/presentation/customer_home_page.dart';
 import '../../technician/presentation/technician_home_page.dart';
@@ -12,165 +14,149 @@ class RoleSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final normalizedRole = initialRole?.toLowerCase();
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Demo merkezi')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          // Intro card removed per request — role cards start immediately
-          _RoleCard(
-            eyebrow: 'Admin Görünümü',
-            icon: Icons.dashboard_customize_outlined,
-            accent: const Color(0xFF7C3AED),
-            subtitle: normalizedRole == 'admin'
-                ? 'Seçili demo akışı: admin. Operasyon ritmi ve ekip görünürlüğüyle doğrudan başlıyorsun.'
-                : 'Operasyon ritmi, ekip durumu ve günlük karar noktaları üst düzey görünürlükle sunulur.',
-            bullets: const ['KPI özetleri', 'Operasyon akışı', 'Ekip yükü'],
-            cta: 'Admin görünümünü aç',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const AdminHomePage()),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _RoleCard(
-            eyebrow: 'Müşteri Görünümü',
-            icon: Icons.person_outline_rounded,
-            accent: const Color(0xFF0F766E),
-            subtitle: normalizedRole == 'customer'
-                ? 'Seçili demo akışı: customer. Ticket ve cihaz görünümüyle müşteri deneyimi öne çıkarılıyor.'
-                : 'Operasyonların durumu, cihaz süreci ve teknisyen bilgisi sakin ve anlaşılır bir dille gösterilir.',
-            bullets: const [
-              'Operasyon özeti',
-              'Cihaz bilgisi',
-              'Teslim görünürlüğü'
-            ],
-            cta: 'Müşteri görünümünü aç',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const CustomerHomePage()),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _RoleCard(
-            eyebrow: 'Teknisyen Görünümü',
-            icon: Icons.engineering_outlined,
-            accent: colorScheme.primary,
-            subtitle: normalizedRole == 'technician'
-                ? 'Seçili demo akışı: technician. Görev kuyruğu ve saha çalışma görünümü öne alındı.'
-                : 'Atanmış operasyon, cihaz özeti, hazırlık notu ve saha aksiyonları tek yerde toplanır.',
-            bullets: const [
-              'Görev listesi',
-              'Hazırlık görünümü',
-              'Saha aksiyonları'
-            ],
-            cta: 'Teknisyen görünümünü aç',
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const TechnicianHomePage()),
-              );
-            },
+    return VercelBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top + 10,
+                left: 16,
+                right: 16,
+                bottom: 10,
+              ),
+              decoration: const BoxDecoration(
+                color: AppColors.bgSurface,
+                border: Border(
+                    bottom: BorderSide(color: AppColors.border, width: 1)),
+              ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.arrow_back_rounded,
+                        color: AppColors.textPrimary, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Text('Demo Merkezi', style: theme.textTheme.titleLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  )),
+                ],
+              ),
+            ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(14),
+              children: [
+                const LinearSection(title: 'Rol seçin', count: 3),
+                _RoleTile(
+                  icon: Icons.dashboard_customize_outlined,
+                  color: AppColors.statusPurple,
+                  title: 'Admin',
+                  subtitle:
+                      'KPI özetleri, operasyon akışı, ekip yükü',
+                  metric: '6 talep',
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const AdminHomePage())),
+                ),
+                const SizedBox(height: 8),
+                _RoleTile(
+                  icon: Icons.person_outline_rounded,
+                  color: AppColors.statusGreen,
+                  title: 'Müşteri',
+                  subtitle:
+                      'Operasyon özeti, cihaz bilgisi, teslim görünürlüğü',
+                  metric: '3 açık',
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const CustomerHomePage())),
+                ),
+                const SizedBox(height: 8),
+                _RoleTile(
+                  icon: Icons.engineering_outlined,
+                  color: AppColors.statusOrange,
+                  title: 'Teknisyen',
+                  subtitle:
+                      'Görev listesi, hazırlık görünümü, saha aksiyonları',
+                  metric: '2 aktif',
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const TechnicianHomePage())),
+                ),
+              ],
+            ),
           ),
         ],
       ),
+    ),
     );
   }
 }
 
-class _RoleCard extends StatelessWidget {
-  const _RoleCard({
-    required this.eyebrow,
+class _RoleTile extends StatelessWidget {
+  const _RoleTile({
     required this.icon,
-    required this.accent,
+    required this.color,
+    required this.title,
     required this.subtitle,
-    required this.bullets,
-    required this.cta,
+    required this.metric,
     required this.onTap,
   });
 
-  final String eyebrow;
   final IconData icon;
-  final Color accent;
+  final Color color;
+  final String title;
   final String subtitle;
-  final List<String> bullets;
-  final String cta;
+  final String metric;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(28),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    return GestureDetector(
+      onTap: onTap,
+      child: LinearCard(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(icon, color: accent),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: Text(title,
+                              style: theme.textTheme.titleMedium)),
+                      LinearBadge(label: metric, color: color),
+                    ],
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          eyebrow.toUpperCase(),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: accent,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // title removed; eyebrow provides the header text
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 4),
+                  Text(subtitle,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 2),
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(subtitle, style: theme.textTheme.bodyLarge),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children:
-                    bullets.map((item) => Chip(label: Text(item))).toList(),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onTap,
-                      icon: const Icon(Icons.arrow_forward_rounded),
-                      label: Text(cta),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textTertiary, size: 18),
+          ],
         ),
       ),
     );

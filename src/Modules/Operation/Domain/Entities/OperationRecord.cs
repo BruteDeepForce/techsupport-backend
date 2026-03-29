@@ -10,6 +10,7 @@ public sealed class OperationRecord
     public Guid DeviceId { get; set; }
 
     public Guid? FieldTechnicianUserId { get; set; }
+    //public string FieldTechnicianFullName { get; set; } = string.Empty;
     // Optional link back to originating Ticket (one-to-one, nullable)
     public Guid? TicketId { get; set; }
     public Ticket? Ticket { get; set; }
@@ -19,7 +20,12 @@ public sealed class OperationRecord
     public OperationStatus Status { get; set; } = OperationStatus.Created;
     public OperationPriority Priority { get; set; } = OperationPriority.Normal;
 
-    //! public OperationType Type { get; set; } = new OperationType(); ileri süreçte eklenecek.
+    public OperationType Type { get; set; } = OperationType.Repair;
+
+    // Maintenance (preventive) only
+    public Guid? MaintenanceTemplateId { get; set; }
+    public MaintenanceTemplate? MaintenanceTemplate { get; set; }
+    public DateTimeOffset? ScheduledAtUtc { get; set; }
 
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -32,6 +38,13 @@ public sealed class OperationRecord
     public DateTimeOffset? UpdatedAtUtc { get; set; }
     public DateTimeOffset? ClosedAtUtc { get; set; }
     public bool IsClosed { get; set; }
+}
+
+public enum OperationType
+{
+    Repair,
+    Maintenance,
+    Guarantee
 }
 public enum OperationStatus
 {

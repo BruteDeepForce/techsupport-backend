@@ -35,7 +35,13 @@ namespace TechSupport.Customer.Data
                 b.ToTable("customer_devices");
                 b.HasKey(x => x.Id);
                 b.Property(x => x.DeviceId).IsRequired();
-                b.Property(x=> x.BranchId).IsRequired(false);
+                b.Property(x => x.BranchId).IsRequired(false);
+                b.Property(x => x.Brand).HasMaxLength(128);
+                b.Property(x => x.Model).HasMaxLength(128);
+                b.Property(x => x.SerialNumber).HasMaxLength(128);
+                b.Property(x => x.BarcodeNumber).HasMaxLength(128);
+                b.Property(x => x.ProblemDescription).HasMaxLength(4000);
+                b.Property(x => x.Status).HasMaxLength(64);
                 b.HasIndex(x => new { x.CustomerId, x.DeviceId }).IsUnique();
             });
 

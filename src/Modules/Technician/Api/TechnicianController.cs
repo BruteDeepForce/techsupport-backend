@@ -41,7 +41,6 @@ public class TechnicianController : ControllerBase
     {
         var tenantId = GetTenantIdFromClaims();
         if (tenantId is null) return Unauthorized();
-
         return Ok(await _technicians.ListAsync(tenantId.Value, ct));
     }
 
@@ -97,8 +96,8 @@ public class TechnicianController : ControllerBase
         var techClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "user_id" || c.Type.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase));
         if (techClaim is null || !Guid.TryParse(techClaim.Value, out var technicianUserId))
             return Unauthorized();
-
-        var op = await _technicians.UpdateOperationStatusAsync(tenantId.Value, operationId, technicianUserId, dto.Status, ct);
+        var technicianInfo = User.Claims.FirstOrDefault(c=> c.Type == "username" || c.Type == "name")?.Value ?? "Unknown Technician";
+        var op = await _technicians.UpdateOperationStatusAsync(tenantId.Value, operationId, technicianUserId, technicianInfo, dto.Status, ct);
         return Ok(new { op.OperationId, Status = op.Status.ToString() });
     }
 

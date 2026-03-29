@@ -1,18 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
+using Reports.Domain.Entities;
+using Reports.Domain.Enums;
 using TechSupport.Reports.Data;
 using TechSupport.Reports.Domain.Entities;
 using TechSupport.Reports.Domain.Enums;
 
 namespace TechSupport.Reports.Services;
 
-/// <summary>
-/// Low-level SET store for the Reports module.
-///
-/// Intentionally contains no business meaning (customer/operation/technician);
-/// it only knows how to upsert summaries/metrics with concurrency-safe patterns.
-/// </summary>
 public sealed class ReportSetStore
 {
     private readonly ReportDbContext _db;
@@ -59,7 +55,7 @@ public sealed class ReportSetStore
 
         await _db.SaveChangesAsync(ct);
     }
-    public Task UpsertTechnicianSummaryAsync(
+    public async Task UpsertTechnicianSummaryAsync(
         Guid tenantId,
         Guid? branchId,
         Guid technicianUserId,
@@ -68,8 +64,8 @@ public sealed class ReportSetStore
         string? phoneNumber,
         DateTimeOffset occurredAtUtc,
         CancellationToken ct)
-        => UpsertTechnicianSummaryInternalAsync(tenantId, branchId, technicianUserId, name, email, phoneNumber, occurredAtUtc, ct);
-    public Task IncrementTechnicianMetricAsync(
+        => await UpsertTechnicianSummaryInternalAsync(tenantId, branchId, technicianUserId, name, email, phoneNumber, occurredAtUtc, ct);
+    public async Task IncrementTechnicianMetricAsync(
         Guid tenantId,
         Guid? branchId,
         Guid technicianUserId,
@@ -78,9 +74,25 @@ public sealed class ReportSetStore
         DateOnly? periodDate,
         long delta,
         CancellationToken ct)
-        => IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
+        => await IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
 
-    private async Task IncrementMetricInternalAsync(
+    public async Task TechnicianWorksSetAsync (Guid tenantId, Guid technicianId, Guid operationId, string operationDescription, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    {
+        var work = new TechnicianWork
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            TechnicianId = technicianId,
+            OperationDescription = operationDescription,
+            Status = WorkStatus.Assigned,
+            AssignedAtUtc = occurredAtUtc,
+            OperationId = operationId
+        };
+        await _db.TechnicianWorks.AddAsync(work);
+
+        await _db.SaveChangesAsync(ct);
+    }
+    private async Task IncrementMetricInternalAsync( //! olay burada teknisyen userid var ise metrikler ekleniyor.
         Guid tenantId,
         Guid? branchId,
         ReportMetricType metricType,
@@ -99,6 +111,7 @@ public sealed class ReportSetStore
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.Value, x => x.Value + delta)
                 .SetProperty(x => x.UpdatedAtUtc, _ => DateTimeOffset.UtcNow), ct);
+                Console.WriteLine($"Updated {updated} rows for metric {metricType} ({periodType} - {periodDate}) with delta {delta}");
 
         if (updated > 0)
             return;

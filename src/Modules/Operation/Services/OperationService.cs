@@ -8,7 +8,23 @@ namespace TechSupport.Operation.Services;
 
 public interface IOperationService
 {
-    Task<OperationRecord>   CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, Guid customerId, Guid deviceId, Guid? toTechnician, string title, string description, string? internalNote, Guid? ticketId, OperationPriority priority, CancellationToken ct);
+    Task<OperationRecord> CreateAsync(
+        Guid tenantId,
+        Guid? branchId,
+        Guid createdBy,
+        string TechnicianfuLLname,
+        Guid customerId,
+        Guid deviceId,
+        Guid? toTechnician,
+        string title,
+        string description,
+        string? internalNote,
+        Guid? ticketId,
+        OperationPriority priority,
+        OperationType type,
+        Guid? maintenanceTemplateId,
+        DateTimeOffset? scheduledAtUtc,
+        CancellationToken ct);
     Task<OperationRecord?> GetAsync(Guid tenantId, Guid operationId, CancellationToken ct);
     Task<IEnumerable<OperationRecord>> AdminGetAllAsync(Guid tenantId, CancellationToken ct);
 
@@ -18,7 +34,7 @@ public interface IOperationService
 
     Task<OperationRecord> UpdateAsync(Guid tenantId, Guid operationId, Guid updatedBy, string title, string description, Guid? toTechnician, string? internalNote, CancellationToken ct);
 
-    Task<OperationRecord> UpdateStatusAsync(Guid tenantId, Guid operationId, Guid updatedBy, string status, CancellationToken ct);
+    Task<OperationRecord> UpdateStatusAsync(Guid tenantId, Guid operationId, Guid updatedBy, string TechnicianInfo, string status, CancellationToken ct);
 }
 
 public sealed class OperationService : IOperationService
@@ -32,12 +48,23 @@ public sealed class OperationService : IOperationService
         _bus = bus;
     }
 
-    public async Task<OperationRecord> CreateAsync(Guid tenantId,
-    Guid? branchId, Guid createdBy,
-    Guid customerId, Guid deviceId,
-    Guid? toTechnician, string title, string description,
-    string? internalNote, Guid? ticketId, OperationPriority priority,
-    CancellationToken ct)
+    public async Task<OperationRecord> CreateAsync(
+        Guid tenantId,
+        Guid? branchId,
+        Guid createdBy,
+        string TechnicianfuLLname,
+        Guid customerId,
+        Guid deviceId,
+        Guid? toTechnician,
+        string title,
+        string description,
+        string? internalNote,
+        Guid? ticketId,
+        OperationPriority priority,
+        OperationType type,
+        Guid? maintenanceTemplateId,
+        DateTimeOffset? scheduledAtUtc,
+        CancellationToken ct)
     {
         var op = new OperationRecord
         {
@@ -49,6 +76,9 @@ public sealed class OperationService : IOperationService
             CreatedByUserId = createdBy,
             FieldTechnicianUserId = toTechnician,
             TicketId = ticketId,
+            Type = type,
+            MaintenanceTemplateId = type == OperationType.Maintenance ? maintenanceTemplateId : null,
+            ScheduledAtUtc = type == OperationType.Maintenance ? scheduledAtUtc : null,
             Title = title,
             Description = description,
             Priority = priority,
@@ -58,11 +88,20 @@ public sealed class OperationService : IOperationService
             LastStatusChangedAtUtc = DateTimeOffset.UtcNow
         };
 
-        _db.Operations.Add(op);
+        await _db.Operations.AddAsync(op);
         await _db.SaveChangesAsync(ct);
 
         var now = DateTimeOffset.UtcNow;
 
+        /// koşul teknisyenid var mı ??? 
+        /// varsa teknisyen modülüne teknisyen operation assign et.
+        ///  
+        ///  
+        //! sistemi değiştirdim.
+        //! bir operasyon için teknisyenid yoksa sadece operasyon raporu oluşturuyor.
+        //! teknisyenid varsa operasyon raporu oluşturuyor ve rapor modülünde teknisyene atanmış operasyon için metricler güncelleniyor
+        //! ayrıca teknisyenid var ise teknisyen modülünde de teknisyene atanmış operasyon oluşturuluyor. 
+        //! Böylece teknisyen modülü teknisyene atanmış operasyonları kendi veritabanında tutuyor ve operasyon modülüne bağımlılığı kalmıyor.
         await _bus.Publish(new OperationCreated(
             op.Id,
             op.TenantId,
@@ -74,17 +113,35 @@ public sealed class OperationService : IOperationService
             op.Title,
             op.Description,
             now), ct);
-
+            //! teknisyen ataması varsa teknisyen modülüne de event publish edelim. 
+            //! böylece teknisyen modülü teknisyene atanmış operasyonları kendi veritabanında tutabilir ve operasyon modülüne bağımlılığı kalmaz.
         if (toTechnician.HasValue)
         {
-            await _bus.Publish(new OperationAssignedToTechnician(
-                op.Id,
-                op.TenantId,
-                op.BranchId,
-                toTechnician.Value,
-                now), ct);
+        await _bus.Publish(new OperationAssignedToTechnician(
+            op.Id,
+            op.TenantId,
+            op.BranchId,
+            op.FieldTechnicianUserId ?? Guid.Empty, //! saçma. teknistene assign etmiceksek niye pushluyoz
+            op.CustomerId,
+            op.DeviceId,
+            op.Title,
+            op.Description,
+            op.Type.ToString(),
+            now), ct);
         }
-
+        //! operasyon oluşturulduktan sonra ai modülüne operasyonun oluşturulduğunu bildiriyoruz.
+        await _bus.Publish(new OperationCreatedToAI
+        {
+            OperationId = op.Id,
+            TenantId = op.TenantId,
+            BranchId = op.BranchId ?? Guid.Empty,
+            CustomerInfo = $"CustomerId: {op.CustomerId}",
+            TechnicianInfo = TechnicianfuLLname,
+            Title = op.Title,
+            Description = op.Description,
+            Status = op.Status.ToString(),
+            CreatedAtUtc = op.CreatedAtUtc,
+        }, ct);
         return op;
     }
 
@@ -122,11 +179,13 @@ public sealed class OperationService : IOperationService
             op.AssignedAtUtc ??= DateTimeOffset.UtcNow;
         }
 
+        //! burada publish çakalım ai modülüne.  assign var mı yok mu onu ayrıca düşünelim.
+
         await _db.SaveChangesAsync(ct);
 
         return op;
     }
-    public async Task<OperationRecord> UpdateStatusAsync(Guid tenantId, Guid operationId, Guid updatedBy, string status, CancellationToken ct)
+    public async Task<OperationRecord> UpdateStatusAsync(Guid tenantId, Guid operationId, Guid updatedBy, string TechnicianInfo, string status, CancellationToken ct)
     {
         var op = await _db.Operations.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId && x.Status != OperationStatus.Completed, ct);
         if (op == null) throw new InvalidOperationException("Operation not found");

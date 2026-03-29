@@ -8,10 +8,12 @@ namespace TechSupport.Reports.Services;
 public interface IReportService
 {
     Task HandleCustomerCreatedAsync(CustomerCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
+
+    //! tüm olay burada dönecek
     Task HandleOperationCreatedAsync(OperationCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
     Task HandleTenantCreatedAsync(TenantCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
 
-    Task HandleOperationAssignedToTechnicianAsync(OperationAssignedToTechnician message, Guid? messageId, Guid? correlationId, CancellationToken ct);
+    Task HandleOperationAssignedToTechnicianAsync(OperationCreated message, Guid? messageId, Guid? correlationId, CancellationToken ct);
     Task HandleOperationStatusChangedAsync(OperationStatusChanged message, Guid? messageId, Guid? correlationId, CancellationToken ct);
 
     Task HandleTechnicianAccountProvisionedAsync(TechnicianAccountProvisioned message, Guid? messageId, Guid? correlationId, CancellationToken ct);

@@ -9,5 +9,6 @@ public sealed record TechnicianOperationStatusChanged(
     Guid TenantId,
     Guid? BranchId,
     Guid TechnicianUserId,
+    string TechnicianInfo,
     string NewStatus,
     DateTimeOffset OccurredAtUtc);
