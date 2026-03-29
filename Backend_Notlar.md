@@ -29,3 +29,6 @@ device işlemler fikirleri :
 
 
 
+- Backend Dokploya deploy işlemleri başlatılacak [TO-DO]
+- DockerFile Rootda mı olacak ? [AR-GE]
+- 
