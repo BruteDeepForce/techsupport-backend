@@ -313,153 +313,102 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 980),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: SizedBox(
-                        height: double.infinity,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Lineer Destek',
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                letterSpacing: -0.2,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 900;
+                return ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isNarrow ? 520 : 980),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: isNarrow
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Lineer Destek',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.2,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Uçtan Uca Operasyon Merkezi Giriş Sayfası.',
-                              style: GoogleFonts.dmSans(
-                                fontSize: 15,
-                                height: 1.5,
-                                color: const Color(0xFF8FB6F3),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Uçtan Uca Operasyon Merkezi Giriş Sayfası.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14,
+                                  height: 1.5,
+                                  color: const Color(0xFF8FB6F3),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 0),
-                    Expanded(
-                      flex: 5,
-                      child: SizedBox(
-                        height: double.infinity,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            width: 460,
-                            padding: const EdgeInsets.fromLTRB(32, 28, 32, 28),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF0B4BA8)
-                                  .withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                  color: const Color(0xFF2C7BEF), width: 1),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x66000000),
-                                  blurRadius: 40,
-                                  offset: Offset(0, 24),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _WebField(
-                                  label: 'E-posta',
-                                  controller: _usernameController,
-                                  hint: 'ornek@firma.com',
-                                ),
-                                const SizedBox(height: 12),
-                                _WebField(
-                                  label: 'Şifre',
-                                  controller: _passwordController,
-                                  hint: 'Şifre',
-                                  obscureText: true,
-                                ),
-                                const SizedBox(height: 14),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF0F3F8C),
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12)),
-                                    ),
-                                    onPressed: () async {
-                                      final email =
-                                          _usernameController.text.trim();
-                                      final password = _passwordController.text;
-                                      if (email.isEmpty || password.isEmpty) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                                content: Text(
-                                                    'Lütfen e-posta ve şifre girin')));
-                                        return;
-                                      }
-
-                                      showDialog<void>(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (_) => const Center(
-                                            child: CircularProgressIndicator()),
-                                      );
-
-                                      try {
-                                        final token = await _authService.login(
-                                            email, password);
-                                        await _tokenStorage.saveToken(token);
-                                        ApiClient().dio.interceptors.add(
-                                            AuthInterceptor(
-                                                _tokenStorage.getToken));
-
-                                        if (context.mounted) {
-                                          Navigator.of(context).pop();
-                                          Navigator.of(context).pushReplacement(
-                                            MaterialPageRoute<void>(
-                                                builder: (_) =>
-                                                    const RoleSelectionPage()),
-                                          );
-                                        }
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          Navigator.of(context).pop();
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                                  content: Text(
-                                                      'Giriş başarısız: ${e.toString()}')));
-                                        }
-                                      }
-                                    },
-                                    child: const Text('Giriş Yap'),
+                              const SizedBox(height: 18),
+                              _LoginCard(
+                                authService: _authService,
+                                tokenStorage: _tokenStorage,
+                                emailController: _usernameController,
+                                passwordController: _passwordController,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: SizedBox(
+                                  height: double.infinity,
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Lineer Destek',
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Uçtan Uca Operasyon Merkezi Giriş Sayfası.',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 15,
+                                          height: 1.5,
+                                          color: const Color(0xFF8FB6F3),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 0),
+                              Expanded(
+                                flex: 5,
+                                child: SizedBox(
+                                  height: double.infinity,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: _LoginCard(
+                                      authService: _authService,
+                                      tokenStorage: _tokenStorage,
+                                      emailController: _usernameController,
+                                      passwordController: _passwordController,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -482,6 +431,114 @@ class _GlowBlob extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(colors: colors),
+      ),
+    );
+  }
+}
+
+class _LoginCard extends StatelessWidget {
+  const _LoginCard({
+    required this.authService,
+    required this.tokenStorage,
+    required this.emailController,
+    required this.passwordController,
+  });
+
+  final AuthService authService;
+  final TokenStorage tokenStorage;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 460,
+      padding: const EdgeInsets.fromLTRB(32, 28, 32, 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B4BA8).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF2C7BEF), width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 40,
+            offset: Offset(0, 24),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _WebField(
+            label: 'E-posta',
+            controller: emailController,
+            hint: 'ornek@firma.com',
+          ),
+          const SizedBox(height: 12),
+          _WebField(
+            label: 'Şifre',
+            controller: passwordController,
+            hint: 'Şifre',
+            obscureText: true,
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F3F8C),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () async {
+                final email = emailController.text.trim();
+                final password = passwordController.text;
+                if (email.isEmpty || password.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Lütfen e-posta ve şifre girin')));
+                  return;
+                }
+
+                showDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
+                try {
+                  final token = await authService.login(email, password);
+                  await tokenStorage.saveToken(token);
+                  ApiClient()
+                      .dio
+                      .interceptors
+                      .add(AuthInterceptor(tokenStorage.getToken));
+
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const RoleSelectionPage()),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Giriş başarısız: ${e.toString()}'),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Giriş Yap'),
+            ),
+          ),
+        ],
       ),
     );
   }
