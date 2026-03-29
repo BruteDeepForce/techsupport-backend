@@ -48,6 +48,12 @@ public static class ModuleExtensions
             };
         });
 
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            dbContext.Database.Migrate();
+        }
+
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITenantService, TenantService>();
 

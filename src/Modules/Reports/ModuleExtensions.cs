@@ -16,6 +16,12 @@ public static class ModuleExtensions
         services.AddDbContext<ReportDbContext>(opt =>
             opt.UseNpgsql(conn));
 
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ReportDbContext>();
+            dbContext.Database.Migrate();
+        }
+
         services.AddScoped<ReportSetStore>();
         services.AddScoped<ICustomerReportSetService, CustomerReportSetService>();
         services.AddScoped<IOperationReportSetService, OperationReportSetService>();

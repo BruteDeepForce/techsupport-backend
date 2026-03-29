@@ -71,11 +71,10 @@ builder.Services.AddMassTransit(x =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 
 app.UseRouting();
 app.UseAuthentication();
