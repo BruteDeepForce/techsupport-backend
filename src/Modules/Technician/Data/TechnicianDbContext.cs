@@ -13,6 +13,8 @@ public sealed class TechnicianDbContext : DbContext
     public DbSet<TechnicianProvisionRequest> TechnicianProvisionRequests => Set<TechnicianProvisionRequest>();
     public DbSet<Technician.Domain.Entities.TechnicianOperation> TechnicianOperations => Set<Technician.Domain.Entities.TechnicianOperation>();
 
+    public DbSet<TechnicianExpert> TechnicianExperts => Set<TechnicianExpert>();
+    public DbSet<TechnicianExpertMapping> TechnicianExpertMappings => Set<TechnicianExpertMapping>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("technicians");
@@ -52,6 +54,22 @@ public sealed class TechnicianDbContext : DbContext
             b.Property(x => x.Status).HasMaxLength(50).IsRequired();
             b.Property(x=> x.Status).HasConversion<string>();
         });
+
+        modelBuilder.Entity<TechnicianExpertMapping>(b =>
+        {
+            b.ToTable("technician_expert_mappings");
+            b.HasKey(x => new { x.TechnicianId, x.TechnicianExpertId, x.tenantId });
+            b.HasOne(x => x.Technician)
+                .WithMany(t => t.TechnicianExpertMappings)
+                .HasForeignKey(x => x.TechnicianId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne(x => x.TechnicianExpert)
+                .WithMany(t => t.TechnicianExpertMappings)
+                .HasForeignKey(x => x.TechnicianExpertId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
 
         base.OnModelCreating(modelBuilder);
     }

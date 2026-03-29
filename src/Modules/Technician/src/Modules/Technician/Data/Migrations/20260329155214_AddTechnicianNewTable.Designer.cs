@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TechSupport.Technician.Data;
 
 #nullable disable
 
-namespace TechSupport.Technician.Data.Migrations
+namespace TechSupport.Technician.src.Modules.Technician.Data.Migrations
 {
     [DbContext(typeof(TechnicianDbContext))]
-    partial class TechnicianDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260329155214_AddTechnicianNewTable")]
+    partial class AddTechnicianNewTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,7 +88,7 @@ namespace TechSupport.Technician.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TechnicianExperts", "technicians");
+                    b.ToTable("TechnicianExpert", "technicians");
                 });
 
             modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpertMapping", b =>

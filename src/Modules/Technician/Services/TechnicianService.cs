@@ -46,6 +46,7 @@ public sealed class TechnicianService : ITechnicianService
             _logger.LogError("Technician with ID {TechnicianId} not found for tenant {TenantId}", technicianId, tenantId);
             throw new InvalidOperationException("Technician not found");
         }
+
         var item = new Technician.Domain.Entities.TechnicianOperation
         {
             Id = Guid.NewGuid(),
