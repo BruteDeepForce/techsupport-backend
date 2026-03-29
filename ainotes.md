@@ -1,1 +1,0 @@
-Reports modülü var backendde.      Öncelikle admin tarafından manuel set işlemini yapacak butonumuzu ve butona tıklandığında apiyapiye Operation.Create endpointindenin tarafından manuel set işlemini yapacak butonumuzu ve butona tıklandığında apiye Operation.Create endpointinden gönderecek

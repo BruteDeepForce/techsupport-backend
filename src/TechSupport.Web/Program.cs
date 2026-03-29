@@ -69,11 +69,19 @@ builder.Services.AddMassTransit(x =>
 
 
 
+
+
 var app = builder.Build();
 
+app.UseCors(policy =>
+{
+    policy.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader();
+});
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.UseRouting();

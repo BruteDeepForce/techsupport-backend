@@ -19,7 +19,7 @@ device işlemler fikirleri :
  Operation fikir: 
 - operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek. [STANDBY]
 
-
+- Teknisyen oluştururken branch/uzmanlık alanı sistemi getirilecek. [TODO]
 
 
 
@@ -27,15 +27,19 @@ device işlemler fikirleri :
 - Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
 - Teknisyen metriklerinde operasyonid gelmiyor [URGENT] [BUG] [SOLVED] operasyonid kayıt işlemi yapılıyor artık.
 
+- Backend Dokploya deploy işlemleri başlatılacak [INPROCCESS]
+- DockerFile Rootda mı olacak ? [ROOTCOMPLETED] [ONROOTLOCATED] 
 
 
-- Backend Dokploya deploy işlemleri başlatılacak [TO-DO]
-- DockerFile Rootda mı olacak ? [AR-GE]
-
-- docker build -f DockerFile.backend -t techsupport-backend-local . 
-- $ docker run --rm -d --name techsupport-backend -p 8080:8080 --network techsupport-backend_default -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=myappdb;Username=myappuser;Password=rootpassword" -e RabbitMq__Host="rabbitmq" techsupport-backend-local
 
 
 
 
 - Deploy süreç için tüm modüllerde Database.Migrate() tanımlandı.[COMPLETED] 
+
+
+
+[ÖNEMLİ]
+
+- docker build -f DockerFile.backend -t techsupport-backend-local . 
+- $ docker run --rm -d --name techsupport-backend -p 8080:8080 --network techsupport-backend_default -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=myappdb;Username=myappuser;Password=rootpassword" -e RabbitMq__Host="rabbitmq" techsupport-backend-local

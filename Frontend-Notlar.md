@@ -17,3 +17,8 @@
 - FLUTTER TARAFLI CI/CD PROBLEMİ VAR. [NORMAL] [PIPELINE] [GITHUB] 
 
 
+
+
+git add -f build/web 
+git commit -m "add build" 
+git push
