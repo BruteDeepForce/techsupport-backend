@@ -15,6 +15,7 @@ public sealed class TechnicianDbContext : DbContext
 
     public DbSet<TechnicianExpert> TechnicianExperts => Set<TechnicianExpert>();
     public DbSet<TechnicianExpertMapping> TechnicianExpertMappings => Set<TechnicianExpertMapping>();
+    public DbSet<ExpertsTechnicianProvision> ExpertsTechnicianProvisions => Set<ExpertsTechnicianProvision>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("technicians");
@@ -42,6 +43,17 @@ public sealed class TechnicianDbContext : DbContext
             b.Property(x => x.FailureReason).HasMaxLength(1000);
             b.HasIndex(x => x.CorrelationId).IsUnique();
             b.HasIndex(x => new { x.TenantId, x.Email });
+        });
+        modelBuilder.Entity<TechnicianProvisionRequest>()
+            .HasMany(t => t.ExpertsId)
+            .WithOne(e => e.TechnicianProvisionRequest)
+            .HasForeignKey(e => e.TechnicianProvisionRequestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExpertsTechnicianProvision>(b =>
+        {
+            b.ToTable("ExpertsTechnicianProvision");
+            b.HasKey(x => x.Id);
         });
 
         modelBuilder.Entity<Technician.Domain.Entities.TechnicianOperation>(b =>

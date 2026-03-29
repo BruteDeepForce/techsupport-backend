@@ -19,7 +19,9 @@ device işlemler fikirleri :
  Operation fikir: 
 - operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek. [STANDBY]
 
-- Teknisyen oluştururken branch/uzmanlık alanı sistemi getirilecek. [TODO]
+- Teknisyen oluştururken branch/uzmanlık alanı sistemi getirilecek. [COMPLETED]
+- Teknisyen tablosunda profil fotoğrafı bulunduralım. [TODO]
+- Teknisyen tablosunda işe başlangıç tarihi verelim. [TODO]
 
 
 
@@ -30,6 +32,13 @@ device işlemler fikirleri :
 - Backend Dokploya deploy işlemleri başlatılacak [INPROCCESS]
 - DockerFile Rootda mı olacak ? [ROOTCOMPLETED] [ONROOTLOCATED] 
 
+- teknisyen modülü servisinden startprovisionrequest tarafında sistem şuan işe giriş tarhi ve expert göndermiyor. [COMPLETED]
+- startprovision işleminde işe giriş tarihini ve experti isteyelim. [COMPLETED]
+- technicianProvisionRequest entity içerisinde biz işe giriş tarihini ve experti gönderelim.[COMPLETED]
+- TechnicianProvisionRequest tablosuna bunları da kaydedelim. [ilgi propertyler eklensin][COMPLETED]
+- technicianPorvisionRequest tablosuna kayıt için ExpertsTechnicianProvision tablosu oluşturulsun. İlişki kurularak.[COMPLETED]
+- Complete geldiğinde zaten corelationid ile provisionrequest tablosundan ilgili 2 prop bilgiyi de çekeriz. [COMPLETED]
+- Insert to DB.[COMPLETED]
 
 
 

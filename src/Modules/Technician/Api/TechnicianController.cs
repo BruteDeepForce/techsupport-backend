@@ -15,9 +15,13 @@ public class TechnicianController : ControllerBase
         _technicians = technicians;
     }
 
-    public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, string? PhoneNumber, string TemporaryPassword);
+    public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, 
+    string? PhoneNumber, string TemporaryPassword,
+    DateTimeOffset? EmploymentStartDate, List<string>? ExpertIds);
     public sealed record SetActiveDto(bool IsActive);
     public sealed record UpdateWorkItemStatusDto(string Status);
+
+    public sealed record ExpertDTO(string Name);
 
     [Authorize(Roles = "admin")]
     [HttpPost]
@@ -27,12 +31,34 @@ public class TechnicianController : ControllerBase
         var branchId = GetBranchIdFromClaims();
         if (tenantId is null) return Unauthorized();
 
-        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.Email, dto.PhoneNumber, dto.TemporaryPassword, ct);
+        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.Email, dto.PhoneNumber, 
+        dto.TemporaryPassword, dto.ExpertIds, dto.EmploymentStartDate, ct);
         return Accepted(new
         {
             correlationId = request.CorrelationId,
             status = request.Status.ToString()
         });
+    }
+    [Authorize]
+    [HttpPost("createExperts")]
+    public async Task<IActionResult> CreateExperts([FromBody] ExpertDTO dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        var experts = await _technicians.CreateTechnicianExpertiseAsync(tenantId.Value, dto.Name, ct);
+        return Ok(experts);
+    }
+    
+    [Authorize]
+    [HttpGet("experts")]
+    public async Task<IActionResult> GetExperts(CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        var experts = await _technicians.GetTechnicianExpertiseByNameAsync(tenantId.Value, ct);
+        return Ok(experts);
     }
 
     [Authorize(Roles = "admin")]

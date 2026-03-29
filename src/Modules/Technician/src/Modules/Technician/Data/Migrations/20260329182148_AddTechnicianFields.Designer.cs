@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TechSupport.Technician.Data;
 
 #nullable disable
 
-namespace TechSupport.Technician.Data.Migrations
+namespace TechSupport.Technician.src.Modules.Technician.Data.Migrations
 {
     [DbContext(typeof(TechnicianDbContext))]
-    partial class TechnicianDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260329182148_AddTechnicianFields")]
+    partial class AddTechnicianFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,12 +265,9 @@ namespace TechSupport.Technician.Data.Migrations
 
             modelBuilder.Entity("TechSupport.Technician.Domain.Entities.ExpertsTechnicianProvision", b =>
                 {
-                    b.HasOne("TechSupport.Technician.Domain.Entities.TechnicianProvisionRequest", "TechnicianProvisionRequest")
+                    b.HasOne("TechSupport.Technician.Domain.Entities.TechnicianProvisionRequest", null)
                         .WithMany("ExpertsId")
-                        .HasForeignKey("TechnicianProvisionRequestId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("TechnicianProvisionRequest");
+                        .HasForeignKey("TechnicianProvisionRequestId");
                 });
 
             modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpertMapping", b =>

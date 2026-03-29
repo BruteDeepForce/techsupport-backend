@@ -6,12 +6,14 @@ using TechSupport.Identity.Contracts.Events;
 using TechSupport.Technician.Contracts.Events;
 using TechSupport.Technician.Data;
 using TechSupport.Technician.Domain.Entities;
+using static TechSupport.Technician.Services.TechnicianService;
 
 namespace TechSupport.Technician.Services;
 
 public interface ITechnicianService
 {
-    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName,  string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
+    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName,  string email, 
+    string? phoneNumber, string temporaryPassword, List<string>? experts, DateTimeOffset? employmentStartDate, CancellationToken ct);
     Task<TechnicianProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct);
     Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct);
     Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
@@ -19,8 +21,9 @@ public interface ITechnicianService
     Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
     Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct);
-
     Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string technicianInfo, string status, CancellationToken ct);
+    Task<bool> CreateTechnicianExpertiseAsync(Guid tenantId, string expertise, CancellationToken ct);
+    Task<List<TechnicianExpertResponseDTO>> GetTechnicianExpertiseByNameAsync(Guid tenantId, CancellationToken ct);
 }
 
 public sealed class TechnicianService : ITechnicianService
@@ -36,8 +39,8 @@ public sealed class TechnicianService : ITechnicianService
         _bus = bus;
         _logger = logger;
     }
+    public record TechnicianExpertResponseDTO (Guid Id, string ExpertiseName);
 
-    //!burası yanlış
     public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
@@ -64,11 +67,41 @@ public sealed class TechnicianService : ITechnicianService
             Status = TechnicianOperationStatus.Assigned
         };
 
-        _db.TechnicianOperations.Add(item);
+        await _db.TechnicianOperations.AddAsync(item, ct);
         technician.IsActive = true; //* Ensure technician is active
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<bool> CreateTechnicianExpertiseAsync(Guid tenantId, string expertise, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(expertise))
+            return false;
+        var normalizedExpertise = expertise.Trim().ToLower();
+        var exists = await _db.TechnicianExperts.AnyAsync(x => x.TenantId == tenantId 
+        && x.ExpertiseName.ToLower() == normalizedExpertise, ct);
+
+        if (exists)
+            return false;
+
+        var item = new TechnicianExpert
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            ExpertiseName = expertise.Trim(),
+        };
+
+        await _db.TechnicianExperts.AddAsync(item, ct);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
+    public async Task<List<TechnicianExpertResponseDTO>> GetTechnicianExpertiseByNameAsync(Guid tenantId, CancellationToken ct)
+    {
+        return await _db.TechnicianExperts
+            .Where(x => x.TenantId == tenantId)
+            .Select(x => new TechnicianExpertResponseDTO(x.Id, x.ExpertiseName))
+            .ToListAsync(ct);
+    }
     public async Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(
         Guid tenantId,
         Guid operationId,
@@ -105,13 +138,22 @@ public sealed class TechnicianService : ITechnicianService
         return op;
     }
 
-    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct)
+    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, 
+    string firstName, string email, string? phoneNumber, string temporaryPassword, List<string>? experts, 
+    DateTimeOffset? employmentStartDate, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid();
+        var requestId = Guid.NewGuid();
+        var expertList = experts?.
+        Select(e=> new ExpertsTechnicianProvision
+        {
+            Id = Guid.NewGuid(),
+            ExpertiseId = Guid.TryParse(e, out var expId) ? expId : (Guid?)null
+        }).ToList() ?? new List<ExpertsTechnicianProvision>();
 
         var request = new TechnicianProvisionRequest
         {
-            Id = Guid.NewGuid(),
+            Id = requestId,
             CorrelationId = correlationId,
             TenantId = tenantId,
             BranchId = branchId,
@@ -119,7 +161,9 @@ public sealed class TechnicianService : ITechnicianService
             Email = email.Trim(),
             PhoneNumber = phoneNumber?.Trim() ?? string.Empty,
             Status = ProvisioningStatus.Pending,
-            CreatedAtUtc = DateTimeOffset.UtcNow
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            EmploymentStartDate = employmentStartDate,
+            ExpertsId = expertList
         };
 
         await _db.TechnicianProvisionRequests.AddAsync(request, ct);
@@ -151,6 +195,23 @@ public sealed class TechnicianService : ITechnicianService
         {
             return;
         }
+        var expertid = await _db.TechnicianProvisionRequests.Where(x => x.CorrelationId == correlationId)
+        .SelectMany(x => x.ExpertsId)
+        .Select(e => new TechnicianExpertMapping
+        {
+            tenantId = tenantId,
+            BranchId = branchId,
+            TechnicianExpertId = e.ExpertiseId ?? Guid.Empty
+        })
+        .ToListAsync(ct);
+
+        _logger.LogInformation("Fetched {Count} expertise mappings for CorrelationId {CorrelationId}", expertid.Count, correlationId);
+
+        if (expertid.Count == 0)
+        {
+            _logger.LogInformation("No expertise mappings found for CorrelationId {CorrelationId}", correlationId);
+        }
+
         _logger.LogInformation("{CorrelationId}: Starting provisioning completion for AppUserId {AppUserId}, TenantId {TenantId}, Email {Email}", correlationId, appUserId, tenantId, email);
 
         var existing = await _db.Technicians.FirstOrDefaultAsync(x => x.AppUserId == appUserId || (x.TenantId == tenantId && x.Email == email), ct);
@@ -166,7 +227,9 @@ public sealed class TechnicianService : ITechnicianService
                 FirstName = firstName,
                 Email = email,
                 PhoneNumber = phoneNumber ?? string.Empty,
-                IsActive = true
+                IsActive = true,
+                EmploymentStartDate = request.EmploymentStartDate,
+                TechnicianExpertMappings = expertid
             };
 
             await _db.Technicians.AddAsync(existing, ct);

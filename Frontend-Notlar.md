@@ -17,8 +17,8 @@
 - FLUTTER TARAFLI CI/CD PROBLEMİ VAR. [NORMAL] [PIPELINE] [GITHUB] 
 
 
-
-
+- WEB İÇİN DOKPLOYA DEPLOY WHILE CHANGE WEB SIDE. [CHE]
+flutter build web --release
 git add -f build/web 
 git commit -m "add build" 
 git push
