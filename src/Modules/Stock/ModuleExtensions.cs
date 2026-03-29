@@ -13,6 +13,12 @@ public static class ModuleExtensions
 
         services.AddDbContext<StockDbContext>(opt => opt.UseNpgsql(conn));
 
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<StockDbContext>();
+            dbContext.Database.Migrate();
+        }
+
     services.AddScoped<Services.IStockService, Services.StockService>();
     services.AddScoped<Services.ICategoryService, Services.CategoryService>();
 

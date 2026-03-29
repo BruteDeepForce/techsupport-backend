@@ -13,6 +13,12 @@ public static class ModuleExtensions
         var conn = configuration.GetConnectionString("DefaultConnection") ?? configuration["ConnectionStrings:DefaultConnection"];
 
         services.AddDbContext<DeviceDbContext>(opt => opt.UseNpgsql(conn));
+
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<DeviceDbContext>();
+            dbContext.Database.Migrate();
+        }
         services.AddScoped<IDeviceService, DeviceService>();
 
         return services;

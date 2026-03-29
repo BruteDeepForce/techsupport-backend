@@ -15,6 +15,12 @@ namespace TechSupport.Customer
             services.AddDbContext<TechSupport.Customer.Data.CustomerDbContext>(opt =>
                 opt.UseNpgsql(conn));
 
+            using (var scope = services.BuildServiceProvider().CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<Data.CustomerDbContext>();
+                dbContext.Database.Migrate();
+            }
+
             services.AddScoped<Services.ICustomerService, Services.CustomerService>();
 
             return services;

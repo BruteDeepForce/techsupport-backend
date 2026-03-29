@@ -15,9 +15,11 @@ namespace TechSupport.Ai;
 
 public static class ModuleExtensions
 {
+    [Obsolete("EmbeddingClient Env alınacak, Şuan sadece test amaçlı")]
     public static IServiceCollection AddAiModule(this IServiceCollection services, IConfiguration configuration)
     {
         var conn = configuration.GetConnectionString("DefaultConnection") ?? configuration["ConnectionStrings:DefaultConnection"];
+
         services.AddSingleton<EmbeddingClient>(sp =>
         {
             const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
@@ -52,11 +54,18 @@ public static class ModuleExtensions
         services.AddDbContext<AiDbContext>(opt =>
         {
             var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(conn);
-            dataSourceBuilder.UseVector(); 
+            dataSourceBuilder.UseVector();
             var dataSource = dataSourceBuilder.Build();
 
             opt.UseNpgsql(dataSource, o => o.UseVector());
         });
+
+
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AiDbContext>();
+            dbContext.Database.Migrate();
+        }
 
         services.AddScoped<IOperationCreated, OperationCreated>();
         services.AddScoped<IEmbeddingService, EmbeddingService>();

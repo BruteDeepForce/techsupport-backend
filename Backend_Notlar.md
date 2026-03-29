@@ -31,8 +31,11 @@ device işlemler fikirleri :
 
 - Backend Dokploya deploy işlemleri başlatılacak [TO-DO]
 - DockerFile Rootda mı olacak ? [AR-GE]
-- 
+
+- docker build -f DockerFile.backend -t techsupport-backend-local . 
+- $ docker run --rm -d --name techsupport-backend -p 8080:8080 --network techsupport-backend_default -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=myappdb;Username=myappuser;Password=rootpassword" -e RabbitMq__Host="rabbitmq" techsupport-backend-local
 
 
 
-FLUTTER TARAFLI CI/DC PROBLEMİ VAR. 
+
+- Deploy süreç için tüm modüllerde Database.Migrate() tanımlandı.[COMPLETED] 
