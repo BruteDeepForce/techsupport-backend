@@ -1,5 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TechSupport.Device.Contracts.Events;
 using TechSupport.Device.Data;
 using TechSupport.Device.Domain.Entities;
@@ -8,7 +9,9 @@ namespace TechSupport.Device.Services;
 
 public interface IDeviceService
 {
-    Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, string serialNumber, CancellationToken ct);
+    Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, 
+    string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
+    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct);
     Task<Devices?> GetAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<Devices> DeactivateAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
 }
@@ -24,10 +27,17 @@ public sealed class DeviceService : IDeviceService
         _bus = bus;
     }
 
-    public async Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, string serialNumber, CancellationToken ct)
+    public async Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, 
+    string model, string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
+    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct)
     {
         var exists = await _db.Devices.AnyAsync(x => x.TenantId == tenantId && x.SerialNumber == serialNumber, ct);
         if (exists) throw new InvalidOperationException("Device already exists for tenant (serialNumber must be unique)");
+
+        var normalizedWarrantyStart = warrantyStartAtUtc?.ToUniversalTime();
+        var normalizedWarrantyEnd = normalizedWarrantyStart.HasValue && guaranteePeriod.HasValue
+            ? normalizedWarrantyStart.Value.AddMonths(guaranteePeriod.Value)
+            : (DateTimeOffset?)null;
 
     var device = new Devices
         {
@@ -37,14 +47,48 @@ public sealed class DeviceService : IDeviceService
             Brand = brand.Trim(),
             Model = model.Trim(),
             SerialNumber = serialNumber.Trim(),
+            ProblemDescription = problemDescription?.Trim(),
+            GuaranteePeriod = guaranteePeriod,
+            WarrantyStartAtUtc = normalizedWarrantyStart,
+            WarrantyEndAtUtc = normalizedWarrantyEnd,
+            BarcodeNumber = barcodeNumber?.Trim(),
+            CustomerId = customerId,
+            CustomerName = customerName?.Trim(),
+            Status = Enum.TryParse<DeviceStatus>(status, true, out var parsedStatus) ? parsedStatus : DeviceStatus.Other,
             IsActive = true,
             CreatedAtUtc = DateTimeOffset.UtcNow
         };
 
-        _db.Devices.Add(device);
+        await _db.Devices.AddAsync(device, ct);
         await _db.SaveChangesAsync(ct);
 
-        await _bus.Publish(new DeviceCreated(device.TenantId, device.BranchId, device.Id, device.Brand, device.Model, device.SerialNumber, DateTimeOffset.UtcNow), ct);
+        if (device.CustomerId.HasValue)
+        {
+            await _bus.Publish(new DeviceCustomerMapping
+            {
+                DeviceId = device.Id,
+                TenantId = device.TenantId,
+                BranchId = device.BranchId,
+                CustomerId = device.CustomerId.Value,
+                Status = device.Status.ToString(),
+                CustomerName = device.CustomerName,
+                ProblemDescription = device.ProblemDescription,
+                Brand = device.Brand,
+                Model = device.Model,
+                SerialNumber = device.SerialNumber,
+                IsActive = device.IsActive,
+                GuaranteePeriod = device.GuaranteePeriod,
+                WarrantyStartAtUtc = device.WarrantyStartAtUtc,
+                WarrantyEndAtUtc = device.WarrantyEndAtUtc,
+                BarcodeNumber = device.BarcodeNumber,
+                UpdatedAtUtc = device.UpdatedAtUtc,
+                CreatedAtUtc = device.CreatedAtUtc,
+                DeactivatedAtUtc = device.DeactivatedAtUtc
+            }, ct);
+        }
+        
+        await _bus.Publish(new DeviceCreated(device.TenantId, device.BranchId, device.Id, 
+        device.Brand, device.Model, device.SerialNumber, DateTimeOffset.UtcNow), ct);
 
         return device;
     }

@@ -24,8 +24,9 @@ public sealed class TechnicianOperationStatusChangedConsumer : IConsumer<Technic
         var existing = await _operations.GetAsync(msg.TenantId, msg.OperationId, context.CancellationToken);
         var oldStatus = existing?.Status.ToString() ?? string.Empty;
 
-        await _operations.UpdateStatusAsync(msg.TenantId, msg.OperationId, msg.TechnicianUserId, msg.NewStatus, context.CancellationToken);
+        await _operations.UpdateStatusAsync(msg.TenantId, msg.OperationId, msg.TechnicianUserId, msg.TechnicianInfo, msg.NewStatus, context.CancellationToken);
 
+        //! reports modülüne push
         await _bus.Publish(new OperationStatusChanged(
             msg.OperationId,
             msg.TenantId,
@@ -33,5 +34,21 @@ public sealed class TechnicianOperationStatusChangedConsumer : IConsumer<Technic
             oldStatus,
             msg.NewStatus,
             msg.OccurredAtUtc), context.CancellationToken);   //! corelationId nerde ???
+        //! ai modülüne push
+        await _bus.Publish(new OperationStatusAIEvent
+        {
+            CorrelationId = Guid.NewGuid(), //! corelationId nerde ???
+            OperationId = msg.OperationId,
+            TenantId = msg.TenantId,
+            BranchId = existing?.BranchId ?? Guid.Empty,
+            Title = existing?.Title ?? string.Empty,
+            Description = existing?.Description ?? string.Empty,
+            TechnicianInfo = msg.TechnicianInfo,
+            CustomerInfo = existing?.CustomerId.ToString() ?? string.Empty, //! customer info ekleyelim. operation record a customerId var, onu string olarak yollayalım.
+            Status = msg.NewStatus,
+            CreatedAtUtc = existing?.CreatedAtUtc,
+            AssignedAtUtc = existing?.AssignedAtUtc,
+            EndedAtUtc = msg.OccurredAtUtc,
+        }, context.CancellationToken);
     }
 }

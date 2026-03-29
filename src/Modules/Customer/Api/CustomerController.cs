@@ -20,7 +20,7 @@ namespace TechSupport.Customer.Api.Controllers
         }
 
         public sealed record CreateCustomerDto(string Name, string Email, string? PhoneNumber, string TemporaryPassword);
-        public sealed record AssignDeviceDto(Guid DeviceId);
+    public sealed record AssignDeviceDto(Guid DeviceId, string? DeviceSerialNumber, string? BarcodeNumber, string? ProblemDescription, string? Model, string? Status);
 
         [Authorize(Roles = "admin")]
         [HttpPost]
@@ -83,8 +83,21 @@ namespace TechSupport.Customer.Api.Controllers
         [HttpPost("{customerId:guid}/devices")]
         public async Task<IActionResult> AssignDevice([FromRoute] Guid customerId, [FromBody] AssignDeviceDto dto, CancellationToken ct)
         {
+            var tenantId = GetTenantIdFromClaims();
             var branchId = GetBranchIdFromClaims();
-            var assigned = await _customers.AssignDeviceToCustomerAsync(customerId, dto.DeviceId, branchId, ct);
+            if (tenantId is null) return Unauthorized();
+
+            var assigned = await _customers.AssignDeviceToCustomerAsync(
+                tenantId.Value,
+                branchId,
+                customerId,
+                dto.DeviceId,
+                dto.DeviceSerialNumber?.Trim(),
+                dto.BarcodeNumber?.Trim(),
+                dto.ProblemDescription?.Trim(),
+                dto.Model?.Trim(),
+                dto.Status ?? string.Empty,
+                ct);
             return assigned ? Ok() : NotFound();
         }
 

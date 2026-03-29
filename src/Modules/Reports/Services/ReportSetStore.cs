@@ -76,7 +76,7 @@ public sealed class ReportSetStore
         CancellationToken ct)
         => await IncrementTechnicianMetricInternalAsync(tenantId, branchId, technicianUserId, metricType, periodType, periodDate, delta, ct);
 
-    public async Task TechnicianWorksSetAsync (Guid tenantId, Guid technicianId, string operationDescription, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    public async Task TechnicianWorksSetAsync (Guid tenantId, Guid technicianId, Guid operationId, string operationDescription, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var work = new TechnicianWork
         {
@@ -86,6 +86,7 @@ public sealed class ReportSetStore
             OperationDescription = operationDescription,
             Status = WorkStatus.Assigned,
             AssignedAtUtc = occurredAtUtc,
+            OperationId = operationId
         };
         await _db.TechnicianWorks.AddAsync(work);
 
@@ -110,6 +111,7 @@ public sealed class ReportSetStore
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.Value, x => x.Value + delta)
                 .SetProperty(x => x.UpdatedAtUtc, _ => DateTimeOffset.UtcNow), ct);
+                Console.WriteLine($"Updated {updated} rows for metric {metricType} ({periodType} - {periodDate}) with delta {delta}");
 
         if (updated > 0)
             return;

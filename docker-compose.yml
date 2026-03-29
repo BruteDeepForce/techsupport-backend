@@ -1,19 +1,32 @@
-version: '3.8'
-
 services:
-   db:
-    image: postgres:15
-    container_name: techsupport_tech
+  postgres:
+    image: pgvector/pgvector:0.8.1-pg18-trixie
+    container_name: techsupport_postgres
+    restart: always
     environment:
+      POSTGRES_USER: myappuser
       POSTGRES_PASSWORD: rootpassword
       POSTGRES_DB: myappdb
-      POSTGRES_USER: myappuser
-    volumes:
-      - db_data:/var/lib/postgresql
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+  postgres_backup:
+    image: pgvector/pgvector:0.8.1-pg18-trixie
+    container_name: techsupport_postgres_backup
+    restart: always
+    environment:
+      POSTGRES_USER: myappuser
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: backupdb
+    ports:
+      - "5440:5432"
+    volumes:
+      - pgdata_backup:/var/lib/postgresql
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
 
-   rabbitmq:
+  rabbitmq:
     image: rabbitmq:3-management
     container_name: techsupport_rabbitmq
     ports:
@@ -23,4 +36,5 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
 volumes:
-  db_data:
+  pgdata:
+  pgdata_backup:

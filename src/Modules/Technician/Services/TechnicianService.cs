@@ -18,9 +18,9 @@ public interface ITechnicianService
     Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
     Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
-    Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct);
+    Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct);
 
-    Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string status, CancellationToken ct);
+    Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string technicianInfo, string status, CancellationToken ct);
 }
 
 public sealed class TechnicianService : ITechnicianService
@@ -38,7 +38,7 @@ public sealed class TechnicianService : ITechnicianService
     }
 
     //!burası yanlış
-    public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, DateTimeOffset occurredAtUtc, CancellationToken ct)
+    public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
         if (technician is null)        
@@ -58,6 +58,7 @@ public sealed class TechnicianService : ITechnicianService
             DeviceId = deviceId,
             Title = title,
             Description = description,
+            OperationType = operationType,
             CreatedAtUtc = occurredAtUtc,
             Status = TechnicianOperationStatus.Assigned
         };
@@ -71,6 +72,7 @@ public sealed class TechnicianService : ITechnicianService
         Guid tenantId,
         Guid operationId,
         Guid technicianUserId,
+        string technicianInfo,
         string status,
         CancellationToken ct)
     {
@@ -95,6 +97,7 @@ public sealed class TechnicianService : ITechnicianService
             op.TenantId,
             op.BranchId,
             technicianUserId,
+            technicianInfo,
             newStatus.ToString(),
             DateTimeOffset.UtcNow), ct);
 

@@ -57,9 +57,14 @@ public sealed class ReportService : IReportService
         if(message.FieldTechnicianUserId.HasValue)
         {
             await _operationSet.HandleOperationCreatedAsync (message, ct);
-            await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.FieldTechnicianUserId ?? Guid.Empty, message.Description, message.OccurredAtUtc, ct);
+
+            await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, 
+            message.FieldTechnicianUserId ?? Guid.Empty, message.OperationId, message.Description, message.OccurredAtUtc, ct);
         }
-        await _operationSet.HandleOperationCreatedAsync(message, ct);
+        else
+        {
+            await _operationSet.HandleOperationCreatedAsync(message, ct);
+        }
 
         await tx.CommitAsync(ct);
     }
@@ -89,7 +94,7 @@ public sealed class ReportService : IReportService
             return;
         }
 
-        await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.FieldTechnicianUserId ?? Guid.Empty, message.Description, message.OccurredAtUtc, ct);
+        //await _technicianSet.HandleOperationAssignedToTechnicianAsync(message.TenantId, message.BranchId, message.FieldTechnicianUserId ?? Guid.Empty, message.Description, message.OccurredAtUtc, ct);
 
         await tx.CommitAsync(ct);
     }

@@ -33,4 +33,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/
+    - assets/photos/
+    - assets/mockups.png
 
