@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'admin_web_team_page.dart';
+
 class AdminWebHomePage extends StatelessWidget {
   const AdminWebHomePage({super.key});
 
@@ -111,22 +113,29 @@ class _Sidebar extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: const [
-                _NavItem(
+              children: [
+                const _NavItem(
                   icon: Icons.grid_view_rounded,
                   label: 'Ana Menü',
                   active: true,
                 ),
-                _NavItem(
+                const _NavItem(
                     icon: Icons.receipt_long_outlined, label: 'Operasyonlar'),
-                _NavItem(icon: Icons.group_outlined, label: 'Ekip Yönetimi'),
                 _NavItem(
+                  icon: Icons.group_outlined,
+                  label: 'Ekip Yönetimi',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                        builder: (_) => const AdminWebTeamPage()),
+                  ),
+                ),
+                const _NavItem(
                     icon: Icons.inventory_2_outlined, label: 'Stok Yönetimi'),
-                _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
-                _NavItem(
+                const _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
+                const _NavItem(
                     icon: Icons.query_stats_rounded,
                     label: 'Analiz & Raporlar'),
-                _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
+                const _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
               ],
             ),
           ),
@@ -205,35 +214,41 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.label,
     this.active = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool active;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFF1B3A5C) : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: const Color(0xFF9FB3C8)),
-          const SizedBox(width: 10),
-          Text(label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                color: active ? Colors.white : const Color(0xFF9FB3C8),
-              )),
-          const Spacer(),
-          if (!active)
-            const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFF1B3A5C) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: const Color(0xFF9FB3C8)),
+            const SizedBox(width: 10),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                  color: active ? Colors.white : const Color(0xFF9FB3C8),
+                )),
+            const Spacer(),
+            if (!active)
+              const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
+          ],
+        ),
       ),
     );
   }

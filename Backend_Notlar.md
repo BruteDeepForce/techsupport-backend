@@ -23,14 +23,19 @@ device işlemler fikirleri :
 - Teknisyen tablosunda profil fotoğrafı bulunduralım. [TODO]
 - Teknisyen tablosunda işe başlangıç tarihi verelim. [TODO]
 
+Öncelikle web tarafında 
+-Admin Homepage ile api bağlantısı kurulmalı. (Mobilde kuruldu)
 
+- Admin webhome page ile api bağlantısını kuralım. 
+
+-  
 
  RAPORLAR MODÜLÜ:
 - Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
 - Teknisyen metriklerinde operasyonid gelmiyor [URGENT] [BUG] [SOLVED] operasyonid kayıt işlemi yapılıyor artık.
 
 - Backend Dokploya deploy işlemleri başlatılacak [INPROCCESS]
-- DockerFile Rootda mı olacak ? [ROOTCOMPLETED] [ONROOTLOCATED] 
+- DockerFile Rootda mı olacak ? [ROOTCOMPLETED] [ATROOTLOCATED] 
 
 - teknisyen modülü servisinden startprovisionrequest tarafında sistem şuan işe giriş tarhi ve expert göndermiyor. [COMPLETED]
 - startprovision işleminde işe giriş tarihini ve experti isteyelim. [COMPLETED]
