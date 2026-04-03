@@ -23,12 +23,7 @@ device işlemler fikirleri :
 - Teknisyen tablosunda profil fotoğrafı bulunduralım. [TODO]
 - Teknisyen tablosunda işe başlangıç tarihi verelim. [TODO]
 
-Öncelikle web tarafında 
--Admin Homepage ile api bağlantısı kurulmalı. (Mobilde kuruldu)
 
-- Admin webhome page ile api bağlantısını kuralım. 
-
--  
 
  RAPORLAR MODÜLÜ:
 - Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
@@ -45,6 +40,10 @@ device işlemler fikirleri :
 - Complete geldiğinde zaten corelationid ile provisionrequest tablosundan ilgili 2 prop bilgiyi de çekeriz. [COMPLETED]
 - Insert to DB.[COMPLETED]
 
+
+ACCOUNT MUHASEBE MODÜLÜ
+- Account GET işlemlerde Row Version boş dönüyor [URGENT]
+-
 
 
 
