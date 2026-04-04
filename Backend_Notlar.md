@@ -46,6 +46,9 @@ ACCOUNT MUHASEBE MODÜLÜ
 -
 
 
+STOCK MODÜLÜ
+- Stock modülünde Row version race condition için lazım. Reserve işlemlerinde. 
+
 
 
 - Deploy süreç için tüm modüllerde Database.Migrate() tanımlandı.[COMPLETED] 

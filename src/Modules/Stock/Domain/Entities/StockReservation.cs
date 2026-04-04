@@ -4,10 +4,11 @@ namespace TechSupport.Stock.Domain.Entities;
 
 public enum StockReservationStatus
 {
-    Reserved,
-    Consumed,
-    Returned,
-    Released
+    Pending,
+    Approved,
+    Finalized,
+    Released,
+    Rejected
 }
 
 public class StockReservation
@@ -20,7 +21,14 @@ public class StockReservation
     public Guid? TechnicianUserId { get; set; }
     public long Quantity { get; set; }
     public StockReservationStatus Status { get; set; }
+    public decimal? UnitPriceSnapshot { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? RequestedAtUtc { get; set; }
+    public DateTime? ApprovedAtUtc { get; set; }
+    public DateTime? FinalizedAtUtc { get; set; }
+    public DateTime? ReleasedAtUtc { get; set; }
+    public DateTime? RejectedAtUtc { get; set; }
+    public string? RejectedReason { get; set; }
     public DateTime? ExpiresAtUtc { get; set; }
 
     // Navigation

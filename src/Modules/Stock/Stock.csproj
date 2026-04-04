@@ -9,11 +9,13 @@
 
     <ItemGroup>
         <ProjectReference Include="../../Shared/Shared.csproj" />
+        <ProjectReference Include="../Stock.Contracts/Stock.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
+        <PackageReference Include="MassTransit" Version="8.0.7" />
     </ItemGroup>
 
     <ItemGroup>

@@ -21,7 +21,7 @@ public static class ModuleExtensions
 
     services.AddScoped<Services.IStockService, Services.StockService>();
     services.AddScoped<Services.ICategoryService, Services.CategoryService>();
-
+    services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
         return services;
     }
 }
