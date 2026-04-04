@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'admin_web_customers_page.dart';
+import 'admin_web_operations_page.dart';
+import 'admin_web_route.dart';
+import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
+import 'admin_web_tickets_page.dart';
 
 class AdminWebHomePage extends StatelessWidget {
   const AdminWebHomePage({super.key});
@@ -119,18 +124,41 @@ class _Sidebar extends StatelessWidget {
                   label: 'Ana Menü',
                   active: true,
                 ),
-                const _NavItem(
-                    icon: Icons.receipt_long_outlined, label: 'Operasyonlar'),
+                _NavItem(
+                  icon: Icons.confirmation_number_outlined,
+                  label: 'Talepler',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebTicketsPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Operasyonlar',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebOperationsPage()),
+                  ),
+                ),
                 _NavItem(
                   icon: Icons.group_outlined,
                   label: 'Ekip Yönetimi',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                        builder: (_) => const AdminWebTeamPage()),
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebTeamPage()),
                   ),
                 ),
-                const _NavItem(
-                    icon: Icons.inventory_2_outlined, label: 'Stok Yönetimi'),
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  label: 'Müşteri Yönetimi',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebCustomersPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Stok Yönetimi',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebStockPage()),
+                  ),
+                ),
                 const _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
                 const _NavItem(
                     icon: Icons.query_stats_rounded,

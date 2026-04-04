@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechSupport.Operation.DTO;
 using TechSupport.Operation.Domain.Entities;
 using TechSupport.Operation.Services;
+using System.Security.Claims;
 
 namespace TechSupport.Operation.Api.Controllers;
 
@@ -61,7 +62,7 @@ public sealed class OperationsController : ControllerBase
     {
         var tenantId = GetTenantIdFromClaims();
         if (tenantId == null) return Unauthorized();
-        var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+        var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
         if (role == "technician")
         {
             var userId = GetUserIdFromClaims();

@@ -17,4 +17,12 @@ class OperationService {
     }
     throw Exception('Failed to load operations: ${res.statusCode}');
   }
+
+  Future<OperationRecord> getOperation(String id) async {
+    final res = await _dio.get('/api/operations/$id');
+    if (res.statusCode == 200) {
+      return OperationRecord.fromJson(res.data as Map<String, dynamic>);
+    }
+    throw Exception('Failed to load operation: ${res.statusCode}');
+  }
 }

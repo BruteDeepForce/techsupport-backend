@@ -1,10 +1,32 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/app_design.dart';
+import '../../operations/data/operation_service.dart';
+import '../../operations/models/operation_models.dart';
 import 'technician_signature_page.dart';
 
-class TechnicianHomePage extends StatelessWidget {
+class TechnicianHomePage extends StatefulWidget {
   const TechnicianHomePage({super.key});
+
+  @override
+  State<TechnicianHomePage> createState() => _TechnicianHomePageState();
+}
+
+class _TechnicianHomePageState extends State<TechnicianHomePage> {
+  final OperationService _operationService = OperationService();
+  late Future<List<OperationRecord>> _opsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _opsFuture = _operationService.listOperations();
+  }
+
+  void _refreshOperations() {
+    setState(() {
+      _opsFuture = _operationService.listOperations();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +53,7 @@ class TechnicianHomePage extends StatelessWidget {
           LinearTabItem(
               icon: Icons.assignment_outlined,
               label: 'İş Emirleri',
-              active: true,
-              count: 2),
+              active: true),
           LinearTabItem(
               icon: Icons.confirmation_number_outlined, label: 'Talepler'),
           LinearTabItem(
@@ -41,79 +62,182 @@ class TechnicianHomePage extends StatelessWidget {
         ],
       ),
       children: [
-        // ── Metrics ──────────────────────────────────────────────
-        Row(
-          children: const [
-            Expanded(
-                child: LinearStatPill(
-                    value: '2',
-                    label: 'Aktif',
-                    color: AppColors.statusBlue)),
-            SizedBox(width: 8),
-            Expanded(
-                child: LinearStatPill(
-                    value: '0',
-                    label: 'Çözülen',
-                    color: AppColors.statusGreen)),
-          ],
-        ),
+        FutureBuilder<List<OperationRecord>>(
+          future: _opsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const LinearCard(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(18),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              );
+            }
+            if (snapshot.hasError) {
+              return LinearCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Operasyonlar yüklenemedi'),
+                    const SizedBox(height: 8),
+                    Text(snapshot.error.toString()),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: _refreshOperations,
+                      child: const Text('Tekrar dene'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            final ops = snapshot.data ?? [];
+            final activeCount = ops
+                .where((o) =>
+                    o.status != 'Completed' && o.status != 'Delivered')
+                .length;
+            final doneCount = ops
+                .where((o) =>
+                    o.status == 'Completed' || o.status == 'Delivered')
+                .length;
 
-        const SizedBox(height: 10),
-
-        Row(
-          children: [
-            Expanded(
-              child: LinearCommand(
-                icon: Icons.qr_code_scanner_rounded,
-                label: 'Cihaz Tara',
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: LinearCommand(
-                icon: Icons.playlist_add_check_circle_rounded,
-                label: 'İş Al',
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 14),
-
-        const LinearFilterTabs(
-          labels: ['Sıradaki İşler', 'Atanmamış'],
-          selectedIndex: 0,
-        ),
-
-        const SizedBox(height: 14),
-
-        // ── Operation cards ──────────────────────────────────────
-        _OpCard(
-          id: 'TS-2',
-          title: 'Printer not responding to print jobs',
-          subtitle:
-              'The reception printer stopped working after a large print batch...',
-          customer: 'Alice Morgan',
-          device: 'Reception Printer',
-          priority: AppColors.statusRed,
-          status: 'Devam Ediyor',
-          time: '1 saat önce',
-        ),
-        const SizedBox(height: 8),
-        _OpCard(
-          id: 'TS-5',
-          title: 'Need to migrate data from old server',
-          subtitle:
-              'Old Dell server has important data that needs to be moved...',
-          customer: 'Bob Williams',
-          device: 'Old Server',
-          priority: AppColors.statusRed,
-          status: 'Devam Ediyor',
-          time: '3 saat önce',
+            return Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                        child: LinearStatPill(
+                            value: activeCount.toString(),
+                            label: 'Aktif',
+                            color: AppColors.statusBlue)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                        child: LinearStatPill(
+                            value: doneCount.toString(),
+                            label: 'Çözülen',
+                            color: AppColors.statusGreen)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: LinearCommand(
+                        icon: Icons.qr_code_scanner_rounded,
+                        label: 'Cihaz Tara',
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: LinearCommand(
+                        icon: Icons.playlist_add_check_circle_rounded,
+                        label: 'İş Al',
+                        onTap: _refreshOperations,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const LinearFilterTabs(
+                  labels: ['Sıradaki İşler', 'Atanmamış'],
+                  selectedIndex: 0,
+                ),
+                const SizedBox(height: 14),
+                if (ops.isEmpty)
+                  const LinearCard(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text('Atanmış iş yok'),
+                    ),
+                  )
+                else
+                  Column(
+                    children: [
+                      for (int i = 0; i < ops.length; i++) ...[
+                        _OpCard(
+                          id: _shortId(ops[i].id),
+                          title: ops[i].title,
+                          subtitle: ops[i].description,
+                          customer: _shortId(ops[i].customerId),
+                          device: _shortId(ops[i].deviceId),
+                          priority: _priorityColor(ops[i].priority),
+                          status: _operationStatusLabel(ops[i].status),
+                          statusColor: _operationStatusColor(ops[i].status),
+                          time: _relativeTime(ops[i].occurredAtUtc),
+                        ),
+                        if (i != ops.length - 1) const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ],
     );
   }
+}
+
+String _shortId(String id) =>
+    id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+
+Color _priorityColor(String priority) {
+  switch (priority.toLowerCase()) {
+    case 'urgent':
+      return AppColors.statusRed;
+    case 'high':
+      return AppColors.statusOrange;
+    default:
+      return AppColors.statusBlue;
+  }
+}
+
+String _operationStatusLabel(String status) {
+  switch (status.toLowerCase()) {
+    case 'diagnosing':
+      return 'Teşhis';
+    case 'waitingforapproval':
+      return 'Onay Bekliyor';
+    case 'repairing':
+      return 'Onarım';
+    case 'testing':
+      return 'Test';
+    case 'completed':
+      return 'Tamamlandı';
+    case 'delivered':
+      return 'Teslim';
+    default:
+      return 'Yeni';
+  }
+}
+
+Color _operationStatusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'completed':
+    case 'delivered':
+      return AppColors.statusGreen;
+    case 'waitingforapproval':
+      return AppColors.statusOrange;
+    case 'repairing':
+    case 'testing':
+      return AppColors.statusYellow;
+    case 'diagnosing':
+      return AppColors.statusBlue;
+    default:
+      return AppColors.statusBlue;
+  }
+}
+
+String _relativeTime(DateTime dt) {
+  final diff = DateTime.now().toLocal().difference(dt.toLocal());
+  if (diff.inMinutes < 60) {
+    return '${diff.inMinutes} dk önce';
+  }
+  if (diff.inHours < 24) {
+    return '${diff.inHours} saat önce';
+  }
+  return '${diff.inDays} gün önce';
 }
 
 class _OpCard extends StatelessWidget {
@@ -125,6 +249,7 @@ class _OpCard extends StatelessWidget {
     required this.device,
     required this.priority,
     required this.status,
+    required this.statusColor,
     required this.time,
   });
 
@@ -135,6 +260,7 @@ class _OpCard extends StatelessWidget {
   final String device;
   final Color priority;
   final String status;
+  final Color statusColor;
   final String time;
 
   @override
@@ -154,7 +280,7 @@ class _OpCard extends StatelessWidget {
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: AppColors.textTertiary)),
               const Spacer(),
-              LinearBadge(label: status, color: AppColors.statusYellow),
+              LinearBadge(label: status, color: statusColor),
             ],
           ),
           const SizedBox(height: 8),
@@ -165,41 +291,54 @@ class _OpCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _Tag(Icons.devices_other_outlined, device),
-              const SizedBox(width: 8),
               _Tag(Icons.person_outline_rounded, customer),
-              const Spacer(),
               Text(time,
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: AppColors.textTertiary, fontSize: 10)),
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  child: const Text('Detay'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => TechnicianSignaturePage(workOrderId: id),
-                      ),
-                    );
-                  },
-                  child: const Text('Tamamla'),
-                ),
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow = constraints.maxWidth < 320;
+              final detailButton = OutlinedButton(
+                onPressed: () {},
+                child: const Text('Detay'),
+              );
+              final completeButton = FilledButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TechnicianSignaturePage(workOrderId: id),
+                    ),
+                  );
+                },
+                child: const Text('Tamamla'),
+              );
+              if (isNarrow) {
+                return Column(
+                  children: [
+                    SizedBox(width: double.infinity, child: detailButton),
+                    const SizedBox(height: 8),
+                    SizedBox(width: double.infinity, child: completeButton),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: detailButton),
+                  const SizedBox(width: 8),
+                  Expanded(child: completeButton),
+                ],
+              );
+            },
           ),
         ],
       ),

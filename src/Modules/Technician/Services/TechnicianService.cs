@@ -6,6 +6,7 @@ using TechSupport.Identity.Contracts.Events;
 using TechSupport.Technician.Contracts.Events;
 using TechSupport.Technician.Data;
 using TechSupport.Technician.Domain.Entities;
+using TechSupport.Technician.DTO;
 using static TechSupport.Technician.Services.TechnicianService;
 
 namespace TechSupport.Technician.Services;
@@ -18,7 +19,7 @@ public interface ITechnicianService
     Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct);
     Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
     Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
-    Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct);
+    Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
     Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct);
     Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string technicianInfo, string status, CancellationToken ct);
@@ -273,12 +274,20 @@ public sealed class TechnicianService : ITechnicianService
         return _db.Technicians.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
     }
 
-    public async Task<IReadOnlyList<Technician.Domain.Entities.Technician>> ListAsync(Guid tenantId, CancellationToken ct)
+    public async Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct)
     {
-        return await _db.Technicians
-        .AsNoTracking()
+        return await _db.Technicians.AsNoTracking()
             .Where(x => x.TenantId == tenantId)
-            .OrderBy(x => x.FirstName)
+            .Select(t => new TechnicianResponseDTO
+            {
+                TenantId = t.TenantId,
+                UserId = t.AppUserId ?? Guid.Empty,
+                Name = t.FirstName,
+                Email = t.Email,
+                PhoneNumber = t.PhoneNumber,
+                IsActive = t.IsActive,
+                Specializations = t.TechnicianExpertMappings.Select(m => m.TechnicianExpert.ExpertiseName).ToList()
+            })
             .ToListAsync(ct);
     }
 

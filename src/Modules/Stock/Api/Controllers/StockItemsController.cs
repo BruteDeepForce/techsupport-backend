@@ -15,7 +15,7 @@ public class StockItemsController : ControllerBase
         _stockService = stockService;
     }
 
-    public record CreateItemDto(Guid? BranchId, Guid? CategoryId, string Sku, string Barcode, string Name, string? Description, string? Unit, long InitialQuantity);
+    public record CreateItemDto(Guid? BranchId, Guid CategoryId, string Sku, string Barcode, string Name, string? Description, string? Unit, long InitialQuantity);
 
     private Guid? GetTenantIdFromClaims()
     {
@@ -30,7 +30,25 @@ public class StockItemsController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         if (tenantId == null) return Unauthorized();
 
-        var item = await _stockService.CreateAsync(tenantId.Value, dto.BranchId, dto.Sku, dto.Barcode, dto.Name, dto.Description, dto.Unit, dto.InitialQuantity, ct);
+        var item = await _stockService.CreateAsync(tenantId.Value, dto.BranchId, dto.CategoryId, dto.Sku, dto.Barcode, dto.Name, dto.Description, dto.Unit, dto.InitialQuantity, ct);
         return Ok(new { item.Id, item.Sku, item.Barcode, item.Name });
+    }
+
+    [Authorize(Roles = "admin")]
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+        return Ok(await _stockService.GetAllAsync(tenantId.Value, ct));
+    }
+    
+    [Authorize(Roles = "admin")]
+    [HttpGet("category/{categoryId:guid}")]
+    public async Task<IActionResult> GetAllByCategoryId(Guid categoryId, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+        return Ok(await _stockService.GetAllByCategoryId(tenantId.Value, categoryId, ct));
     }
 }

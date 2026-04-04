@@ -1,10 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../technician/data/technician_service.dart';
+import '../../technician/models/technician_models.dart';
+import 'admin_web_customers_page.dart';
 import 'admin_web_home_page.dart';
+import 'admin_web_operations_page.dart';
+import 'admin_web_route.dart';
+import 'admin_web_stock_page.dart';
+import 'admin_web_tickets_page.dart';
 
-class AdminWebTeamPage extends StatelessWidget {
+class AdminWebTeamPage extends StatefulWidget {
   const AdminWebTeamPage({super.key});
+
+  @override
+  State<AdminWebTeamPage> createState() => _AdminWebTeamPageState();
+}
+
+class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
+  final TechnicianService _technicianService = TechnicianService();
+  late Future<List<Technician>> _techniciansFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _techniciansFuture = _technicianService.listTechnicians();
+  }
+
+  void _refresh() {
+    setState(() {
+      _techniciansFuture = _technicianService.listTechnicians();
+    });
+  }
 
   void _showAddPersonnelDialog(BuildContext context) {
     final formKey = GlobalKey<FormState>();
@@ -12,8 +39,7 @@ class AdminWebTeamPage extends StatelessWidget {
     final lastNameController = TextEditingController();
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
-    final roleController = TextEditingController();
-    final expertiseController = TextEditingController();
+    final tempPasswordController = TextEditingController();
 
     showDialog(
       context: context,
@@ -55,24 +81,20 @@ class AdminWebTeamPage extends StatelessWidget {
                     requiredField: true,
                   ),
                   const SizedBox(height: 10),
-                  _DialogField(
-                    label: 'Telefon',
-                    controller: phoneController,
-                  ),
-                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                         child: _DialogField(
-                          label: 'Pozisyon',
-                          controller: roleController,
+                          label: 'Telefon',
+                          controller: phoneController,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _DialogField(
-                          label: 'Uzmanlık',
-                          controller: expertiseController,
+                          label: 'Geçici Şifre',
+                          controller: tempPasswordController,
+                          requiredField: true,
                         ),
                       ),
                     ],
@@ -87,11 +109,48 @@ class AdminWebTeamPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (!(formKey.currentState?.validate() ?? false)) {
                             return;
                           }
                           Navigator.of(ctx).pop();
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()),
+                          );
+                          try {
+                            await _technicianService.createTechnician(
+                              firstName: nameController.text.trim(),
+                              lastName: lastNameController.text.trim().isEmpty
+                                  ? null
+                                  : lastNameController.text.trim(),
+                              email: emailController.text.trim(),
+                              phoneNumber: phoneController.text.trim().isEmpty
+                                  ? null
+                                  : phoneController.text.trim(),
+                              temporaryPassword:
+                                  tempPasswordController.text.trim(),
+                            );
+                            if (mounted) Navigator.of(context).pop();
+                            if (mounted) {
+                              _refresh();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Teknisyen oluşturma başlatıldı')),
+                              );
+                            }
+                          } catch (_) {
+                            if (mounted) Navigator.of(context).pop();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Teknisyen oluşturulamadı')),
+                              );
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF3B82F6),
@@ -156,7 +215,31 @@ class AdminWebTeamPage extends StatelessWidget {
                           if (!(formKey.currentState?.validate() ?? false)) {
                             return;
                           }
+                          final name = expertiseController.text.trim();
                           Navigator.of(ctx).pop();
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()),
+                          );
+                          _technicianService.createExpertise(name).then((_) {
+                            if (mounted) Navigator.of(context).pop();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Uzmanlık eklendi')),
+                              );
+                            }
+                          }).catchError((_) {
+                            if (mounted) Navigator.of(context).pop();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Uzmanlık eklenemedi')),
+                              );
+                            }
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF3B82F6),
@@ -255,11 +338,23 @@ class AdminWebTeamPage extends StatelessWidget {
                           const SizedBox(height: 16),
                           const _SegmentTabs(),
                           const SizedBox(height: 16),
-                          _MetricRow(width: width),
+                          FutureBuilder<List<Technician>>(
+                            future: _techniciansFuture,
+                            builder: (context, snapshot) {
+                              final list = snapshot.data ?? [];
+                              final activeCount =
+                                  list.where((t) => t.isActive == true).length;
+                              return _MetricRow(
+                                width: width,
+                                total: list.length,
+                                activeCount: activeCount,
+                              );
+                            },
+                          ),
                           const SizedBox(height: 16),
                           const _FilterRow(),
                           const SizedBox(height: 12),
-                          const _TableCard(),
+                          _TeamTableCard(techniciansFuture: _techniciansFuture),
                         ],
                       ),
                     ),
@@ -274,7 +369,7 @@ class AdminWebTeamPage extends StatelessWidget {
   }
 }
 
-enum _NavKey { home, team, other }
+enum _NavKey { home, tickets, operations, team, customers, stock, other }
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -337,19 +432,46 @@ class _WebSidebar extends StatelessWidget {
                   label: 'Ana Menü',
                   active: active == _NavKey.home,
                   onTap: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                        builder: (_) => const AdminWebHomePage()),
+                    adminWebRoute(const AdminWebHomePage()),
                   ),
                 ),
-                const _NavItem(
-                    icon: Icons.receipt_long_outlined, label: 'Operasyonlar'),
+                _NavItem(
+                  icon: Icons.confirmation_number_outlined,
+                  label: 'Talepler',
+                  active: active == _NavKey.tickets,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebTicketsPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Operasyonlar',
+                  active: active == _NavKey.operations,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebOperationsPage()),
+                  ),
+                ),
                 _NavItem(
                   icon: Icons.group_outlined,
                   label: 'Ekip Yönetimi',
                   active: active == _NavKey.team,
                 ),
-                const _NavItem(
-                    icon: Icons.inventory_2_outlined, label: 'Stok Yönetimi'),
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  label: 'Müşteri Yönetimi',
+                  active: active == _NavKey.customers,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebCustomersPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Stok Yönetimi',
+                  active: active == _NavKey.stock,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebStockPage()),
+                  ),
+                ),
                 const _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
                 const _NavItem(
                     icon: Icons.query_stats_rounded,
@@ -358,72 +480,83 @@ class _WebSidebar extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF14263F),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Depolama',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, color: Colors.white)),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: 0.55,
-                    minHeight: 6,
-                    backgroundColor: const Color(0xFF1D3554),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text('4.88 GB / 8 GB',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF9FB3C8))),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add, size: 18, color: Colors.white),
-                    label: const Text('Depolama Ekle',
-                        style: TextStyle(color: Colors.white)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF2C4469)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Color(0xFF1C2F4A),
-                  child: Text('ST',
-                      style: TextStyle(fontSize: 11, color: Colors.white)),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Süleyman TÜY... \nTR',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF9FB3C8)),
-                  ),
-                ),
-                Icon(Icons.logout, size: 18, color: Color(0xFF9FB3C8)),
-              ],
-            ),
-          ),
+          _SidebarFooter(),
         ],
       ),
+    );
+  }
+}
+
+class _SidebarFooter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF14263F),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Depolama',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: Colors.white)),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: 0.55,
+                  minHeight: 6,
+                  backgroundColor: const Color(0xFF1D3554),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text('4.88 GB / 8 GB',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF9FB3C8))),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.add, size: 18, color: Colors.white),
+                  label: const Text('Depolama Ekle',
+                      style: TextStyle(color: Colors.white)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF2C4469)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          child: Row(
+            children: const [
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: Color(0xFF1C2F4A),
+                child: Text('ST',
+                    style: TextStyle(fontSize: 11, color: Colors.white)),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Süleyman TÜY... \nTR',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF9FB3C8)),
+                ),
+              ),
+              Icon(Icons.logout, size: 18, color: Color(0xFF9FB3C8)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -494,7 +627,7 @@ class _TopBar extends StatelessWidget {
               icon: const Icon(Icons.menu_rounded),
             ),
           const Spacer(),
-          _PrimaryActionButton(
+          _SecondaryActionButton(
             label: 'İş Emri',
             icon: Icons.add,
             onPressed: () {},
@@ -518,80 +651,13 @@ class _TopBar extends StatelessWidget {
           const SizedBox(width: 10),
           const Icon(Icons.wb_sunny_outlined, color: Color(0xFF64748B)),
           const SizedBox(width: 10),
-          const Icon(Icons.notifications_none_rounded,
-              color: Color(0xFF64748B)),
-          const SizedBox(width: 10),
-          const Icon(Icons.settings_outlined, color: Color(0xFF64748B)),
-          const SizedBox(width: 12),
-          Row(
-            children: const [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Color(0xFFE2E8F0),
-                child: Text('ST', style: TextStyle(fontSize: 11)),
-              ),
-              SizedBox(width: 8),
-              Text('Süleyman T...',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-            ],
+          const CircleAvatar(
+            radius: 16,
+            backgroundColor: Color(0xFFE2E8F0),
+            child: Text('ST', style: TextStyle(fontSize: 11)),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0,
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-    );
-  }
-}
-
-class _SecondaryActionButton extends StatelessWidget {
-  const _SecondaryActionButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF2563EB),
-        side: const BorderSide(color: Color(0xFFBFDBFE)),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -603,16 +669,13 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Icon(Icons.home_outlined, size: 16, color: Color(0xFF94A3B8)),
-        SizedBox(width: 8),
-        Text('Servissoft',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+        Text('Yönetim',
+            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 16, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Personel',
-            style: TextStyle(
-                color: Color(0xFF0F172A), fontWeight: FontWeight.w600)),
+        Text('Personel Yönetimi',
+            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -625,38 +688,46 @@ class _SegmentTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     return Wrap(
       spacing: 10,
+      runSpacing: 10,
       children: const [
-        _SegmentChip(label: 'Tümü', active: true, icon: Icons.menu_rounded),
-        _SegmentChip(label: 'Teknisyen Haritası', icon: Icons.map_outlined),
+        _SegmentTab(label: 'Tümü', active: true),
+        _SegmentTab(label: 'Teknisyenler'),
+        _SegmentTab(label: 'Yönetim'),
+        _SegmentTab(label: 'Stajyer'),
       ],
     );
   }
 }
 
-class _SegmentChip extends StatelessWidget {
-  const _SegmentChip({required this.label, this.active = false, this.icon});
+class _SegmentTab extends StatelessWidget {
+  const _SegmentTab({required this.label, this.active = false});
 
   final String label;
   final bool active;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: active ? const Color(0xFFE8F1FF) : const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(12),
+        color: active ? const Color(0xFFEFF6FF) : Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: active ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null)
-            Icon(icon,
-                size: 16,
-                color:
-                    active ? const Color(0xFF2563EB) : const Color(0xFF64748B)),
-          if (icon != null) const SizedBox(width: 6),
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: active ? const Color(0xFF3B82F6) : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
@@ -671,9 +742,12 @@ class _SegmentChip extends StatelessWidget {
 }
 
 class _MetricRow extends StatelessWidget {
-  const _MetricRow({required this.width});
+  const _MetricRow(
+      {required this.width, required this.total, required this.activeCount});
 
   final double width;
+  final int total;
+  final int activeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -683,10 +757,10 @@ class _MetricRow extends StatelessWidget {
             ? 3
             : 2;
     final childAspectRatio = width >= 1300
-        ? 2.9
+        ? 2.6
         : width >= 1000
-            ? 2.4
-            : 2.1;
+            ? 2.1
+            : 1.8;
     return GridView.count(
       crossAxisCount: crossAxisCount,
       mainAxisSpacing: 12,
@@ -695,32 +769,27 @@ class _MetricRow extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: childAspectRatio,
       padding: EdgeInsets.zero,
-      children: const [
+      children: [
         _MetricCard(
             title: 'Toplam Personel',
-            value: '0',
+            value: total.toString(),
             icon: Icons.group_outlined,
-            color: Color(0xFF3B82F6)),
+            color: const Color(0xFF3B82F6)),
         _MetricCard(
             title: 'Aktif Personel',
-            value: '0',
+            value: activeCount.toString(),
             icon: Icons.person_outline,
-            color: Color(0xFF22C55E)),
+            color: const Color(0xFF22C55E)),
         _MetricCard(
             title: 'Teknisyenler',
-            value: '0',
+            value: total.toString(),
             icon: Icons.build_outlined,
-            color: Color(0xFF2563EB)),
+            color: const Color(0xFF2563EB)),
         _MetricCard(
             title: 'Müsait',
-            value: '0',
+            value: (total - activeCount).toString(),
             icon: Icons.check_circle_outline,
-            color: Color(0xFF22C55E)),
-        _MetricCard(
-            title: 'Aktif İş Emirleri',
-            value: '0',
-            icon: Icons.assignment_outlined,
-            color: Color(0xFF64748B)),
+            color: const Color(0xFF22C55E)),
       ],
     );
   }
@@ -742,44 +811,32 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0F0F172A),
-            blurRadius: 16,
-            offset: Offset(0, 10),
-          ),
-        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
+                        fontSize: 12, color: Color(0xFF64748B))),
+                const SizedBox(height: 4),
                 Text(value,
                     style: const TextStyle(
                         fontSize: 18,
@@ -856,8 +913,71 @@ class _DropdownPill extends StatelessWidget {
   }
 }
 
+class _TeamTableCard extends StatelessWidget {
+  const _TeamTableCard({required this.techniciansFuture});
+
+  final Future<List<Technician>> techniciansFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Technician>>(
+      future: techniciansFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const _TableCard(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return const _TableCard(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('Ekip yüklenemedi'),
+            ),
+          );
+        }
+        final technicians = snapshot.data ?? [];
+        if (technicians.isEmpty) {
+          return const _TableCard(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text('Veri bulunamadı',
+                  style: TextStyle(color: Color(0xFF94A3B8))),
+            ),
+          );
+        }
+        return _TableCard(
+          child: Column(
+            children: [
+              const _TableHeader(),
+              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              for (final t in technicians)
+                _TableRow(
+                  name: t.name,
+                  department: 'Teknik',
+                  role: 'Teknisyen',
+                  specializations: (t.specializations ?? []).join(', '),
+                  contact: t.email,
+                  status: t.isActive == null
+                      ? 'Bilinmiyor'
+                      : (t.isActive! ? 'Aktif' : 'Pasif'),
+                  tasks: '0',
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _TableCard extends StatelessWidget {
-  const _TableCard();
+  const _TableCard({required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -874,17 +994,7 @@ class _TableCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          const _TableHeader(),
-          Container(
-            height: 90,
-            alignment: Alignment.center,
-            child: const Text('Veri bulunamadı',
-                style: TextStyle(color: Color(0xFF94A3B8))),
-          ),
-        ],
-      ),
+      child: child,
     );
   }
 }
@@ -902,7 +1012,6 @@ class _TableHeader extends StatelessWidget {
       'İletişim',
       'Durum',
       'Atanmış İşler',
-      'İşlemler',
     ];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -924,6 +1033,50 @@ class _TableHeader extends StatelessWidget {
               ),
             )
             .toList(),
+      ),
+    );
+  }
+}
+
+class _TableRow extends StatelessWidget {
+  const _TableRow({
+    required this.name,
+    required this.department,
+    required this.role,
+    required this.specializations,
+    required this.contact,
+    required this.status,
+    required this.tasks,
+  });
+
+  final String name;
+  final String department;
+  final String role;
+  final String specializations;
+  final String contact;
+  final String status;
+  final String tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+              child: Text(name,
+                  style: const TextStyle(fontWeight: FontWeight.w600))),
+          Expanded(child: Text(department)),
+          Expanded(child: Text(role)),
+          Expanded(
+              child: Text(specializations.isEmpty ? '-' : specializations)),
+          Expanded(child: Text(contact)),
+          Expanded(child: Text(status)),
+          Expanded(child: Text(tasks)),
+        ],
       ),
     );
   }
@@ -959,8 +1112,53 @@ class _DialogField extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+    );
+  }
+}
+
+class _PrimaryActionButton extends StatelessWidget {
+  const _PrimaryActionButton(
+      {required this.label, required this.icon, required this.onPressed});
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF3B82F6),
+        foregroundColor: Colors.white,
+      ),
+    );
+  }
+}
+
+class _SecondaryActionButton extends StatelessWidget {
+  const _SecondaryActionButton(
+      {required this.label, required this.icon, required this.onPressed});
+
+  final String label;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF0F172A),
+        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: Colors.white,
       ),
     );
   }

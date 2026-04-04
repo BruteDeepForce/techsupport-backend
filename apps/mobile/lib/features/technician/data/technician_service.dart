@@ -69,4 +69,12 @@ class TechnicianService {
       throw Exception('Failed to set active: ${res.statusCode}');
     }
   }
+
+  Future<void> createExpertise(String name) async {
+    final res =
+        await _dio.post('/api/technicians/createExperts', data: {'Name': name});
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception('Failed to create expertise: ${res.statusCode}');
+    }
+  }
 }

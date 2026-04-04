@@ -447,7 +447,7 @@ class LinearTabBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: items.map((item) {
               final color =
@@ -462,7 +462,7 @@ class LinearTabBar extends StatelessWidget {
                       Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        Icon(item.icon, color: color, size: 22),
+                        Icon(item.icon, color: color, size: 20),
                         if (item.count != null)
                           Positioned(
                             right: -6,
@@ -483,13 +483,13 @@ class LinearTabBar extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       item.label,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: color,
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight:
                             item.active ? FontWeight.w600 : FontWeight.w500,
                       ),
@@ -762,6 +762,5 @@ class LinearLogo extends StatelessWidget {
     );
   }
 }
-
 
 

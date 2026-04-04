@@ -15,6 +15,9 @@ class TicketService {
           .map((e) => Ticket.fromJson(e as Map<String, dynamic>))
           .toList();
     }
+    if (res.statusCode == 404) {
+      return [];
+    }
     throw Exception('Failed to load tickets: ${res.statusCode}');
   }
 

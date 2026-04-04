@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/app_design.dart';
+import '../../tickets/data/ticket_service.dart';
+import '../../tickets/models/ticket_models.dart';
 import 'admin_home_page.dart';
 import 'admin_devices_page.dart';
 import 'admin_team_page.dart';
@@ -8,13 +10,31 @@ import 'admin_work_orders_page.dart';
 import 'inventory_management_page.dart';
 import 'admin_ticket_detail_page.dart';
 
-class AdminTicketsPage extends StatelessWidget {
+class AdminTicketsPage extends StatefulWidget {
   const AdminTicketsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  State<AdminTicketsPage> createState() => _AdminTicketsPageState();
+}
 
+class _AdminTicketsPageState extends State<AdminTicketsPage> {
+  final TicketService _ticketService = TicketService();
+  late Future<List<Ticket>> _ticketsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticketsFuture = _ticketService.listTickets();
+  }
+
+  void _refreshTickets() {
+    setState(() {
+      _ticketsFuture = _ticketService.listTickets();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return LinearPageShell(
       title: 'Talepler',
       subtitle: 'Admin Portal',
@@ -89,147 +109,202 @@ class AdminTicketsPage extends StatelessWidget {
         ],
       ),
       children: [
-        // ── Ticket Metrics ──────────────────────────────────────
-        LinearCard(
-          padding: EdgeInsets.zero,
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                _TicketMetric(value: '3', label: 'Açık', color: AppColors.statusYellow),
-                const VerticalDivider(width: 1, thickness: 1, color: AppColors.borderSubtle),
-                _TicketMetric(value: '2', label: 'Devam', color: AppColors.statusBlue),
-                const VerticalDivider(width: 1, thickness: 1, color: AppColors.borderSubtle),
-                _TicketMetric(value: '1', label: 'Çözüldü', color: AppColors.statusGreen),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // ── Navigation & Filters ──────────────────────────────────
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 40,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.bgSurface,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                  border: Border.all(color: AppColors.border),
+        FutureBuilder<List<Ticket>>(
+          future: _ticketsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const LinearCard(
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(18),
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
-                child: Row(
+              );
+            }
+            if (snapshot.hasError) {
+              return LinearCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Text('Talep no veya başlık ara...',
-                          style: TextStyle(fontSize: 13, color: AppColors.textTertiary)),
+                    const Text('Talepler yüklenemedi'),
+                    const SizedBox(height: 8),
+                    Text(snapshot.error.toString()),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: _refreshTickets,
+                      child: const Text('Tekrar dene'),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: AppColors.bgSurface,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: const Icon(Icons.tune_rounded, color: AppColors.textSecondary, size: 18),
-            ),
-          ],
-        ),
+              );
+            }
+            final tickets = snapshot.data ?? [];
+            final openCount =
+                tickets.where((t) => t.status == 'Open').length;
+            final inProgressCount = tickets
+                .where((t) => t.status == 'CreatedOperation')
+                .length;
+            final closedCount =
+                tickets.where((t) => t.status == 'Closed').length;
 
-        const SizedBox(height: 16),
-        
-        const LinearFilterTabs(
-          labels: ['Hepsi', 'Acil', 'Kritik', 'Düşük'],
-          selectedIndex: 0,
-        ),
-
-        const SizedBox(height: 16),
-
-        // ── Ticket List ──────────────────────────────────────────
-        const LinearSection(title: 'Aktif Talepler', count: 6),
-        LinearCard(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminTicketDetailPage(id: 'TS-1', title: 'Laptop screen flickering', statusLabel: 'Açık', statusColor: AppColors.statusBlue))),
-                child: const LinearIssueRow(
-                  id: 'TS-1',
-                  title: 'Laptop screen flickering',
-                  priority: AppColors.statusOrange,
-                  statusColor: AppColors.statusBlue,
-                  label: 'Açık',
-                  labelColor: AppColors.statusBlue,
-                  assignee: 'AM',
+            return Column(
+              children: [
+                LinearCard(
+                  padding: EdgeInsets.zero,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        _TicketMetric(
+                            value: openCount.toString(),
+                            label: 'Açık',
+                            color: AppColors.statusYellow),
+                        const VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: AppColors.borderSubtle),
+                        _TicketMetric(
+                            value: inProgressCount.toString(),
+                            label: 'Devam',
+                            color: AppColors.statusBlue),
+                        const VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: AppColors.borderSubtle),
+                        _TicketMetric(
+                            value: closedCount.toString(),
+                            label: 'Çözüldü',
+                            color: AppColors.statusGreen),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminTicketDetailPage(id: 'TS-2', title: 'Printer not responding', statusLabel: 'Devam', statusColor: AppColors.statusYellow))),
-                child: const LinearIssueRow(
-                  id: 'TS-2',
-                  title: 'Printer not responding',
-                  priority: AppColors.statusRed,
-                  statusColor: AppColors.statusYellow,
-                  label: 'Devam',
-                  labelColor: AppColors.statusYellow,
-                  assignee: 'AM',
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.bgSurface,
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.search_rounded,
+                                color: AppColors.textTertiary, size: 18),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text('Talep no veya başlık ara...',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.textTertiary)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    InkWell(
+                      onTap: _refreshTickets,
+                      child: Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.bgSurface,
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: const Icon(Icons.refresh_rounded,
+                            color: AppColors.textSecondary, size: 18),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminTicketDetailPage(id: 'TS-4', title: 'Wi-Fi connectivity issues', statusLabel: 'Açık', statusColor: AppColors.statusBlue))),
-                child: const LinearIssueRow(
-                  id: 'TS-4',
-                  title: 'Wi-Fi connectivity issues in Room 302',
-                  priority: AppColors.statusBlue,
-                  statusColor: AppColors.statusBlue,
-                  label: 'Açık',
-                  labelColor: AppColors.statusBlue,
-                  assignee: 'BW',
+                const SizedBox(height: 16),
+                const LinearFilterTabs(
+                  labels: ['Hepsi', 'Acil', 'Kritik', 'Düşük'],
+                  selectedIndex: 0,
                 ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminTicketDetailPage(id: 'TS-5', title: 'VPN Access request', statusLabel: 'Açık', statusColor: AppColors.statusBlue))),
-                child: const LinearIssueRow(
-                  id: 'TS-5',
-                  title: 'VPN Access request for new hire',
-                  priority: AppColors.statusGray,
-                  statusColor: AppColors.statusBlue,
-                  label: 'Açık',
-                  labelColor: AppColors.statusBlue,
-                  assignee: 'AM',
-                  showDivider: false,
+                const SizedBox(height: 16),
+                LinearSection(title: 'Aktif Talepler', count: tickets.length),
+                LinearCard(
+                  padding: EdgeInsets.zero,
+                  child: tickets.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('Talep bulunamadı'),
+                        )
+                      : Column(
+                          children: [
+                            for (int i = 0; i < tickets.length; i++)
+                              LinearIssueRow(
+                                id: _shortId(tickets[i].id),
+                                title: tickets[i].title,
+                                priority: _priorityColor(tickets[i].priority),
+                                statusColor: _statusColor(tickets[i].status),
+                                label: _statusLabel(tickets[i].status),
+                                labelColor: _statusColor(tickets[i].status),
+                                assignee: null,
+                                showDivider: i != tickets.length - 1,
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => AdminTicketDetailPage(
+                                          ticketId: tickets[i].id)),
+                                ),
+                              ),
+                          ],
+                        ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        const LinearSection(title: 'Tamamlananlar'),
-        LinearCard(
-          padding: EdgeInsets.zero,
-          child: const LinearIssueRow(
-            id: 'TS-3',
-            title: 'Software installation request',
-            priority: AppColors.statusBlue,
-            statusColor: AppColors.statusGreen,
-            label: 'Çözüldü',
-            labelColor: AppColors.statusGreen,
-            assignee: 'BW',
-            showDivider: false,
-          ),
+              ],
+            );
+          },
         ),
       ],
     );
+  }
+}
+
+String _shortId(String id) =>
+    id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+
+Color _priorityColor(String priority) {
+  switch (priority.toLowerCase()) {
+    case 'urgent':
+      return AppColors.statusRed;
+    case 'high':
+      return AppColors.statusOrange;
+    default:
+      return AppColors.statusBlue;
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'createdoperation':
+      return AppColors.statusYellow;
+    case 'closed':
+      return AppColors.statusGreen;
+    case 'rejected':
+      return AppColors.statusRed;
+    default:
+      return AppColors.statusBlue;
+  }
+}
+
+String _statusLabel(String status) {
+  switch (status.toLowerCase()) {
+    case 'createdoperation':
+      return 'Operasyon';
+    case 'closed':
+      return 'Çözüldü';
+    case 'rejected':
+      return 'Reddedildi';
+    default:
+      return 'Açık';
   }
 }
 
