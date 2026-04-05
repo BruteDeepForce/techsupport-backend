@@ -7,6 +7,7 @@ import 'admin_web_customers_page.dart';
 import 'admin_web_home_page.dart';
 import 'admin_web_operations_page.dart';
 import 'admin_web_route.dart';
+import 'admin_web_offers_page.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_ticket_detail_page.dart';
@@ -123,7 +124,7 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
   }
 }
 
-enum _NavKey { home, tickets, operations, team, customers, stock, other }
+enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -203,6 +204,14 @@ class _WebSidebar extends StatelessWidget {
                   active: active == _NavKey.operations,
                   onTap: () => Navigator.of(context).pushReplacement(
                     adminWebRoute(const AdminWebOperationsPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.local_offer_outlined,
+                  label: 'Teklifler',
+                  active: active == _NavKey.offers,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebOffersPage()),
                   ),
                 ),
                 _NavItem(

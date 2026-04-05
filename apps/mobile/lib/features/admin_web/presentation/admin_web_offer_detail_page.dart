@@ -1,37 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../operations/data/operation_service.dart';
-import '../../operations/models/operation_models.dart';
+import '../../offers/data/offer_service.dart';
+import '../../offers/models/offer_models.dart';
 import 'admin_web_customers_page.dart';
 import 'admin_web_home_page.dart';
-import 'admin_web_operation_detail_page.dart';
-import 'admin_web_route.dart';
 import 'admin_web_offers_page.dart';
+import 'admin_web_operations_page.dart';
+import 'admin_web_route.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_tickets_page.dart';
 
-class AdminWebOperationsPage extends StatefulWidget {
-  const AdminWebOperationsPage({super.key});
+class AdminWebOfferDetailPage extends StatefulWidget {
+  const AdminWebOfferDetailPage({super.key, required this.offerId});
+
+  final String offerId;
 
   @override
-  State<AdminWebOperationsPage> createState() => _AdminWebOperationsPageState();
+  State<AdminWebOfferDetailPage> createState() =>
+      _AdminWebOfferDetailPageState();
 }
 
-class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
-  final OperationService _operationService = OperationService();
-  late Future<List<OperationRecord>> _opsFuture;
+class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
+  final OfferService _offerService = OfferService();
+  late Future<OfferSummary> _offerFuture;
 
   @override
   void initState() {
     super.initState();
-    _opsFuture = _operationService.listOperations();
+    _offerFuture = _offerService.getOfferById(widget.offerId);
   }
 
   void _refresh() {
     setState(() {
-      _opsFuture = _operationService.listOperations();
+      _offerFuture = _offerService.getOfferById(widget.offerId);
     });
   }
 
@@ -48,19 +51,19 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: _WebSidebar(compact: true, active: _NavKey.operations),
+                child: _WebSidebar(compact: true, active: _NavKey.offers),
               ),
         body: Row(
           children: [
             if (showSidebar)
               const SizedBox(
                 width: 260,
-                child: _WebSidebar(active: _NavKey.operations),
+                child: _WebSidebar(active: _NavKey.offers),
               ),
             Expanded(
               child: Column(
                 children: [
-                  const _TopBar(showMenu: false),
+                  _TopBar(showMenu: false, onRefresh: _refresh),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
@@ -77,7 +80,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const [
                                     Text(
-                                      'Operasyon Yönetimi',
+                                      'Teklif Detayı',
                                       style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w700,
@@ -86,7 +89,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                     ),
                                     SizedBox(height: 6),
                                     Text(
-                                      'Tüm iş emirlerini görüntüleyin ve takip edin',
+                                      'Teklife ait kalemleri ve toplam tutarı inceleyin',
                                       style: TextStyle(
                                         color: Color(0xFF64748B),
                                       ),
@@ -94,21 +97,135 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   ],
                                 ),
                               ),
-                              _SecondaryActionButton(
-                                label: 'Yenile',
-                                icon: Icons.refresh,
-                                onPressed: _refresh,
-                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          _OperationsTableCard(
-                            opsFuture: _opsFuture,
-                            onOpenOperation: (id) => Navigator.of(context).push(
-                              adminWebRoute(
-                                AdminWebOperationDetailPage(operationId: id),
-                              ),
-                            ),
+                          FutureBuilder<OfferSummary>(
+                            future: _offerFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const _Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  ),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return const _Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: Text('Teklif yüklenemedi'),
+                                  ),
+                                );
+                              }
+                              final offer = snapshot.data;
+                              if (offer == null) {
+                                return const _Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20),
+                                    child: Text('Kayıt bulunamadı'),
+                                  ),
+                                );
+                              }
+
+                              final itemCount = offer.items
+                                  .fold<int>(0, (sum, i) => sum + i.quantity);
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(20),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Teklif ${_shortId(offer.id)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  'Operasyon: ${_shortId(offer.operationId)}',
+                                                  style: const TextStyle(
+                                                      color: Color(0xFF64748B)),
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Row(
+                                                  children: [
+                                                    _Pill(
+                                                      label:
+                                                          'Kalem: $itemCount',
+                                                      color: const Color(
+                                                          0xFF2563EB),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    _Pill(
+                                                      label:
+                                                          '${offer.amount.toStringAsFixed(2)} ${offer.currency}',
+                                                      color: const Color(
+                                                          0xFFF59E0B),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              const Text('Teknisyen',
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color:
+                                                          Color(0xFF64748B))),
+                                              const SizedBox(height: 4),
+                                              Text(_shortId(
+                                                  offer.technicianUserId)),
+                                              const SizedBox(height: 12),
+                                              const Text('Müşteri',
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color:
+                                                          Color(0xFF64748B))),
+                                              const SizedBox(height: 4),
+                                              Text(offer.customerId ?? '-'),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _Card(
+                                    child: Column(
+                                      children: [
+                                        const _ItemsHeader(),
+                                        const Divider(
+                                            height: 1,
+                                            color: Color(0xFFE2E8F0)),
+                                        for (final item in offer.items)
+                                          _ItemRow(item: item),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -278,7 +395,8 @@ class _SidebarFooter extends StatelessWidget {
                   value: 0.55,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1D3554),
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
+                  valueColor:
+                      const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -373,9 +491,10 @@ class _NavItem extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.showMenu});
+  const _TopBar({required this.showMenu, required this.onRefresh});
 
   final bool showMenu;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -394,9 +513,9 @@ class _TopBar extends StatelessWidget {
             ),
           const Spacer(),
           _SecondaryActionButton(
-            label: 'İş Emri',
-            icon: Icons.add,
-            onPressed: () {},
+            label: 'Yenile',
+            icon: Icons.refresh,
+            onPressed: onRefresh,
           ),
           const SizedBox(width: 10),
           Container(
@@ -440,81 +559,19 @@ class _Breadcrumb extends StatelessWidget {
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Operasyonlar',
+        Text('Teklifler',
             style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        SizedBox(width: 6),
+        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        SizedBox(width: 6),
+        Text('Detay', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
 }
 
-class _OperationsTableCard extends StatelessWidget {
-  const _OperationsTableCard(
-      {required this.opsFuture, required this.onOpenOperation});
-
-  final Future<List<OperationRecord>> opsFuture;
-  final ValueChanged<String> onOpenOperation;
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<OperationRecord>>(
-      future: opsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const _TableCard(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-        if (snapshot.hasError) {
-          return const _TableCard(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Operasyonlar yüklenemedi'),
-            ),
-          );
-        }
-        final ops = snapshot.data ?? [];
-        if (ops.isEmpty) {
-          return const _TableCard(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
-            ),
-          );
-        }
-        return _TableCard(
-          child: Column(
-            children: [
-              const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
-              for (final op in ops)
-                _TableRow(
-                  id: _shortId(op.id),
-                  title: op.title,
-                  status: _statusLabel(op.status),
-                  statusColor: _statusColor(op.status),
-                  priority: _priorityLabel(op.priority),
-                  customer: _shortId(op.customerId),
-                  device: _shortId(op.deviceId),
-                  technician: op.technicianUserId == null
-                      ? '-'
-                      : _shortId(op.technicianUserId!),
-                  time: _formatTime(op.occurredAtUtc),
-                  onTap: () => onOpenOperation(op.id),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _TableCard extends StatelessWidget {
-  const _TableCard({required this.child});
+class _Card extends StatelessWidget {
+  const _Card({required this.child});
 
   final Widget child;
 
@@ -538,106 +595,27 @@ class _TableCard extends StatelessWidget {
   }
 }
 
-class _TableHeader extends StatelessWidget {
-  const _TableHeader();
+class _Pill extends StatelessWidget {
+  const _Pill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final headers = [
-      'İş Emri',
-      'Başlık',
-      'Durum',
-      'Öncelik',
-      'Müşteri',
-      'Cihaz',
-      'Teknisyen',
-      'Zaman',
-    ];
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
-      child: Row(
-        children: headers
-            .map(
-              (h) => Expanded(
-                child: Text(
-                  h,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-}
-
-class _TableRow extends StatelessWidget {
-  const _TableRow({
-    required this.id,
-    required this.title,
-    required this.status,
-    required this.statusColor,
-    required this.priority,
-    required this.customer,
-    required this.device,
-    required this.technician,
-    required this.time,
-    required this.onTap,
-  });
-
-  final String id;
-  final String title;
-  final String status;
-  final Color statusColor;
-  final String priority;
-  final String customer;
-  final String device;
-  final String technician;
-  final String time;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-                child: Text(id,
-                    style: const TextStyle(fontWeight: FontWeight.w600))),
-            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                        color: statusColor, shape: BoxShape.circle),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(status),
-                ],
-              ),
-            ),
-            Expanded(child: Text(priority)),
-            Expanded(child: Text(customer)),
-            Expanded(child: Text(device)),
-            Expanded(child: Text(technician)),
-            Expanded(child: Text(time)),
-          ],
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -669,66 +647,57 @@ class _SecondaryActionButton extends StatelessWidget {
   }
 }
 
-String _shortId(String id) {
-  if (id.isEmpty) return '-';
-  return id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
-}
+class _ItemsHeader extends StatelessWidget {
+  const _ItemsHeader();
 
-String _statusLabel(String status) {
-  switch (status.toLowerCase()) {
-    case 'diagnosing':
-      return 'Teşhis';
-    case 'waitingforapproval':
-      return 'Onay Bekliyor';
-    case 'repairing':
-      return 'Onarım';
-    case 'testing':
-      return 'Test';
-    case 'completed':
-      return 'Tamamlandı';
-    case 'delivered':
-      return 'Teslim';
-    default:
-      return 'Yeni';
+  @override
+  Widget build(BuildContext context) {
+    final headers = ['Stok Id', 'Miktar', 'Birim Fiyat'];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Row(
+        children: headers
+            .map((h) => Expanded(
+                  child: Text(
+                    h,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
   }
 }
 
-Color _statusColor(String status) {
-  switch (status.toLowerCase()) {
-    case 'completed':
-    case 'delivered':
-      return const Color(0xFF22C55E);
-    case 'waitingforapproval':
-      return const Color(0xFFF59E0B);
-    case 'repairing':
-    case 'testing':
-      return const Color(0xFFF59E0B);
-    case 'diagnosing':
-      return const Color(0xFF3B82F6);
-    default:
-      return const Color(0xFF64748B);
+class _ItemRow extends StatelessWidget {
+  const _ItemRow({required this.item});
+
+  final OfferItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+      ),
+      child: Row(
+        children: [
+          Expanded(child: Text(_shortId(item.stockItemId))),
+          Expanded(child: Text('${item.quantity}')),
+          Expanded(child: Text(item.unitPrice.toStringAsFixed(2))),
+        ],
+      ),
+    );
   }
 }
 
-String _priorityLabel(String priority) {
-  switch (priority.toLowerCase()) {
-    case 'urgent':
-      return 'Kritik';
-    case 'high':
-      return 'Yüksek';
-    case 'medium':
-      return 'Orta';
-    default:
-      return 'Normal';
-  }
-}
-
-String _formatTime(DateTime dt) {
-  final local = dt.toLocal();
-  final y = local.year.toString().padLeft(4, '0');
-  final m = local.month.toString().padLeft(2, '0');
-  final d = local.day.toString().padLeft(2, '0');
-  final hh = local.hour.toString().padLeft(2, '0');
-  final mm = local.minute.toString().padLeft(2, '0');
-  return '$y-$m-$d $hh:$mm';
-}
+String _shortId(String id) =>
+    id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();

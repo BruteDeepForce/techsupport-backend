@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit.Initializers.PropertyConverters;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
@@ -30,7 +32,7 @@ namespace TechSupport.Operation.Services
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
 
-            //! customere push bildirim göndeririz.
+            //! teknisyen ve customere push bildirim göndeririz. daha sonra teknisyen işi başlatır.
             return true;
         }
 
@@ -44,11 +46,11 @@ namespace TechSupport.Operation.Services
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
 
-            //! teknisyene push bildirim göndeririz.
+            //! customera push bildirim göndeririz.
             return true;
         }
 
-        public async Task<bool> CustomerAcceptOfferAsync(Guid TenantId, Guid? BranchId, 
+        public async Task<bool> CustomerAcceptOfferAsync(Guid TenantId, Guid? BranchId,
         Guid offerId, Guid CustomerId, CancellationToken ct)
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
@@ -62,7 +64,7 @@ namespace TechSupport.Operation.Services
 
             var operationId = offer.OperationId;
             var operation = await _dbContext.Operations.FirstOrDefaultAsync(o => o.Id == operationId && o.TenantId == TenantId, ct);
-            if (operation == null)                return false;
+            if (operation == null) return false;
             operation.Status = OperationStatus.Diagnosing;
             await _dbContext.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
@@ -123,10 +125,10 @@ namespace TechSupport.Operation.Services
         {
             var query = await _dbContext.OfferRecords.AsNoTracking().Where(o => o.TenantId == TenantId).ToListAsync(ct);
 
-            if(query == null || !query.Any())
+            if (query == null || !query.Any())
                 return Enumerable.Empty<OfferDTO>();
-            
-            var offers = query.Select(o=> new OfferDTO(
+
+            var offers = query.Select(o => new OfferDTO(
                 o.Id,
                 o.TenantId,
                 o.BranchId,
@@ -144,10 +146,10 @@ namespace TechSupport.Operation.Services
         {
             var query = await _dbContext.OfferRecords.AsNoTracking().Where(o => o.TenantId == TenantId && o.CustomerId == CustomerId).ToListAsync(ct);
 
-            if(query == null || !query.Any())
+            if (query == null || !query.Any())
                 return Enumerable.Empty<OfferDTO>();
-            
-            var offers = query.Select(o=> new OfferDTO(
+
+            var offers = query.Select(o => new OfferDTO(
                 o.Id,
                 o.TenantId,
                 o.BranchId,
@@ -160,6 +162,29 @@ namespace TechSupport.Operation.Services
                 o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
             ));
             return offers;
+        }
+
+        public async Task<OfferDTO?> GetOfferByIdAsync(Guid TenantId, Guid? BranchId, Guid offerId, CancellationToken ct)
+        {
+            if(TenantId == Guid.Empty || offerId == Guid.Empty) return null;
+
+            var offer = await _dbContext.OfferRecords.Include(x=> x.Items).FirstOrDefaultAsync(x=> x.Id == offerId, ct);
+            if (offer != null)
+            {
+                return new OfferDTO(
+                    offer.Id,
+                    offer.TenantId,
+                    offer.BranchId,
+                    offer.OperationId,
+                    offer.TechnicianUserId,
+                    offer.CustomerId,
+                    offer.Amount,
+                    offer.Currency,
+                    offer.CreatedAt,
+                    offer.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+                );
+}
+            return null;
         }
     }
 }

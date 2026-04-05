@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../operations/data/operation_service.dart';
-import '../../operations/models/operation_models.dart';
+import '../../offers/data/offer_service.dart';
+import '../../offers/models/offer_models.dart';
 import 'admin_web_customers_page.dart';
 import 'admin_web_home_page.dart';
-import 'admin_web_operation_detail_page.dart';
+import 'admin_web_offer_detail_page.dart';
+import 'admin_web_operations_page.dart';
 import 'admin_web_route.dart';
-import 'admin_web_offers_page.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_tickets_page.dart';
 
-class AdminWebOperationsPage extends StatefulWidget {
-  const AdminWebOperationsPage({super.key});
+class AdminWebOffersPage extends StatefulWidget {
+  const AdminWebOffersPage({super.key});
 
   @override
-  State<AdminWebOperationsPage> createState() => _AdminWebOperationsPageState();
+  State<AdminWebOffersPage> createState() => _AdminWebOffersPageState();
 }
 
-class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
-  final OperationService _operationService = OperationService();
-  late Future<List<OperationRecord>> _opsFuture;
+class _AdminWebOffersPageState extends State<AdminWebOffersPage> {
+  final OfferService _offerService = OfferService();
+  late Future<List<OfferSummary>> _offersFuture;
 
   @override
   void initState() {
     super.initState();
-    _opsFuture = _operationService.listOperations();
+    _offersFuture = _offerService.getOffersToAdminAsync();
   }
 
   void _refresh() {
     setState(() {
-      _opsFuture = _operationService.listOperations();
+      _offersFuture = _offerService.getOffersToAdminAsync();
     });
   }
 
@@ -48,19 +48,19 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: _WebSidebar(compact: true, active: _NavKey.operations),
+                child: _WebSidebar(compact: true, active: _NavKey.offers),
               ),
         body: Row(
           children: [
             if (showSidebar)
               const SizedBox(
                 width: 260,
-                child: _WebSidebar(active: _NavKey.operations),
+                child: _WebSidebar(active: _NavKey.offers),
               ),
             Expanded(
               child: Column(
                 children: [
-                  const _TopBar(showMenu: false),
+                  _TopBar(showMenu: false, onRefresh: _refresh),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
@@ -77,7 +77,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const [
                                     Text(
-                                      'Operasyon Yönetimi',
+                                      'Teklifler',
                                       style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.w700,
@@ -86,7 +86,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                     ),
                                     SizedBox(height: 6),
                                     Text(
-                                      'Tüm iş emirlerini görüntüleyin ve takip edin',
+                                      'Teknisyenlerden gelen teklifleri yönetin',
                                       style: TextStyle(
                                         color: Color(0xFF64748B),
                                       ),
@@ -102,11 +102,19 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          _OperationsTableCard(
-                            opsFuture: _opsFuture,
-                            onOpenOperation: (id) => Navigator.of(context).push(
+                          FutureBuilder<List<OfferSummary>>(
+                            future: _offersFuture,
+                            builder: (context, snapshot) {
+                              final list = snapshot.data ?? [];
+                              return _MetricRow(offers: list);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _OffersTableCard(
+                            offersFuture: _offersFuture,
+                            onOpenOffer: (id) => Navigator.of(context).push(
                               adminWebRoute(
-                                AdminWebOperationDetailPage(operationId: id),
+                                AdminWebOfferDetailPage(offerId: id),
                               ),
                             ),
                           ),
@@ -278,7 +286,8 @@ class _SidebarFooter extends StatelessWidget {
                   value: 0.55,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1D3554),
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
+                  valueColor:
+                      const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -373,9 +382,10 @@ class _NavItem extends StatelessWidget {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.showMenu});
+  const _TopBar({required this.showMenu, required this.onRefresh});
 
   final bool showMenu;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -394,9 +404,9 @@ class _TopBar extends StatelessWidget {
             ),
           const Spacer(),
           _SecondaryActionButton(
-            label: 'İş Emri',
-            icon: Icons.add,
-            onPressed: () {},
+            label: 'Yenile',
+            icon: Icons.refresh,
+            onPressed: onRefresh,
           ),
           const SizedBox(width: 10),
           Container(
@@ -440,24 +450,118 @@ class _Breadcrumb extends StatelessWidget {
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Operasyonlar',
+        Text('Teklifler',
             style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
 }
 
-class _OperationsTableCard extends StatelessWidget {
-  const _OperationsTableCard(
-      {required this.opsFuture, required this.onOpenOperation});
+class _MetricRow extends StatelessWidget {
+  const _MetricRow({required this.offers});
 
-  final Future<List<OperationRecord>> opsFuture;
-  final ValueChanged<String> onOpenOperation;
+  final List<OfferSummary> offers;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<OperationRecord>>(
-      future: opsFuture,
+    final total = offers.length;
+    final totalAmount =
+        offers.fold<double>(0, (sum, o) => sum + o.amount);
+    final totalItems = offers.fold<int>(
+        0, (sum, o) => sum + o.items.fold<int>(0, (s, i) => s + i.quantity));
+
+    return GridView.count(
+      crossAxisCount: 3,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 2.6,
+      padding: EdgeInsets.zero,
+      children: [
+        _MetricCard(
+            title: 'Toplam Teklif',
+            value: total.toString(),
+            icon: Icons.local_offer_outlined,
+            color: const Color(0xFF3B82F6)),
+        _MetricCard(
+            title: 'Toplam Kalem',
+            value: totalItems.toString(),
+            icon: Icons.inventory_2_outlined,
+            color: const Color(0xFF22C55E)),
+        _MetricCard(
+            title: 'Toplam Tutar',
+            value: totalAmount.toStringAsFixed(2),
+            icon: Icons.payments_outlined,
+            color: const Color(0xFFF59E0B)),
+      ],
+    );
+  }
+}
+
+class _MetricCard extends StatelessWidget {
+  const _MetricCard(
+      {required this.title,
+      required this.value,
+      required this.icon,
+      required this.color});
+
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A))),
+              Text(title,
+                  style:
+                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OffersTableCard extends StatelessWidget {
+  const _OffersTableCard(
+      {required this.offersFuture, required this.onOpenOffer});
+
+  final Future<List<OfferSummary>> offersFuture;
+  final ValueChanged<String> onOpenOffer;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<OfferSummary>>(
+      future: offersFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const _TableCard(
@@ -471,12 +575,12 @@ class _OperationsTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Operasyonlar yüklenemedi'),
+              child: Text('Teklifler yüklenemedi'),
             ),
           );
         }
-        final ops = snapshot.data ?? [];
-        if (ops.isEmpty) {
+        final offers = snapshot.data ?? [];
+        if (offers.isEmpty) {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
@@ -490,20 +594,10 @@ class _OperationsTableCard extends StatelessWidget {
             children: [
               const _TableHeader(),
               const Divider(height: 1, color: Color(0xFFE2E8F0)),
-              for (final op in ops)
+              for (final offer in offers)
                 _TableRow(
-                  id: _shortId(op.id),
-                  title: op.title,
-                  status: _statusLabel(op.status),
-                  statusColor: _statusColor(op.status),
-                  priority: _priorityLabel(op.priority),
-                  customer: _shortId(op.customerId),
-                  device: _shortId(op.deviceId),
-                  technician: op.technicianUserId == null
-                      ? '-'
-                      : _shortId(op.technicianUserId!),
-                  time: _formatTime(op.occurredAtUtc),
-                  onTap: () => onOpenOperation(op.id),
+                  offer: offer,
+                  onTap: () => onOpenOffer(offer.id),
                 ),
             ],
           ),
@@ -544,14 +638,13 @@ class _TableHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final headers = [
-      'İş Emri',
-      'Başlık',
-      'Durum',
-      'Öncelik',
-      'Müşteri',
-      'Cihaz',
+      'Teklif',
+      'Operasyon',
       'Teknisyen',
-      'Zaman',
+      'Müşteri',
+      'Kalem',
+      'Tutar',
+      'Tarih',
     ];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -579,32 +672,15 @@ class _TableHeader extends StatelessWidget {
 }
 
 class _TableRow extends StatelessWidget {
-  const _TableRow({
-    required this.id,
-    required this.title,
-    required this.status,
-    required this.statusColor,
-    required this.priority,
-    required this.customer,
-    required this.device,
-    required this.technician,
-    required this.time,
-    required this.onTap,
-  });
+  const _TableRow({required this.offer, required this.onTap});
 
-  final String id;
-  final String title;
-  final String status;
-  final Color statusColor;
-  final String priority;
-  final String customer;
-  final String device;
-  final String technician;
-  final String time;
+  final OfferSummary offer;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final itemCount =
+        offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -615,28 +691,16 @@ class _TableRow extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-                child: Text(id,
+                child: Text(_shortId(offer.id),
                     style: const TextStyle(fontWeight: FontWeight.w600))),
-            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
+            Expanded(child: Text(_shortId(offer.operationId))),
+            Expanded(child: Text(_shortId(offer.technicianUserId))),
+            Expanded(child: Text(offer.customerId ?? '-')),
+            Expanded(child: Text('$itemCount')),
             Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                        color: statusColor, shape: BoxShape.circle),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(status),
-                ],
-              ),
-            ),
-            Expanded(child: Text(priority)),
-            Expanded(child: Text(customer)),
-            Expanded(child: Text(device)),
-            Expanded(child: Text(technician)),
-            Expanded(child: Text(time)),
+                child:
+                    Text('${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
+            Expanded(child: Text(_formatTime(offer.createdAt))),
           ],
         ),
       ),
@@ -669,59 +733,8 @@ class _SecondaryActionButton extends StatelessWidget {
   }
 }
 
-String _shortId(String id) {
-  if (id.isEmpty) return '-';
-  return id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
-}
-
-String _statusLabel(String status) {
-  switch (status.toLowerCase()) {
-    case 'diagnosing':
-      return 'Teşhis';
-    case 'waitingforapproval':
-      return 'Onay Bekliyor';
-    case 'repairing':
-      return 'Onarım';
-    case 'testing':
-      return 'Test';
-    case 'completed':
-      return 'Tamamlandı';
-    case 'delivered':
-      return 'Teslim';
-    default:
-      return 'Yeni';
-  }
-}
-
-Color _statusColor(String status) {
-  switch (status.toLowerCase()) {
-    case 'completed':
-    case 'delivered':
-      return const Color(0xFF22C55E);
-    case 'waitingforapproval':
-      return const Color(0xFFF59E0B);
-    case 'repairing':
-    case 'testing':
-      return const Color(0xFFF59E0B);
-    case 'diagnosing':
-      return const Color(0xFF3B82F6);
-    default:
-      return const Color(0xFF64748B);
-  }
-}
-
-String _priorityLabel(String priority) {
-  switch (priority.toLowerCase()) {
-    case 'urgent':
-      return 'Kritik';
-    case 'high':
-      return 'Yüksek';
-    case 'medium':
-      return 'Orta';
-    default:
-      return 'Normal';
-  }
-}
+String _shortId(String id) =>
+    id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
 
 String _formatTime(DateTime dt) {
   final local = dt.toLocal();

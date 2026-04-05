@@ -4,9 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'admin_web_customers_page.dart';
 import 'admin_web_operations_page.dart';
 import 'admin_web_route.dart';
+import 'admin_web_offers_page.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_tickets_page.dart';
+import 'admin_web_offers_page.dart';
 
 class AdminWebHomePage extends StatelessWidget {
   const AdminWebHomePage({super.key});
@@ -139,6 +141,13 @@ class _Sidebar extends StatelessWidget {
                   ),
                 ),
                 _NavItem(
+                  icon: Icons.local_offer_outlined,
+                  label: 'Teklifler',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebOffersPage()),
+                  ),
+                ),
+                _NavItem(
                   icon: Icons.group_outlined,
                   label: 'Ekip Yönetimi',
                   onTap: () => Navigator.of(context).pushReplacement(
@@ -150,6 +159,13 @@ class _Sidebar extends StatelessWidget {
                   label: 'Müşteri Yönetimi',
                   onTap: () => Navigator.of(context).pushReplacement(
                     adminWebRoute(const AdminWebCustomersPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.local_offer_sharp,
+                  label: 'Teklifler',
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebOffersPage()),
                   ),
                 ),
                 _NavItem(
