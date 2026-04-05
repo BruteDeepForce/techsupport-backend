@@ -28417,10 +28417,10 @@ _.c=a
 _.d=b
 _.e=c
 _.a=d},
-b2_(a){switch(a.toLowerCase()){case"createdoperation":return"Operasyon"
+b2_(a){switch(a.toLowerCase()){case"createdoperation":return"\u0130\u015flem Ba\u015flat\u0131ld\u0131"
 case"closed":return"Kapal\u0131"
 case"rejected":return"Reddedildi"
-default:return"A\xe7\u0131k"}},
+default:return"Yeni Talep"}},
 b1T(a){switch(a.toLowerCase()){case"createdoperation":return B.bS
 case"closed":return B.f9
 case"rejected":return B.cH
