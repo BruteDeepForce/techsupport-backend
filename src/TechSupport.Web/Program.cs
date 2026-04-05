@@ -60,6 +60,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
     x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
+    x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {

@@ -4,6 +4,7 @@ import '../../../core/design/app_design.dart';
 import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
 import 'technician_signature_page.dart';
+import 'technician_stock_page.dart';
 
 class TechnicianHomePage extends StatefulWidget {
   const TechnicianHomePage({super.key});
@@ -137,6 +138,15 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 10),
+                LinearCommand(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Parça Talebi Oluştur',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                        builder: (_) => const TechnicianStockPage()),
+                  ),
                 ),
                 const SizedBox(height: 14),
                 const LinearFilterTabs(

@@ -76,4 +76,28 @@ class StockService {
     }
     return null;
   }
+
+  Future<void> reserveStock({
+    required String stockItemId,
+    required String operationId,
+    required int quantity,
+  }) async {
+    final res = await _dio.post('/api/stock/reservations', data: {
+      'stockItemId': stockItemId,
+      'operationId': operationId,
+      'quantity': quantity,
+      'branchId': null,
+    });
+    if (res.statusCode != 200) {
+      throw Exception('Failed to reserve stock: ${res.statusCode}');
+    }
+  }
+
+  Future<void> publishOffer(String operationId) async {
+    final res = await _dio.post('/api/stock/reservations/publish-offer',
+        data: {'operationId': operationId});
+    if (res.statusCode != 200) {
+      throw Exception('Failed to publish offer: ${res.statusCode}');
+    }
+  }
 }

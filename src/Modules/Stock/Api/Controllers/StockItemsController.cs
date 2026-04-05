@@ -23,7 +23,7 @@ public class StockItemsController : ControllerBase
         return tenantClaim != null && Guid.TryParse(tenantClaim.Value, out var tenantId) ? tenantId : null;
     }
 
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin, technician")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateItemDto dto, CancellationToken ct)
     {
@@ -34,7 +34,7 @@ public class StockItemsController : ControllerBase
         return Ok(new { item.Id, item.Sku, item.Barcode, item.Name });
     }
 
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin, technician")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {
@@ -43,7 +43,7 @@ public class StockItemsController : ControllerBase
         return Ok(await _stockService.GetAllAsync(tenantId.Value, ct));
     }
     
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin, technician")]
     [HttpGet("category/{categoryId:guid}")]
     public async Task<IActionResult> GetAllByCategoryId(Guid categoryId, CancellationToken ct)
     {

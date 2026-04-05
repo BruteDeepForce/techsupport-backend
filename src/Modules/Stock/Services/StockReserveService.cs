@@ -25,18 +25,22 @@ namespace TechSupport.Stock.Services
         [Obsolete("publish event ile operasyon modülünde teklif create edilecek.reports modülüne rapor düşecek.ai modülüne gönderilecek.")]
         public async Task<bool> ReserveStockAsync(ReserveRequestDTO request, CancellationToken cancellationToken = default)
         {
+            //! idempotent olması lazım.
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             var isExist = await _dbContext.StockItems.Include(x=> x.Balances).FirstOrDefaultAsync(s => s.Id == request.StockItemId && s.TenantId == request.TenantId, cancellationToken);
+            var totalAvailable = isExist?.Balances.Sum(x => x.QuantityAvailable) ?? 0;
+
             if (isExist == null)
                 throw new ArgumentException("Stock item does not exist.", nameof(request.StockItemId));
             
-            
-
             if(request.Quantity <= 0 || request.TenantId == Guid.Empty || 
             request.StockItemId == Guid.Empty 
             || request.TechnicianUserId == Guid.Empty
-            || request.Quantity > isExist.Balances.Where(x=> x.StockItemId == request.StockItemId).Sum(x=> x.QuantityAvailable))
-                throw new ArgumentException("Quantity must be greater than zero.", nameof(request.Quantity));
+            || request.Quantity > isExist.Balances.Where(x=> x.StockItemId == request.StockItemId).Sum(x=> x.QuantityAvailable)
+            || totalAvailable - request.Quantity < 0)
+            {
+                return false;
+            }
 
             var reservation = new StockReservation
             {
@@ -53,14 +57,15 @@ namespace TechSupport.Stock.Services
             };
 
             await _dbContext.StockReservations.AddAsync(reservation, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
             
             var balance = isExist.Balances.FirstOrDefault(x => x.StockItemId == request.StockItemId);
             if (balance != null)
             {
                 balance.QuantityReserved += request.Quantity;
+                balance.QuantityAvailable -= request.Quantity;
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
+                return true;
             }
 
             return false;

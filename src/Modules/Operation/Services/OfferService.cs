@@ -119,5 +119,47 @@ namespace TechSupport.Operation.Services
             //!admine push bildirim göndeririz.
             return true;
         }
+        public async Task<IEnumerable<OfferDTO>> GetOffersToAdminAsync(Guid TenantId, Guid? BranchId, CancellationToken ct)
+        {
+            var query = await _dbContext.OfferRecords.AsNoTracking().Where(o => o.TenantId == TenantId).ToListAsync(ct);
+
+            if(query == null || !query.Any())
+                return Enumerable.Empty<OfferDTO>();
+            
+            var offers = query.Select(o=> new OfferDTO(
+                o.Id,
+                o.TenantId,
+                o.BranchId,
+                o.OperationId,
+                o.TechnicianUserId,
+                o.CustomerId,
+                o.Amount,
+                o.Currency,
+                o.CreatedAt,
+                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+            ));
+            return offers;
+        }
+        public async Task<IEnumerable<OfferDTO>> GetOffersToCustomerAsync(Guid TenantId, Guid? BranchId, Guid CustomerId, CancellationToken ct)
+        {
+            var query = await _dbContext.OfferRecords.AsNoTracking().Where(o => o.TenantId == TenantId && o.CustomerId == CustomerId).ToListAsync(ct);
+
+            if(query == null || !query.Any())
+                return Enumerable.Empty<OfferDTO>();
+            
+            var offers = query.Select(o=> new OfferDTO(
+                o.Id,
+                o.TenantId,
+                o.BranchId,
+                o.OperationId,
+                o.TechnicianUserId,
+                o.CustomerId,
+                o.Amount,
+                o.Currency,
+                o.CreatedAt,
+                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+            ));
+            return offers;
+        }
     }
 }
