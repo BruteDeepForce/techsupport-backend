@@ -93,6 +93,10 @@ namespace TechSupport.Operation.Services
         {
             if (offer.Items == null || !offer.Items.Any())
                 return false;
+            
+            var customerid = await _dbContext.Operations.Where(o => o.Id == offer.OperationId && o.TenantId == offer.TenantId).Select(o => o.CustomerId).FirstOrDefaultAsync(ct);
+            if (customerid == Guid.Empty)
+                return false;
 
             var offerRecord = new Domain.Entities.OfferRecord
             {
@@ -101,7 +105,7 @@ namespace TechSupport.Operation.Services
                 BranchId = offer.BranchId,
                 OperationId = offer.OperationId,
                 TechnicianUserId = offer.TechnicianUserId,
-                CustomerId = offer.CustomerId,
+                CustomerId = customerid,
                 Amount = offer.Items.Sum(i => i.Quantity * i.UnitPrice),
                 Currency = offer.Currency,
                 CreatedAt = DateTime.UtcNow,
@@ -138,7 +142,9 @@ namespace TechSupport.Operation.Services
                 o.Amount,
                 o.Currency,
                 o.CreatedAt,
+                o.Status,
                 o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+
             ));
             return offers;
         }
@@ -159,6 +165,7 @@ namespace TechSupport.Operation.Services
                 o.Amount,
                 o.Currency,
                 o.CreatedAt,
+                o.Status,
                 o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
             ));
             return offers;
@@ -181,6 +188,7 @@ namespace TechSupport.Operation.Services
                     offer.Amount,
                     offer.Currency,
                     offer.CreatedAt,
+                    offer.Status,
                     offer.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
                 );
 }

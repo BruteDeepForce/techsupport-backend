@@ -1,3 +1,5 @@
+using TechSupport.Operation.Domain.Entities;
+
 namespace TechSupport.Operation.DTO
 {
     public sealed record OfferDTO(
@@ -10,6 +12,7 @@ namespace TechSupport.Operation.DTO
         decimal Amount,
         string Currency,
         DateTime CreatedAt,
+        OfferStatus? Status,
         IEnumerable<OfferItemDTO> Items);
     public sealed record OfferItemDTO(
         Guid StockItemId,

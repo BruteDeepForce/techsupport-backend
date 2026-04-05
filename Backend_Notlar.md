@@ -47,7 +47,7 @@ ACCOUNT MUHASEBE MODÜLÜ
 
 
 STOCK MODÜLÜ
-- Stock modülünde Row version race condition için lazım. Reserve işlemlerinde. 
+- Stock modülünde Row version race condition için lazım. Reserve işlemlerinde.  [VITAL]
 
 
 

@@ -36,4 +36,40 @@ class OfferService {
     }
     throw Exception('Failed to load offer: ${res.statusCode}');
   }
+
+  Future<bool> approveAdmin(String offerId) async {
+    final response = await _dio.post('/api/offer/approve/admin/$offerId');
+    if (response.statusCode == 200) {
+      if (response.data is bool) return response.data == true;
+      return (response.data['success'] ?? response.data['Success']) == true;
+    }
+    throw Exception('Failed to approve offer: ${response.statusCode}');
+  }
+
+  Future<bool> approveCustomer(String offerId) async {
+    final response = await _dio.post('/api/offer/approve/customer/$offerId');
+    if (response.statusCode == 200) {
+      if (response.data is bool) return response.data == true;
+      return (response.data['success'] ?? response.data['Success']) == true;
+    }
+    throw Exception('Failed to approve offer: ${response.statusCode}');
+  }
+
+  Future<bool> rejectAdmin(String offerId) async {
+    final response = await _dio.post('/api/offer/reject/admin/$offerId');
+    if (response.statusCode == 200) {
+      if (response.data is bool) return response.data == true;
+      return (response.data['success'] ?? response.data['Success']) == true;
+    }
+    throw Exception('Failed to reject offer: ${response.statusCode}');
+  }
+
+  Future<bool> rejectCustomer(String offerId) async {
+    final response = await _dio.post('/api/offer/reject/customer/$offerId');
+    if (response.statusCode == 200) {
+      if (response.data is bool) return response.data == true;
+      return (response.data['success'] ?? response.data['Success']) == true;
+    }
+    throw Exception('Failed to reject offer: ${response.statusCode}');
+  }
 }

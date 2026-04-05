@@ -106,9 +106,8 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
                             ticketsFuture: _ticketsFuture,
                             onOpenTicket: (ticketId) => Navigator.of(context)
                                 .push(MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        AdminWebTicketDetailPage(
-                                            ticketId: ticketId))),
+                                    builder: (_) => AdminWebTicketDetailPage(
+                                        ticketId: ticketId))),
                           ),
                         ],
                       ),
@@ -124,7 +123,16 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
   }
 }
 
-enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
+enum _NavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  stock,
+  other
+}
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -308,8 +316,8 @@ class _SidebarFooter extends StatelessWidget {
               CircleAvatar(
                 radius: 14,
                 backgroundColor: Color(0xFF1C2F4A),
-                child:
-                    Text('ST', style: TextStyle(fontSize: 11, color: Colors.white)),
+                child: Text('ST',
+                    style: TextStyle(fontSize: 11, color: Colors.white)),
               ),
               SizedBox(width: 10),
               Expanded(
@@ -626,8 +634,8 @@ class _TableRow extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Text(_formatDate(createdAtUtc),
-                  style: const TextStyle(
-                      fontSize: 12, color: Color(0xFF64748B))),
+                  style:
+                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
             ),
           ],
         ),
@@ -668,13 +676,13 @@ String _formatDate(DateTime dt) {
 String _statusLabel(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return 'Operasyon';
+      return 'İşlem Başlatıldı';
     case 'closed':
       return 'Kapalı';
     case 'rejected':
       return 'Reddedildi';
     default:
-      return 'Açık';
+      return 'Yeni Talep';
   }
 }
 

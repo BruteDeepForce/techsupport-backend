@@ -25,6 +25,7 @@ class AdminWebOfferDetailPage extends StatefulWidget {
 class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
   final OfferService _offerService = OfferService();
   late Future<OfferSummary> _offerFuture;
+  bool _acting = false;
 
   @override
   void initState() {
@@ -36,6 +37,40 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     setState(() {
       _offerFuture = _offerService.getOfferById(widget.offerId);
     });
+  }
+
+  Future<void> _approve() async {
+    setState(() => _acting = true);
+    try {
+      final ok = await _offerService.approveAdmin(widget.offerId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ok ? 'Teklif onaylandı' : 'Onay başarısız')));
+      _refresh();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Onay başarısız')));
+    } finally {
+      if (mounted) setState(() => _acting = false);
+    }
+  }
+
+  Future<void> _reject() async {
+    setState(() => _acting = true);
+    try {
+      final ok = await _offerService.rejectAdmin(widget.offerId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ok ? 'Teklif reddedildi' : 'Reddetme başarısız')));
+      _refresh();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Reddetme başarısız')));
+    } finally {
+      if (mounted) setState(() => _acting = false);
+    }
   }
 
   @override
@@ -133,6 +168,9 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
 
                               final itemCount = offer.items
                                   .fold<int>(0, (sum, i) => sum + i.quantity);
+                              final status = (offer.status ?? 'Pending');
+                              final isPending =
+                                  status.toLowerCase() == 'pending';
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,6 +213,13 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                                     const SizedBox(width: 8),
                                                     _Pill(
                                                       label:
+                                                          _statusLabel(status),
+                                                      color:
+                                                          _statusColor(status),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    _Pill(
+                                                      label:
                                                           '${offer.amount.toStringAsFixed(2)} ${offer.currency}',
                                                       color: const Color(
                                                           0xFFF59E0B),
@@ -184,6 +229,7 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                               ],
                                             ),
                                           ),
+                                          const SizedBox(width: 16),
                                           Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.end,
@@ -204,6 +250,26 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                                           Color(0xFF64748B))),
                                               const SizedBox(height: 4),
                                               Text(offer.customerId ?? '-'),
+                                              const SizedBox(height: 16),
+                                              Row(
+                                                children: [
+                                                  OutlinedButton(
+                                                    onPressed: _acting ||
+                                                            !isPending
+                                                        ? null
+                                                        : _reject,
+                                                    child: const Text('Reddet'),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  FilledButton(
+                                                    onPressed: _acting ||
+                                                            !isPending
+                                                        ? null
+                                                        : _approve,
+                                                    child: const Text('Onayla'),
+                                                  ),
+                                                ],
+                                              ),
                                             ],
                                           ),
                                         ],
@@ -619,6 +685,34 @@ class _Pill extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String _statusLabel(String status) {
+  switch (status.toLowerCase()) {
+    case 'adminapproved':
+      return 'Admin Onayladı';
+    case 'customerapproved':
+      return 'Müşteri Onayladı';
+    case 'adminrejected':
+      return 'Admin Reddetti';
+    case 'customerrejected':
+      return 'Müşteri Reddetti';
+    default:
+      return 'Beklemede';
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'adminapproved':
+    case 'customerapproved':
+      return const Color(0xFF22C55E);
+    case 'adminrejected':
+    case 'customerrejected':
+      return const Color(0xFFEF4444);
+    default:
+      return const Color(0xFFF59E0B);
   }
 }
 

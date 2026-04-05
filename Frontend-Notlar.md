@@ -39,3 +39,5 @@ flutter build web --release
 git add -f build/web 
 git commit -m "add build" 
 git push
+
+[ÖZELLİKLE FLUTTER CLEAN ATTIYSAK WEB RELEASE PUSH LAZIM] []

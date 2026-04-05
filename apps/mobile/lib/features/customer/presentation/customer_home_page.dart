@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/design/app_design.dart';
 import '../../tickets/data/ticket_service.dart';
 import '../../tickets/models/ticket_models.dart';
+import 'customer_offers_page.dart';
 
 class CustomerHomePage extends StatefulWidget {
   const CustomerHomePage({super.key});
@@ -140,17 +141,23 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 fontSize: 9,
                 fontWeight: FontWeight.w600)),
       ),
-      tabBar: const LinearTabBar(
+      tabBar: LinearTabBar(
         items: [
+          const LinearTabItem(
+              icon: Icons.grid_view_rounded, label: 'Ana Sayfa', active: true),
           LinearTabItem(
-              icon: Icons.grid_view_rounded,
-              label: 'Ana Sayfa',
-              active: true),
-          LinearTabItem(
-              icon: Icons.confirmation_number_outlined, label: 'Talepler'),
-          LinearTabItem(
+            icon: Icons.local_offer_outlined,
+            label: 'Teklifler',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const CustomerOffersPage(),
+                transitionDuration: Duration.zero,
+              ),
+            ),
+          ),
+          const LinearTabItem(
               icon: Icons.devices_other_outlined, label: 'Cihazlar'),
-          LinearTabItem(icon: Icons.logout_rounded, label: 'Çıkış'),
+          const LinearTabItem(icon: Icons.logout_rounded, label: 'Çıkış'),
         ],
       ),
       children: [
@@ -193,11 +200,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               );
             }
             final tickets = snapshot.data ?? [];
-            final openCount =
-                tickets.where((t) => t.status == 'Open').length;
-            final inProgressCount = tickets
-                .where((t) => t.status == 'CreatedOperation')
-                .length;
+            final openCount = tickets.where((t) => t.status == 'Open').length;
+            final inProgressCount =
+                tickets.where((t) => t.status == 'CreatedOperation').length;
             final closedCount =
                 tickets.where((t) => t.status == 'Closed').length;
 
@@ -346,13 +351,13 @@ Color _statusColor(String status) {
 String _statusLabel(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return 'Operasyon';
+      return 'İşlem Başlatıldı';
     case 'closed':
       return 'Kapalı';
     case 'rejected':
       return 'Reddedildi';
     default:
-      return 'Açık';
+      return 'Yeni Talep';
   }
 }
 
@@ -380,8 +385,7 @@ class _DeviceRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? const Border(
-                bottom:
-                    BorderSide(color: AppColors.borderSubtle, width: 0.5))
+                bottom: BorderSide(color: AppColors.borderSubtle, width: 0.5))
             : null,
       ),
       child: Row(

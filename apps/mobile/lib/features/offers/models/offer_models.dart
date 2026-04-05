@@ -9,6 +9,7 @@ class OfferSummary {
       required this.amount,
       required this.currency,
       required this.createdAt,
+      required this.status,
       required this.items});
 
   final String id;
@@ -20,6 +21,7 @@ class OfferSummary {
   final double amount;
   final String currency;
   final DateTime createdAt;
+  final String? status;
   final List<OfferItem> items;
 
   factory OfferSummary.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class OfferSummary {
       currency: (json['currency'] ?? json['Currency']).toString(),
       createdAt:
           DateTime.parse((json['createdAt'] ?? json['CreatedAt']).toString()),
+      status: (json['status'] ?? json['Status'])?.toString(),
       items: ((json['items'] as List?) ?? [])
           .cast<dynamic>()
           .map((e) => OfferItem.fromJson(e as Map<String, dynamic>))

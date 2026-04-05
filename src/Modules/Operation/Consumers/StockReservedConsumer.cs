@@ -36,6 +36,7 @@ namespace TechSupport.Operation.Consumers
                 Amount: message.TotalAmount,
                 Currency: "TRY",
                 CreatedAt: DateTime.UtcNow,
+                Status: null, //! Teknisyen teklif oluştururken status null olabilir, admin onayından sonra güncellenir.
                 Items: items);
 
             await _offerService.TechnicianCreateOfferAsync(offer, context.CancellationToken);
