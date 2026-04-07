@@ -59,6 +59,7 @@ class StockService {
     required String name,
     String? description,
     String? unit,
+    double? unitPrice,
     required int initialQuantity,
   }) async {
     final res = await _dio.post('/api/stock/items', data: {
@@ -69,6 +70,7 @@ class StockService {
       'name': name,
       'description': description,
       'unit': unit,
+      'unitPrice': unitPrice,
       'initialQuantity': initialQuantity,
     });
     if (res.statusCode == 200) {

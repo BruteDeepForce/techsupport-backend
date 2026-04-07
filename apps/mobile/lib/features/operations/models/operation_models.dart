@@ -9,6 +9,7 @@ class OperationRecord {
     required this.title,
     required this.description,
     required this.status,
+    required this.internalnote,
     required this.priority,
     required this.occurredAtUtc,
     required this.type,
@@ -25,6 +26,7 @@ class OperationRecord {
   final String title;
   final String description;
   final String status;
+  final String internalnote;
   final String priority;
   final DateTime occurredAtUtc;
   final String type;
@@ -47,14 +49,16 @@ class OperationRecord {
       title: (json['title'] ?? json['Title']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
       status: (json['status'] ?? json['Status']).toString(),
+      internalnote:
+          (json['internalNote'] ?? json['InternalNote'] ?? '').toString(),
       priority: (json['priority'] ?? json['Priority']).toString(),
       occurredAtUtc: DateTime.parse(occurred.toString()),
       type: (json['type'] ?? json['Type']).toString(),
       maintenanceTemplateId:
           (json['maintenanceTemplateId'] ?? json['MaintenanceTemplateId'])
               ?.toString(),
-      scheduledAtUtc: _parseOptionalDate(
-          json['scheduledAtUtc'] ?? json['ScheduledAtUtc']),
+      scheduledAtUtc:
+          _parseOptionalDate(json['scheduledAtUtc'] ?? json['ScheduledAtUtc']),
     );
   }
 }

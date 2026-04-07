@@ -25,10 +25,11 @@ public sealed class TicketsController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var userId = GetUserIdFromClaims();
         var branchId = GetBranchIdFromClaims();
+        var username = GetUserNameFromClaims();
     if (tenantId == null || userId == null) return Unauthorized();
 
     // CustomerId is taken from authenticated user claims (userId)
-    var ticket = await _tickets.CreateAsync(tenantId.Value, branchId, userId.Value, dto.DeviceId, dto.Title, dto.Description, dto.Priority ?? Priority.Normal, ct);
+    var ticket = await _tickets.CreateAsync(tenantId.Value, branchId, userId.Value, username, dto.DeviceId, dto.Title, dto.Description, dto.Priority ?? Priority.Normal, ct);
         return Ok(ToResponse(ticket));
     }
 
@@ -129,9 +130,15 @@ public sealed class TicketsController : ControllerBase
         }
         return null;
     }
+    private string? GetUserNameFromClaims()
+    {
+        var username = User.Claims.FirstOrDefault(x=> x.Type == "username")?.Value;
+        
+        return username;
+    }
 
     private static ResponseTicket ToResponse(Ticket t)
     {
-        return new ResponseTicket(t.Id, t.TenantId, t.BranchId, t.CustomerId, t.DeviceId, t.Title, t.Description, t.Priority.ToString(), t.Status.ToString(), t.CreatedAtUtc, t.OperationId);
+        return new ResponseTicket(t.Id, t.TenantId, t.BranchId, t.CustomerId, t.CustomerName,t.DeviceId, t.Title, t.Description, t.Priority.ToString(), t.Status.ToString(), t.CreatedAtUtc, t.OperationId);
     }
 }

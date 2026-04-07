@@ -41,6 +41,18 @@ services:
     container_name: techsupport_redis
     ports:
       - "6379:6379"
+  application:
+    build:
+      context: .
+      dockerfile: DockerFile.backend
+    container_name: techsupport_application
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
   
 volumes:
   pgdata:

@@ -504,6 +504,7 @@ class _TicketsTableCard extends StatelessWidget {
                 _TableRow(
                   id: ticket.id,
                   title: ticket.title,
+                  username: ticket.customername,
                   priority: ticket.priority,
                   status: ticket.status,
                   createdAtUtc: ticket.createdAtUtc,
@@ -553,6 +554,14 @@ class _TableHeader extends StatelessWidget {
                     color: Color(0xFF475569))),
           ),
           Expanded(
+            flex: 2,
+            child: Text('Kullanıcı',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF475569))),
+          ),
+          Expanded(
             flex: 1,
             child: Text('Öncelik',
                 style: TextStyle(
@@ -586,6 +595,7 @@ class _TableRow extends StatelessWidget {
   const _TableRow({
     required this.id,
     required this.title,
+    required this.username,
     required this.priority,
     required this.status,
     required this.createdAtUtc,
@@ -594,6 +604,7 @@ class _TableRow extends StatelessWidget {
 
   final String id;
   final String title;
+  final String? username;
   final String priority;
   final String status;
   final DateTime createdAtUtc;
@@ -616,6 +627,15 @@ class _TableRow extends StatelessWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF0F172A))),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                username ?? '-',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              ),
             ),
             Expanded(
               flex: 1,
@@ -677,6 +697,8 @@ String _statusLabel(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
       return 'İşlem Başlatıldı';
+    case 'repairing':
+      return 'Onarım/İşlem';
     case 'closed':
       return 'Kapalı';
     case 'rejected':

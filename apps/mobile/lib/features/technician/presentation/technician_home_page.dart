@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../core/design/app_design.dart';
 import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
-import 'technician_signature_page.dart';
+import 'technician_payment_page.dart';
+import 'technician_operation_detail_page.dart';
 import 'technician_stock_page.dart';
 
 class TechnicianHomePage extends StatefulWidget {
@@ -166,7 +167,8 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
                     children: [
                       for (int i = 0; i < ops.length; i++) ...[
                         _OpCard(
-                          id: _shortId(ops[i].id),
+                          operationId: ops[i].id,
+                          displayId: _shortId(ops[i].id),
                           title: ops[i].title,
                           subtitle: ops[i].description,
                           customer: _shortId(ops[i].customerId),
@@ -252,7 +254,8 @@ String _relativeTime(DateTime dt) {
 
 class _OpCard extends StatelessWidget {
   const _OpCard({
-    required this.id,
+    required this.operationId,
+    required this.displayId,
     required this.title,
     required this.subtitle,
     required this.customer,
@@ -263,7 +266,8 @@ class _OpCard extends StatelessWidget {
     required this.time,
   });
 
-  final String id;
+  final String operationId;
+  final String displayId;
   final String title;
   final String subtitle;
   final String customer;
@@ -286,7 +290,7 @@ class _OpCard extends StatelessWidget {
             children: [
               LinearPriority(color: priority),
               const SizedBox(width: 8),
-              Text(id,
+              Text(displayId,
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: AppColors.textTertiary)),
               const Spacer(),
@@ -318,7 +322,16 @@ class _OpCard extends StatelessWidget {
             builder: (context, constraints) {
               final isNarrow = constraints.maxWidth < 320;
               final detailButton = OutlinedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TechnicianOperationDetailPage(
+                        operationId: operationId,
+                      ),
+                    ),
+                  );
+                },
                 child: const Text('Detay'),
               );
               final completeButton = FilledButton(
@@ -326,7 +339,10 @@ class _OpCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TechnicianSignaturePage(workOrderId: id),
+                      builder: (_) => TechnicianPaymentPage(
+                        operationId: operationId,
+                        title: title,
+                      ),
                     ),
                   );
                 },

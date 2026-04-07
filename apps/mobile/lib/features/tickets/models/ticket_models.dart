@@ -11,6 +11,7 @@ class Ticket {
     required this.status,
     required this.createdAtUtc,
     this.convertedOperationId,
+    this.customername,
   });
 
   final String id;
@@ -24,6 +25,7 @@ class Ticket {
   final String status;
   final DateTime createdAtUtc;
   final String? convertedOperationId;
+  final String? customername;
 
   factory Ticket.fromJson(Map<String, dynamic> json) => Ticket(
         id: (json['id'] ?? json['Id']).toString(),
@@ -40,6 +42,10 @@ class Ticket {
         convertedOperationId:
             (json['convertedOperationId'] ?? json['ConvertedOperationId'])
                 ?.toString(),
+        customername: (json['customerName'] ??
+                json['CustomerName'] ??
+                json['CustomerName'])
+            ?.toString(),
       );
 }
 

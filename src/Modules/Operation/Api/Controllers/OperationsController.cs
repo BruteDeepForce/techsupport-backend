@@ -151,6 +151,7 @@ public sealed class OperationsController : ControllerBase
             op.Title,
             op.Description,
             op.Status.ToString(),
+            op.InternalNote ?? string.Empty,
             op.Priority,
             op.CreatedAtUtc,
             op.Type,

@@ -339,6 +339,8 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
       return AppColors.statusYellow;
+    case 'repairing':
+      return const Color.fromARGB(255, 15, 11, 245);
     case 'closed':
       return AppColors.statusGreen;
     case 'rejected':
@@ -352,6 +354,8 @@ String _statusLabel(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
       return 'İşlem Başlatıldı';
+    case 'repairing':
+      return 'Onarım/Bakım';
     case 'closed':
       return 'Kapalı';
     case 'rejected':

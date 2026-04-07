@@ -37,8 +37,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
       _categoriesFuture = _stockService.listCategories();
       _allItemsFuture = _stockService.listItems();
       if (_selectedCategoryId != null) {
-        _itemsFuture =
-            _stockService.listItemsByCategory(_selectedCategoryId!);
+        _itemsFuture = _stockService.listItemsByCategory(_selectedCategoryId!);
       }
     });
   }
@@ -137,6 +136,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     final unitController = TextEditingController();
+    final unitPriceController = TextEditingController();
     final qtyController = TextEditingController(text: '1');
     String? selectedCategoryId;
 
@@ -212,6 +212,14 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                   ],
                 ),
                 const SizedBox(height: 10),
+                _DialogField(
+                  label: 'Birim Fiyat',
+                  controller: unitPriceController,
+                  requiredField: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                ),
+                const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
                   value: selectedCategoryId,
                   items: [
@@ -252,6 +260,9 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         final qty =
                             int.tryParse(qtyController.text.trim()) ?? 0;
                         if (qty <= 0) return;
+                        final unitPrice =
+                            double.tryParse(unitPriceController.text.trim());
+                        if (unitPrice == null) return;
                         Navigator.of(ctx).pop();
                         showDialog(
                           context: context,
@@ -275,6 +286,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                             unit: unitController.text.trim().isEmpty
                                 ? null
                                 : unitController.text.trim(),
+                            unitPrice: unitPrice,
                             initialQuantity: qty,
                           );
                           if (mounted) Navigator.of(context).pop();
@@ -288,8 +300,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                           if (mounted) Navigator.of(context).pop();
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Ürün eklenemedi')),
+                              const SnackBar(content: Text('Ürün eklenemedi')),
                             );
                           }
                         }
@@ -376,7 +387,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: Column(
@@ -426,9 +438,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                     onSelect: (id) {
                                       setState(() {
                                         _selectedCategoryId = id;
-                                        _itemsFuture =
-                                            _stockService.listItemsByCategory(
-                                                id);
+                                        _itemsFuture = _stockService
+                                            .listItemsByCategory(id);
                                       });
                                     },
                                   ),
@@ -465,8 +476,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                                 child: Text(
                                                   'Ürünleri görmek için kategori seçin',
                                                   style: TextStyle(
-                                                      color:
-                                                          Color(0xFF94A3B8)),
+                                                      color: Color(0xFF94A3B8)),
                                                 ),
                                               ),
                                             ),
@@ -498,7 +508,16 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
   }
 }
 
-enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
+enum _NavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  stock,
+  other
+}
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -652,8 +671,7 @@ class _SidebarFooter extends StatelessWidget {
                   value: 0.55,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1D3554),
-                  valueColor:
-                      const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -739,8 +757,7 @@ class _NavItem extends StatelessWidget {
                 )),
             const Spacer(),
             if (!active)
-              const Icon(Icons.expand_more,
-                  size: 14, color: Color(0xFF7B8FA8)),
+              const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
           ],
         ),
       ),
@@ -832,10 +849,8 @@ class _MetricRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = items.length;
-    final available =
-        items.fold<int>(0, (sum, e) => sum + e.quantityAvailable);
-    final reserved =
-        items.fold<int>(0, (sum, e) => sum + e.quantityReserved);
+    final available = items.fold<int>(0, (sum, e) => sum + e.quantityAvailable);
+    final reserved = items.fold<int>(0, (sum, e) => sum + e.quantityReserved);
     final lowStock = items.where((e) => e.quantityAvailable < 5).length;
 
     return GridView.count(
@@ -882,10 +897,9 @@ class _CriticalPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final criticalItems =
-        items.where((e) => e.quantityAvailable < 5).toList();
-    criticalItems.sort((a, b) =>
-        a.quantityAvailable.compareTo(b.quantityAvailable));
+    final criticalItems = items.where((e) => e.quantityAvailable < 5).toList();
+    criticalItems
+        .sort((a, b) => a.quantityAvailable.compareTo(b.quantityAvailable));
     final top = criticalItems.take(5).toList();
     return _TableCard(
       child: Padding(
@@ -1180,8 +1194,9 @@ class _CategoryCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color:
-                      selected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                  color: selected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF0F172A),
                 ),
               ),
             ),
@@ -1260,8 +1275,8 @@ class _StockTableCard extends StatelessWidget {
       return const _TableCard(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child:
-              Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+          child: Text('Kayıt bulunamadı',
+              style: TextStyle(color: Color(0xFF94A3B8))),
         ),
       );
     }
@@ -1314,6 +1329,7 @@ class _TableHeader extends StatelessWidget {
       'Barkod',
       'Stok',
       'Rezerve',
+      'Fiyat',
       'Birim',
     ];
     return Container(
@@ -1363,11 +1379,17 @@ class _TableRow extends StatelessWidget {
           Expanded(child: Text(item.barcode)),
           Expanded(child: Text(item.quantityAvailable.toString())),
           Expanded(child: Text(item.quantityReserved.toString())),
+          Expanded(child: Text(_formatPrice(item.unitPrice))),
           Expanded(child: Text(item.unit ?? '-')),
         ],
       ),
     );
   }
+}
+
+String _formatPrice(double? value) {
+  if (value == null) return '-';
+  return value.toStringAsFixed(2);
 }
 
 class _DialogField extends StatelessWidget {

@@ -13,6 +13,7 @@ namespace TechSupport.Operation.DTO
         string Title,
         string Description,
         string Status,
+        string InternalNote,
         OperationPriority Priority,
         DateTimeOffset OccurredAtUtc,
         OperationType Type,

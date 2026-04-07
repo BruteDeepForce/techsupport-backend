@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/design/app_design.dart';
 import '../../offers/data/offer_service.dart';
 import '../../offers/models/offer_models.dart';
+import 'customer_offer_detail_page.dart';
 import 'customer_home_page.dart';
 
 class CustomerOffersPage extends StatefulWidget {
@@ -119,6 +120,12 @@ class _CustomerOffersPageState extends State<CustomerOffersPage> {
                         _OfferRow(
                           offer: offers[i],
                           showDivider: i != offers.length - 1,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  CustomerOfferDetailPage(offerId: offers[i].id),
+                            ),
+                          ),
                         ),
                     ],
                   ),
@@ -133,41 +140,48 @@ class _CustomerOffersPageState extends State<CustomerOffersPage> {
 }
 
 class _OfferRow extends StatelessWidget {
-  const _OfferRow({required this.offer, required this.showDivider});
+  const _OfferRow(
+      {required this.offer, required this.showDivider, required this.onTap});
 
   final OfferSummary offer;
   final bool showDivider;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final status = (offer.status ?? 'Pending');
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      decoration: BoxDecoration(
-        border: showDivider
-            ? const Border(
-                bottom: BorderSide(color: AppColors.borderSubtle, width: 0.5))
-            : null,
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.local_offer_outlined,
-              color: AppColors.textTertiary, size: 16),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Teklif ${_shortId(offer.id)}',
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                Text('Toplam: ${offer.amount.toStringAsFixed(2)} ${offer.currency}',
-                    style: const TextStyle(
-                        color: AppColors.textTertiary, fontSize: 11)),
-              ],
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          border: showDivider
+              ? const Border(
+                  bottom: BorderSide(color: AppColors.borderSubtle, width: 0.5))
+              : null,
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.local_offer_outlined,
+                color: AppColors.textTertiary, size: 16),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Teklif ${_shortId(offer.id)}',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                      'Toplam: ${offer.amount.toStringAsFixed(2)} ${offer.currency}',
+                      style: const TextStyle(
+                          color: AppColors.textTertiary, fontSize: 11)),
+                ],
+              ),
             ),
-          ),
-          LinearBadge(label: _statusLabel(status), color: _statusColor(status)),
-        ],
+            LinearBadge(
+                label: _statusLabel(status), color: _statusColor(status)),
+          ],
+        ),
       ),
     );
   }
@@ -178,16 +192,13 @@ String _shortId(String id) =>
 
 String _statusLabel(String status) {
   switch (status.toLowerCase()) {
-    case 'adminapproved':
-      return 'Admin Onayladı';
     case 'customerapproved':
-      return 'Müşteri Onayladı';
+      return 'Onaylandı';
     case 'adminrejected':
-      return 'Admin Reddetti';
     case 'customerrejected':
-      return 'Müşteri Reddetti';
+      return 'Reddedildi';
     default:
-      return 'Beklemede';
+      return 'Açık teklif';
   }
 }
 
@@ -203,4 +214,3 @@ Color _statusColor(String status) {
       return AppColors.statusYellow;
   }
 }
-

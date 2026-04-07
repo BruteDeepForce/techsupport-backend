@@ -28,6 +28,10 @@ namespace TechSupport.Operation.Services
             if (offer == null)
                 return false;
 
+            var operation = await _dbContext.Operations.FirstOrDefaultAsync(o => o.Id == offer.OperationId && o.TenantId == TenantId, ct);
+            if (operation == null)                return false;
+            operation.Status = OperationStatus.WaitingForApproval;
+
             offer.Status = OfferStatus.AdminApproved;
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
@@ -41,6 +45,9 @@ namespace TechSupport.Operation.Services
             var offer = await _dbContext.OfferRecords.FirstOrDefaultAsync(o => o.Id == offerId && o.TenantId == TenantId, ct);
             if (offer == null)
                 return false;
+            // var operation = await _dbContext.Operations.FirstOrDefaultAsync(o => o.Id == offer.OperationId && o.TenantId == TenantId, ct);
+            // if (operation == null)                return false;
+            // operation.Status = OperationStatus.;
 
             offer.Status = OfferStatus.AdminRejected;
             offer.UpdatedAt = DateTime.UtcNow;
@@ -56,6 +63,7 @@ namespace TechSupport.Operation.Services
             using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
             if (offerId == Guid.Empty || CustomerId == Guid.Empty || TenantId == Guid.Empty)
                 throw new ArgumentException("Offer ID, Customer ID, and Tenant ID cannot be empty.");
+            
             var offer = await _dbContext.OfferRecords.FirstOrDefaultAsync(o => o.Id == offerId && o.TenantId == TenantId && o.CustomerId == CustomerId, ct);
             if (offer == null)
                 return false;
@@ -63,9 +71,17 @@ namespace TechSupport.Operation.Services
             offer.UpdatedAt = DateTime.UtcNow;
 
             var operationId = offer.OperationId;
-            var operation = await _dbContext.Operations.FirstOrDefaultAsync(o => o.Id == operationId && o.TenantId == TenantId, ct);
+            var operation = await _dbContext.Operations.Include(x=> x.Ticket).
+            FirstOrDefaultAsync(o => o.Id == operationId && o.TenantId == TenantId, ct);
+
             if (operation == null) return false;
-            operation.Status = OperationStatus.Diagnosing;
+            operation.Status = OperationStatus.Repairing;
+
+            if (operation.Ticket != null)
+            {
+                operation.Ticket.Status = TicketStatus.Repairing;            
+            }
+            
             await _dbContext.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
