@@ -46,7 +46,7 @@ class _Greeting extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Text('Merhaba, Süleyman 👋',
+        Text('Merhaba, Süleyman Tuysuzoglu',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
         SizedBox(height: 6),
       ],

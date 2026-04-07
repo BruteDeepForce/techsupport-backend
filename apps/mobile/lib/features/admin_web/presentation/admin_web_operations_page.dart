@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
 
+import '../../customer/data/customer_service.dart';
+import '../../customer/models/customer_models.dart';
+import '../../device/data/device_service.dart';
+import '../../device/model/device_model.dart';
 import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
+import '../../technician/data/technician_service.dart';
+import '../../technician/models/technician_models.dart';
 import 'admin_web_customers_page.dart';
 import 'admin_web_home_page.dart';
 import 'admin_web_operation_detail_page.dart';
@@ -11,6 +18,7 @@ import 'admin_web_offers_page.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_tickets_page.dart';
+import 'admin_web_device_page.dart';
 
 class AdminWebOperationsPage extends StatefulWidget {
   const AdminWebOperationsPage({super.key});
@@ -21,18 +29,374 @@ class AdminWebOperationsPage extends StatefulWidget {
 
 class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
   final OperationService _operationService = OperationService();
+  final CustomerService _customerService = CustomerService();
+  final DeviceService _deviceService = DeviceService();
+  final TechnicianService _technicianService = TechnicianService();
   late Future<List<OperationRecord>> _opsFuture;
+  late Future<List<Customer>> _customersFuture;
+  late Future<List<Technician>> _techniciansFuture;
 
   @override
   void initState() {
     super.initState();
     _opsFuture = _operationService.listOperations();
+    _customersFuture = _customerService.listCustomers();
+    _techniciansFuture = _technicianService.listTechnicians();
   }
 
   void _refresh() {
     setState(() {
       _opsFuture = _operationService.listOperations();
+      _customersFuture = _customerService.listCustomers();
+      _techniciansFuture = _technicianService.listTechnicians();
     });
+  }
+
+  Future<void> _showCreateOperationDialog() async {
+    List<Customer> customers = [];
+    List<Technician> technicians = [];
+    try {
+      customers = await _customersFuture;
+      technicians = await _techniciansFuture;
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veriler yüklenemedi')),
+      );
+      return;
+    }
+
+    final formKey = GlobalKey<FormState>();
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final internalNoteController = TextEditingController();
+    String? selectedCustomerId;
+    String? selectedCustomerUserId;
+    String? selectedDeviceId;
+    String? selectedTechnicianId;
+    String? selectedTechnicianName;
+    Future<List<DeviceRecord>>? devicesFuture;
+    String priority = 'Normal';
+    String type = 'Repair';
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setLocalState) {
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'İş Emri Oluştur',
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A)),
+                      ),
+                      const SizedBox(height: 14),
+                      DropdownButtonFormField<String>(
+                        value: selectedCustomerId,
+                        items: [
+                          for (final c in customers)
+                            DropdownMenuItem(
+                              value: c.id,
+                              child: Text(c.name),
+                            ),
+                        ],
+                        onChanged: (v) {
+                          selectedCustomerId = v;
+                          selectedCustomerUserId = null;
+                          selectedDeviceId = null;
+                          if (v != null) {
+                            devicesFuture = _deviceService.getCustomerDevices(v);
+                            final match =
+                                customers.where((e) => e.id == v).toList();
+                            if (match.isNotEmpty) {
+                              selectedCustomerUserId = match.first.appUserId;
+                            }
+                          } else {
+                            devicesFuture = null;
+                          }
+                          setLocalState(() {});
+                        },
+                        validator: (v) =>
+                            v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                        decoration: InputDecoration(
+                          labelText: 'Müşteri',
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (devicesFuture == null)
+                        const _HintBox('Önce müşteri seçin')
+                      else
+                        FutureBuilder<List<DeviceRecord>>(
+                          future: devicesFuture,
+                          builder: (context, snap) {
+                            if (snap.connectionState ==
+                                ConnectionState.waiting) {
+                              return const _HintBox('Cihazlar yükleniyor...');
+                            }
+                            if (snap.hasError) {
+                              return const _HintBox('Cihazlar yüklenemedi');
+                            }
+                            final devices = snap.data ?? [];
+                            if (devices.isEmpty) {
+                              return const _HintBox(
+                                  'Müşteriye bağlı cihaz bulunamadı');
+                            }
+                            return DropdownButtonFormField<String>(
+                              value: selectedDeviceId,
+                              items: [
+                                for (final d in devices)
+                                  DropdownMenuItem(
+                                    value: d.id,
+                                    child: Text(
+                                        '${d.brand} ${d.model} (${d.serialNumber})'),
+                                  ),
+                              ],
+                              onChanged: (v) {
+                                selectedDeviceId = v;
+                                setLocalState(() {});
+                              },
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Cihaz seçin'
+                                  : null,
+                              decoration: InputDecoration(
+                                labelText: 'Cihaz',
+                                filled: true,
+                                fillColor: const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFE2E8F0)),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      const SizedBox(height: 10),
+                      _DialogField(
+                        label: 'Başlık',
+                        controller: titleController,
+                        requiredField: true,
+                      ),
+                      const SizedBox(height: 10),
+                      _DialogField(
+                        label: 'Açıklama',
+                        controller: descriptionController,
+                        requiredField: true,
+                      ),
+                      const SizedBox(height: 10),
+                      _DialogField(
+                        label: 'İç Not',
+                        controller: internalNoteController,
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<String?>(
+                        value: selectedTechnicianId,
+                        hint: const Text('Teknisyen seçme'),
+                        items: [
+                          for (final t in technicians)
+                            DropdownMenuItem<String?>(
+                              value: t.userId,
+                              child: Text(t.name),
+                            ),
+                        ],
+                        onChanged: (v) {
+                          selectedTechnicianId = v;
+                          if (v == null) {
+                            selectedTechnicianName = null;
+                          } else {
+                            final match =
+                                technicians.where((e) => e.userId == v).toList();
+                            selectedTechnicianName =
+                                match.isEmpty ? null : match.first.name;
+                          }
+                          setLocalState(() {});
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Teknisyen (Opsiyonel)',
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: priority,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'Low', child: Text('Düşük')),
+                                DropdownMenuItem(
+                                    value: 'Normal', child: Text('Normal')),
+                                DropdownMenuItem(
+                                    value: 'High', child: Text('Yüksek')),
+                                DropdownMenuItem(
+                                    value: 'Urgent', child: Text('Acil')),
+                              ],
+                              onChanged: (v) =>
+                                  setLocalState(() => priority = v ?? 'Normal'),
+                              decoration: InputDecoration(
+                                labelText: 'Öncelik',
+                                filled: true,
+                                fillColor: const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFE2E8F0)),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: type,
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'Repair', child: Text('Onarım')),
+                                DropdownMenuItem(
+                                    value: 'Maintenance', child: Text('Bakım')),
+                                DropdownMenuItem(
+                                    value: 'Installation',
+                                    child: Text('Kurulum')),
+                              ],
+                              onChanged: (v) => setLocalState(
+                                  () => type = v ?? 'Repair'),
+                              decoration: InputDecoration(
+                                labelText: 'Tür',
+                                filled: true,
+                                fillColor: const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFE2E8F0)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('İptal'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (!(formKey.currentState?.validate() ??
+                                  false)) {
+                                return;
+                              }
+                              if (selectedCustomerId == null ||
+                                  selectedDeviceId == null) {
+                                return;
+                              }
+                              Navigator.of(ctx).pop();
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                useRootNavigator: true,
+                                builder: (_) => const Center(
+                                    child: CircularProgressIndicator()),
+                              );
+                              try {
+                                await _operationService
+                                    .createOperation(
+                                  customerId:
+                                      selectedCustomerUserId ?? selectedCustomerId!,
+                                  deviceId: selectedDeviceId!,
+                                  title: titleController.text.trim(),
+                                  description:
+                                      descriptionController.text.trim(),
+                                  internalNote: internalNoteController
+                                          .text.trim()
+                                          .isEmpty
+                                      ? null
+                                      : internalNoteController.text.trim(),
+                                  technicianId: selectedTechnicianId,
+                                  technicianName: selectedTechnicianName,
+                                  priority: priority,
+                                  type: type,
+                                )
+                                    .timeout(const Duration(seconds: 20));
+                                if (mounted) {
+                                  _refresh();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('İş emri oluşturuldu')),
+                                  );
+                                }
+                              } on TimeoutException {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'İş emri oluşturma zaman aşımına uğradı')),
+                                  );
+                                }
+                              } catch (_) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content:
+                                            Text('İş emri oluşturulamadı')),
+                                  );
+                                }
+                              } finally {
+                                if (mounted &&
+                                    Navigator.of(context, rootNavigator: true)
+                                        .canPop()) {
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3B82F6),
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Kaydet'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -99,6 +463,16 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 icon: Icons.refresh,
                                 onPressed: _refresh,
                               ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: _showCreateOperationDialog,
+                                icon: const Icon(Icons.add, size: 16),
+                                label: const Text('İş Emri Oluştur'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF3B82F6),
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -124,7 +498,17 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
   }
 }
 
-enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
+enum _NavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  devices,
+  stock,
+  other
+}
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -228,6 +612,14 @@ class _WebSidebar extends StatelessWidget {
                   active: active == _NavKey.customers,
                   onTap: () => Navigator.of(context).pushReplacement(
                     adminWebRoute(const AdminWebCustomersPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.devices_other_outlined,
+                  label: 'Cihaz Takibi',
+                  active: active == _NavKey.devices,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebDevicePage()),
                   ),
                 ),
                 _NavItem(
@@ -664,6 +1056,64 @@ class _SecondaryActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         backgroundColor: Colors.white,
+      ),
+    );
+  }
+}
+
+class _DialogField extends StatelessWidget {
+  const _DialogField({
+    required this.label,
+    required this.controller,
+    this.requiredField = false,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final bool requiredField;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      validator: requiredField
+          ? (val) => (val == null || val.trim().isEmpty) ? 'Zorunlu' : null
+          : null,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFF8FAFC),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+      ),
+    );
+  }
+}
+
+class _HintBox extends StatelessWidget {
+  const _HintBox(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
       ),
     );
   }

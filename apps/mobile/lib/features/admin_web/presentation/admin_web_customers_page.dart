@@ -10,6 +10,7 @@ import 'admin_web_offers_page.dart';
 import 'admin_web_stock_page.dart';
 import 'admin_web_team_page.dart';
 import 'admin_web_tickets_page.dart';
+import 'admin_web_device_page.dart';
 
 class AdminWebCustomersPage extends StatefulWidget {
   const AdminWebCustomersPage({super.key});
@@ -45,7 +46,8 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 520),
@@ -236,7 +238,8 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          _CustomersTableCard(customersFuture: _customersFuture),
+                          _CustomersTableCard(
+                              customersFuture: _customersFuture),
                         ],
                       ),
                     ),
@@ -251,7 +254,17 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
   }
 }
 
-enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
+enum _NavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  devices,
+  stock,
+  other
+}
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -353,6 +366,17 @@ class _WebSidebar extends StatelessWidget {
                   icon: Icons.person_outline_rounded,
                   label: 'Müşteri Yönetimi',
                   active: active == _NavKey.customers,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebCustomersPage()),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.devices_other_outlined,
+                  label: 'Cihaz Takibi',
+                  active: active == _NavKey.devices,
+                  onTap: () => Navigator.of(context).pushReplacement(
+                    adminWebRoute(const AdminWebDevicePage()),
+                  ),
                 ),
                 _NavItem(
                   icon: Icons.inventory_2_outlined,
@@ -673,7 +697,8 @@ class _TableHeader extends StatelessWidget {
 }
 
 class _TableRow extends StatelessWidget {
-  const _TableRow({required this.name, required this.email, required this.phone});
+  const _TableRow(
+      {required this.name, required this.email, required this.phone});
 
   final String name;
   final String email;

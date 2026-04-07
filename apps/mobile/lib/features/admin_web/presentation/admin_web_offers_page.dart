@@ -5,6 +5,7 @@ import 'admin_web_offer_detail_page.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 import 'shared/admin_web_topbar.dart';
+import 'admin_web_device_page.dart';
 
 class AdminWebOffersPage extends StatefulWidget {
   const AdminWebOffersPage({super.key});
@@ -68,6 +69,7 @@ class _AdminWebOffersPageState extends State<AdminWebOffersPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -130,8 +132,7 @@ class _MetricRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = offers.length;
-    final totalAmount =
-        offers.fold<double>(0, (sum, o) => sum + o.amount);
+    final totalAmount = offers.fold<double>(0, (sum, o) => sum + o.amount);
     final totalItems = offers.fold<int>(
         0, (sum, o) => sum + o.items.fold<int>(0, (s, i) => s + i.quantity));
 
@@ -344,8 +345,7 @@ class _TableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemCount =
-        offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
+    final itemCount = offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -363,8 +363,8 @@ class _TableRow extends StatelessWidget {
             Expanded(child: Text(offer.customerId ?? '-')),
             Expanded(child: Text('$itemCount')),
             Expanded(
-                child:
-                    Text('${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
+                child: Text(
+                    '${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
             Expanded(child: Text(_formatTime(offer.createdAt))),
           ],
         ),

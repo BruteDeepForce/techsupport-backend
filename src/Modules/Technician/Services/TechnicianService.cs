@@ -44,7 +44,7 @@ public sealed class TechnicianService : ITechnicianService
 
     public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
-        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
+        var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.AppUserId == technicianId, ct);
         if (technician is null)        
         {
             _logger.LogError("Technician with ID {TechnicianId} not found for tenant {TenantId}", technicianId, tenantId);

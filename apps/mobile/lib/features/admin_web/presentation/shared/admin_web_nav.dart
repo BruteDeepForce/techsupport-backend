@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../admin_web_customers_page.dart';
+import '../admin_web_device_page.dart';
 import '../admin_web_home_page.dart';
 import '../admin_web_offer_detail_page.dart';
 import '../admin_web_offers_page.dart';
@@ -12,7 +13,16 @@ import '../admin_web_ticket_detail_page.dart';
 import '../admin_web_tickets_page.dart';
 import '../admin_web_route.dart';
 
-enum AdminNavKey { home, tickets, operations, offers, team, customers, stock }
+enum AdminNavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  devices,
+  stock
+}
 
 class AdminNavItem {
   const AdminNavItem({
@@ -67,6 +77,12 @@ List<AdminNavItem> adminNavItems() {
       pageBuilder: (_) => const AdminWebCustomersPage(),
     ),
     AdminNavItem(
+      key: AdminNavKey.devices,
+      label: 'Cihaz Takibi',
+      icon: Icons.devices_other_outlined,
+      pageBuilder: (_) => const AdminWebDevicePage(),
+    ),
+    AdminNavItem(
       key: AdminNavKey.stock,
       label: 'Stok Yönetimi',
       icon: Icons.inventory_2_outlined,
@@ -76,4 +92,3 @@ List<AdminNavItem> adminNavItems() {
 }
 
 PageRouteBuilder<void> adminNavRoute(Widget page) => adminWebRoute(page);
-

@@ -12,8 +12,10 @@ public interface IDeviceService
     Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, 
     string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
     string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct);
-    Task<Devices?> GetAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
+    Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<Devices> DeactivateAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
+    Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct);
+    Task<IReadOnlyCollection<Devices>> GetCustomerDevicesAsync(Guid tenantId, Guid customerId, CancellationToken ct);
 }
 
 public sealed class DeviceService : IDeviceService
@@ -93,7 +95,7 @@ public sealed class DeviceService : IDeviceService
         return device;
     }
 
-    public Task<Devices?> GetAsync(Guid tenantId, Guid deviceId, CancellationToken ct)
+    public Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct)
     {
         return _db.Devices.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == deviceId, ct);
     }
@@ -112,5 +114,17 @@ public sealed class DeviceService : IDeviceService
         await _bus.Publish(new DeviceDeactivated(device.TenantId, device.BranchId, device.Id, DateTimeOffset.UtcNow), ct);
 
         return device;
+    }
+
+    public async Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct)
+    {
+        var devices = await _db.Devices.AsNoTracking().Where(x => x.TenantId == tenantId).ToListAsync(ct);
+        return devices;
+    }
+
+    public async Task<IReadOnlyCollection<Devices>> GetCustomerDevicesAsync(Guid tenantId, Guid customerId, CancellationToken ct)
+    {
+        var devices = await _db.Devices.AsNoTracking().Where(x => x.TenantId == tenantId && x.CustomerId == customerId).ToListAsync(ct);
+        return devices;
     }
 }
