@@ -25,18 +25,37 @@ class Technician {
                 ?.toString() ??
             '',
         tenantId: (json['tenantId'] ?? json['TenantId'])?.toString() ?? '',
-        name: (json['name'] ?? json['Name'] ?? json['firstName'])
-                ?.toString() ??
+        name: (json['name'] ?? json['Name'] ?? json['firstName'])?.toString() ??
             '',
         email: (json['email'] ?? json['Email'])?.toString() ?? '',
         phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
-        specializations: (json['specializations'] ??
-                    json['Specializations']) is List
-            ? (json['specializations'] ?? json['Specializations'])
-                .map((e) => e.toString())
-                .toList()
-                .cast<String>()
-            : null,
+        specializations:
+            (json['specializations'] ?? json['Specializations']) is List
+                ? (json['specializations'] ?? json['Specializations'])
+                    .map((e) => e.toString())
+                    .toList()
+                    .cast<String>()
+                : null,
         isActive: json['isActive'] ?? json['IsActive'],
+      );
+}
+
+class Experts {
+  Experts({
+    required this.id,
+    required this.name,
+  });
+
+  final String id;
+  final String name;
+
+  factory Experts.fromJson(Map<String, dynamic> json) => Experts(
+        id: (json['id'] ?? json['Id'])?.toString() ?? '',
+        name: (json['name'] ??
+                json['Name'] ??
+                json['expertiseName'] ??
+                json['ExpertiseName'])
+            ?.toString() ??
+            '',
       );
 }

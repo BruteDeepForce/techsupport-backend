@@ -11,7 +11,7 @@ public interface IDeviceService
 {
     Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, 
     string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct);
+    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, CancellationToken ct);
     Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<Devices> DeactivateAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct);
@@ -31,7 +31,7 @@ public sealed class DeviceService : IDeviceService
 
     public async Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, 
     string model, string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct)
+    string? barcodeNumber, Guid? customerId, Guid? appUserId,string? customerName, string status, CancellationToken ct)
     {
         var exists = await _db.Devices.AnyAsync(x => x.TenantId == tenantId && x.SerialNumber == serialNumber, ct);
         if (exists) throw new InvalidOperationException("Device already exists for tenant (serialNumber must be unique)");
@@ -54,7 +54,7 @@ public sealed class DeviceService : IDeviceService
             WarrantyStartAtUtc = normalizedWarrantyStart,
             WarrantyEndAtUtc = normalizedWarrantyEnd,
             BarcodeNumber = barcodeNumber?.Trim(),
-            CustomerId = customerId,
+            CustomerId = appUserId.Value,  //!burada gelen appuserid customerid olarak kaydediyoruz
             CustomerName = customerName?.Trim(),
             Status = Enum.TryParse<DeviceStatus>(status, true, out var parsedStatus) ? parsedStatus : DeviceStatus.Other,
             IsActive = true,
@@ -71,7 +71,7 @@ public sealed class DeviceService : IDeviceService
                 DeviceId = device.Id,
                 TenantId = device.TenantId,
                 BranchId = device.BranchId,
-                CustomerId = device.CustomerId.Value,
+                CustomerId = device.CustomerId.Value, //!burada gelen appuserid customerid olarak kaydediyoruz
                 Status = device.Status.ToString(),
                 CustomerName = device.CustomerName,
                 ProblemDescription = device.ProblemDescription,

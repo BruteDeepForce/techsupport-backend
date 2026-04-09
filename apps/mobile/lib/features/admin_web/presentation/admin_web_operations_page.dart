@@ -118,7 +118,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           selectedCustomerUserId = null;
                           selectedDeviceId = null;
                           if (v != null) {
-                            devicesFuture = _deviceService.getCustomerDevices(v);
+                            devicesFuture =
+                                _deviceService.getCustomerDevices(v);
                             final match =
                                 customers.where((e) => e.id == v).toList();
                             if (match.isNotEmpty) {
@@ -175,9 +176,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 selectedDeviceId = v;
                                 setLocalState(() {});
                               },
-                              validator: (v) => v == null || v.isEmpty
-                                  ? 'Cihaz seçin'
-                                  : null,
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? 'Cihaz seçin' : null,
                               decoration: InputDecoration(
                                 labelText: 'Cihaz',
                                 filled: true,
@@ -224,8 +224,9 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           if (v == null) {
                             selectedTechnicianName = null;
                           } else {
-                            final match =
-                                technicians.where((e) => e.userId == v).toList();
+                            final match = technicians
+                                .where((e) => e.userId == v)
+                                .toList();
                             selectedTechnicianName =
                                 match.isEmpty ? null : match.first.name;
                           }
@@ -285,8 +286,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                     value: 'Installation',
                                     child: Text('Kurulum')),
                               ],
-                              onChanged: (v) => setLocalState(
-                                  () => type = v ?? 'Repair'),
+                              onChanged: (v) =>
+                                  setLocalState(() => type = v ?? 'Repair'),
                               decoration: InputDecoration(
                                 labelText: 'Tür',
                                 filled: true,
@@ -321,32 +322,36 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 return;
                               }
                               Navigator.of(ctx).pop();
+                              BuildContext? loadingCtx;
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
                                 useRootNavigator: true,
-                                builder: (_) => const Center(
-                                    child: CircularProgressIndicator()),
+                                builder: (ctx) {
+                                  loadingCtx = ctx;
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                },
                               );
                               try {
                                 await _operationService
                                     .createOperation(
-                                  customerId:
-                                      selectedCustomerUserId ?? selectedCustomerId!,
-                                  deviceId: selectedDeviceId!,
-                                  title: titleController.text.trim(),
-                                  description:
-                                      descriptionController.text.trim(),
-                                  internalNote: internalNoteController
-                                          .text.trim()
-                                          .isEmpty
-                                      ? null
-                                      : internalNoteController.text.trim(),
-                                  technicianId: selectedTechnicianId,
-                                  technicianName: selectedTechnicianName,
-                                  priority: priority,
-                                  type: type,
-                                )
+                                      customerId: selectedCustomerUserId ??
+                                          selectedCustomerId!,
+                                      deviceId: selectedDeviceId!,
+                                      title: titleController.text.trim(),
+                                      description:
+                                          descriptionController.text.trim(),
+                                      internalNote: internalNoteController.text
+                                              .trim()
+                                              .isEmpty
+                                          ? null
+                                          : internalNoteController.text.trim(),
+                                      technicianId: selectedTechnicianId,
+                                      technicianName: selectedTechnicianName,
+                                      priority: priority,
+                                      type: type,
+                                    )
                                     .timeout(const Duration(seconds: 20));
                                 if (mounted) {
                                   _refresh();
@@ -372,11 +377,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   );
                                 }
                               } finally {
-                                if (mounted &&
-                                    Navigator.of(context, rootNavigator: true)
-                                        .canPop()) {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .pop();
+                                if (loadingCtx != null) {
+                                  Navigator.of(loadingCtx!).pop();
                                 }
                               }
                             },

@@ -34,127 +34,191 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
     final emailController = TextEditingController();
     final phoneController = TextEditingController();
     final tempPasswordController = TextEditingController();
+    final selectedExpertiseIds = <String>{};
 
     showDialog(
       context: context,
       builder: (ctx) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Personel Bilgileri',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A)),
-                  ),
-                  const SizedBox(height: 14),
-                  _DialogField(
-                    label: 'Ad',
-                    controller: nameController,
-                    requiredField: true,
-                  ),
-                  const SizedBox(height: 10),
-                  _DialogField(
-                    label: 'Soyad',
-                    controller: lastNameController,
-                  ),
-                  const SizedBox(height: 10),
-                  _DialogField(
-                    label: 'E-posta',
-                    controller: emailController,
-                    requiredField: true,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _DialogField(
-                          label: 'Telefon',
-                          controller: phoneController,
+        return StatefulBuilder(
+          builder: (context, setDialogState) => Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Personel Bilgileri',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A)),
+                    ),
+                    const SizedBox(height: 14),
+                    _DialogField(
+                      label: 'Ad',
+                      controller: nameController,
+                      requiredField: true,
+                    ),
+                    const SizedBox(height: 10),
+                    _DialogField(
+                      label: 'Soyad',
+                      controller: lastNameController,
+                    ),
+                    const SizedBox(height: 10),
+                    _DialogField(
+                      label: 'E-posta',
+                      controller: emailController,
+                      requiredField: true,
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _DialogField(
+                            label: 'Telefon',
+                            controller: phoneController,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _DialogField(
-                          label: 'Geçici Şifre',
-                          controller: tempPasswordController,
-                          requiredField: true,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _DialogField(
+                            label: 'Geçici Şifre',
+                            controller: tempPasswordController,
+                            requiredField: true,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('İptal'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (!(formKey.currentState?.validate() ?? false)) {
-                            return;
-                          }
-                          Navigator.of(ctx).pop();
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) => const Center(
-                                child: CircularProgressIndicator()),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    FutureBuilder<List<Experts>>(
+                      future: _technicianService.listExpertise(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: LinearProgressIndicator(minHeight: 2),
                           );
-                          try {
-                            await _technicianService.createTechnician(
-                              firstName: nameController.text.trim(),
-                              lastName: lastNameController.text.trim().isEmpty
-                                  ? null
-                                  : lastNameController.text.trim(),
-                              email: emailController.text.trim(),
-                              phoneNumber: phoneController.text.trim().isEmpty
-                                  ? null
-                                  : phoneController.text.trim(),
-                              temporaryPassword:
-                                  tempPasswordController.text.trim(),
-                            );
-                            if (mounted) Navigator.of(context).pop();
-                            if (mounted) {
-                              _refresh();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Teknisyen oluşturma başlatıldı')),
-                              );
-                            }
-                          } catch (_) {
-                            if (mounted) Navigator.of(context).pop();
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Teknisyen oluşturulamadı')),
-                              );
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3B82F6),
-                          foregroundColor: Colors.white,
+                        }
+                        if (snapshot.hasError) {
+                          return const Text('Uzmanlıklar yüklenemedi',
+                              style: TextStyle(color: Color(0xFF94A3B8)));
+                        }
+                        final experts = snapshot.data ?? [];
+                        if (experts.isEmpty) {
+                          return const Text('Uzmanlık bulunamadı',
+                              style: TextStyle(color: Color(0xFF94A3B8)));
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Uzmanlık Alanları',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                for (final e in experts)
+                                  FilterChip(
+                                    label: Text(e.name),
+                                    selected:
+                                        selectedExpertiseIds.contains(e.id),
+                                    onSelected: (val) {
+                                      setDialogState(() {
+                                        if (val) {
+                                          selectedExpertiseIds.add(e.id);
+                                        } else {
+                                          selectedExpertiseIds.remove(e.id);
+                                        }
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('İptal'),
                         ),
-                        child: const Text('Kaydet'),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (!(formKey.currentState?.validate() ?? false)) {
+                              return;
+                            }
+                            Navigator.of(ctx).pop();
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => const Center(
+                                  child: CircularProgressIndicator()),
+                            );
+                            try {
+                              await _technicianService.createTechnician(
+                                firstName: nameController.text.trim(),
+                                lastName: lastNameController.text.trim().isEmpty
+                                    ? null
+                                    : lastNameController.text.trim(),
+                                email: emailController.text.trim(),
+                                phoneNumber: phoneController.text.trim().isEmpty
+                                    ? null
+                                    : phoneController.text.trim(),
+                                temporaryPassword:
+                                    tempPasswordController.text.trim(),
+                                expertiseIds: selectedExpertiseIds.isEmpty
+                                    ? null
+                                    : selectedExpertiseIds.toList(),
+                              );
+                              if (mounted) Navigator.of(context).pop();
+                              if (mounted) {
+                                _refresh();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Teknisyen oluşturma başlatıldı')),
+                                );
+                              }
+                            } catch (_) {
+                              if (mounted) Navigator.of(context).pop();
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Teknisyen oluşturulamadı')),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3B82F6),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Kaydet'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

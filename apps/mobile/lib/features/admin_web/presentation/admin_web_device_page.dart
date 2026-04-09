@@ -41,6 +41,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
     final warrantyStartController = TextEditingController();
     DateTime? warrantyStartDate;
     String? selectedCustomerId;
+    String? selectedCustomerUserId;
     String? selectedCustomerName;
     String status = 'Other';
 
@@ -96,6 +97,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   controller: barcodeController,
                 ),
                 const SizedBox(height: 10),
+                //! burada müşteri selected
                 DropdownButtonFormField<String>(
                   value: selectedCustomerId,
                   items: [
@@ -107,15 +109,20 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   ],
                   onChanged: (v) {
                     selectedCustomerId = v;
+                    //! query for customer by id to map appUserId + name
                     final match = customers.where((e) => e.id == v).toList();
                     if (match.isNotEmpty) {
                       selectedCustomerName = match.first.name;
+                      selectedCustomerUserId = match.first.appUserId;
                       customerNameController.text = match.first.name;
                     } else {
                       selectedCustomerName = null;
+                      selectedCustomerUserId = null;
                       customerNameController.clear();
                     }
                   },
+                  validator: (v) =>
+                      v == null || v.isEmpty ? 'Müşteri seçin' : null,
                   decoration: InputDecoration(
                     labelText: 'Müşteri',
                     filled: true,
@@ -204,6 +211,23 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         if (!(formKey.currentState?.validate() ?? false)) {
                           return;
                         }
+                        if (selectedCustomerId == null ||
+                            selectedCustomerId!.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Müşteri seçmelisiniz')),
+                          );
+                          return;
+                        }
+                        if (selectedCustomerUserId == null ||
+                            selectedCustomerUserId!.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Müşterinin kullanıcı bilgisi yok')),
+                          );
+                          return;
+                        }
                         Navigator.of(ctx).pop();
                         showDialog(
                           context: context,
@@ -227,6 +251,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                                 ? null
                                 : barcodeController.text.trim(),
                             customerId: selectedCustomerId,
+                            appUserId: selectedCustomerUserId,
                             customerName: selectedCustomerName ??
                                 (customerNameController.text.trim().isEmpty
                                     ? null

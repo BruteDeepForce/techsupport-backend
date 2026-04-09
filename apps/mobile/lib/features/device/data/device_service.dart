@@ -25,7 +25,7 @@ class DeviceService {
     throw Exception('Failed to load device info: ${response.statusCode}');
   }
 
-  Future<List<DeviceRecord>> getCustomerDevices(String customerId) async {
+  Future<List<DeviceRecord>> getCustomerDevices(String? customerId) async {
     final response = await _dio.get('/api/devices/customer/$customerId');
     if (response.statusCode == 200) {
       final list = (response.data as List).cast<dynamic>();
@@ -46,6 +46,7 @@ class DeviceService {
       'warrantyStartAtUtc': device.warrantyStartAtUtc?.toIso8601String(),
       'barcodeNumber': device.barcodeNumber,
       'customerId': device.customerId,
+      'appUserId': device.appUserId,
       'customerName': device.customerName,
       'status': device.status,
     });

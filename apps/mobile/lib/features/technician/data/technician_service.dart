@@ -32,6 +32,7 @@ class TechnicianService {
     required String email,
     String? phoneNumber,
     required String temporaryPassword,
+    List<String>? expertiseIds,
   }) async {
     final body = {
       'firstName': firstName,
@@ -39,6 +40,7 @@ class TechnicianService {
       'email': email,
       'phoneNumber': phoneNumber,
       'temporaryPassword': temporaryPassword,
+      'expertiseIds': expertiseIds,
     }..removeWhere((k, v) => v == null);
 
     final res = await _dio.post('/api/technicians', data: body);
@@ -76,5 +78,16 @@ class TechnicianService {
     if (res.statusCode != 200 && res.statusCode != 201) {
       throw Exception('Failed to create expertise: ${res.statusCode}');
     }
+  }
+
+  Future<List<Experts>> listExpertise() async {
+    final res = await _dio.get('/api/technicians/experts');
+    if (res.statusCode == 200) {
+      final list = (res.data as List).cast<dynamic>();
+      return list
+          .map((e) => Experts.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to load expertise: ${res.statusCode}');
   }
 }

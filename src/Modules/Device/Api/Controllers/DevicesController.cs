@@ -19,7 +19,7 @@ public sealed class DevicesController : ControllerBase
     public sealed record RegisterDeviceDto(
     string Brand, string Model, string SerialNumber,
     string? ProblemDescription, int? GuaranteePeriod, DateTimeOffset? WarrantyStartAtUtc,
-    string? BarcodeNumber, Guid? CustomerId, string? CustomerName,
+    string? BarcodeNumber, Guid? CustomerId, Guid? appUserId, string? CustomerName,
     string Status);
 
     [Authorize(Roles = "admin,customer")]
@@ -29,7 +29,7 @@ public sealed class DevicesController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var branchId = GetBranchIdFromClaims();
         var device = await _devices.RegisterAsync(tenantId.Value, branchId.Value, dto.Brand, dto.Model, dto.SerialNumber,
-            dto.ProblemDescription, dto.GuaranteePeriod, dto.WarrantyStartAtUtc, dto.BarcodeNumber, dto.CustomerId, dto.CustomerName, dto.Status, ct);
+            dto.ProblemDescription, dto.GuaranteePeriod, dto.WarrantyStartAtUtc, dto.BarcodeNumber, dto.CustomerId, dto.appUserId, dto.CustomerName, dto.Status, ct);
         return Ok(new
         {
             device.Id,

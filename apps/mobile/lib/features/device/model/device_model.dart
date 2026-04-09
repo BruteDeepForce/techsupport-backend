@@ -7,6 +7,7 @@ class DeviceDTO {
   final DateTime? warrantyStartAtUtc;
   final String? barcodeNumber;
   final String? customerId;
+  final String? appUserId;
   final String? customerName;
   final String status;
 
@@ -19,6 +20,7 @@ class DeviceDTO {
     this.warrantyStartAtUtc,
     this.barcodeNumber,
     this.customerId,
+    this.appUserId,
     this.customerName,
     required this.status,
   });
@@ -80,18 +82,16 @@ class DeviceRecord {
               ?.toString(),
       guaranteePeriod:
           (json['guaranteePeriod'] ?? json['GuaranteePeriod']) as int?,
-      warrantyStartAtUtc: _parseDate(
-          json['warrantyStartAtUtc'] ?? json['WarrantyStartAtUtc']),
+      warrantyStartAtUtc:
+          _parseDate(json['warrantyStartAtUtc'] ?? json['WarrantyStartAtUtc']),
       warrantyEndAtUtc:
           _parseDate(json['warrantyEndAtUtc'] ?? json['WarrantyEndAtUtc']),
-      barcodeNumber: (json['barcodeNumber'] ?? json['BarcodeNumber'])
-          ?.toString(),
+      barcodeNumber:
+          (json['barcodeNumber'] ?? json['BarcodeNumber'])?.toString(),
       status: (json['status'] ?? json['Status']).toString(),
       isActive: (json['isActive'] ?? json['IsActive']) == true,
-      createdAtUtc:
-          _parseDate(json['createdAtUtc'] ?? json['CreatedAtUtc']),
-      updatedAtUtc:
-          _parseDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+      createdAtUtc: _parseDate(json['createdAtUtc'] ?? json['CreatedAtUtc']),
+      updatedAtUtc: _parseDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
       deactivatedAtUtc:
           _parseDate(json['deactivatedAtUtc'] ?? json['DeactivatedAtUtc']),
     );
