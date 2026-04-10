@@ -5,6 +5,7 @@ class Technician {
     required this.name,
     required this.email,
     this.phoneNumber,
+    this.pictureUrl,
     this.specializations,
     this.isActive,
   });
@@ -14,6 +15,7 @@ class Technician {
   final String name;
   final String email;
   final String? phoneNumber;
+  final String? pictureUrl;
   final List<String>? specializations;
   final bool? isActive;
 
@@ -29,6 +31,7 @@ class Technician {
             '',
         email: (json['email'] ?? json['Email'])?.toString() ?? '',
         phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
+        pictureUrl: (json['pictureUrl'] ?? json['PictureUrl'])?.toString(),
         specializations:
             (json['specializations'] ?? json['Specializations']) is List
                 ? (json['specializations'] ?? json['Specializations'])
@@ -52,10 +55,10 @@ class Experts {
   factory Experts.fromJson(Map<String, dynamic> json) => Experts(
         id: (json['id'] ?? json['Id'])?.toString() ?? '',
         name: (json['name'] ??
-                json['Name'] ??
-                json['expertiseName'] ??
-                json['ExpertiseName'])
-            ?.toString() ??
+                    json['Name'] ??
+                    json['expertiseName'] ??
+                    json['ExpertiseName'])
+                ?.toString() ??
             '',
       );
 }

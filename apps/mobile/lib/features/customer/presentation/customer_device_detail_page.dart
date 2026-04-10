@@ -192,8 +192,7 @@ class _InfoRow extends StatelessWidget {
           ),
           Text(value,
               style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600)),
+                  color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -215,7 +214,7 @@ String _statusLabel(String status) {
     case 'inmaintenance':
       return 'Bakımda';
     case 'selled':
-      return 'Satıldı';
+      return 'Kullanımda';
     case 'returned':
       return 'İade';
     default:

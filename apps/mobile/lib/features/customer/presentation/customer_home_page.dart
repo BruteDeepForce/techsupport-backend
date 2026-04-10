@@ -223,7 +223,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Talepler yüklenemedi'),
+                    const Text('Talebiniz Bulunmamaktadır'),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -493,9 +493,19 @@ class _DeviceRow extends StatelessWidget {
                 ],
               ),
             ),
-            LinearBadge(
-              label: _deviceStatusLabel(device.status),
-              color: _deviceStatusColor(device.status),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                LinearBadge(
+                  label: _deviceStatusLabel(device.status),
+                  color: _deviceStatusColor(device.status),
+                ),
+                const SizedBox(height: 6),
+                LinearBadge(
+                  label: _deviceWarrantyLabel(device),
+                  color: _deviceWarrantyColor(device),
+                ),
+              ],
             ),
           ],
         ),
@@ -532,4 +542,23 @@ Color _deviceStatusColor(String status) {
     default:
       return AppColors.statusYellow;
   }
+}
+
+bool _isDeviceWarrantyCovered(DeviceRecord device) {
+  final start = device.warrantyStartAtUtc;
+  final end = device.warrantyEndAtUtc;
+  if (start == null || end == null) return false;
+  return start.isBefore(end);
+}
+
+String _deviceWarrantyLabel(DeviceRecord device) {
+  return _isDeviceWarrantyCovered(device)
+      ? 'Garanti kapsamındadır'
+      : 'Garanti kapsamında değil';
+}
+
+Color _deviceWarrantyColor(DeviceRecord device) {
+  return _isDeviceWarrantyCovered(device)
+      ? AppColors.statusGreen
+      : AppColors.statusRed;
 }

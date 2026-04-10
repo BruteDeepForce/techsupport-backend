@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/design/app_design.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/network/auth_interceptor.dart';
 import '../../auth/data/auth_service.dart';
 import '../../auth/data/token_storage.dart';
 import 'role_selection_page.dart';
@@ -208,10 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                                       await _authService.login(email, password);
                                   await _tokenStorage.saveToken(token);
 
-                                  // Register interceptor so subsequent requests include the token
-                                  ApiClient().dio.interceptors.add(
-                                        AuthInterceptor(_tokenStorage.getToken),
-                                      );
+                                  // ApiClient already has a global auth interceptor.
 
                                   if (context.mounted) {
                                     Navigator.of(context)
@@ -361,8 +356,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: SizedBox(
                                   height: double.infinity,
                                   child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
@@ -512,10 +506,6 @@ class _LoginCard extends StatelessWidget {
                 try {
                   final token = await authService.login(email, password);
                   await tokenStorage.saveToken(token);
-                  ApiClient()
-                      .dio
-                      .interceptors
-                      .add(AuthInterceptor(tokenStorage.getToken));
 
                   if (context.mounted) {
                     Navigator.of(context).pop();

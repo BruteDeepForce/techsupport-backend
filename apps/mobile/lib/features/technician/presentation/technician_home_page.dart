@@ -1,8 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/design/app_design.dart';
+import '../../../core/network/api_client.dart';
+import '../../auth/data/token_storage.dart';
 import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
+import '../data/technician_service.dart';
+import '../models/technician_models.dart';
 import 'technician_payment_page.dart';
 import 'technician_operation_detail_page.dart';
 import 'technician_stock_page.dart';
@@ -16,12 +23,17 @@ class TechnicianHomePage extends StatefulWidget {
 
 class _TechnicianHomePageState extends State<TechnicianHomePage> {
   final OperationService _operationService = OperationService();
+  final TechnicianService _technicianService = TechnicianService();
+  final TokenStorage _tokenStorage = TokenStorage();
+  final ImagePicker _picker = ImagePicker();
   late Future<List<OperationRecord>> _opsFuture;
+  late Future<Technician?> _meFuture;
 
   @override
   void initState() {
     super.initState();
     _opsFuture = _operationService.listOperations();
+    _meFuture = _loadMe();
   }
 
   void _refreshOperations() {
@@ -30,25 +42,166 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
     });
   }
 
+  void _refreshMe() {
+    setState(() {
+      _meFuture = _loadMe();
+    });
+  }
+
+  Future<Technician?> _loadMe() async {
+    final token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) return null;
+    final payload = _decodeJwtPayload(token);
+    final userId = payload['user_id']?.toString();
+    if (userId == null || userId.isEmpty) return null;
+    return _technicianService.getTechnician(userId);
+  }
+
+  Map<String, dynamic> _decodeJwtPayload(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) return {};
+    final payload = parts[1];
+    final normalized = base64Url.normalize(payload);
+    final decoded = String.fromCharCodes(base64Url.decode(normalized));
+    return decoded.isNotEmpty
+        ? jsonDecode(decoded) as Map<String, dynamic>
+        : {};
+  }
+
+  String? _pictureUrl(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    final base = ApiClient().dio.options.baseUrl;
+    if (raw.startsWith('/')) return '$base$raw';
+    return '$base/$raw';
+  }
+
+  Future<void> _pickAndUploadProfilePicture() async {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (picked == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      await _technicianService.updateProfile(picturePath: picked.path);
+      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        _refreshMe();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil fotoğrafı güncellendi')),
+        );
+      }
+    } catch (_) {
+      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil fotoğrafı güncellenemedi')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showProfilePhotoDialog(String? imageUrl) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child: Container(
+          width: 340,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 400,
+                height: 400,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: imageUrl == null
+                      ? const Icon(Icons.person_outline,
+                          size: 84, color: AppColors.textSecondary)
+                      : Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.person_outline,
+                            size: 84,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    Navigator.of(ctx).pop();
+                    await _pickAndUploadProfilePicture();
+                  },
+                  icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                  label: const Text('Fotoğrafı Değiştir'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LinearPageShell(
       title: 'Teknisyen',
       subtitle: 'Teknisyen Portalı',
-      trailing: Container(
-        width: 26,
-        height: 26,
-        decoration: BoxDecoration(
-          color: AppColors.bgElevated,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: AppColors.border, width: 0.5),
-        ),
-        alignment: Alignment.center,
-        child: const Text('TJ',
-            style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 9,
-                fontWeight: FontWeight.w600)),
+      trailing: FutureBuilder<Technician?>(
+        future: _meFuture,
+        builder: (context, snapshot) {
+          final me = snapshot.data;
+          final imageUrl = _pictureUrl(me?.pictureUrl);
+          return InkWell(
+            onTap: () => _showProfilePhotoDialog(imageUrl),
+            borderRadius: BorderRadius.circular(22),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.bgElevated,
+              child: imageUrl == null
+                  ? const Icon(Icons.person_outline,
+                      size: 24, color: AppColors.textSecondary)
+                  : ClipOval(
+                      child: Image.network(
+                        imageUrl,
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.person_outline,
+                          size: 24,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+            ),
+          );
+        },
       ),
       tabBar: const LinearTabBar(
         items: [
@@ -58,8 +211,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
               active: true),
           LinearTabItem(
               icon: Icons.confirmation_number_outlined, label: 'Talepler'),
-          LinearTabItem(
-              icon: Icons.devices_other_outlined, label: 'Cihazlar'),
+          LinearTabItem(icon: Icons.devices_other_outlined, label: 'Cihazlar'),
           LinearTabItem(icon: Icons.logout_rounded, label: 'Çıkış'),
         ],
       ),
@@ -96,12 +248,12 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
             }
             final ops = snapshot.data ?? [];
             final activeCount = ops
-                .where((o) =>
-                    o.status != 'Completed' && o.status != 'Delivered')
+                .where(
+                    (o) => o.status != 'Completed' && o.status != 'Delivered')
                 .length;
             final doneCount = ops
-                .where((o) =>
-                    o.status == 'Completed' || o.status == 'Delivered')
+                .where(
+                    (o) => o.status == 'Completed' || o.status == 'Delivered')
                 .length;
 
             return Column(

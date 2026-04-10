@@ -71,7 +71,7 @@ public sealed class DeviceService : IDeviceService
                 DeviceId = device.Id,
                 TenantId = device.TenantId,
                 BranchId = device.BranchId,
-                CustomerId = device.CustomerId.Value, //!burada gelen appuserid customerid olarak kaydediyoruz
+                CustomerId = customerId.Value, //!burada gelen appuserid customerid olarak kaydediyoruz
                 Status = device.Status.ToString(),
                 CustomerName = device.CustomerName,
                 ProblemDescription = device.ProblemDescription,

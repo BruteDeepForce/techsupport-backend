@@ -1,5 +1,6 @@
 using MassTransit;
 using MassTransit.Futures.Contracts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TechSupport.Identity.Contracts.Events;
@@ -13,7 +14,7 @@ namespace TechSupport.Technician.Services;
 
 public interface ITechnicianService
 {
-    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName,  string email, 
+    Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string firstName, string email,
     string? phoneNumber, string temporaryPassword, List<string>? experts, DateTimeOffset? employmentStartDate, CancellationToken ct);
     Task<TechnicianProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct);
     Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct);
@@ -25,27 +26,32 @@ public interface ITechnicianService
     Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string technicianInfo, string status, CancellationToken ct);
     Task<bool> CreateTechnicianExpertiseAsync(Guid tenantId, string expertise, CancellationToken ct);
     Task<List<TechnicianExpertResponseDTO>> GetTechnicianExpertiseByNameAsync(Guid tenantId, CancellationToken ct);
+    Task<object> UpdateTechnicianProfileAsync(Guid tenantId, Guid? branchid, Guid technicianId, string? name, string? email,
+    string? phoneNumber, List<string>? expertiseIds, IFormFile? picture, CancellationToken ct);
+
 }
 
 public sealed class TechnicianService : ITechnicianService
 {
     private readonly TechnicianDbContext _db;
     private readonly IBus _bus;
+    private readonly S3Service _s3Service;
 
     private readonly ILogger<TechnicianService> _logger;
 
-    public TechnicianService(TechnicianDbContext db, IBus bus, ILogger<TechnicianService> logger)
+    public TechnicianService(TechnicianDbContext db, IBus bus, S3Service s3Service, ILogger<TechnicianService> logger)
     {
         _db = db;
         _bus = bus;
+        _s3Service = s3Service;
         _logger = logger;
     }
-    public record TechnicianExpertResponseDTO (Guid Id, string ExpertiseName);
+    public record TechnicianExpertResponseDTO(Guid Id, string ExpertiseName);
 
     public async Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct)
     {
         var technician = await _db.Technicians.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.AppUserId == technicianId, ct);
-        if (technician is null)        
+        if (technician is null)
         {
             _logger.LogError("Technician with ID {TechnicianId} not found for tenant {TenantId}", technicianId, tenantId);
             throw new InvalidOperationException("Technician not found");
@@ -59,7 +65,7 @@ public sealed class TechnicianService : ITechnicianService
             BranchId = branchId,
             CustomerId = customerId,
             AssignedAtUtc = DateTimeOffset.UtcNow,
-            AssignedTechnicianId = technician.Id, 
+            AssignedTechnicianId = technician.Id,
             DeviceId = deviceId,
             Title = title,
             Description = description,
@@ -78,7 +84,7 @@ public sealed class TechnicianService : ITechnicianService
         if (string.IsNullOrWhiteSpace(expertise))
             return false;
         var normalizedExpertise = expertise.Trim().ToLower();
-        var exists = await _db.TechnicianExperts.AnyAsync(x => x.TenantId == tenantId 
+        var exists = await _db.TechnicianExperts.AnyAsync(x => x.TenantId == tenantId
         && x.ExpertiseName.ToLower() == normalizedExpertise, ct);
 
         if (exists)
@@ -139,14 +145,14 @@ public sealed class TechnicianService : ITechnicianService
         return op;
     }
 
-    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, 
-    string firstName, string email, string? phoneNumber, string temporaryPassword, List<string>? experts, 
+    public async Task<TechnicianProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId,
+    string firstName, string email, string? phoneNumber, string temporaryPassword, List<string>? experts,
     DateTimeOffset? employmentStartDate, CancellationToken ct)
     {
         var correlationId = Guid.NewGuid();
         var requestId = Guid.NewGuid();
         var expertList = experts?.
-        Select(e=> new ExpertsTechnicianProvision
+        Select(e => new ExpertsTechnicianProvision
         {
             Id = Guid.NewGuid(),
             ExpertiseId = Guid.TryParse(e, out var expId) ? expId : (Guid?)null
@@ -180,7 +186,7 @@ public sealed class TechnicianService : ITechnicianService
             temporaryPassword), ct);
 
         //! direkt requesti neden dönüyorsun saçma pending dönüyor çünkü. consume edip tekrar bakmamız lazım.
-        
+
         return request;
     }
 
@@ -271,7 +277,7 @@ public sealed class TechnicianService : ITechnicianService
 
     public Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct)
     {
-        return _db.Technicians.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == technicianId, ct);
+        return _db.Technicians.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.AppUserId == technicianId, ct);
     }
 
     public async Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct)
@@ -285,6 +291,7 @@ public sealed class TechnicianService : ITechnicianService
                 Name = t.FirstName,
                 Email = t.Email,
                 PhoneNumber = t.PhoneNumber,
+                PictureUrl = t.PictureUrl,
                 IsActive = t.IsActive,
                 Specializations = t.TechnicianExpertMappings.Select(m => m.TechnicianExpert.ExpertiseName).ToList()
             })
@@ -299,5 +306,60 @@ public sealed class TechnicianService : ITechnicianService
         technician.IsActive = isActive;
         await _db.SaveChangesAsync(ct);
         return true;
+    }
+
+    public async Task<object> UpdateTechnicianProfileAsync(Guid tenantId, Guid? branchId, Guid technicianId, string? name,
+    string? email, string? phoneNumber, List<string>? expertIds, IFormFile? picture, CancellationToken ct)
+    {
+        var technician = await _db.Technicians.Include(x => x.TechnicianExpertMappings).FirstOrDefaultAsync(x => x.TenantId == tenantId && x.AppUserId == technicianId, ct);
+        if (technician is null) return new { Success = false, Message = "Technician not found" };
+
+        technician.FirstName = name ?? technician.FirstName;
+        technician.Email = email ?? technician.Email;
+        technician.PhoneNumber = phoneNumber ?? technician.PhoneNumber;
+
+
+        technician.TechnicianExpertMappings = expertIds != null
+            ? expertIds.Select(e => new TechnicianExpertMapping
+            {
+                TechnicianId = technicianId,
+                tenantId = tenantId,
+                BranchId = branchId,
+                TechnicianExpertId = GetParsedGuid(e)
+            }).ToList()
+            : technician.TechnicianExpertMappings;
+
+
+        technician.PictureUrl = picture != null ? await ProfilePictureUploadAsync(tenantId, technicianId, picture, ct)
+        : technician.PictureUrl;
+
+        _db.Technicians.Update(technician);
+        await _db.SaveChangesAsync(ct);
+        return new { Success = true, Message = $"Picture Url: {technician.PictureUrl}" };
+    }
+
+    private async Task<string> ProfilePictureUploadAsync(Guid tenantId, Guid technicianId, IFormFile picture, CancellationToken ct)
+    {
+        if (picture == null || picture.Length == 0)
+            return string.Empty;
+
+        string key = $"technicians/{tenantId}/{technicianId}/profile-picture/{Guid.NewGuid()}";
+        var filePath = await _s3Service.UploadFileAsync(picture, key, ct);
+        if (string.IsNullOrEmpty(filePath))
+        {
+            _logger.LogError("Failed to upload profile picture for TechnicianId {TechnicianId} in TenantId {TenantId}", technicianId, tenantId);
+            return string.Empty;
+        }
+
+        return filePath;
+    }
+
+    private Guid GetParsedGuid(string? input)
+    {
+        if (!Guid.TryParse(input, out var result))
+        {
+            throw new ArgumentException($"Invalid GUID format: {input}");
+        }
+        return result;
     }
 }
