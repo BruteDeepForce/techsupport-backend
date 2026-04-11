@@ -49,7 +49,7 @@ namespace TechSupport.Stock.Services
             string idempotencyKey = IdempotentKey;
 
             var inserted = await _dbContext.Database.ExecuteSqlRawAsync(@"
-            INSERT INTO stock.""StockReservations"" (
+            INSERT INTO stock.""stock_reservations"" (
             ""Id"",
             ""TenantId"",
             ""StockItemId"",
@@ -58,14 +58,15 @@ namespace TechSupport.Stock.Services
             ""Quantity"",
             ""BranchId"",
             ""Status"",
+            ""CreatedAtUtc"",
             ""RequestedAtUtc"",
             ""UnitPriceSnapshot"",
-            ""IdempotencyKey""
+            ""IdempotentcyKey""
         )
         VALUES (
-                    {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}
+                    {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11}
                 )
-        ON CONFLICT (""IdempotencyKey"") DO NOTHING",
+        ON CONFLICT (""IdempotentcyKey"") DO NOTHING",
 
             Guid.NewGuid(),
             request.TenantId,
@@ -73,10 +74,11 @@ namespace TechSupport.Stock.Services
             request.TechnicianUserId,
             request.OperationId,
             request.Quantity,
-            request.BranchId,
+            request.BranchId ?? Guid.Empty,
             (int)StockReservationStatus.Pending,
             DateTime.UtcNow,
-            isExist.UnitPrice,
+            DateTime.UtcNow,
+            isExist.UnitPrice ?? 0m,
             idempotencyKey
 );
         if(inserted == 0 )

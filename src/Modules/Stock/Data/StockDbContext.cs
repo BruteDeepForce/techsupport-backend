@@ -78,6 +78,7 @@ public class StockDbContext : DbContext
             b.ToTable("stock_reservations");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.OperationId });
+            b.HasIndex(x => new { x.IdempotentcyKey }).IsUnique();
 
             b.HasOne(x => x.StockItem)
              .WithMany(i => i.Reservations)
