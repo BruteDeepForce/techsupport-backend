@@ -60,6 +60,9 @@ STOCK MODÜLÜ
 - docker build -f DockerFile.backend -t techsupport-backend-local . 
 - $ docker run --rm -d --name techsupport-backend -p 8080:8080 --network techsupport-backend_default -e ConnectionStrings__DefaultConnection="Host=postgres;Port=5432;Database=myappdb;Username=myappuser;Password=rootpassword" -e RabbitMq__Host="rabbitmq" techsupport-backend-local
 
+- Get-Content secondBackup.sql | docker exec -i b4421066dfdb psql -U myappuser -d backupdb 
+[BackUp]
+
 
 ad@gmail.com teknisyen
 admin@gmail.com admin

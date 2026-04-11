@@ -48,8 +48,10 @@ public class StockReservationsController : ControllerBase
             body.OperationId,
             body.Quantity,
             body.BranchId);
+        string IdempotentKey = $"{tenantId}:{body.StockItemId}:{body.OperationId}:{technicianId}:{body.Quantity}";
 
-        var ok = await _reservations.ReserveStockAsync(request, ct);
+
+        var ok = await _reservations.ReserveStockAsync(request, IdempotentKey,ct);
         if (!ok) return BadRequest(new { error = "Reservation could not be created" });
         return Ok(new { status = "Pending" });
     }

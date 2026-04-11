@@ -30,7 +30,7 @@ public class StockReservation
     public DateTime? RejectedAtUtc { get; set; }
     public string? RejectedReason { get; set; }
     public DateTime? ExpiresAtUtc { get; set; }
-
+    public string IdempotentcyKey {get; set;} = String.Empty;
     // Navigation
     public StockItem? StockItem { get; set; }
 }

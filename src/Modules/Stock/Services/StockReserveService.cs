@@ -23,41 +23,84 @@ namespace TechSupport.Stock.Services
             _bus = bus;
         }
         [Obsolete("publish event ile operasyon modülünde teklif create edilecek.reports modülüne rapor düşecek.ai modülüne gönderilecek.")]
-        public async Task<bool> ReserveStockAsync(ReserveRequestDTO request, CancellationToken cancellationToken = default)
+        public async Task<bool> ReserveStockAsync(ReserveRequestDTO request, string IdempotentKey, CancellationToken cancellationToken = default)
         {
-            //! idempotent olması lazım.
+            //! need idempotent Task 
+            //! need ATOMIC update task
+            //! Prevent Race Condition  
+
+
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-            var isExist = await _dbContext.StockItems.Include(x=> x.Balances).FirstOrDefaultAsync(s => s.Id == request.StockItemId && s.TenantId == request.TenantId, cancellationToken);
+            var isExist = await _dbContext.StockItems.Include(x => x.Balances).FirstOrDefaultAsync(s => s.Id == request.StockItemId && s.TenantId == request.TenantId, cancellationToken);
             var totalAvailable = isExist?.Balances.Sum(x => x.QuantityAvailable) ?? 0;
 
             if (isExist == null)
                 throw new ArgumentException("Stock item does not exist.", nameof(request.StockItemId));
-            
-            if(request.Quantity <= 0 || request.TenantId == Guid.Empty || 
-            request.StockItemId == Guid.Empty 
+
+            if (request.Quantity <= 0 || request.TenantId == Guid.Empty ||
+            request.StockItemId == Guid.Empty
             || request.TechnicianUserId == Guid.Empty
-            || request.Quantity > isExist.Balances.Where(x=> x.StockItemId == request.StockItemId).Sum(x=> x.QuantityAvailable)
+            || request.Quantity > isExist.Balances.Where(x => x.StockItemId == request.StockItemId).Sum(x => x.QuantityAvailable)
             || totalAvailable - request.Quantity < 0)
             {
                 return false;
             }
 
-            var reservation = new StockReservation
-            {
-                Id = Guid.NewGuid(),
-                TenantId = request.TenantId,
-                StockItemId = request.StockItemId,
-                TechnicianUserId = request.TechnicianUserId,
-                OperationId = request.OperationId,
-                Quantity = request.Quantity,
-                BranchId = request.BranchId,
-                Status = StockReservationStatus.Pending,
-                RequestedAtUtc = DateTime.UtcNow,
-                UnitPriceSnapshot = isExist.UnitPrice
-            };
+            string idempotencyKey = IdempotentKey;
 
-            await _dbContext.StockReservations.AddAsync(reservation, cancellationToken);
-            
+            var inserted = await _dbContext.Database.ExecuteSqlRawAsync(@"
+            INSERT INTO stock.""StockReservations"" (
+            ""Id"",
+            ""TenantId"",
+            ""StockItemId"",
+            ""TechnicianUserId"",
+            ""OperationId"",
+            ""Quantity"",
+            ""BranchId"",
+            ""Status"",
+            ""RequestedAtUtc"",
+            ""UnitPriceSnapshot"",
+            ""IdempotencyKey""
+        )
+        VALUES (
+                    {0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}
+                )
+        ON CONFLICT (""IdempotencyKey"") DO NOTHING",
+
+            Guid.NewGuid(),
+            request.TenantId,
+            request.StockItemId,
+            request.TechnicianUserId,
+            request.OperationId,
+            request.Quantity,
+            request.BranchId,
+            (int)StockReservationStatus.Pending,
+            DateTime.UtcNow,
+            isExist.UnitPrice,
+            idempotencyKey
+);
+        if(inserted == 0 )
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return false;
+            }
+
+            // var reservation = new StockReservation
+            // {
+            //     Id = Guid.NewGuid(),
+            //     TenantId = request.TenantId,
+            //     StockItemId = request.StockItemId,
+            //     TechnicianUserId = request.TechnicianUserId,
+            //     OperationId = request.OperationId,
+            //     Quantity = request.Quantity,
+            //     BranchId = request.BranchId,
+            //     Status = StockReservationStatus.Pending,
+            //     RequestedAtUtc = DateTime.UtcNow,
+            //     UnitPriceSnapshot = isExist.UnitPrice
+            // };
+
+            // await _dbContext.StockReservations.AddAsync(reservation, cancellationToken);
+
             var balance = isExist.Balances.FirstOrDefault(x => x.StockItemId == request.StockItemId);
             if (balance != null)
             {
