@@ -22,7 +22,8 @@ public static class ModuleExtensions
         }
 
         services.AddScoped<ITechnicianService, TechnicianService>();
-
+        services.AddSingleton<S3Service>(sp => new S3Service(configuration));
+    
         return services;
     }
 }

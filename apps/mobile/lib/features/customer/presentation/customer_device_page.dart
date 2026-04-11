@@ -205,9 +205,19 @@ class _DeviceRow extends StatelessWidget {
                 ],
               ),
             ),
-            LinearBadge(
-              label: _statusLabel(device.status),
-              color: _statusColor(device.status),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                LinearBadge(
+                  label: _statusLabel(device.status),
+                  color: _statusColor(device.status),
+                ),
+                const SizedBox(height: 6),
+                LinearBadge(
+                  label: _warrantyLabel(device),
+                  color: _warrantyColor(device),
+                ),
+              ],
             ),
           ],
         ),
@@ -244,4 +254,23 @@ Color _statusColor(String status) {
     default:
       return AppColors.statusYellow;
   }
+}
+
+bool _isWarrantyCovered(DeviceRecord device) {
+  final start = device.warrantyStartAtUtc;
+  final end = device.warrantyEndAtUtc;
+  if (start == null || end == null) return false;
+  return start.isBefore(end);
+}
+
+String _warrantyLabel(DeviceRecord device) {
+  return _isWarrantyCovered(device)
+      ? 'Garanti kapsamındadır'
+      : 'Garanti kapsamında değil';
+}
+
+Color _warrantyColor(DeviceRecord device) {
+  return _isWarrantyCovered(device)
+      ? AppColors.statusGreen
+      : AppColors.statusRed;
 }

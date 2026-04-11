@@ -10,7 +10,7 @@ Teknisyene operation modülünden bakım emri yaratıldığında teknisyenoperat
 
 device işlemler fikirleri : 
 - müşteri sisteme kayıt - sonra müşterinin device sisteme kayıt. device-müşteri mapping. [SOLVED]
-- müşteri sisteme kayıt- müşteriye ürün satışı sonrası garanti periyodu vs tüm device bilgileri ile device kayıt. device müşteri mapping. [STANDBY]
+- müşteri sisteme kayıt- müşteriye ürün satışı sonrası garanti periyodu vs tüm device bilgileri ile device kayıt. device müşteri mapping. [SOLVED]
 
 - Device oluşturup müşteriye maplendikten sonra operasyon yaratılacak mı? [AR-GE]
 ** tercihen device oluşturulup müşteriye maplenirken zaten Status alıyoruz. Status eğer ki inrepair ya da maintenance ise direkt operasyon modülüne event publishlenebilir. [OPERASYON MODÜLÜNDEKİ OPERATION CREATE SERVİSİNE TYPE İLE GİDER] [DEĞİŞME-1] 
@@ -64,6 +64,10 @@ STOCK MODÜLÜ
 [BackUp]
 
 
-ad@gmail.com teknisyen
-admin@gmail.com admin
-vestel@gmail.com müşteri
+
+
+[TODOLIST][LIST]
+- Tedarikçi bilgilerini kaydedeceğiz hangi modül tutsun ?
+- Ödeme sistemi nasıl olmalı?
+- IK modülü eklenecek
+- 

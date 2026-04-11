@@ -51,7 +51,13 @@ class _RegisterPageState extends State<RegisterPage> {
       final token = await _authService.register(
           email, password, _selectedRole, tenantName);
       await _tokenStorage.saveToken(token);
-      ApiClient().dio.interceptors.add(AuthInterceptor(_tokenStorage.getToken));
+      ApiClient().dio.interceptors.add(AuthInterceptor(
+            tokenProvider: _tokenStorage.getToken,
+            clearToken: _tokenStorage.clear,
+            onUnauthorized: () {
+              // Handle unauthorized access if needed
+            },
+          ));
 
       if (context.mounted) {
         Navigator.of(context).pop();

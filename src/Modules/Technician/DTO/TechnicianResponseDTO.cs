@@ -13,6 +13,7 @@ namespace TechSupport.Technician.DTO
         public string Email { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public bool IsActive { get; set; }
+        public string? PictureUrl { get; set; }
         public List<string> Specializations { get; set; } = new List<string>();
     }
 }

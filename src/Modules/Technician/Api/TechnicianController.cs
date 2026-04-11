@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechSupport.Technician.Services;
 
@@ -17,6 +18,10 @@ public class TechnicianController : ControllerBase
 
     public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, 
     string? PhoneNumber, string TemporaryPassword,
+    DateTimeOffset? EmploymentStartDate, List<string>? ExpertIds);
+
+    public sealed record UpdateTechnicianDto(string? FirstName, string? LastName, string? Email, 
+    string? PhoneNumber, string? TemporaryPassword,
     DateTimeOffset? EmploymentStartDate, List<string>? ExpertIds);
     public sealed record SetActiveDto(bool IsActive);
     public sealed record UpdateWorkItemStatusDto(string Status);
@@ -99,6 +104,18 @@ public class TechnicianController : ControllerBase
             status.CompletedAtUtc
         });
     }
+    [Authorize]
+    [HttpPut("update-profile")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateTechnicianDto? dto, [FromForm] IFormFile? picture, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var branchId = GetBranchIdFromClaims();
+        var technicianId = GetUserIdFromClaims();
+        if (tenantId is null || technicianId is null) return Unauthorized();
+        var updated = await _technicians.UpdateTechnicianProfileAsync(tenantId.Value, branchId.Value, technicianId.Value, 
+        dto.FirstName, dto.Email, dto.PhoneNumber, dto.ExpertIds, picture, ct);
+        return Ok(updated);
+    }
 
     [Authorize(Roles = "admin")]
     [HttpPatch("{technicianId:guid}/active")]
@@ -137,5 +154,11 @@ public class TechnicianController : ControllerBase
     {
         var branchClaim = User.Claims.FirstOrDefault(c => c.Type == "branch_id");
         return branchClaim != null && Guid.TryParse(branchClaim.Value, out var branchId) ? branchId : null;
+    }
+
+    private Guid? GetUserIdFromClaims()
+    {
+        var userClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "user_id" || c.Type.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase));
+        return userClaim != null && Guid.TryParse(userClaim.Value, out var userId) ? userId : null;
     }
 }

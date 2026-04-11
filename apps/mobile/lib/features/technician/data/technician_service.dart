@@ -32,7 +32,7 @@ class TechnicianService {
     required String email,
     String? phoneNumber,
     required String temporaryPassword,
-    List<String>? expertiseIds,
+    List<String> expertiseIds = const [],
   }) async {
     final body = {
       'firstName': firstName,
@@ -40,7 +40,7 @@ class TechnicianService {
       'email': email,
       'phoneNumber': phoneNumber,
       'temporaryPassword': temporaryPassword,
-      'expertiseIds': expertiseIds,
+      'ExpertIds': expertiseIds,
     }..removeWhere((k, v) => v == null);
 
     final res = await _dio.post('/api/technicians', data: body);
@@ -89,5 +89,41 @@ class TechnicianService {
           .toList();
     }
     throw Exception('Failed to load expertise: ${res.statusCode}');
+  }
+
+  Future<Technician> updateProfile({
+    String? firstName,
+    String? email,
+    String? phoneNumber,
+    List<String>? expertIds,
+    String? picturePath,
+  }) async {
+    final formMap = <String, dynamic>{};
+    if (firstName != null && firstName.trim().isNotEmpty) {
+      formMap['FirstName'] = firstName.trim();
+    }
+    if (email != null && email.trim().isNotEmpty) {
+      formMap['Email'] = email.trim();
+    }
+    if (phoneNumber != null && phoneNumber.trim().isNotEmpty) {
+      formMap['PhoneNumber'] = phoneNumber.trim();
+    }
+    if (expertIds != null && expertIds.isNotEmpty) {
+      formMap['ExpertIds'] = expertIds;
+    }
+    if (picturePath != null && picturePath.isNotEmpty) {
+      formMap['picture'] = await MultipartFile.fromFile(
+        picturePath,
+        filename: picturePath.split('/').last,
+      );
+    }
+
+    final formData = FormData.fromMap(formMap);
+    final res =
+        await _dio.put('/api/technicians/update-profile', data: formData);
+    if (res.statusCode == 200) {
+      return Technician.fromJson(res.data as Map<String, dynamic>);
+    }
+    throw Exception('Failed to update technician profile: ${res.statusCode}');
   }
 }

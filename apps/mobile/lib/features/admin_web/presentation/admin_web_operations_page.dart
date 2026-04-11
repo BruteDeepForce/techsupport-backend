@@ -118,12 +118,17 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           selectedCustomerUserId = null;
                           selectedDeviceId = null;
                           if (v != null) {
-                            devicesFuture =
-                                _deviceService.getCustomerDevices(v);
                             final match =
                                 customers.where((e) => e.id == v).toList();
                             if (match.isNotEmpty) {
                               selectedCustomerUserId = match.first.appUserId;
+                              if (selectedCustomerUserId != null &&
+                                  selectedCustomerUserId!.isNotEmpty) {
+                                devicesFuture = _deviceService
+                                    .getCustomerDevices(selectedCustomerUserId);
+                              } else {
+                                devicesFuture = Future.value([]);
+                              }
                             }
                           } else {
                             devicesFuture = null;
@@ -168,8 +173,45 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 for (final d in devices)
                                   DropdownMenuItem(
                                     value: d.id,
-                                    child: Text(
-                                        '${d.brand} ${d.model} (${d.serialNumber})'),
+                                    child: ConstrainedBox(
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 420),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              '${d.brand} ${d.model} (${d.serialNumber})',
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: _isWarrantyCovered(d)
+                                                  ? const Color(0xFFDCFCE7)
+                                                  : const Color(0xFFFEE2E2),
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                            child: Text(
+                                              _isWarrantyCovered(d)
+                                                  ? 'Garanti kapsamındadır'
+                                                  : 'Garanti kapsamında değil',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: _isWarrantyCovered(d)
+                                                    ? const Color(0xFF166534)
+                                                    : const Color(0xFF991B1B),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                               ],
                               onChanged: (v) {
@@ -321,6 +363,16 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   selectedDeviceId == null) {
                                 return;
                               }
+                              if (selectedCustomerUserId == null ||
+                                  selectedCustomerUserId!.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Seçilen müşteride appUserId bulunamadı'),
+                                  ),
+                                );
+                                return;
+                              }
                               Navigator.of(ctx).pop();
                               BuildContext? loadingCtx;
                               showDialog(
@@ -336,8 +388,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                               try {
                                 await _operationService
                                     .createOperation(
-                                      customerId: selectedCustomerUserId ??
-                                          selectedCustomerId!,
+                                      customerId: selectedCustomerUserId!,
                                       deviceId: selectedDeviceId!,
                                       title: titleController.text.trim(),
                                       description:
@@ -1119,6 +1170,13 @@ class _HintBox extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _isWarrantyCovered(DeviceRecord device) {
+  final start = device.warrantyStartAtUtc;
+  final end = device.warrantyEndAtUtc;
+  if (start == null || end == null) return false;
+  return start.isBefore(end);
 }
 
 String _shortId(String id) {

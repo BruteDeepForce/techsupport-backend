@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../core/network/api_client.dart';
 import '../../technician/data/technician_service.dart';
 import '../../technician/models/technician_models.dart';
+import 'admin_web_technician_detail_page.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 
@@ -185,9 +187,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                     : phoneController.text.trim(),
                                 temporaryPassword:
                                     tempPasswordController.text.trim(),
-                                expertiseIds: selectedExpertiseIds.isEmpty
-                                    ? null
-                                    : selectedExpertiseIds.toList(),
+                                expertiseIds: selectedExpertiseIds.toList(),
                               );
                               if (mounted) Navigator.of(context).pop();
                               if (mounted) {
@@ -687,8 +687,13 @@ class _TeamTableCard extends StatelessWidget {
               const Divider(height: 1, color: Color(0xFFE2E8F0)),
               for (final t in technicians)
                 _TableRow(
+                  onTap: () => Navigator.of(context).push(
+                    adminNavRoute(
+                      AdminWebTechnicianDetailPage(technicianId: t.userId),
+                    ),
+                  ),
                   name: t.name,
-                  department: 'Teknik',
+                  pictureUrl: t.pictureUrl,
                   role: 'Teknisyen',
                   specializations: (t.specializations ?? []).join(', '),
                   contact: t.email,
@@ -737,7 +742,6 @@ class _TableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final headers = [
       'Personel',
-      'Departman',
       'Pozisyon',
       'Uzmanlıklar',
       'İletişim',
@@ -771,8 +775,9 @@ class _TableHeader extends StatelessWidget {
 
 class _TableRow extends StatelessWidget {
   const _TableRow({
+    required this.onTap,
     required this.name,
-    required this.department,
+    required this.pictureUrl,
     required this.role,
     required this.specializations,
     required this.contact,
@@ -780,34 +785,75 @@ class _TableRow extends StatelessWidget {
     required this.tasks,
   });
 
+  final VoidCallback onTap;
   final String name;
-  final String department;
+  final String? pictureUrl;
   final String role;
   final String specializations;
   final String contact;
   final String status;
   final String tasks;
 
+  String? _fullPictureUrl(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    final base = ApiClient().dio.options.baseUrl;
+    if (raw.startsWith('/')) return '$base$raw';
+    return '$base/$raw';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-              child: Text(name,
-                  style: const TextStyle(fontWeight: FontWeight.w600))),
-          Expanded(child: Text(department)),
-          Expanded(child: Text(role)),
-          Expanded(
-              child: Text(specializations.isEmpty ? '-' : specializations)),
-          Expanded(child: Text(contact)),
-          Expanded(child: Text(status)),
-          Expanded(child: Text(tasks)),
-        ],
+    final fullImageUrl = _fullPictureUrl(pictureUrl);
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundColor: const Color(0xFFE2E8F0),
+                    child: fullImageUrl == null
+                        ? const Icon(Icons.person_outline_rounded,
+                            size: 36, color: Color(0xFF64748B))
+                        : ClipOval(
+                            child: Image.network(
+                              fullImageUrl,
+                              width: 66,
+                              height: 66,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.person_outline_rounded,
+                                size: 36,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: Text(role)),
+            Expanded(
+                child: Text(specializations.isEmpty ? '-' : specializations)),
+            Expanded(child: Text(contact)),
+            Expanded(child: Text(status)),
+            Expanded(child: Text(tasks)),
+          ],
+        ),
       ),
     );
   }
