@@ -106,9 +106,17 @@ namespace TechSupport.Stock.Services
             var balance = isExist.Balances.FirstOrDefault(x => x.StockItemId == request.StockItemId);
             if (balance != null)
             {
-                balance.QuantityReserved += request.Quantity;
-                balance.QuantityAvailable -= request.Quantity;
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                var affected = await _dbContext.StockBalances
+                .Where(x=> x.StockItemId == request.StockItemId 
+                && x.QuantityAvailable >= request.Quantity)
+                .ExecuteUpdateAsync( property => property
+                .SetProperty(x=> x.QuantityReserved, x=> x.QuantityReserved + request.Quantity)
+                .SetProperty(x=> x.QuantityAvailable, x=> x.QuantityAvailable - request.Quantity));
+                if(affected == 0)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    return false;
+                }
                 await transaction.CommitAsync(cancellationToken);
                 return true;
             }
