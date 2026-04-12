@@ -31,6 +31,8 @@ jobs :
         uses : github/codeql-action/init@v4
         with :
           languages : 'csharp'
+
+
       - name : Build .NET Project
         run : | 
           dotnet restore
@@ -51,12 +53,6 @@ jobs :
           sudo apt-get install -y trivy
       - name : Trivy Scan
         run : trivy image exit-code 1 --severity HIGH,CRITICAL myapp:latest
-
-      - name : Upload CodeQL Results
-        uses : actions/upload-artifact@v4
-        with :
-          name : codeql-results
-          path : codeql-results.sarif
 
       - name : Upload Trivy Results
         uses : actions/upload-artifact@v4
