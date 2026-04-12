@@ -26,6 +26,11 @@ jobs :
         uses : github/codeql-action/init@v4
         with :
           languages : 'csharp'
+      - name : Build .NET Project
+        run : | 
+          dotnet restore
+          dotnet build --no-incremental
+          
       - name : Analyze Code with CodeQL
         uses : github/codeql-action/analyze@v4
 
