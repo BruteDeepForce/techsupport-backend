@@ -23,7 +23,7 @@ public static class ModuleExtensions
         services.AddSingleton<EmbeddingClient>(sp =>
         {
             const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
-            string apiKey = "6TZk8IrJRC2xENHlOHvnrTgYPUJPaReDkm8qoPJpp1xor1N8HHYyJQQJ99BKACYeBjFXJ3w3AAABACOGZfHg";
+            string apiKey = configuration["AzureAI:Key"];
             const string deploymentName = "embedding-model";
 
             OpenAIClient client = new(
@@ -38,7 +38,7 @@ public static class ModuleExtensions
         services.AddSingleton<ChatClient>(sp =>
         {
             const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
-            string apiKey = "6TZk8IrJRC2xENHlOHvnrTgYPUJPaReDkm8qoPJpp1xor1N8HHYyJQQJ99BKACYeBjFXJ3w3AAABACOGZfHg";
+            string apiKey = configuration["AzureAI:Key"];
             const string deploymentName = "gpt-model"; // Replaced with a generic gpt-model deployment name
 
             OpenAIClient client = new(

@@ -5,7 +5,7 @@ on :
     branches : [ "Backend-Lead" ]
   
 jobs : 
-  devsecops : 
+  DevSecOPS : 
     runs-on : ubuntu-latest
     
     permissions:

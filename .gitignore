@@ -10,3 +10,10 @@
 .DS_Store
 node_modules/
 *.db
+/appsettings.Development.json
+/appsettings.Production.json
+/appsettings.Staging.json
+/src/TechSupport.Web/appsettings.Development.json
+/src/TechSupport.Web/appsettings.Production.json
+/src/TechSupport.Web/appsettings.Staging.json
+/src/TechSupport.Web/appsettings.json
