@@ -11,9 +11,11 @@ public interface IDeviceService
 {
     Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, string model, 
     string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct);
-    Task<Devices?> GetAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
+    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, CancellationToken ct);
+    Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<Devices> DeactivateAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
+    Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct);
+    Task<IReadOnlyCollection<Devices>> GetCustomerDevicesAsync(Guid tenantId, Guid customerId, CancellationToken ct);
 }
 
 public sealed class DeviceService : IDeviceService
@@ -29,7 +31,7 @@ public sealed class DeviceService : IDeviceService
 
     public async Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, string brand, 
     string model, string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, string? customerName, string status, CancellationToken ct)
+    string? barcodeNumber, Guid? customerId, Guid? appUserId,string? customerName, string status, CancellationToken ct)
     {
         var exists = await _db.Devices.AnyAsync(x => x.TenantId == tenantId && x.SerialNumber == serialNumber, ct);
         if (exists) throw new InvalidOperationException("Device already exists for tenant (serialNumber must be unique)");
@@ -52,7 +54,7 @@ public sealed class DeviceService : IDeviceService
             WarrantyStartAtUtc = normalizedWarrantyStart,
             WarrantyEndAtUtc = normalizedWarrantyEnd,
             BarcodeNumber = barcodeNumber?.Trim(),
-            CustomerId = customerId,
+            CustomerId = appUserId.Value,  //!burada gelen appuserid customerid olarak kaydediyoruz
             CustomerName = customerName?.Trim(),
             Status = Enum.TryParse<DeviceStatus>(status, true, out var parsedStatus) ? parsedStatus : DeviceStatus.Other,
             IsActive = true,
@@ -69,7 +71,7 @@ public sealed class DeviceService : IDeviceService
                 DeviceId = device.Id,
                 TenantId = device.TenantId,
                 BranchId = device.BranchId,
-                CustomerId = device.CustomerId.Value,
+                CustomerId = customerId.Value, //!burada gelen appuserid customerid olarak kaydediyoruz
                 Status = device.Status.ToString(),
                 CustomerName = device.CustomerName,
                 ProblemDescription = device.ProblemDescription,
@@ -93,7 +95,7 @@ public sealed class DeviceService : IDeviceService
         return device;
     }
 
-    public Task<Devices?> GetAsync(Guid tenantId, Guid deviceId, CancellationToken ct)
+    public Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct)
     {
         return _db.Devices.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == deviceId, ct);
     }
@@ -112,5 +114,17 @@ public sealed class DeviceService : IDeviceService
         await _bus.Publish(new DeviceDeactivated(device.TenantId, device.BranchId, device.Id, DateTimeOffset.UtcNow), ct);
 
         return device;
+    }
+
+    public async Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct)
+    {
+        var devices = await _db.Devices.AsNoTracking().Where(x => x.TenantId == tenantId).ToListAsync(ct);
+        return devices;
+    }
+
+    public async Task<IReadOnlyCollection<Devices>> GetCustomerDevicesAsync(Guid tenantId, Guid customerId, CancellationToken ct)
+    {
+        var devices = await _db.Devices.AsNoTracking().Where(x => x.TenantId == tenantId && x.CustomerId == customerId).ToListAsync(ct);
+        return devices;
     }
 }

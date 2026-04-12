@@ -50,7 +50,7 @@ public sealed class CustomerAccountProvisionRequestedConsumer : IConsumer<Custom
 
         var user = new AppUser
         {
-            UserName = message.Email,
+            UserName = message.Name,
             Email = message.Email
         };
 

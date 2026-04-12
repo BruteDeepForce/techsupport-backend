@@ -1,336 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'shared/admin_web_nav.dart';
+import 'shared/admin_web_shell.dart';
+import 'shared/admin_web_topbar.dart';
+import '../../operations/data/operation_service.dart';
+import '../../operations/models/operation_models.dart';
 
-class AdminWebHomePage extends StatelessWidget {
+class AdminWebHomePage extends StatefulWidget {
   const AdminWebHomePage({super.key});
+
+  @override
+  State<AdminWebHomePage> createState() => _AdminWebHomePageState();
+}
+
+class _AdminWebHomePageState extends State<AdminWebHomePage> {
+  final OperationService _operationService = OperationService();
+  late Future<List<OperationRecord>> _operationsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _operationsFuture = _operationService.listOperations();
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final showSidebar = width >= 1100;
-    final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
-
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF5F7FB),
-        drawer:
-            showSidebar ? null : const Drawer(child: _Sidebar(compact: true)),
-        body: Row(
-          children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: _Sidebar(),
-              ),
-            Expanded(
-              child: Column(
-                children: [
-                  _TopBar(showMenu: !showSidebar),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _Greeting(),
-                          const SizedBox(height: 16),
-                          const _TabStrip(),
-                          const SizedBox(height: 16),
-                          const _CalendarCard(),
-                          const SizedBox(height: 16),
-                          const _StatusListCard(),
-                          const SizedBox(height: 20),
-                          _MiniStatsGrid(width: width),
-                          const SizedBox(height: 20),
-                          _ChartSection(width: width),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return AdminWebShell(
+      active: AdminNavKey.home,
+      actions: [
+        AdminWebActionButton(
+          label: 'İş Emri',
+          icon: Icons.add,
+          onPressed: () {},
         ),
-      ),
-    );
-  }
-}
-
-class _Sidebar extends StatelessWidget {
-  const _Sidebar({this.compact = false});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0C1E33), Color(0xFF0A1728)],
-        ),
-      ),
-      child: Column(
+      ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F223A),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/branding/logo.png',
-                    width: 22,
-                    height: 22,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                if (!compact)
-                  const Text(
-                    'Lineer Destek',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: const [
-                _NavItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Ana Menü',
-                  active: true,
-                ),
-                _NavItem(
-                    icon: Icons.receipt_long_outlined, label: 'Operasyonlar'),
-                _NavItem(icon: Icons.group_outlined, label: 'Ekip Yönetimi'),
-                _NavItem(
-                    icon: Icons.inventory_2_outlined, label: 'Stok Yönetimi'),
-                _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
-                _NavItem(
-                    icon: Icons.query_stats_rounded,
-                    label: 'Analiz & Raporlar'),
-                _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF14263F),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Depolama',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, color: Colors.white)),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: 0.55,
-                    minHeight: 6,
-                    backgroundColor: const Color(0xFF1D3554),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text('4.88 GB / 8 GB',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF9FB3C8))),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add, size: 18, color: Colors.white),
-                    label: const Text('Depolama Ekle',
-                        style: TextStyle(color: Colors.white)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF2C4469)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Color(0xFF1C2F4A),
-                  child: Text('ST',
-                      style: TextStyle(fontSize: 11, color: Colors.white)),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Süleyman TÜY... \nTR',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF9FB3C8)),
-                  ),
-                ),
-                Icon(Icons.logout, size: 18, color: Color(0xFF9FB3C8)),
-              ],
-            ),
-          ),
+          const _Greeting(),
+          const SizedBox(height: 16),
+          const _TabStrip(),
+          const SizedBox(height: 16),
+          const _CalendarCard(),
+          const SizedBox(height: 16),
+          const _StatusListCard(),
+          const SizedBox(height: 20),
+          _MiniStatsGrid(width: width),
+          const SizedBox(height: 20),
+          _ChartSection(width: width, operationsFuture: _operationsFuture),
         ],
       ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    this.active = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFF1B3A5C) : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: const Color(0xFF9FB3C8)),
-          const SizedBox(width: 10),
-          Text(label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                color: active ? Colors.white : const Color(0xFF9FB3C8),
-              )),
-          const Spacer(),
-          if (!active)
-            const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
-        ],
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.showMenu});
-
-  final bool showMenu;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF9FAFC),
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: Row(
-        children: [
-          if (showMenu)
-            IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: const Icon(Icons.menu_rounded),
-            ),
-          const Spacer(),
-          _PrimaryButton(
-            icon: Icons.add,
-            label: 'İş Emri',
-            onPressed: () {},
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-            ),
-            child: Row(
-              children: const [
-                Text('TR', style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(width: 6),
-                Icon(Icons.expand_more, size: 16),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Icon(Icons.wb_sunny_outlined, color: Color(0xFF64748B)),
-          const SizedBox(width: 10),
-          const Icon(Icons.notifications_none_rounded,
-              color: Color(0xFF64748B)),
-          const SizedBox(width: 10),
-          const Icon(Icons.settings_outlined, color: Color(0xFF64748B)),
-          const SizedBox(width: 12),
-          Row(
-            children: const [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Color(0xFFE2E8F0),
-                child: Text('ST', style: TextStyle(fontSize: 11)),
-              ),
-              SizedBox(width: 8),
-              Text('Süleyman T...',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0,
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -343,7 +62,7 @@ class _Greeting extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Text('Merhaba, Süleyman 👋',
+        Text('Merhaba, Süleyman Tuysuzoglu',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
         SizedBox(height: 6),
       ],
@@ -380,13 +99,6 @@ class _TabStrip extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Expanded(
-            child: Center(
-              child: Text('Depo',
-                  style: TextStyle(
-                      color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
-            ),
-          ),
         ],
       ),
     );
@@ -694,14 +406,35 @@ class _MiniCard extends StatelessWidget {
   }
 }
 
-class _ChartSection extends StatelessWidget {
-  const _ChartSection({required this.width});
+class _ChartSection extends StatefulWidget {
+  const _ChartSection({required this.width, required this.operationsFuture});
 
   final double width;
+  final Future<List<OperationRecord>> operationsFuture;
+
+  @override
+  State<_ChartSection> createState() => _ChartSectionState();
+}
+
+class _ChartSectionState extends State<_ChartSection> {
+  _TrendRange _range = _TrendRange.last6Months;
+
+  String get _rangeLabel {
+    switch (_range) {
+      case _TrendRange.daily:
+        return 'Son 7 Gün';
+      case _TrendRange.weekly:
+        return 'Son 8 Hafta';
+      case _TrendRange.monthly:
+        return 'Son 12 Ay';
+      case _TrendRange.last6Months:
+        return 'Son 6 Ay';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final stacked = width < 1200;
+    final stacked = widget.width < 1200;
     return Column(
       children: [
         Row(
@@ -712,34 +445,36 @@ class _ChartSection extends StatelessWidget {
               child: _CardShell(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Aylık Trend',
+                  children: [
+                    const Text('Aylık Trend',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
-                    SizedBox(height: 6),
-                    Text('Son 6 Ay',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
-                    SizedBox(height: 16),
-                    _ChartPlaceholder(
-                        height: 170, caption: 'Toplam / Tamamlandı'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _CardShell(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Duruma göre iş emirleri',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
-                    SizedBox(height: 6),
-                    Text('Mevcut dağılım',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
-                    SizedBox(height: 24),
-                    _EmptyState(label: 'Veri bulunamadı'),
+                    const SizedBox(height: 6),
+                    Text(_rangeLabel,
+                        style: const TextStyle(color: Color(0xFF94A3B8))),
+                    const SizedBox(height: 12),
+                    _TrendRangeRow(
+                      range: _range,
+                      onChanged: (val) => setState(() => _range = val),
+                    ),
+                    const SizedBox(height: 12),
+                    FutureBuilder<List<OperationRecord>>(
+                      future: widget.operationsFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const _ChartPlaceholder(
+                              height: 170, caption: 'Yükleniyor...');
+                        }
+                        if (snapshot.hasError) {
+                          return const _ChartPlaceholder(
+                              height: 170, caption: 'Trend alınamadı');
+                        }
+                        final ops = snapshot.data ?? [];
+                        final data = _buildTrend(ops, _range);
+                        return _TrendChart(data: data);
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -879,6 +614,286 @@ class _ChartPlaceholder extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(caption, style: const TextStyle(color: Color(0xFF94A3B8))),
     );
+  }
+}
+
+enum _TrendRange { daily, weekly, monthly, last6Months }
+
+class _TrendPoint {
+  const _TrendPoint(this.label, this.value);
+
+  final String label;
+  final int value;
+}
+
+List<_TrendPoint> _buildTrend(List<OperationRecord> ops, _TrendRange range) {
+  final now = DateTime.now();
+  final monthLabels = const [
+    'Oca',
+    'Şub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Ağu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara',
+  ];
+
+  List<DateTime> buckets;
+  List<String> labels;
+
+  switch (range) {
+    case _TrendRange.daily:
+      buckets = List.generate(
+          7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
+      labels = buckets
+          .map((d) => '${d.day.toString().padLeft(2, '0')}')
+          .toList();
+      break;
+    case _TrendRange.weekly:
+      buckets = List.generate(
+        8,
+        (i) => DateTime(now.year, now.month, now.day - (7 * (7 - i))),
+      );
+      labels = List.generate(8, (i) => 'H${i + 1}');
+      break;
+    case _TrendRange.monthly:
+      buckets = List.generate(12, (i) => DateTime(now.year, now.month - (11 - i), 1));
+      labels = buckets.map((d) => monthLabels[d.month - 1]).toList();
+      break;
+    case _TrendRange.last6Months:
+      buckets = List.generate(6, (i) => DateTime(now.year, now.month - (5 - i), 1));
+      labels = buckets.map((d) => monthLabels[d.month - 1]).toList();
+      break;
+  }
+
+  final counts = List<int>.filled(buckets.length, 0);
+  for (final op in ops) {
+    final d = op.occurredAtUtc.toLocal();
+    for (int i = 0; i < buckets.length; i++) {
+      final b = buckets[i];
+      if (range == _TrendRange.daily) {
+        if (d.year == b.year && d.month == b.month && d.day == b.day) {
+          counts[i] += 1;
+          break;
+        }
+      } else if (range == _TrendRange.weekly) {
+        final start = b;
+        final end = start.add(const Duration(days: 7));
+        if (!d.isBefore(start) && d.isBefore(end)) {
+          counts[i] += 1;
+          break;
+        }
+      } else {
+        if (d.year == b.year && d.month == b.month) {
+          counts[i] += 1;
+          break;
+        }
+      }
+    }
+  }
+
+  return List.generate(buckets.length, (i) {
+    return _TrendPoint(labels[i], counts[i]);
+  });
+}
+
+class _TrendRangeRow extends StatelessWidget {
+  const _TrendRangeRow({required this.range, required this.onChanged});
+
+  final _TrendRange range;
+  final ValueChanged<_TrendRange> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _TrendRangePill(
+          label: 'Gün',
+          active: range == _TrendRange.daily,
+          onTap: () => onChanged(_TrendRange.daily),
+        ),
+        _TrendRangePill(
+          label: 'Hafta',
+          active: range == _TrendRange.weekly,
+          onTap: () => onChanged(_TrendRange.weekly),
+        ),
+        _TrendRangePill(
+          label: 'Ay',
+          active: range == _TrendRange.monthly,
+          onTap: () => onChanged(_TrendRange.monthly),
+        ),
+        _TrendRangePill(
+          label: '6 Ay',
+          active: range == _TrendRange.last6Months,
+          onTap: () => onChanged(_TrendRange.last6Months),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrendRangePill extends StatelessWidget {
+  const _TrendRangePill(
+      {required this.label, required this.active, required this.onTap});
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFF4F46E5) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: active ? Colors.white : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrendChart extends StatelessWidget {
+  const _TrendChart({required this.data});
+
+  final List<_TrendPoint> data;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxValue =
+        data.map((e) => e.value).fold<int>(0, (a, b) => a > b ? a : b);
+    final displayMax = maxValue == 0 ? 6 : maxValue;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('Toplam operasyon',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+            const SizedBox(width: 8),
+            Text(
+              data.fold<int>(0, (sum, e) => sum + e.value).toString(),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 170,
+          child: CustomPaint(
+            painter: _TrendPainter(
+              values: data.map((e) => e.value.toDouble()).toList(),
+              maxValue: displayMax.toDouble(),
+            ),
+            child: Container(),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: data
+              .map((e) => Text(
+                    e.label,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF94A3B8)),
+                  ))
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrendPainter extends CustomPainter {
+  _TrendPainter({required this.values, required this.maxValue});
+
+  final List<double> values;
+  final double maxValue;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paintGrid = Paint()
+      ..color = const Color(0xFFE2E8F0)
+      ..strokeWidth = 1;
+
+    final gridCount = 4;
+    for (int i = 0; i <= gridCount; i++) {
+      final y = size.height - (size.height / gridCount) * i;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paintGrid);
+    }
+
+    if (values.isEmpty) return;
+    final stepX = size.width / (values.length - 1);
+    final points = <Offset>[];
+    for (int i = 0; i < values.length; i++) {
+      final x = stepX * i;
+      final v = values[i];
+      final ratio = maxValue == 0 ? 0.0 : (v / maxValue);
+      final y = size.height - (ratio * size.height);
+      points.add(Offset(x, y));
+    }
+
+    final fillPath = Path()..moveTo(0, size.height);
+    for (int i = 0; i < points.length; i++) {
+      fillPath.lineTo(points[i].dx, points[i].dy);
+    }
+    fillPath.lineTo(size.width, size.height);
+    fillPath.close();
+
+    final fillPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0x334F46E5),
+          Color(0x004F46E5),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawPath(fillPath, fillPaint);
+
+    final linePaint = Paint()
+      ..color = const Color(0xFF4F46E5)
+      ..strokeWidth = 2.6
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (int i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, linePaint);
+
+    final dotPaint = Paint()..color = const Color(0xFF4F46E5);
+    for (final p in points) {
+      canvas.drawCircle(p, 3.6, dotPaint);
+      canvas.drawCircle(
+          p, 6, dotPaint..color = const Color(0x204F46E5));
+      dotPaint.color = const Color(0xFF4F46E5);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrendPainter oldDelegate) {
+    return oldDelegate.values != values || oldDelegate.maxValue != maxValue;
   }
 }
 

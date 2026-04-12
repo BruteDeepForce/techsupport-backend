@@ -14,6 +14,7 @@ using TechSupport.Technician;
 using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
 using Reports.Consumers;
+using TechSupport.Accounting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,7 @@ builder.Services.AddOperationModule(builder.Configuration);
 builder.Services.AddReportsModule(builder.Configuration);
 builder.Services.AddTechnicianModule(builder.Configuration);
 builder.Services.AddStockModule(builder.Configuration);
+builder.Services.AddAccountingModule(builder.Configuration);
 
 // MassTransit + RabbitMQ configuration
 builder.Services.AddMassTransit(x =>
@@ -58,6 +60,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
     x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
+    x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {

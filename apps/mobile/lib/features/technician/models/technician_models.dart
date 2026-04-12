@@ -1,41 +1,64 @@
 class Technician {
   Technician({
-    required this.id,
-    required this.firstName,
-    this.lastName,
+    required this.userId,
+    required this.tenantId,
+    required this.name,
     required this.email,
     this.phoneNumber,
-    required this.isActive,
+    this.pictureUrl,
+    this.specializations,
+    this.isActive,
+  });
+
+  final String userId;
+  final String tenantId;
+  final String name;
+  final String email;
+  final String? phoneNumber;
+  final String? pictureUrl;
+  final List<String>? specializations;
+  final bool? isActive;
+
+  // Backend now uses TechnicianId == UserId. Keep a convenience alias.
+  String get id => userId;
+
+  factory Technician.fromJson(Map<String, dynamic> json) => Technician(
+        userId: (json['userId'] ?? json['UserId'] ?? json['id'] ?? json['Id'])
+                ?.toString() ??
+            '',
+        tenantId: (json['tenantId'] ?? json['TenantId'])?.toString() ?? '',
+        name: (json['name'] ?? json['Name'] ?? json['firstName'])?.toString() ??
+            '',
+        email: (json['email'] ?? json['Email'])?.toString() ?? '',
+        phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
+        pictureUrl: (json['pictureUrl'] ?? json['PictureUrl'])?.toString(),
+        specializations:
+            (json['specializations'] ?? json['Specializations']) is List
+                ? (json['specializations'] ?? json['Specializations'])
+                    .map((e) => e.toString())
+                    .toList()
+                    .cast<String>()
+                : null,
+        isActive: json['isActive'] ?? json['IsActive'],
+      );
+}
+
+class Experts {
+  Experts({
+    required this.id,
+    required this.name,
   });
 
   final String id;
-  final String firstName;
-  final String? lastName;
-  final String email;
-  final String? phoneNumber;
-  final bool isActive;
+  final String name;
 
-  factory Technician.fromJson(Map<String, dynamic> json) => Technician(
-        id: (json['id'] ??
-                    json['Id'] ??
-                    json['technicianId'] ??
-                    json['TechnicianId'])
+  factory Experts.fromJson(Map<String, dynamic> json) => Experts(
+        id: (json['id'] ?? json['Id'])?.toString() ?? '',
+        name: (json['name'] ??
+                    json['Name'] ??
+                    json['expertiseName'] ??
+                    json['ExpertiseName'])
                 ?.toString() ??
             '',
-        firstName: (json['firstName'] ??
-                    json['FirstName'] ??
-                    json['name'] ??
-                    json['Name'])
-                ?.toString() ??
-            '',
-        lastName: (json['lastName'] ?? json['LastName'])?.toString(),
-        email: (json['email'] ?? json['Email'])?.toString() ?? '',
-        phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
-        isActive: (json['isActive'] ?? json['IsActive'] ?? false) is bool
-            ? (json['isActive'] ?? json['IsActive'] ?? false) as bool
-            : ((json['isActive'] ?? json['IsActive'] ?? 'false')
-                    .toString()
-                    .toLowerCase() ==
-                'true'),
       );
 }

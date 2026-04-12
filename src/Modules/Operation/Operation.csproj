@@ -13,6 +13,7 @@
     <ProjectReference Include="../Identity.Contracts/Identity.Contracts.csproj" />
     <ProjectReference Include="../Customer.Contracts/Customer.Contracts.csproj" />
     <ProjectReference Include="../Technician.Contracts/Technician.Contracts.csproj" />
+    <ProjectReference Include="../Stock.Contracts/Stock.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

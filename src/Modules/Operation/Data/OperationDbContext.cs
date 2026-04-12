@@ -19,6 +19,9 @@ public sealed class OperationDbContext : DbContext
     public DbSet<MaintenanceTemplate> MaintenanceTemplates => Set<MaintenanceTemplate>();
     public DbSet<MaintenanceTemplateChecklist> MaintenanceTemplateChecklists => Set<MaintenanceTemplateChecklist>();
 
+    public DbSet<OfferRecord> OfferRecords => Set<OfferRecord>();
+    public DbSet<OfferRecordItem> OfferRecordItems => Set<OfferRecordItem>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("operations");
@@ -146,6 +149,27 @@ public sealed class OperationDbContext : DbContext
             b.Property(x => x.FileName).HasMaxLength(256).IsRequired();
             b.Property(x => x.ContentType).HasMaxLength(100).IsRequired();
             b.HasIndex(x => x.TicketId);
+        });
+
+        modelBuilder.Entity<OfferRecord>(b =>
+        {
+            b.ToTable("offer_records");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Amount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(x => x.Currency).HasMaxLength(10).IsRequired();
+            b.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").IsRequired();
+            b.HasMany(x => x.Items)
+                .WithOne(i => i.OfferRecord)
+                .HasForeignKey(i => i.OfferRecordId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OfferRecordItem>(b =>
+        {
+            b.ToTable("offer_record_items");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Quantity).IsRequired();
+            b.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)").IsRequired();
         });
 
         base.OnModelCreating(modelBuilder);

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TechSupport.Stock.DTO;
 using TechSupport.Stock.Services;
 
 namespace TechSupport.Stock.Api.Controllers;
@@ -15,22 +16,50 @@ public class StockItemsController : ControllerBase
         _stockService = stockService;
     }
 
-    public record CreateItemDto(Guid? BranchId, Guid? CategoryId, string Sku, string Barcode, string Name, string? Description, string? Unit, long InitialQuantity);
+
+    [Authorize(Roles = "admin, technician")]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateItemDTO dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var branchId = GetBranchIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+
+        var item = await _stockService.CreateAsync(tenantId.Value,  branchId, dto, ct);
+        return Ok(new { item.Id, item.Sku, item.Barcode, item.Name });
+    }
+
+    [Authorize(Roles = "admin, technician")]
+    [HttpGet]
+    public async Task<IActionResult> GetAll(CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+        return Ok(await _stockService.GetAllAsync(tenantId.Value, ct));
+    }
+    
+    [Authorize(Roles = "admin, technician")]
+    [HttpGet("category/{categoryId:guid}")]
+    public async Task<IActionResult> GetAllByCategoryId(Guid categoryId, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+        return Ok(await _stockService.GetAllByCategoryId(tenantId.Value, categoryId, ct));
+    }
 
     private Guid? GetTenantIdFromClaims()
     {
         var tenantClaim = User.Claims.FirstOrDefault(c => c.Type == "tenant_id");
         return tenantClaim != null && Guid.TryParse(tenantClaim.Value, out var tenantId) ? tenantId : null;
     }
-
-    [Authorize(Roles = "admin")]
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateItemDto dto, CancellationToken ct)
+    private Guid? GetUserIdFromClaims()
     {
-        var tenantId = GetTenantIdFromClaims();
-        if (tenantId == null) return Unauthorized();
-
-        var item = await _stockService.CreateAsync(tenantId.Value, dto.BranchId, dto.Sku, dto.Barcode, dto.Name, dto.Description, dto.Unit, dto.InitialQuantity, ct);
-        return Ok(new { item.Id, item.Sku, item.Barcode, item.Name });
+        var userClaim = User.Claims.FirstOrDefault(c => c.Type == "user_id");
+        return userClaim != null && Guid.TryParse(userClaim.Value, out var userId) ? userId : null;
+    }
+     private Guid? GetBranchIdFromClaims()
+    {
+        var branchClaim = User.Claims.FirstOrDefault(c => c.Type == "branch_id");
+        return branchClaim != null && Guid.TryParse(branchClaim.Value, out var branchId) ? branchId : null;
     }
 }

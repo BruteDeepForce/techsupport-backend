@@ -15,6 +15,8 @@ public sealed class TechnicianProvisionRequest
     public string? FailureReason { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? CompletedAtUtc { get; set; }
+    public DateTimeOffset? EmploymentStartDate { get; set; }
+    public List<ExpertsTechnicianProvision> ExpertsId { get; set; } = new List<ExpertsTechnicianProvision>();
 }
 
 public enum ProvisioningStatus

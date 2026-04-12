@@ -13,6 +13,9 @@ public sealed class TechnicianDbContext : DbContext
     public DbSet<TechnicianProvisionRequest> TechnicianProvisionRequests => Set<TechnicianProvisionRequest>();
     public DbSet<Technician.Domain.Entities.TechnicianOperation> TechnicianOperations => Set<Technician.Domain.Entities.TechnicianOperation>();
 
+    public DbSet<TechnicianExpert> TechnicianExperts => Set<TechnicianExpert>();
+    public DbSet<TechnicianExpertMapping> TechnicianExpertMappings => Set<TechnicianExpertMapping>();
+    public DbSet<ExpertsTechnicianProvision> ExpertsTechnicianProvisions => Set<ExpertsTechnicianProvision>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("technicians");
@@ -41,6 +44,17 @@ public sealed class TechnicianDbContext : DbContext
             b.HasIndex(x => x.CorrelationId).IsUnique();
             b.HasIndex(x => new { x.TenantId, x.Email });
         });
+        modelBuilder.Entity<TechnicianProvisionRequest>()
+            .HasMany(t => t.ExpertsId)
+            .WithOne(e => e.TechnicianProvisionRequest)
+            .HasForeignKey(e => e.TechnicianProvisionRequestId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExpertsTechnicianProvision>(b =>
+        {
+            b.ToTable("ExpertsTechnicianProvision");
+            b.HasKey(x => x.Id);
+        });
 
         modelBuilder.Entity<Technician.Domain.Entities.TechnicianOperation>(b =>
         {
@@ -52,6 +66,22 @@ public sealed class TechnicianDbContext : DbContext
             b.Property(x => x.Status).HasMaxLength(50).IsRequired();
             b.Property(x=> x.Status).HasConversion<string>();
         });
+
+        modelBuilder.Entity<TechnicianExpertMapping>(b =>
+        {
+            b.ToTable("technician_expert_mappings");
+            b.HasKey(x => new { x.TechnicianId, x.TechnicianExpertId, x.tenantId });
+            b.HasOne(x => x.Technician)
+                .WithMany(t => t.TechnicianExpertMappings)
+                .HasForeignKey(x => x.TechnicianId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.HasOne(x => x.TechnicianExpert)
+                .WithMany(t => t.TechnicianExpertMappings)
+                .HasForeignKey(x => x.TechnicianExpertId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
 
         base.OnModelCreating(modelBuilder);
     }

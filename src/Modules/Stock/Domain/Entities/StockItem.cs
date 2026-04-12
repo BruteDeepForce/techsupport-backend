@@ -13,6 +13,7 @@ public class StockItem
     public string Barcode { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public decimal? UnitPrice { get; set; }
     public string? Unit { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAtUtc { get; set; }

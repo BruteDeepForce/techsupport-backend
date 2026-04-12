@@ -57,8 +57,7 @@ class _TechnicianDetailPageState extends State<TechnicianDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                    '${_tech!.firstName}${_tech!.lastName != null ? ' ${_tech!.lastName}' : ''}',
+                Text(_tech!.name,
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
@@ -66,7 +65,14 @@ class _TechnicianDetailPageState extends State<TechnicianDetailPage> {
                 const SizedBox(height: 6),
                 Text('Telefon: ${_tech!.phoneNumber ?? '-'}'),
                 const SizedBox(height: 8),
-                Text('Durum: ${_tech!.isActive ? 'Aktif' : 'Pasif'}'),
+                if (_tech!.specializations != null &&
+                    _tech!.specializations!.isNotEmpty)
+                  Text(
+                      'Uzmanlık: ${_tech!.specializations!.join(', ')}'),
+                if (_tech!.isActive != null) ...[
+                  const SizedBox(height: 6),
+                  Text('Durum: ${_tech!.isActive! ? 'Aktif' : 'Pasif'}'),
+                ],
               ],
             ),
           ),

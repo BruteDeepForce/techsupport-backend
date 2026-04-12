@@ -20,7 +20,7 @@ public sealed class TicketService : ITicketService
         _ops = ops;
     }
 
-    public async Task<Ticket> CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, Guid? deviceId, string title, string description, Priority priority, CancellationToken ct)
+    public async Task<Ticket> CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, string? CustomerName, Guid? deviceId, string title, string description, Priority priority, CancellationToken ct)
     {
         var ticket = new Ticket
         {
@@ -29,6 +29,7 @@ public sealed class TicketService : ITicketService
             BranchId = branchId,
             // CustomerId is inferred from the authenticated user (createdBy)
             CustomerId = createdBy,
+            CustomerName = CustomerName,
             DeviceId = deviceId,
             Title = title,
             Description = description,

@@ -93,7 +93,7 @@ namespace TechSupport.Customer.Services
             await _db.SaveChangesAsync(ct);
             return true;
         }
-        // kaldırıldı kullanılmıyor StartProvisioningAsync metodu içerisinde müşteri oluşturuluyor.
+        //! kaldırıldı kullanılmıyor StartProvisioningAsync metodu içerisinde müşteri oluşturuluyor.
         public async Task<TechSupport.Customer.Domain.Entities.Customer> CreateCustomerAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, CancellationToken ct)
         {
             var exists = await _db.Customers.AnyAsync(x => x.TenantId == tenantId && x.Email == email, ct);

@@ -4,6 +4,7 @@ public enum TicketStatus
 {
     Open,
     CreatedOperation,
+    Repairing,
     Closed,
     Rejected
 }
@@ -17,7 +18,7 @@ public sealed class Ticket
     public Guid CustomerId { get; set; }
     public Guid? DeviceId { get; set; }
 
-
+    public string? CustomerName { get; set; }
     public Guid? OperationId { get; set; }
     public OperationRecord? Operation { get; set; }
 

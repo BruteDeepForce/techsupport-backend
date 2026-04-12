@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Stock.Data;
 using TechSupport.Stock.Domain.Entities;
+using TechSupport.Stock.DTO;
 
 namespace TechSupport.Stock.Services;
 
@@ -16,16 +17,21 @@ public class StockService : IStockService
         _db = db;
     }
 
-    public async Task<StockItem> CreateAsync(Guid tenantId, Guid? branchId, string sku, string barcode, string name, string? description, string? unit, long initialQuantity, CancellationToken ct = default)
+    public async Task<StockItem> CreateAsync(Guid tenantId, Guid? branchId, CreateItemDTO dto, CancellationToken ct = default)
     {
-        // validate duplicates with a single DB call to reduce roundtrips
-        var existing = await _db.StockItems.FirstOrDefaultAsync(x => x.TenantId == tenantId && (x.Sku == sku || x.Barcode == barcode), ct);
+        var categoryExists = await _db.StockCategories
+            .AnyAsync(x => x.TenantId == tenantId && x.Id == dto.CategoryId, ct);
+        if (!categoryExists)
+            throw new InvalidOperationException($"Category with id '{dto.CategoryId}' does not exist for tenant {tenantId}");
+
+        var existing = await _db.StockItems
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && (x.Sku == dto.Sku || x.Barcode == dto.Barcode), ct);
         if (existing != null)
         {
-            if (existing.Sku == sku)
-                throw new InvalidOperationException($"SKU '{sku}' already exists for tenant {tenantId}");
-            if (existing.Barcode == barcode)
-                throw new InvalidOperationException($"Barcode '{barcode}' already exists for tenant {tenantId}");
+            if (existing.Sku == dto.Sku)
+                throw new InvalidOperationException($"SKU '{dto.Sku}' already exists for tenant {tenantId}");
+            if (existing.Barcode == dto.Barcode)
+                throw new InvalidOperationException($"Barcode '{dto.Barcode}' already exists for tenant {tenantId}");
             // fallback
             throw new InvalidOperationException($"Stock item conflict for tenant {tenantId}");
         }
@@ -34,13 +40,13 @@ public class StockService : IStockService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = branchId,
-            Sku = sku,
-            Barcode = barcode,
-            Name = name,
-            Description = description,
-            Unit = unit,
-            CreatedAtUtc = DateTime.UtcNow
+            CategoryId = dto.CategoryId,
+            Sku = dto.Sku,
+            Barcode = dto.Barcode,
+            Name = dto.Name,
+            Description = dto.Description,
+            Unit = dto.Unit,
+            UnitPrice = dto.UnitPrice
         };
 
         var balance = new StockBalance
@@ -49,7 +55,7 @@ public class StockService : IStockService
             TenantId = tenantId,
             StockItemId = item.Id,
             BranchId = branchId,
-            QuantityAvailable = initialQuantity,
+            QuantityAvailable = dto.InitialQuantity,
             QuantityReserved = 0
         };
 
@@ -62,7 +68,7 @@ public class StockService : IStockService
             await _db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
         }
-        catch (DbUpdateException dbEx)
+        catch (DbUpdateException dbEx) //! güzel rollback uyguladık
         {
             // rollback first
             await tx.RollbackAsync(ct);
@@ -75,13 +81,13 @@ public class StockService : IStockService
                 if (inner is Npgsql.PostgresException pg && pg.SqlState == "23505")
                 {
                     // conflict - find which field collides
-                    var conflict = await _db.StockItems.FirstOrDefaultAsync(x => x.TenantId == tenantId && (x.Sku == sku || x.Barcode == barcode), ct);
+                    var conflict = await _db.StockItems.FirstOrDefaultAsync(x => x.TenantId == tenantId && (x.Sku == dto.Sku || x.Barcode == dto.Barcode), ct);
                     if (conflict != null)
                     {
-                        if (conflict.Sku == sku)
-                            throw new InvalidOperationException($"SKU '{sku}' already exists for tenant {tenantId}");
-                        if (conflict.Barcode == barcode)
-                            throw new InvalidOperationException($"Barcode '{barcode}' already exists for tenant {tenantId}");
+                        if (conflict.Sku == dto.Sku)
+                            throw new InvalidOperationException($"SKU '{dto.Sku}' already exists for tenant {tenantId}");
+                        if (conflict.Barcode == dto.Barcode)
+                            throw new InvalidOperationException($"Barcode '{dto.Barcode}' already exists for tenant {tenantId}");
                     }
 
                     // if we couldn't determine, return a generic friendly message
@@ -104,5 +110,46 @@ public class StockService : IStockService
     public async Task<StockItem?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.StockItems.FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
+    public async Task<IReadOnlyList<StockItemListDto>> GetAllAsync(Guid tenantId, CancellationToken ct = default)
+    {
+        return await _db.StockItems.AsNoTracking()
+            .Where(x => x.TenantId == tenantId)
+            .Select(x => new StockItemListDto(
+                x.Id,
+                x.CategoryId,
+                x.Category != null ? x.Category.Name : null,
+                x.Sku,
+                x.Barcode,
+                x.Name,
+                x.Description,
+                x.Unit,
+                x.UnitPrice,
+                x.Balances.Sum(b => b.QuantityAvailable),
+                x.Balances.Sum(b => b.QuantityReserved),
+                x.CreatedAtUtc
+            ))
+            .ToListAsync(ct);
+    }
+    public async Task<IReadOnlyList<StockItemListDto>> GetAllByCategoryId(Guid tenantId, Guid categoryId, CancellationToken ct = default)
+    {
+        return await _db.StockItems.AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.CategoryId == categoryId)
+            .Select(x => new StockItemListDto(
+                x.Id,
+                x.CategoryId,
+                x.Category != null ? x.Category.Name : null,
+                x.Sku,
+                x.Barcode,
+                x.Name,
+                x.Description,
+                x.Unit,
+                x.UnitPrice,
+                x.Balances.Sum(b => b.QuantityAvailable),
+                x.Balances.Sum(b => b.QuantityReserved),
+                x.CreatedAtUtc
+            ))
+            .ToListAsync(ct);
     }
 }
