@@ -45,7 +45,7 @@ jobs :
         run : docker build -t myapp:latest -f ./DockerFile.backend .
       
       - name : Docker Scan
-        run : docker scout myapp:latest
+        run : docker scout quickview myapp:latest
 
       - name : Install Trivy
         run : |
