@@ -23,7 +23,7 @@ public sealed class CustomerAccountProvisionRequestedConsumer : IConsumer<Custom
     {
         var message = context.Message;
 
-        var password = "12345678"; // Generate a secure temporary password in production
+        var ApiKey = "12345678"; // Generate a secure temporary password in production
 
         var existing = await _userManager.FindByEmailAsync(message.Email);
         if (existing is not null)
