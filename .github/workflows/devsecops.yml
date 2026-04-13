@@ -42,17 +42,14 @@ jobs :
         uses : github/codeql-action/analyze@v4
 
       - name : Docker Build
-        run : docker build -t myapp:latest .
-      
-      - name : Docker Scan
-        run : docker scan myapp:latest
+        run : docker build -t myapp:latest -f ./DockerFile.backend .
 
       - name : Install Trivy
         run : |
           sudo apt-get update
           sudo apt-get install -y trivy
       - name : Trivy Scan
-        run : trivy image exit-code 1 --severity HIGH,CRITICAL myapp:latest
+        run : trivy image --timeout 10m --exit-code 1 --severity HIGH,CRITICAL myapp:latest
 
       - name : Upload Trivy Results
         uses : actions/upload-artifact@v4
