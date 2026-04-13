@@ -1,0 +1,71 @@
+name : DevSecOps Pipeline
+
+on :
+  push : 
+    branches : [ "Backend-Lead" ]
+  
+jobs : 
+  DevSecOPS : 
+    runs-on : ubuntu-latest
+    
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps : 
+      - name : Checkout Code
+        uses : actions/checkout@v4
+
+      - name : Setup .Net
+        uses : actions/setup-dotnet@v4
+        with :
+          dotnet-version : '9.0.x'
+      - name : Restore Dependencies
+        run : dotnet restore
+      
+      - name : Build Solution
+        run : dotnet build --no-restore
+      
+      - name : Init CodeQL
+        uses : github/codeql-action/init@v4
+        with :
+          languages : 'csharp'
+
+
+      - name : Build .NET Project
+        run : | 
+          dotnet restore
+          dotnet build --no-incremental
+
+      - name : Analyze Code with CodeQL
+        uses : github/codeql-action/analyze@v4
+
+      - name : Docker Build
+        run : docker build -t myapp:latest -f ./DockerFile.backend .
+
+      - name : Install Trivy
+        run : |
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name : Trivy Scan
+        run : trivy image --timeout 10m --exit-code 1 --severity HIGH,CRITICAL myapp:latest
+
+      - name : Upload Trivy Results
+        uses : actions/upload-artifact@v4
+        with :
+          name : trivy-results
+          path : trivy-results.txt
+      
+      - name : Deploy to Server
+        if: success()
+        uses : appleboy/ssh-action@v0.1.5
+        with :
+          host : ${{ secrets.SERVER_HOST }}
+          username : ${{ secrets.SERVER_USER }}
+          key : ${{ secrets.SERVER_SSH_KEY }}
+          script : |
+            docker pull myapp:latest
+            docker stop myapp || true
+            docker rm myapp || true
+            docker run -d --name myapp -p 80:80 myapp:latest

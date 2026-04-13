@@ -1,0 +1,104 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run -d chrome
+
+## exception
+
+_TypeError: Null check operator used on a null value
+
+```
+#0      ResidentHandlers._toggleDebugBanner (package:flutter_tools/src/resident_runner.dart:1007:37)
+#1      ResidentHandlers._takeVmServiceScreenshot (package:flutter_tools/src/resident_runner.dart:992:12)
+#2      ResidentHandlers.screenshot (package:flutter_tools/src/resident_runner.dart:970:24)
+#3      TerminalHandler._commonTerminalInputHandler (package:flutter_tools/src/resident_runner.dart:1859:32)
+#4      TerminalHandler.processTerminalInput (package:flutter_tools/src/resident_runner.dart:1906:13)
+#5      _rootRunUnary (dart:async/zone_root.dart:48:47)
+#6      _CustomZone.runUnary (dart:async/zone.dart:733:19)
+#7      _CustomZone.runUnaryGuarded (dart:async/zone.dart:633:7)
+#8      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+#9      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+#10     _SyncBroadcastStreamController._sendData (dart:async/broadcast_stream_controller.dart:385:25)
+#11     _BroadcastStreamController.add (dart:async/broadcast_stream_controller.dart:257:5)
+#12     _AsBroadcastStreamController.add (dart:async/broadcast_stream_controller.dart:488:11)
+#13     _rootRunUnary (dart:async/zone_root.dart:48:47)
+#14     _CustomZone.runUnary (dart:async/zone.dart:733:19)
+#15     _CustomZone.runUnaryGuarded (dart:async/zone.dart:633:7)
+#16     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+#17     _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+#18     _SinkTransformerStreamSubscription._add (dart:async/stream_transformers.dart:67:11)
+#19     _EventSinkWrapper.add (dart:async/stream_transformers.dart:13:11)
+#20     _StringAdapterSink.add (dart:convert/string_conversion.dart:228:11)
+#21     _StringAdapterSink.addSlice (dart:convert/string_conversion.dart:233:7)
+#22     _Utf8ConversionSink.addSlice (dart:convert/string_conversion.dart:313:20)
+#23     _ErrorHandlingAsciiDecoderSink.addSlice (dart:convert/ascii.dart:285:17)
+#24     _ErrorHandlingAsciiDecoderSink.add (dart:convert/ascii.dart:271:5)
+#25     _ConverterStreamEventSink.add (dart:convert/chunked_conversion.dart:70:18)
+#26     _SinkTransformerStreamSubscription._handleData (dart:async/stream_transformers.dart:115:24)
+#27     _rootRunUnary (dart:async/zone_root.dart:48:47)
+#28     _CustomZone.runUnary (dart:async/zone.dart:733:19)
+#29     _CustomZone.runUnaryGuarded (dart:async/zone.dart:633:7)
+#30     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+#31     _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+#32     _SyncStreamControllerDispatch._sendData (dart:async/stream_controller.dart:798:19)
+#33     _StreamController._add (dart:async/stream_controller.dart:663:7)
+#34     _StreamController.add (dart:async/stream_controller.dart:618:5)
+#35     _Socket._onData (dart:io-patch/socket_patch.dart:2874:41)
+#36     _rootRunUnary (dart:async/zone_root.dart:56:13)
+#37     _CustomZone.runUnary (dart:async/zone.dart:733:19)
+#38     _CustomZone.runUnaryGuarded (dart:async/zone.dart:633:7)
+#39     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)
+#40     _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)
+#41     _SyncStreamControllerDispatch._sendData (dart:async/stream_controller.dart:798:19)
+#42     _StreamController._add (dart:async/stream_controller.dart:663:7)
+#43     _StreamController.add (dart:async/stream_controller.dart:618:5)
+#44     new _RawSocket.<anonymous closure> (dart:io-patch/socket_patch.dart:2312:31)
+#45     _NativeSocket.issueReadEvent.issue (dart:io-patch/socket_patch.dart:1647:14)
+#46     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)
+#47     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+#48     _runPendingImmediateCallback (dart:isolate-patch/isolate_patch.dart:127:13)
+#49     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:194:5)
+```
+
+## flutter doctor
+
+```
+[32m[✓][39m Flutter (Channel stable, 3.41.4, on macOS 15.7.4 24G517 darwin-arm64, locale tr-TR) [205ms]
+    [32m•[39m Flutter version 3.41.4 on channel stable at /Users/suleymantuysuzoglu/flutter
+    [32m•[39m Upstream repository https://github.com/flutter/flutter.git
+    [32m•[39m Framework revision ff37bef603 (4 weeks ago), 2026-03-03 16:03:22 -0800
+    [32m•[39m Engine revision e4b8dca3f1
+    [32m•[39m Dart version 3.11.1
+    [32m•[39m DevTools version 2.54.1
+    [32m•[39m Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations,
+      enable-native-assets, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+
+[31m[✗][39m Android toolchain - develop for Android devices [147ms]
+    [31m✗[39m Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[32m[✓][39m Xcode - develop for iOS and macOS (Xcode 26.3) [1.632ms]
+    [32m•[39m Xcode at /Applications/Xcode.app/Contents/Developer
+    [32m•[39m Build 17C529
+    [32m•[39m CocoaPods version 1.16.2
+
+[32m[✓][39m Chrome - develop for the web [3ms]
+    [32m•[39m Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[32m[✓][39m Connected device (3 available) [5,8s]
+    [32m•[39m iPhone 19 (wireless) (mobile) • 00008030-001924C636B9402E • ios            • iOS 18.0.1 22A3370
+    [32m•[39m macOS (desktop)               • macos                     • darwin-arm64   • macOS 15.7.4 24G517 darwin-arm64
+    [32m•[39m Chrome (web)                  • chrome                    • web-javascript • Google Chrome 146.0.7680.165
+
+[32m[✓][39m Network resources [716ms]
+    [32m•[39m All expected network resources are available.
+
+[33m![39m Doctor found issues in 1 category.
+```

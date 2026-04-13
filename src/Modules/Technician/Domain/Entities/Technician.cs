@@ -1,0 +1,18 @@
+namespace TechSupport.Technician.Domain.Entities;
+
+public sealed class Technician
+{
+    public Guid Id { get; set; }
+    public Guid? AppUserId { get; set; }
+    public Guid TenantId { get; set; }
+    public Guid? BranchId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string? PictureUrl { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? EmploymentStartDate { get; set; }
+    public ICollection<TechnicianExpertMapping> TechnicianExpertMappings { get; set; } = new List<TechnicianExpertMapping>();
+}
