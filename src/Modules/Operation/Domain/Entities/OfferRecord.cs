@@ -14,6 +14,7 @@ namespace TechSupport.Operation.Domain.Entities
         public Guid TechnicianUserId { get; set; }
         public Guid? CustomerId { get; set; }
         public decimal Amount { get; set; }
+        public decimal LaborAmount { get; set; }
         public OfferStatus Status { get; set; } = OfferStatus.Pending;
         public string Currency { get; set; } = null!;
         public DateTime CreatedAt { get; set; }

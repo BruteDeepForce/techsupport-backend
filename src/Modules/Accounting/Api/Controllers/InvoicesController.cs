@@ -15,10 +15,12 @@ namespace TechSupport.Accounting.Api.Controllers;
 public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
+    private readonly IInvoicePdfService _invoicePdfService;
 
-    public InvoicesController(IInvoiceService invoiceService)
+    public InvoicesController(IInvoiceService invoiceService, IInvoicePdfService invoicePdfService)
     {
         _invoiceService = invoiceService;
+        _invoicePdfService = invoicePdfService;
     }
 
     /// <summary>
@@ -36,6 +38,25 @@ public class InvoicesController : ControllerBase
             return NotFound();
 
         return Ok(MapToResponse(invoice));
+    }
+
+    /// <summary>
+    /// Download invoice as PDF
+    /// </summary>
+    [HttpGet("{invoiceId:guid}/pdf")]
+    public async Task<IActionResult> DownloadPdf(Guid invoiceId)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == Guid.Empty)
+            return Unauthorized(new { error = "TenantId claim not found" });
+
+        var invoice = await _invoiceService.GetByIdAsync(tenantId, invoiceId);
+        if (invoice == null)
+            return NotFound();
+
+        var pdfBytes = _invoicePdfService.Generate(invoice);
+        var fileName = $"{invoice.InvoiceNumber}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
     }
 
     /// <summary>

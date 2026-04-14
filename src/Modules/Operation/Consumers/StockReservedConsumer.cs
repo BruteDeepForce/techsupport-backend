@@ -34,6 +34,7 @@ namespace TechSupport.Operation.Consumers
                 TechnicianUserId: message.TechnicianUserId,
                 CustomerId: null,
                 Amount: message.TotalAmount,
+                LaborAmount: 0m,
                 Currency: "TRY",
                 CreatedAt: DateTime.UtcNow,
                 Status: null, //! Teknisyen teklif oluştururken status null olabilir, admin onayından sonra güncellenir.

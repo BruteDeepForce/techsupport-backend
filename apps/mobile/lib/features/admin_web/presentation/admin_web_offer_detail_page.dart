@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../core/utils/pdf_blob_opener.dart';
 import '../../offers/data/offer_service.dart';
 import '../../offers/models/offer_models.dart';
 import 'admin_web_customers_page.dart';
@@ -26,6 +27,7 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
   final OfferService _offerService = OfferService();
   late Future<OfferSummary> _offerFuture;
   bool _acting = false;
+  bool _openingPdf = false;
 
   @override
   void initState() {
@@ -70,6 +72,30 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
           .showSnackBar(const SnackBar(content: Text('Reddetme başarısız')));
     } finally {
       if (mounted) setState(() => _acting = false);
+    }
+  }
+
+  Future<void> _openInvoicePdfWebModal() async {
+    setState(() => _openingPdf = true);
+    try {
+      final bytes = await _offerService.getOfferInvoicePdf(widget.offerId);
+      if (!mounted) return;
+      final opened = openPdfInNewTab(
+        bytes,
+        fileName: 'teklif-faturasi-${_shortId(widget.offerId)}.pdf',
+      );
+      if (!opened) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('PDF bu platformda yeni sekmede acilamadi')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _openingPdf = false);
     }
   }
 
@@ -253,6 +279,23 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                               const SizedBox(height: 16),
                                               Row(
                                                 children: [
+                                                  OutlinedButton.icon(
+                                                    onPressed: _openingPdf
+                                                        ? null
+                                                        : _openInvoicePdfWebModal,
+                                                    icon: _openingPdf
+                                                        ? const SizedBox(
+                                                            width: 14,
+                                                            height: 14,
+                                                            child:
+                                                                CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                            ),
+                                                          )
+                                                        : const Icon(Icons.picture_as_pdf_outlined),
+                                                    label: const Text('Fatura PDF'),
+                                                  ),
+                                                  const SizedBox(width: 10),
                                                   OutlinedButton(
                                                     onPressed: _acting ||
                                                             !isPending

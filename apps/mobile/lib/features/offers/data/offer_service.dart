@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:typed_data';
 import '../../../core/network/api_client.dart';
 import '../models/offer_models.dart';
 
@@ -71,5 +72,42 @@ class OfferService {
       return (response.data['success'] ?? response.data['Success']) == true;
     }
     throw Exception('Failed to reject offer: ${response.statusCode}');
+  }
+
+  Future<Uint8List> getOfferInvoicePdf(String offerId) async {
+    final invoiceNumber = 'OFR-${offerId.replaceAll('-', '').toLowerCase()}';
+
+    late final Response invoiceRes;
+    try {
+      invoiceRes =
+          await _dio.get('/api/accounting/invoices/by-number/$invoiceNumber');
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 404) {
+        throw Exception(
+            'Bu teklif için henüz fatura oluşmamış. Admin onayı sonrası tekrar deneyin.');
+      }
+      rethrow;
+    }
+
+    if (invoiceRes.statusCode != 200) {
+      throw Exception('Fatura bulunamadı: ${invoiceRes.statusCode}');
+    }
+
+    final invoiceId = (invoiceRes.data['id'] ?? invoiceRes.data['Id'])?.toString();
+    if (invoiceId == null || invoiceId.isEmpty) {
+      throw Exception('Fatura kimliği alınamadı');
+    }
+
+    final pdfRes = await _dio.get<List<int>>(
+      '/api/accounting/invoices/$invoiceId/pdf',
+      options: Options(responseType: ResponseType.bytes),
+    );
+
+    if (pdfRes.statusCode != 200 || pdfRes.data == null) {
+      throw Exception('PDF yüklenemedi: ${pdfRes.statusCode}');
+    }
+
+    return Uint8List.fromList(pdfRes.data!);
   }
 }

@@ -156,6 +156,7 @@ public sealed class OperationDbContext : DbContext
             b.ToTable("offer_records");
             b.HasKey(x => x.Id);
             b.Property(x => x.Amount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(x => x.LaborAmount).HasColumnType("decimal(18,2)").IsRequired();
             b.Property(x => x.Currency).HasMaxLength(10).IsRequired();
             b.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").IsRequired();
             b.HasMany(x => x.Items)

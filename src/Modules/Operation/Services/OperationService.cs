@@ -202,6 +202,8 @@ public sealed class OperationService : IOperationService
         {
             op.IsClosed = true;
             op.ClosedAtUtc = DateTimeOffset.UtcNow;
+            //! burada account modülüne publish event çakalım. ödeme alındı mı alınmadı mı onu düşüncem.
+
         }
 
         await _db.SaveChangesAsync(ct);

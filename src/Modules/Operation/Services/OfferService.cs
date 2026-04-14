@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MassTransit.Initializers.PropertyConverters;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TechSupport.Operation.Contracts.Events;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
 using TechSupport.Operation.DTO;
@@ -14,31 +15,69 @@ namespace TechSupport.Operation.Services
     public class OfferService : IOfferService
     {
         private readonly OperationDbContext _dbContext;
+        private readonly IBus _bus;
 
-        public OfferService(OperationDbContext dbContext)
+        public OfferService(OperationDbContext dbContext, IBus bus)
         {
             _dbContext = dbContext;
+            _bus = bus;
         }
 
         public async Task<bool> AdminApproveOfferAsync(Guid TenantId, Guid? BranchId, Guid offerId, CancellationToken ct)
         {
             if (offerId == Guid.Empty)
                 throw new ArgumentException("Offer ID cannot be empty.", nameof(offerId));
-            var offer = await _dbContext.OfferRecords.FirstOrDefaultAsync(o => o.Id == offerId && o.TenantId == TenantId, ct);
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+
+            var offer = await _dbContext.OfferRecords
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == offerId && o.TenantId == TenantId, ct);
             if (offer == null)
                 return false;
 
             var operation = await _dbContext.Operations.FirstOrDefaultAsync(o => o.Id == offer.OperationId && o.TenantId == TenantId, ct);
-            if (operation == null)                return false;
+            if (operation == null)
+                return false;
+
+            if (offer.CustomerId is null || offer.CustomerId == Guid.Empty)
+                return false;
+
+            if (offer.Status == OfferStatus.AdminApproved)
+                return true;
+
             operation.Status = OperationStatus.WaitingForApproval;
 
             offer.Status = OfferStatus.AdminApproved;
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+
+            var partsAmount = offer.Items.Sum(i => i.Quantity * i.UnitPrice);
+
+            //! bu event publish edilince account modülünde customer için 
+            //! fatura oluşturulur. Onaylarsa iş başlatılır.
+            //! account modülü Invoice tablosunda bu faturayı Draft ve ProForma olarak tutar.
+            await _bus.Publish(new OfferAdminApprovedForInvoicing(
+                offer.Id,
+                offer.OperationId,
+                offer.TenantId,
+                offer.BranchId,
+                offer.CustomerId.Value,
+                offer.Currency,
+                partsAmount,
+                offer.LaborAmount,
+                offer.Amount,
+                offer.Items.Select(i => new OfferAdminApprovedItem(
+                    i.StockItemId,
+                    i.Quantity,
+                    i.UnitPrice)).ToList(),
+                DateTimeOffset.UtcNow), ct);
 
             //! teknisyen ve customere push bildirim göndeririz. daha sonra teknisyen işi başlatır.
             return true;
         }
+
+
 
         public async Task<bool> AdminRejectOfferAsync(Guid TenantId, Guid? BranchId, Guid offerId, CancellationToken ct)
         {
@@ -113,6 +152,7 @@ namespace TechSupport.Operation.Services
             var customerid = await _dbContext.Operations.Where(o => o.Id == offer.OperationId && o.TenantId == offer.TenantId).Select(o => o.CustomerId).FirstOrDefaultAsync(ct);
             if (customerid == Guid.Empty)
                 return false;
+            var partsTotal = offer.Items.Sum(i => i.Quantity * i.UnitPrice);
 
             var offerRecord = new Domain.Entities.OfferRecord
             {
@@ -122,7 +162,8 @@ namespace TechSupport.Operation.Services
                 OperationId = offer.OperationId,
                 TechnicianUserId = offer.TechnicianUserId,
                 CustomerId = customerid,
-                Amount = offer.Items.Sum(i => i.Quantity * i.UnitPrice),
+                Amount = partsTotal + offer.LaborAmount,
+                LaborAmount = offer.LaborAmount,
                 Currency = offer.Currency,
                 CreatedAt = DateTime.UtcNow,
                 Items = offer.Items.Select(i => new OfferRecordItem
@@ -156,6 +197,7 @@ namespace TechSupport.Operation.Services
                 o.TechnicianUserId,
                 o.CustomerId,
                 o.Amount,
+                o.LaborAmount,
                 o.Currency,
                 o.CreatedAt,
                 o.Status,
@@ -179,6 +221,7 @@ namespace TechSupport.Operation.Services
                 o.TechnicianUserId,
                 o.CustomerId,
                 o.Amount,
+                o.LaborAmount,
                 o.Currency,
                 o.CreatedAt,
                 o.Status,
@@ -202,6 +245,7 @@ namespace TechSupport.Operation.Services
                     offer.TechnicianUserId,
                     offer.CustomerId,
                     offer.Amount,
+                    offer.LaborAmount,
                     offer.Currency,
                     offer.CreatedAt,
                     offer.Status,

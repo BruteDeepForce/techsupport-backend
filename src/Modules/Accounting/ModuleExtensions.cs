@@ -32,6 +32,7 @@ public static class ModuleExtensions
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ICariHesapService, CariHesapService>();
         services.AddScoped<IInvoiceService, InvoiceService>();
+        services.AddScoped<IInvoicePdfService, InvoicePdfService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IRedisCacheService, RedisCacheService>();
 

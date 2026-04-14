@@ -10,6 +10,7 @@ namespace TechSupport.Operation.DTO
         Guid TechnicianUserId,
         Guid? CustomerId,
         decimal Amount,
+        decimal LaborAmount,
         string Currency,
         DateTime CreatedAt,
         OfferStatus? Status,

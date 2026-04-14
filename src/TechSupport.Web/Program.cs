@@ -15,6 +15,7 @@ using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
 using Reports.Consumers;
 using TechSupport.Accounting;
+using TechSupport.Accounting.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
     x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
+    x.AddConsumer<OfferAdminApprovedForInvoicingConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
