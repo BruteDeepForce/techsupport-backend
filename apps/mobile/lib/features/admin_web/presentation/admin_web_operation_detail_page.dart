@@ -245,7 +245,8 @@ class _AdminWebOperationDetailPageState
                                             children: [
                                               _DetailTile(
                                                 label: 'Müşteri',
-                                                value: _shortId(op.customerId),
+                                                value:
+                                                    _shortId(op.customerName),
                                               ),
                                               _DetailTile(
                                                 label: 'Cihaz',
@@ -253,11 +254,10 @@ class _AdminWebOperationDetailPageState
                                               ),
                                               _DetailTile(
                                                 label: 'Teknisyen',
-                                                value:
-                                                    op.technicianUserId == null
-                                                        ? '-'
-                                                        : _shortId(op
-                                                            .technicianUserId!),
+                                                value: op.technicianName.isEmpty
+                                                    ? '-'
+                                                    : _shortId(
+                                                        op.technicianName),
                                               ),
                                               _DetailTile(
                                                 label: 'Tür',
@@ -265,8 +265,8 @@ class _AdminWebOperationDetailPageState
                                               ),
                                               _DetailTile(
                                                 label: 'Öncelik',
-                                                value: _priorityLabel(
-                                                    op.priority),
+                                                value:
+                                                    _priorityLabel(op.priority),
                                               ),
                                               _DetailTile(
                                                 label: 'Durum',
@@ -296,7 +296,16 @@ class _AdminWebOperationDetailPageState
   }
 }
 
-enum _NavKey { home, tickets, operations, offers, team, customers, stock, other }
+enum _NavKey {
+  home,
+  tickets,
+  operations,
+  offers,
+  team,
+  customers,
+  stock,
+  other
+}
 
 class _WebSidebar extends StatelessWidget {
   const _WebSidebar({this.compact = false, required this.active});
@@ -450,8 +459,7 @@ class _SidebarFooter extends StatelessWidget {
                   value: 0.55,
                   minHeight: 6,
                   backgroundColor: const Color(0xFF1D3554),
-                  valueColor:
-                      const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
+                  valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
                 ),
               ),
               const SizedBox(height: 6),
@@ -537,8 +545,7 @@ class _NavItem extends StatelessWidget {
                 )),
             const Spacer(),
             if (!active)
-              const Icon(Icons.expand_more,
-                  size: 14, color: Color(0xFF7B8FA8)),
+              const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
           ],
         ),
       ),
@@ -619,8 +626,7 @@ class _Breadcrumb extends StatelessWidget {
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Detay',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Detay', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }

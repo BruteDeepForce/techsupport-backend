@@ -11,6 +11,8 @@ class OperationRecord {
     required this.status,
     required this.internalnote,
     required this.priority,
+    required this.customerName,
+    required this.technicianName,
     required this.occurredAtUtc,
     required this.type,
     this.maintenanceTemplateId,
@@ -28,6 +30,8 @@ class OperationRecord {
   final String status;
   final String internalnote;
   final String priority;
+  final String customerName;
+  final String technicianName;
   final DateTime occurredAtUtc;
   final String type;
   final String? maintenanceTemplateId;
@@ -57,6 +61,10 @@ class OperationRecord {
       maintenanceTemplateId:
           (json['maintenanceTemplateId'] ?? json['MaintenanceTemplateId'])
               ?.toString(),
+      customerName:
+          (json['customerName'] ?? json['CustomerName'] ?? '').toString(),
+      technicianName:
+          (json['technicianName'] ?? json['TechnicianName'] ?? '').toString(),
       scheduledAtUtc:
           _parseOptionalDate(json['scheduledAtUtc'] ?? json['ScheduledAtUtc']),
     );

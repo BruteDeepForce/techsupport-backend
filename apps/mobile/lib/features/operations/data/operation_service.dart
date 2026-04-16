@@ -34,26 +34,29 @@ class OperationService {
     String? internalNote,
     String? technicianId,
     String? technicianName,
+    String? customerName,
     required String priority,
     required String type,
     DateTime? scheduledAtUtc,
   }) async {
-    final res = await _dio.post('/api/operations', data: {
-      'CustomerId': customerId,
-      'DeviceId': deviceId,
-      'TechnicianInfo': technicianId == null
-          ? null
-          : {
-              'TechnicianId': technicianId,
-              'Name': technicianName ?? '',
-            },
-      'Title': title,
-      'Description': description,
-      'InternalNote': internalNote,
-      'Priority': priority,
-      'Type': type,
-      'ScheduledAtUtc': scheduledAtUtc?.toUtc().toIso8601String(),
-    }..removeWhere((k, v) => v == null || (v is String && v.isEmpty)));
+    final res = await _dio.post('/api/operations',
+        data: {
+          'CustomerId': customerId,
+          'DeviceId': deviceId,
+          'TechnicianInfo': technicianId == null
+              ? null
+              : {
+                  'TechnicianId': technicianId,
+                  'Name': technicianName ?? '',
+                },
+          'Title': title,
+          'Description': description,
+          'InternalNote': internalNote,
+          'Priority': priority,
+          'Type': type,
+          'CustomerName': customerName,
+          'ScheduledAtUtc': scheduledAtUtc?.toUtc().toIso8601String(),
+        }..removeWhere((k, v) => v == null || (v is String && v.isEmpty)));
     if (res.statusCode == 200) {
       return OperationRecord.fromJson(res.data as Map<String, dynamic>);
     }

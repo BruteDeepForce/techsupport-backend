@@ -14,6 +14,8 @@ namespace TechSupport.Operation.DTO
         string Description,
         string Status,
         string InternalNote,
+        string CustomerName,
+        string TechnicianName,
         OperationPriority Priority,
         DateTimeOffset OccurredAtUtc,
         OperationType Type,
@@ -28,6 +30,7 @@ namespace TechSupport.Operation.DTO
         string Description,
         string? InternalNote,
         OperationPriority Priority,
+        string? customerName,
         OperationType? Type,
         Guid? MaintenanceTemplateId,
         DateTimeOffset? ScheduledAtUtc);

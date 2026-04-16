@@ -4,6 +4,7 @@ using TechSupport.Operation.DTO;
 using TechSupport.Operation.Domain.Entities;
 using TechSupport.Operation.Services;
 using System.Security.Claims;
+using MassTransit.Internals;
 
 namespace TechSupport.Operation.Api.Controllers;
 
@@ -39,6 +40,7 @@ public sealed class OperationsController : ControllerBase
             dto.InternalNote,
             null,
             dto.Priority,
+            dto.customerName,
             dto.Type ?? OperationType.Repair,
             dto.MaintenanceTemplateId ?? null,
             dto.ScheduledAtUtc,
@@ -152,6 +154,8 @@ public sealed class OperationsController : ControllerBase
             op.Description,
             op.Status.ToString(),
             op.InternalNote ?? string.Empty,
+            op.CustomerFullName ?? string.Empty,
+            op.TechnicianFullName ?? string.Empty,
             op.Priority,
             op.CreatedAtUtc,
             op.Type,

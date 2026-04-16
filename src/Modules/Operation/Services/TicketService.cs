@@ -90,6 +90,7 @@ public sealed class TicketService : ITicketService
             internalNote,
             ticket.Id,
             priority,
+            ticket.CustomerName,
             operationType,
             null,
             null,

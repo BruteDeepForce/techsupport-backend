@@ -72,6 +72,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
     final internalNoteController = TextEditingController();
     String? selectedCustomerId;
     String? selectedCustomerUserId;
+    String? selectedCustomerName; //!
     String? selectedDeviceId;
     String? selectedTechnicianId;
     String? selectedTechnicianName;
@@ -117,11 +118,13 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           selectedCustomerId = v;
                           selectedCustomerUserId = null;
                           selectedDeviceId = null;
+                          selectedCustomerName = null; //!
                           if (v != null) {
                             final match =
                                 customers.where((e) => e.id == v).toList();
                             if (match.isNotEmpty) {
                               selectedCustomerUserId = match.first.appUserId;
+                              selectedCustomerName = match.first.name;
                               if (selectedCustomerUserId != null &&
                                   selectedCustomerUserId!.isNotEmpty) {
                                 devicesFuture = _deviceService
@@ -385,6 +388,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                       child: CircularProgressIndicator());
                                 },
                               );
+                              //! operation create try-catch
                               try {
                                 await _operationService
                                     .createOperation(
@@ -400,6 +404,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                           : internalNoteController.text.trim(),
                                       technicianId: selectedTechnicianId,
                                       technicianName: selectedTechnicianName,
+                                      customerName: selectedCustomerName, //!
                                       priority: priority,
                                       type: type,
                                     )
@@ -942,11 +947,11 @@ class _OperationsTableCard extends StatelessWidget {
                   status: _statusLabel(op.status),
                   statusColor: _statusColor(op.status),
                   priority: _priorityLabel(op.priority),
-                  customer: _shortId(op.customerId),
+                  customer: _shortId(op.customerName),
                   device: _shortId(op.deviceId),
-                  technician: op.technicianUserId == null
+                  technician: op.technicianName.isEmpty
                       ? '-'
-                      : _shortId(op.technicianUserId!),
+                      : _shortId(op.technicianName),
                   time: _formatTime(op.occurredAtUtc),
                   onTap: () => onOpenOperation(op.id),
                 ),
