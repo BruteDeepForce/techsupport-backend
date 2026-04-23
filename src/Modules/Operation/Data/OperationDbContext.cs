@@ -169,8 +169,11 @@ public sealed class OperationDbContext : DbContext
         {
             b.ToTable("offer_record_items");
             b.HasKey(x => x.Id);
+            b.Property(x => x.Name).HasMaxLength(256).IsRequired();
             b.Property(x => x.Quantity).IsRequired();
             b.Property(x => x.UnitPrice).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(x => x.StockItemId).HasMaxLength(256).IsRequired();
+            b.Property(x => x.OfferRecordId).IsRequired();
         });
 
         base.OnModelCreating(modelBuilder);

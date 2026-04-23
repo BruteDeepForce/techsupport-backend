@@ -132,8 +132,8 @@ class _TechnicianOperationDetailPageState
                               _shortId(op.deviceId)),
                           _InfoPill(Icons.person_outline_rounded,
                               _shortId(op.customerId)),
-                          _InfoPill(Icons.flag_outlined,
-                              _priorityLabel(op.priority)),
+                          _InfoPill(
+                              Icons.flag_outlined, _priorityLabel(op.priority)),
                         ],
                       ),
                     ],
@@ -146,16 +146,11 @@ class _TechnicianOperationDetailPageState
                       _InfoRow('Durum', _statusLabel(op.status)),
                       _InfoRow('Öncelik', _priorityLabel(op.priority)),
                       _InfoRow('Tür', _operationTypeLabel(op.type)),
-                      _InfoRow('Müşteri', _shortId(op.customerId)),
+                      _InfoRow('Müşteri', _shortId(op.customerName)),
                       _InfoRow('Cihaz', _shortId(op.deviceId)),
-                      _InfoRow('Teknisyen',
-                          op.technicianUserId == null
-                              ? '-'
-                              : _shortId(op.technicianUserId!)),
                       _InfoRow('Tarih', _formatDate(op.occurredAtUtc)),
                       if (op.scheduledAtUtc != null)
-                        _InfoRow(
-                            'Planlanan', _formatDate(op.scheduledAtUtc!)),
+                        _InfoRow('Planlanan', _formatDate(op.scheduledAtUtc!)),
                     ],
                   ),
                 ),
@@ -329,6 +324,8 @@ String _statusLabel(String status) {
       return 'Teslim Edildi';
     case 'cancelled':
       return 'İptal';
+    case 'repairing':
+      return 'Onarım Başlatıldı';
     default:
       return status;
   }

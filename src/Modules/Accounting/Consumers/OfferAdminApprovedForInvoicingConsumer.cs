@@ -64,7 +64,7 @@ public sealed class OfferAdminApprovedForInvoicingConsumer : IConsumer<OfferAdmi
                 BranchId = msg.BranchId,
                 InvoiceId = invoiceId,
                 LineNumber = lineNumber++,
-                Description = $"Parca - StockItem:{item.StockItemId}",
+                Description = $"Parca - {item.Name}",
                 ProductCode = item.StockItemId.ToString("N")[..12],
                 Quantity = item.Quantity,
                 Unit = "adet",

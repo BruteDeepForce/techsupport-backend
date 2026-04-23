@@ -95,9 +95,9 @@ class StockService {
     }
   }
 
-  Future<void> publishOffer(String operationId) async {
+  Future<void> publishOffer(String operationId, double laborAmount) async {
     final res = await _dio.post('/api/stock/reservations/publish-offer',
-        data: {'operationId': operationId});
+        data: {'operationId': operationId, 'LaborAmount': laborAmount});
     if (res.statusCode != 200) {
       throw Exception('Failed to publish offer: ${res.statusCode}');
     }

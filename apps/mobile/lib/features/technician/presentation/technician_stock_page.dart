@@ -29,6 +29,8 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
   final Map<String, StockItem> _itemById = {};
   bool _submitting = false;
   bool _reserved = false;
+  final TextEditingController _laborAmountController =
+      TextEditingController(text: '0');
 
   @override
   void initState() {
@@ -36,6 +38,12 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
     _opsFuture = _operationService.listOperations();
     _categoriesFuture = _stockService.listCategories();
     _selectedOperationId = widget.initialOperationId;
+  }
+
+  @override
+  void dispose() {
+    _laborAmountController.dispose();
+    super.dispose();
   }
 
   void _selectCategory(String id) {
@@ -93,9 +101,20 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
 
   Future<void> _submitOffer() async {
     if (_selectedOperationId == null || !_reserved) return;
+
+    final raw = _laborAmountController.text.trim();
+    final normalized = raw.isEmpty ? '0' : raw.replaceAll(',', '.');
+    final laborAmount = double.tryParse(normalized);
+    if (laborAmount == null || laborAmount < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Geçerli bir işçilik tutarı girin')),
+      );
+      return;
+    }
+
     setState(() => _submitting = true);
     try {
-      await _stockService.publishOffer(_selectedOperationId!);
+      await _stockService.publishOffer(_selectedOperationId!, laborAmount);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Teklif admine gönderildi')),
@@ -299,6 +318,24 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
                       ],
                     ),
                   ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _laborAmountController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'İşçilik Tutarı (TRY)',
+                    hintText: '0.00',
+                    filled: true,
+                    fillColor: AppColors.bgElevated,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [

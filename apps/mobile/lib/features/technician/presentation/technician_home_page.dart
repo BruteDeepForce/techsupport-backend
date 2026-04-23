@@ -323,7 +323,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
                           displayId: _shortId(ops[i].id),
                           title: ops[i].title,
                           subtitle: ops[i].description,
-                          customer: _shortId(ops[i].customerId),
+                          customer: _shortId(ops[i].customerName),
                           device: _shortId(ops[i].deviceId),
                           priority: _priorityColor(ops[i].priority),
                           status: _operationStatusLabel(ops[i].status),

@@ -789,7 +789,7 @@ class _ItemsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headers = ['Stok Id', 'Miktar', 'Birim Fiyat'];
+    final headers = ['Parça Adı', 'Stok Id', 'Miktar', 'Birim Fiyat'];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
@@ -827,6 +827,12 @@ class _ItemRow extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Expanded(
+            child: Text(
+              item.name.isNotEmpty ? item.name : '-',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Expanded(child: Text(_shortId(item.stockItemId))),
           Expanded(child: Text('${item.quantity}')),
           Expanded(child: Text(item.unitPrice.toStringAsFixed(2))),

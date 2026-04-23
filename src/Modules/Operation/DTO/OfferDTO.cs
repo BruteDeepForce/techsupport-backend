@@ -17,6 +17,7 @@ namespace TechSupport.Operation.DTO
         IEnumerable<OfferItemDTO> Items);
     public sealed record OfferItemDTO(
         Guid StockItemId,
+        string Name,
         int Quantity,
         decimal UnitPrice);
 }

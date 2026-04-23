@@ -56,7 +56,7 @@ public class StockReservationsController : ControllerBase
         return Ok(new { status = "Pending" });
     }
 
-    public record PublishOfferBody(Guid OperationId);
+    public record PublishOfferBody(Guid OperationId, decimal LaborAmount);
 
     [HttpPost("publish-offer")]
     [Authorize]
@@ -64,7 +64,7 @@ public class StockReservationsController : ControllerBase
     {
         var tenantId = GetTenantIdFromClaims();
         if (tenantId == null) return Unauthorized();
-        var ok = await _reservations.PublishOperationOfferAsync(tenantId.Value, body.OperationId, ct);
+        var ok = await _reservations.PublishOperationOfferAsync(tenantId.Value, body.OperationId, body.LaborAmount, ct);
         if (!ok) return BadRequest(new { error = "Offer could not be published. Ensure there are approved reservations for this operation." });
         return Ok(new { status = "Offer Published" });
     }

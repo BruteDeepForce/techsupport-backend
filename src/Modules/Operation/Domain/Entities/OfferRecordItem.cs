@@ -10,6 +10,7 @@ namespace TechSupport.Operation.Domain.Entities
         public Guid Id { get; set; }
         public Guid OfferRecordId { get; set; }
         public Guid StockItemId { get; set; }
+        public string? Name { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public OfferRecord OfferRecord { get; set; } = null!;

@@ -124,44 +124,74 @@ namespace TechSupport.Stock.Services
             return false;
         }
 
-        public async Task<bool> PublishOperationOfferAsync(Guid tenantId, Guid operationId, CancellationToken cancellationToken = default)
+        public async Task<bool> PublishOperationOfferAsync(Guid tenantId, Guid operationId, decimal LaborAmount, CancellationToken cancellationToken = default)
         {
             if (tenantId == Guid.Empty)
                 throw new ArgumentException("Tenant ID cannot be empty.", nameof(tenantId));
             if (operationId == Guid.Empty)
                 throw new ArgumentException("Operation ID cannot be empty.", nameof(operationId));
 
-            var reservations = await _dbContext.StockReservations
-                .Where(r => r.TenantId == tenantId && r.OperationId == operationId)
-                .ToListAsync(cancellationToken);
+        //*
+            var stockItemS = await _dbContext.StockItems.Include(x=> x.Reservations)
+            .Where(x=> x.Reservations.Any(r => r.OperationId == operationId && r.TenantId == tenantId))
+            .ToListAsync(cancellationToken);
 
-            if (reservations.Count == 0)
+            if(stockItemS.Count == 0)
                 return false;
+
+            var items = stockItemS.SelectMany(s => s.Reservations.Where(r => r.OperationId == operationId && r.TenantId == tenantId)
+            .GroupBy(r => new { r.StockItemId, UnitPriceSnapshot = r.UnitPriceSnapshot ?? 0m })
+            .Select(group => new StockOperationOfferItem(
+                group.Key.StockItemId,
+                s.Name,
+                group.Sum(r => r.Quantity),
+                group.Key.UnitPriceSnapshot)
+        ))
+            .ToList();
+
+            if(items.Count == 0)
+                return false;
+
+            // var reservations = await _dbContext.StockReservations
+            //     .Where(r => r.TenantId == tenantId && r.OperationId == operationId)
+            //     .ToListAsync(cancellationToken);
+
+            // if (reservations.Count == 0)
+            //     return false;
 
             //! groupby ile aynı stock item id ve unit price snapshot'a sahip rezervasyonları birleştiriyoruz. 
             //!Böylece operasyon teklifi oluştururken her bir stok kalemi için toplam miktarı ve fiyatı alabiliriz. 
             //!Bu, teklif oluşturma sürecini basitleştirir ve aynı stok kalemi için birden fazla rezervasyon varsa 
             //!bunları tek bir kalem olarak sunmamızı sağlar.
 
-            var items = reservations
-                .GroupBy(r => new { r.StockItemId, UnitPriceSnapshot = r.UnitPriceSnapshot ?? 0m })
-                .Select(group => new StockOperationOfferItem(
-                    group.Key.StockItemId,
-                    group.Sum(r => r.Quantity),
-                    group.Key.UnitPriceSnapshot))
-                .ToList();
+            // var items = reservations
+            //     .GroupBy(r => new { r.StockItemId, UnitPriceSnapshot = r.UnitPriceSnapshot ?? 0m })
+            //     .Select(group => new StockOperationOfferItem(
+            //         group.Key.StockItemId,
+            //         group.Sum(r => r.Quantity),
+            //         group.Key.UnitPriceSnapshot))
+            //     .ToList();
 
             var totalAmount = items.Sum(i => i.UnitPriceSnapshot * i.Quantity);
 
-            var sample = reservations.First();
-            var technicianUserId = sample.TechnicianUserId ?? Guid.Empty;
+            var sample = stockItemS
+                .Select(s => s.Reservations.FirstOrDefault(r => r.OperationId == operationId && r.TenantId == tenantId))
+                .FirstOrDefault();
 
+            //* 
+
+            var technicianUserId = sample.TechnicianUserId ?? Guid.Empty;
+            //! burada teklif giderken name bilgileri gitmesi lazım itemler için.
+            //! solved gidiyor. ayrıca laboramount işçilik ücreti de gidiyor.
+
+            //! operation modülüne publish oluyor.....//
             await _bus.Publish(new StockOperationOfferRequested(
                 TenantId: tenantId,
                 OperationId: operationId,
                 BranchId: sample.BranchId,
                 TechnicianUserId: technicianUserId,
-                TotalAmount: totalAmount,
+                TotalAmount: totalAmount + LaborAmount,
+                LaborAmount: LaborAmount,
                 Items: items,
                 OccurredAtUtc: DateTimeOffset.UtcNow
             ), cancellationToken);

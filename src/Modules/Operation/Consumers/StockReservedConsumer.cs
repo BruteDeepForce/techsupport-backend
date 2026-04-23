@@ -22,6 +22,7 @@ namespace TechSupport.Operation.Consumers
             var items = message.Items
                 .Select(item => new DTO.OfferItemDTO(
                     item.StockItemId,
+                    item.Name,
                     checked((int)item.Quantity),
                     item.UnitPriceSnapshot))
                 .ToList();
@@ -34,7 +35,7 @@ namespace TechSupport.Operation.Consumers
                 TechnicianUserId: message.TechnicianUserId,
                 CustomerId: null,
                 Amount: message.TotalAmount,
-                LaborAmount: 0m,
+                LaborAmount: message.LaborAmount,
                 Currency: "TRY",
                 CreatedAt: DateTime.UtcNow,
                 Status: null, //! Teknisyen teklif oluştururken status null olabilir, admin onayından sonra güncellenir.

@@ -308,6 +308,7 @@ class _TableHeader extends StatelessWidget {
       'Operasyon',
       'Teknisyen',
       'Müşteri',
+      'Durum',
       'Kalem',
       'Tutar',
       'Tarih',
@@ -346,6 +347,7 @@ class _TableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemCount = offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
+    final status = (offer.status ?? 'Pending');
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -361,6 +363,12 @@ class _TableRow extends StatelessWidget {
             Expanded(child: Text(_shortId(offer.operationId))),
             Expanded(child: Text(_shortId(offer.technicianUserId))),
             Expanded(child: Text(offer.customerId ?? '-')),
+            Expanded(
+              child: _StatusPill(
+                label: _statusLabel(status),
+                color: _statusColor(status),
+              ),
+            ),
             Expanded(child: Text('$itemCount')),
             Expanded(
                 child: Text(
@@ -398,6 +406,35 @@ class _SecondaryActionButton extends StatelessWidget {
   }
 }
 
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: color,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 String _shortId(String id) =>
     id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
 
@@ -409,4 +446,29 @@ String _formatTime(DateTime dt) {
   final hh = local.hour.toString().padLeft(2, '0');
   final mm = local.minute.toString().padLeft(2, '0');
   return '$y-$m-$d $hh:$mm';
+}
+
+String _statusLabel(String status) {
+  switch (status.toLowerCase()) {
+    case 'customerapproved':
+      return 'Onaylandı';
+    case 'adminrejected':
+    case 'customerrejected':
+      return 'Reddedildi';
+    default:
+      return 'Açık teklif';
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'adminapproved':
+    case 'customerapproved':
+      return const Color(0xFF22C55E);
+    case 'adminrejected':
+    case 'customerrejected':
+      return const Color(0xFFEF4444);
+    default:
+      return const Color(0xFFF59E0B);
+  }
 }

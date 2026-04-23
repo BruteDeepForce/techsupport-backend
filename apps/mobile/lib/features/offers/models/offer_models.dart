@@ -49,17 +49,20 @@ class OfferSummary {
 class OfferItem {
   OfferItem({
     required this.stockItemId,
+    required this.name,
     required this.quantity,
     required this.unitPrice,
   });
 
   final String stockItemId;
+  final String name;
   final int quantity;
   final double unitPrice;
 
   factory OfferItem.fromJson(Map<String, dynamic> json) {
     return OfferItem(
       stockItemId: (json['stockItemId'] ?? json['StockItemId']).toString(),
+      name: (json['name'] ?? json['Name'] ?? '').toString(),
       quantity: _parseInt(json['quantity'] ?? json['Quantity']),
       unitPrice: _parseDouble(json['unitPrice'] ?? json['UnitPrice']),
     );

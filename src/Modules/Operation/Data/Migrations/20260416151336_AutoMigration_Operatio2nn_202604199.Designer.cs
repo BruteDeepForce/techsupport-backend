@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TechSupport.Operation.Data;
@@ -11,9 +12,11 @@ using TechSupport.Operation.Data;
 namespace TechSupport.Operation.Data.Migrations
 {
     [DbContext(typeof(OperationDbContext))]
-    partial class OperationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260416151336_AutoMigration_Operatio2nn_202604199")]
+    partial class AutoMigration_Operatio2nn_202604199
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -70,8 +70,11 @@ namespace TechSupport.Operation.Services
                 offer.Items.Select(i => new OfferAdminApprovedItem(
                     i.StockItemId,
                     i.Quantity,
-                    i.UnitPrice)).ToList(),
-                DateTimeOffset.UtcNow), ct);
+                    i.UnitPrice,
+                    i.Name
+                )).ToList(),
+                DateTimeOffset.UtcNow
+            ), ct);
 
             //! teknisyen ve customere push bildirim göndeririz. daha sonra teknisyen işi başlatır.
             return true;
@@ -170,6 +173,7 @@ namespace TechSupport.Operation.Services
                 {
                     Id = Guid.NewGuid(),
                     StockItemId = i.StockItemId,
+                    Name = i.Name,
                     Quantity = i.Quantity,
                     UnitPrice = i.UnitPrice
                 }).ToList(),
@@ -201,7 +205,7 @@ namespace TechSupport.Operation.Services
                 o.Currency,
                 o.CreatedAt,
                 o.Status,
-                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Name, i.Quantity, i.UnitPrice))
 
             ));
             return offers;
@@ -225,7 +229,7 @@ namespace TechSupport.Operation.Services
                 o.Currency,
                 o.CreatedAt,
                 o.Status,
-                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+                o.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Name, i.Quantity, i.UnitPrice))
             ));
             return offers;
         }
@@ -249,7 +253,7 @@ namespace TechSupport.Operation.Services
                     offer.Currency,
                     offer.CreatedAt,
                     offer.Status,
-                    offer.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Quantity, i.UnitPrice))
+                    offer.Items.Select(i => new OfferItemDTO(i.StockItemId, i.Name, i.Quantity, i.UnitPrice))
                 );
 }
             return null;

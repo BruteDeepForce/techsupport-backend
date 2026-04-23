@@ -16,4 +16,5 @@ public sealed record OfferAdminApprovedForInvoicing(
 public sealed record OfferAdminApprovedItem(
     Guid StockItemId,
     int Quantity,
-    decimal UnitPrice);
+    decimal UnitPrice,
+    string Name);
