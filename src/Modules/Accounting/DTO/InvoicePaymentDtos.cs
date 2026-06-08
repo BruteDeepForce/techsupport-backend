@@ -7,6 +7,7 @@ namespace TechSupport.Accounting.DTO;
 
 public class CreateInvoiceRequest
 {
+    public Guid? Id { get; set; }
     public Guid AccountId { get; set; }
     public Guid CustomerId { get; set; }
     public string InvoiceNumber { get; set; } = string.Empty;

@@ -16,6 +16,11 @@ using TechSupport.Operation.Consumers;
 using Reports.Consumers;
 using TechSupport.Accounting;
 using TechSupport.Accounting.Consumers;
+using TechSupport.Hr;
+using TechSupport.Trade;
+using TechSupport.Trade.Consumers;
+using TechSupport.Trade.SignalR;
+using TechSupport.Device.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +45,19 @@ builder.Services.AddReportsModule(builder.Configuration);
 builder.Services.AddTechnicianModule(builder.Configuration);
 builder.Services.AddStockModule(builder.Configuration);
 builder.Services.AddAccountingModule(builder.Configuration);
+builder.Services.AddHRModule(builder.Configuration);
+builder.Services.AddTradeModule(builder.Configuration);
+builder.Services.AddSignalR();
+//! development CORS policy - to be restricted in production
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // MassTransit + RabbitMQ configuration
 builder.Services.AddMassTransit(x =>
@@ -48,6 +66,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<CustomerAccountProvisionRequestedConsumer>();
     x.AddConsumer<CustomerAccountProvisionedConsumer>();
     x.AddConsumer<CustomerAccountProvisionFailedConsumer>();
+    x.AddConsumer<TradeProvisionRequestConsumer>();
     x.AddConsumer<TechnicianAccountProvisionRequestedConsumer>();
     x.AddConsumer<TechSupport.Reports.Consumers.CustomerCreatedConsumer>();
     x.AddConsumer<TechSupport.Technician.Consumers.OperationAssignedToTechnicianConsumer>();
@@ -63,6 +82,13 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
     x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
     x.AddConsumer<OfferAdminApprovedForInvoicingConsumer>();
+    x.AddConsumer<TradeAccountInsertConsumer>();
+    x.AddConsumer<CustomerDeviceMapCompletedConsumer>();
+    x.AddConsumer<TradeAccountingProcessResultedConsumer>();
+    x.AddConsumer<CustomerCreateCompleted>();
+    x.AddConsumer<TradeDeviceRegistrationRequestedConsumer>();
+    x.AddConsumer<TradeDeviceCreatedEventWithoutMapping>();
+    x.AddConsumer<TradeDeviceUpdateRequestConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
@@ -94,6 +120,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<TradeStatusHub>("/trade-status-hub"); //! şuan için modular monolith ihlal edildi.
 
 app.MapGet("/", () => Results.Ok(new { service = "TechSupport Modular Monolith", version = "0.1" }));
 

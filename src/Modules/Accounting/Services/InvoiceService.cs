@@ -89,7 +89,7 @@ public class InvoiceService : IInvoiceService
 
         var invoice = new Invoice
         {
-            Id = Guid.NewGuid(),
+            Id = request.Id ?? Guid.NewGuid(),
             TenantId = tenantId,
             BranchId = request.BranchId,
             AccountId = request.AccountId,

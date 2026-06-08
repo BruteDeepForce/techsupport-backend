@@ -19,7 +19,7 @@
     <ProjectReference Include="../Modules/User.Contracts/User.Contracts.csproj" />
     <ProjectReference Include="../Modules/User/User.csproj" />
     <ProjectReference Include="../Modules/Customer/Customer.csproj" />
-    <ProjectReference Include= "../Modules/Customer.Contracts/Customer.Contracts.csproj" />
+    <ProjectReference Include="../Modules/Customer.Contracts/Customer.Contracts.csproj" />
     <ProjectReference Include="../Modules/Reports/Reports.csproj" />
     <ProjectReference Include="../Modules/Reports.Contracts/Reports.Contracts.csproj" />
     <ProjectReference Include="../Modules/Technician/Technician.csproj" />
@@ -27,11 +27,14 @@
     <ProjectReference Include="../Modules/Stock/Stock.csproj" />
     <ProjectReference Include="../Modules/Ai/Ai.csproj" />
     <ProjectReference Include="../Modules/Accounting/Accounting.csproj" />
+    <ProjectReference Include= "../Modules/HR/Hr.csproj" />
+    <ProjectReference Include="..\Modules\Trade\Trade.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MassTransit" Version="8.0.7" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -52,7 +52,7 @@ public enum PaymentMethod
     BankaHavalesi, // Bank Transfer
     Cek,           // Check
     Senet,         // Promissory Note
-    Digar          // Other
+    Diger          // Other
 }
 
 public enum PaymentStatus

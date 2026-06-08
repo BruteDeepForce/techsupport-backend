@@ -18,6 +18,16 @@ public interface IPaymentService
     
     // Payment status operations
     Task<Payment?> ProcessAsync(Guid tenantId, Guid paymentId, CancellationToken ct = default);
+
+    Task<bool> ProcessPaymentAsyncV2(Guid tenantId, 
+    Guid tradeId,
+    Guid? branchId,
+    string idempotencyKey,
+    CreatePaymentRequest request, 
+    CreateInvoiceRequest invoiceRequest, 
+    AddInvoiceLineItemRequest invoiceLineItemRequest,
+    bool IsPurchase ,
+    CancellationToken ct = default);
     Task<Payment?> FailAsync(Guid tenantId, Guid paymentId, string? reason = null, CancellationToken ct = default);
     Task<Payment?> RefundAsync(Guid tenantId, Guid paymentId, string? reason = null, CancellationToken ct = default);
 }

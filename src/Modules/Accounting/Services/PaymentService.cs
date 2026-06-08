@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using TechSupport.Accounting.Contracts.Events;
 using TechSupport.Accounting.Data;
 using TechSupport.Accounting.DTO;
 using TechSupport.Accounting.Domain.Entities;
@@ -13,10 +15,21 @@ namespace TechSupport.Accounting.Services;
 public class PaymentService : IPaymentService
 {
     private readonly AccountingDbContext _db;
+    private readonly ICariHesapService _cariHesapService;
 
-    public PaymentService(AccountingDbContext db)
+    private readonly IInvoiceService _invoiceService;
+
+    private readonly IInvoicePdfService _invoicePdfService;
+    private readonly IBus _bus;
+
+    public PaymentService(AccountingDbContext db, ICariHesapService cariHesapService, 
+    IInvoiceService invoiceService, IInvoicePdfService invoicePdfService, IBus bus)
     {
         _db = db;
+        _cariHesapService = cariHesapService;
+        _invoiceService = invoiceService;
+        _invoicePdfService = invoicePdfService;
+        _bus = bus;
     }
 
     public async Task<Payment?> GetByIdAsync(Guid tenantId, Guid paymentId, CancellationToken ct = default)
@@ -85,7 +98,7 @@ public class PaymentService : IPaymentService
         // Check if payment number already exists
         var exists = await _db.Payments
             .AnyAsync(x => x.TenantId == tenantId && x.PaymentNumber == request.PaymentNumber, ct);
-        
+
         if (exists)
             throw new InvalidOperationException($"Payment number '{request.PaymentNumber}' already exists");
 
@@ -101,7 +114,7 @@ public class PaymentService : IPaymentService
             Method = request.Method,
             Status = PaymentStatus.Beklemede,
             Amount = request.Amount,
-            FeeAmount = 0,
+            FeeAmount = 0,  //! incelenecek
             NetAmount = request.Amount,
             ReferenceNumber = request.ReferenceNumber?.Trim(),
             Notes = request.Notes?.Trim(),
@@ -111,7 +124,7 @@ public class PaymentService : IPaymentService
         };
 
         await _db.Payments.AddAsync(payment, ct);
-        await _db.SaveChangesAsync(ct);
+
         return payment;
     }
 
@@ -167,22 +180,29 @@ public class PaymentService : IPaymentService
             // Re-fetch to check if record still exists
             var entry = _db.Entry(payment);
             var databaseValues = await entry.GetDatabaseValuesAsync(ct);
-            
+
             if (databaseValues == null)
                 return null; // Record was deleted by another user
-            
+
             throw new InvalidOperationException(
                 "Another user has modified this record. Please refresh and try again.");
         }
     }
 
+    [Obsolete("[DEPRECATED] Use ProcessPaymentAsyncV2 for better consistency and error handling")]
     public async Task<Payment?> ProcessAsync(Guid tenantId, Guid paymentId, CancellationToken ct = default)
     {
         var payment = await _db.Payments
             .Include(p => p.Invoice)
             .FirstOrDefaultAsync(x => x.Id == paymentId && x.TenantId == tenantId, ct);
 
-        if (payment is null || payment.Status != PaymentStatus.Beklemede)
+        if (payment is null)
+            return null;
+
+        if (payment.Status == PaymentStatus.Tamamlandi)
+            return payment;
+
+        if (payment.Status != PaymentStatus.Beklemede)
             return null;
 
         payment.Status = PaymentStatus.Tamamlandi;
@@ -203,7 +223,7 @@ public class PaymentService : IPaymentService
         if (payment.InvoiceId.HasValue && payment.Invoice != null)
         {
             payment.Invoice.PaidAmount += payment.NetAmount;
-            
+
             if (payment.Invoice.PaidAmount >= payment.Invoice.TotalAmount)
             {
                 payment.Invoice.Status = InvoiceStatus.Paid;
@@ -213,26 +233,269 @@ public class PaymentService : IPaymentService
             {
                 payment.Invoice.Status = InvoiceStatus.PartiallyPaid;
             }
-            
+
             payment.Invoice.UpdatedAtUtc = DateTimeOffset.UtcNow;
         }
 
         try
         {
             await _db.SaveChangesAsync(ct);
+
+            await _cariHesapService.CreateHareketAsync(
+                tenantId,
+                payment.BranchId,
+                new CreateCariHesapHareketiRequest
+                {
+                    AccountId = payment.AccountId,
+                    CustomerId = payment.CustomerId,
+                    HareketTipi = HareketTipi.Alacak,
+                    Tutar = payment.NetAmount,
+                    Aciklama = $"Odeme tahsil edildi. PaymentNo: {payment.PaymentNumber}",
+                    ReferansNumarasi = payment.ReferenceNumber,
+                    BelgeNumarasi = payment.PaymentNumber,
+                    IslemTarihi = payment.PaymentDate,
+                    InvoiceId = payment.InvoiceId,
+                    PaymentId = payment.Id
+                },
+                payment.UpdatedBy,
+                ct);
+
             return payment;
         }
         catch (DbUpdateConcurrencyException)
         {
             var entry = _db.Entry(payment);
             var databaseValues = await entry.GetDatabaseValuesAsync(ct);
-            
+
             if (databaseValues == null)
                 return null;
-            
+
             throw new InvalidOperationException(
                 "Another user has modified this record. Please refresh and try again.");
         }
+    }
+
+    public async Task<bool> ProcessPaymentAsyncV2(Guid tenantId,
+    Guid tradeId,
+    Guid? branchId,
+    string idempotencyKey,
+    CreatePaymentRequest PaymentRequest,
+    CreateInvoiceRequest invoiceRequest,
+    AddInvoiceLineItemRequest invoiceLineItemRequest,
+    bool isPurchase,
+    CancellationToken ct = default)
+    {
+        Guid? invoiceId = null;
+        Guid? paymentId = null;
+
+        using var tx = await _db.Database.BeginTransactionAsync(ct);
+        var account = await _db.Accounts.FirstOrDefaultAsync(x => x.Id == PaymentRequest.AccountId && x.TenantId == tenantId, ct);
+        if (account == null)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Account not found.",
+                ct);
+            return false;
+        }
+        var invoice = await _invoiceService.CreateAsync(tenantId, invoiceRequest, "trade-accounting-consumer", ct);
+        invoiceId = invoice.Id;
+
+        if (invoice is null)
+        {
+
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Invoice create failed.",
+                ct);
+            return false;
+        }
+
+        var invoiceLineItem = await _invoiceService.AddLineItemAsync(tenantId, invoice.Id, invoiceLineItemRequest, "trade-accounting-consumer", ct);
+
+        if (invoiceLineItem is null)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Invoice line item create failed.",
+                ct);
+            return false;
+        }
+
+        PaymentRequest.InvoiceId = invoice.Id;
+        var payment = await CreateAsync(tenantId, PaymentRequest, "trade-accounting-consumer", ct);
+        paymentId = payment.Id;
+        if (payment is null)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Payment create failed.",
+                ct);
+            return false;
+        }
+        payment.Status = PaymentStatus.Tamamlandi;
+        payment.ProcessedAtUtc = DateTimeOffset.UtcNow;
+        payment.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        invoice.PaidAmount += payment.NetAmount;
+        if (invoice.PaidAmount >= invoice.TotalAmount)
+        {
+            invoice.Status = InvoiceStatus.Paid;
+            invoice.PaidDate = DateTimeOffset.UtcNow;
+
+        }
+        else
+        {
+            invoice.Status = InvoiceStatus.PartiallyPaid;
+        }
+        var hareket = await _cariHesapService.CreateHareketAsync(
+                tenantId,
+                payment.BranchId,
+                new CreateCariHesapHareketiRequest
+                {
+                    AccountId = payment.AccountId,
+                    CustomerId = payment.CustomerId,
+                    HareketTipi = isPurchase ? HareketTipi.Borc : HareketTipi.Alacak,
+                    Tutar = payment.NetAmount,
+                    Aciklama = $"{(isPurchase ? "Alış" : "Satış")} - PaymentNo: {payment.PaymentNumber}",
+                    ReferansNumarasi = PaymentRequest.ReferenceNumber,
+                    BelgeNumarasi = payment.PaymentNumber,
+                    IslemTarihi = payment.PaymentDate,
+                    InvoiceId = invoice.Id,
+                    PaymentId = payment.Id
+                },
+                "trade-accounting-consumer",
+                ct);
+        var faturaPDF =  _invoicePdfService.Generate(invoice);
+        if (faturaPDF == null)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Invoice PDF generation failed.",
+                ct);
+            return false;
+        }
+        if (hareket == null)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Cari hareket create failed.",
+                ct);
+            return false;
+        }
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Success,
+                invoiceId,
+                paymentId,
+                null,
+                ct);
+            return true;
+        }
+        catch (DbUpdateException)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                "Db update error while processing payment.",
+                ct);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            await tx.RollbackAsync(ct);
+            await PublishTradeAccountingProcessResultAsync(
+                tradeId,
+                tenantId,
+                branchId,
+                idempotencyKey,
+                AccountingProcessStatus.Failed,
+                invoiceId,
+                paymentId,
+                $"Unexpected error: {ex.Message}",
+                ct);
+            return false;
+        }
+    }
+
+    private Task PublishTradeAccountingProcessResultAsync(
+        Guid tradeId,
+        Guid tenantId,
+        Guid? branchId,
+        string idempotencyKey,
+        AccountingProcessStatus status,
+        Guid? invoiceId,
+        Guid? paymentId,
+        string? errorMessage,
+        CancellationToken ct)
+    {
+        return _bus.Publish(
+            new TradeAccountingProcessResulted(
+                TradeId: tradeId,
+                TenantId: tenantId,
+                BranchId: branchId,
+                IdempotencyKey: idempotencyKey,
+                Status: status,
+                InvoiceId: invoiceId,
+                PaymentId: paymentId,
+                ErrorMessage: errorMessage,
+                OccurredAtUtc: DateTimeOffset.UtcNow),
+            ct);
     }
 
     public async Task<Payment?> FailAsync(Guid tenantId, Guid paymentId, string? reason = null, CancellationToken ct = default)
@@ -256,10 +519,10 @@ public class PaymentService : IPaymentService
         {
             var entry = _db.Entry(payment);
             var databaseValues = await entry.GetDatabaseValuesAsync(ct);
-            
+
             if (databaseValues == null)
                 return null;
-            
+
             throw new InvalidOperationException(
                 "Another user has modified this record. Please refresh and try again.");
         }
@@ -292,7 +555,7 @@ public class PaymentService : IPaymentService
         if (payment.InvoiceId.HasValue && payment.Invoice != null)
         {
             payment.Invoice.PaidAmount -= payment.NetAmount;
-            
+
             if (payment.Invoice.PaidAmount <= 0)
             {
                 payment.Invoice.Status = InvoiceStatus.Issued;
@@ -302,7 +565,7 @@ public class PaymentService : IPaymentService
             {
                 payment.Invoice.Status = InvoiceStatus.PartiallyPaid;
             }
-            
+
             payment.Invoice.UpdatedAtUtc = DateTimeOffset.UtcNow;
         }
 
@@ -315,10 +578,10 @@ public class PaymentService : IPaymentService
         {
             var entry = _db.Entry(payment);
             var databaseValues = await entry.GetDatabaseValuesAsync(ct);
-            
+
             if (databaseValues == null)
                 return null;
-            
+
             throw new InvalidOperationException(
                 "Another user has modified this record. Please refresh and try again.");
         }

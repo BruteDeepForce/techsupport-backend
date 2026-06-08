@@ -30,7 +30,8 @@ namespace TechSupport.Customer.Api.Controllers
             var branchId = GetBranchIdFromClaims();
             if (tenantId is null) return Unauthorized();
 
-            var request = await _customers.StartProvisioningAsync(tenantId.Value, branchId, dto.Name, dto.Email, dto.PhoneNumber, dto.TemporaryPassword, ct);
+            var request = await _customers.StartProvisioningAsync(tenantId.Value, branchId, dto.Name, dto.Email, 
+            dto.PhoneNumber, dto.TemporaryPassword, null, null, ct);
             return Accepted(new
             {
                 correlationId = request.CorrelationId,
@@ -91,6 +92,7 @@ namespace TechSupport.Customer.Api.Controllers
                 tenantId.Value,
                 branchId,
                 customerId,
+                null,
                 dto.DeviceId,
                 dto.DeviceSerialNumber?.Trim(),
                 dto.BarcodeNumber?.Trim(),

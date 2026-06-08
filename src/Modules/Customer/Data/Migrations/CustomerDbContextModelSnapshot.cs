@@ -186,6 +186,12 @@ namespace TechSupport.Customer.Data.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("TradeCorelationKey")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("TradeId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CorrelationId")

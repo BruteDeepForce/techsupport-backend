@@ -28,7 +28,7 @@ public sealed class DevicesController : ControllerBase
     {
         var tenantId = GetTenantIdFromClaims();
         var branchId = GetBranchIdFromClaims();
-        var device = await _devices.RegisterAsync(tenantId.Value, branchId.Value, dto.Brand, dto.Model, dto.SerialNumber,
+        var device = await _devices.RegisterAsync(tenantId.Value, branchId.Value, null, null, dto.Brand, dto.Model, dto.SerialNumber,
             dto.ProblemDescription, dto.GuaranteePeriod, dto.WarrantyStartAtUtc, dto.BarcodeNumber, dto.CustomerId, dto.appUserId, dto.CustomerName, dto.Status, ct);
         return Ok(new
         {

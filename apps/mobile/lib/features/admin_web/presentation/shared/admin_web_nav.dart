@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../admin_web_customers_page.dart';
 import '../admin_web_device_page.dart';
 import '../admin_web_home_page.dart';
+import '../admin_web_trade_page.dart';
 import '../admin_web_offer_detail_page.dart';
 import '../admin_web_offers_page.dart';
 import '../admin_web_operation_detail_page.dart';
@@ -17,6 +18,7 @@ enum AdminNavKey {
   home,
   tickets,
   operations,
+  trades,
   offers,
   team,
   customers,
@@ -57,6 +59,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Operasyonlar',
       icon: Icons.receipt_long_outlined,
       pageBuilder: (_) => const AdminWebOperationsPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.trades,
+      label: 'Hızlı Alış/Satış',
+      icon: Icons.swap_horiz_outlined,
+      pageBuilder: (_) => const AdminWebTradePage(),
     ),
     AdminNavItem(
       key: AdminNavKey.offers,

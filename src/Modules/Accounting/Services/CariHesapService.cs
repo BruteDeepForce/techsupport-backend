@@ -48,7 +48,7 @@ public class CariHesapService : ICariHesapService
     }
     public async Task<CariHesapHareketi> CreateHareketAsync(Guid tenantId, Guid? branchId, CreateCariHesapHareketiRequest request, string? createdBy = null, CancellationToken ct = default)
     {
-        using var transaction = await _db.Database.BeginTransactionAsync(ct);
+        //using var transaction = await _db.Database.BeginTransactionAsync(ct);
         var account = await _db.Accounts
             .FirstOrDefaultAsync(x => x.Id == request.AccountId && x.TenantId == tenantId, ct);
         if (account == null)
@@ -89,8 +89,14 @@ public class CariHesapService : ICariHesapService
             CreatedBy = createdBy
         };
         await _db.CariHesapHareketleri.AddAsync(hareket, ct);
+        var payment = await _db.Payments.FirstOrDefaultAsync(x => x.Id == request.PaymentId, ct);
+        if (payment != null)        {
+            payment.Status = PaymentStatus.Tamamlandi;
+        }
+        account.UpdatedAtUtc = DateTimeOffset.UtcNow;
+        account.UpdatedBy = createdBy;
         await _db.SaveChangesAsync(ct);
-        await transaction.CommitAsync(ct);
+        //await transaction.CommitAsync(ct);
 
         //! create edilen hareket olduğu için ilgili keyi invalidate ettim. 
         //! get Ekstre yaparken tekrar Db den çekilecek ve orada Set edilecek.
