@@ -47,6 +47,41 @@ public class StockItemsController : ControllerBase
         return Ok(await _stockService.GetAllByCategoryId(tenantId.Value, categoryId, ct));
     }
 
+    [Authorize(Roles = "admin, technician")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+
+        var item = await _stockService.GetByIdAsync(tenantId.Value, id, ct);
+        if (item == null)
+            return NotFound();
+
+        var quantityAvailable = item.Balances.Sum(x => x.QuantityAvailable);
+        var quantityReserved = item.Balances.Sum(x => x.QuantityReserved);
+
+        return Ok(new
+        {
+            item.Id,
+            item.TenantId,
+            item.BranchId,
+            item.DeviceId,
+            item.CategoryId,
+            item.Sku,
+            item.ImeiOrSerial,
+            item.Barcode,
+            item.Name,
+            item.Description,
+            item.Unit,
+            item.UnitPrice,
+            QuantityAvailable = quantityAvailable,
+            QuantityReserved = quantityReserved,
+            item.CreatedAtUtc,
+            item.UpdatedAtUtc
+        });
+    }
+
     private Guid? GetTenantIdFromClaims()
     {
         var tenantClaim = User.Claims.FirstOrDefault(c => c.Type == "tenant_id");

@@ -107,6 +107,14 @@ public class StockService : IStockService
         return item;
     }
 
+    public async Task<StockItem?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct = default)
+    {
+        return await _db.StockItems
+            .AsNoTracking()
+            .Include(x => x.Balances)
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == id, ct);
+    }
+
     public async Task<StockItem?> GetByIdAsync(Guid id, CancellationToken ct = default)
     {
         return await _db.StockItems.FirstOrDefaultAsync(x => x.Id == id, ct);
@@ -128,7 +136,8 @@ public class StockService : IStockService
                 x.UnitPrice,
                 x.Balances.Sum(b => b.QuantityAvailable),
                 x.Balances.Sum(b => b.QuantityReserved),
-                x.CreatedAtUtc
+                x.CreatedAtUtc,
+                x.DeviceId
             ))
             .ToListAsync(ct);
     }
@@ -148,7 +157,8 @@ public class StockService : IStockService
                 x.UnitPrice,
                 x.Balances.Sum(b => b.QuantityAvailable),
                 x.Balances.Sum(b => b.QuantityReserved),
-                x.CreatedAtUtc
+                x.CreatedAtUtc,
+                x.DeviceId
             ))
             .ToListAsync(ct);
     }

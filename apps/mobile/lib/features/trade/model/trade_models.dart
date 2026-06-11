@@ -4,6 +4,7 @@ class StartTradeRequest {
     this.existingCustomerName,
     this.existingCusomerAppUserId,
     this.existingDeviceId,
+    this.categoryId,
     this.customer,
     this.device,
     this.type,
@@ -21,6 +22,7 @@ class StartTradeRequest {
   final String? existingCustomerName;
   final String? existingCusomerAppUserId;
   final String? existingDeviceId;
+  final String? categoryId;
   final StartTradeCustomerPayload? customer;
   final StartTradeDevicePayload? device;
   final TradeType? type;
@@ -39,6 +41,7 @@ class StartTradeRequest {
         existingCustomerName: json['existingCustomerName']?.toString(),
         existingCusomerAppUserId: json['existingCusomerAppUserId']?.toString(),
         existingDeviceId: json['existingDeviceId']?.toString(),
+        categoryId: json['categoryId']?.toString(),
         customer: json['customer'] != null
             ? StartTradeCustomerPayload.fromJson(
                 json['customer'] as Map<String, dynamic>,
@@ -65,6 +68,7 @@ class StartTradeRequest {
         'existingCustomerName': existingCustomerName,
         'existingCusomerAppUserId': existingCusomerAppUserId,
         'existingDeviceId': existingDeviceId,
+        'categoryId': categoryId,
         'customer': customer?.toJson(),
         'device': device?.toJson(),
         'type': type?.name,
@@ -113,6 +117,7 @@ class StartTradeDevicePayload {
     required this.brand,
     required this.model,
     required this.serialNumber,
+    this.sku,
     this.problemDescription,
     this.guaranteePeriod,
     this.warrantyStartAtUtc,
@@ -124,6 +129,7 @@ class StartTradeDevicePayload {
   final String brand;
   final String model;
   final String serialNumber;
+  final String? sku;
   final String? problemDescription;
   final int? guaranteePeriod;
   final DateTime? warrantyStartAtUtc;
@@ -136,6 +142,7 @@ class StartTradeDevicePayload {
         brand: json['brand']?.toString() ?? '',
         model: json['model']?.toString() ?? '',
         serialNumber: json['serialNumber']?.toString() ?? '',
+        sku: json['sku']?.toString(),
         problemDescription: json['problemDescription']?.toString(),
         guaranteePeriod: (json['guaranteePeriod'] as num?)?.toInt(),
         warrantyStartAtUtc: json['warrantyStartAtUtc'] != null
@@ -150,6 +157,7 @@ class StartTradeDevicePayload {
         'brand': brand,
         'model': model,
         'serialNumber': serialNumber,
+        'sku': sku,
         'problemDescription': problemDescription,
         'guaranteePeriod': guaranteePeriod,
         'warrantyStartAtUtc': warrantyStartAtUtc?.toUtc().toIso8601String(),

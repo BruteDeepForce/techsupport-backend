@@ -16,6 +16,7 @@ namespace TechSupport.Trade.Domain.Entities
         public string Brand { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
         public string? ProblemDescription { get; set; }
         public int? GuaranteePeriod { get; set; }
         public DateTimeOffset? WarrantyStartAtUtc { get; set; }

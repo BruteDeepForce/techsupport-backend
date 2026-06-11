@@ -19,9 +19,10 @@ public static class ModuleExtensions
             dbContext.Database.Migrate();
         }
 
-    services.AddScoped<Services.IStockService, Services.StockService>();
-    services.AddScoped<Services.ICategoryService, Services.CategoryService>();
-    services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
+        services.AddScoped<Services.IStockService, Services.StockService>();
+        services.AddScoped<Services.ICategoryService, Services.CategoryService>();
+        services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
+        services.AddScoped<Services.IStockTradeProcessService, Services.StockTradeProcessService>();
         return services;
     }
 }

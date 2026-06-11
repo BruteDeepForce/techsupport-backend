@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "dotnet",
+			"task": "watch Trade",
+			"file": "/Users/suleymantuysuzoglu/techsupport-backend/src/Modules/Trade/Trade.csproj",
+			"problemMatcher": [],
+			"label": "dotnet: watch Trade"
+		}
+	]
+}

@@ -31,6 +31,7 @@ public sealed class TradeRecord
     public Guid? BranchId { get; set; }
     public Guid? CustomerId { get; set; }
     public Guid? DeviceId { get; set; }
+    public Guid? CategoryId { get; set; }
     public TradeType Type { get; set; }
     public TradePaymentMethod PaymentMethod { get; set; }
     public TradeStatus Status { get; set; }

@@ -9,6 +9,7 @@ namespace TechSupport.Stock.Services;
 public interface IStockService
 {
     Task<StockItem> CreateAsync(Guid tenantId, Guid? branchId, CreateItemDTO dto, CancellationToken ct = default);
+    Task<StockItem?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<StockItemListDto>> GetAllAsync(Guid tenantId, CancellationToken ct = default);
     Task<IReadOnlyList<StockItemListDto>> GetAllByCategoryId(Guid tenantId, Guid categoryId, CancellationToken ct = default);
 }

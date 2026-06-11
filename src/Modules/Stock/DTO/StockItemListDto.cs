@@ -12,6 +12,7 @@ public sealed record StockItemListDto(
     decimal? UnitPrice,
     long QuantityAvailable,
     long QuantityReserved,
-    DateTime CreatedAtUtc
+    DateTime CreatedAtUtc,
+    Guid? DeviceId
 );
 

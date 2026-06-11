@@ -26,6 +26,10 @@ public sealed class TradeService : ITradeService
 
     public async Task<TradeRecord> StartTradeAsync(Guid tenantId, Guid branchId, StartTradeRequest request, string idempotencyKey, CancellationToken cancellationToken = default)
     {
+        if(request.Type == TradeType.Sale && request.Device == null && request.ExistingDeviceId == null 
+            && string.IsNullOrEmpty(request.ImeiOrSerial) && request.CategoryId == null && string.IsNullOrEmpty(request.Device?.SKU))
+            throw new ArgumentException("Device information is required for sale trades.", nameof(request.Device));
+
         if (tenantId == Guid.Empty)
             throw new ArgumentException("TenantId is required.", nameof(tenantId));
 
@@ -92,6 +96,8 @@ public sealed class TradeService : ITradeService
                 TenantId = tenantId,
                 BranchId = branchId,
                 CustomerId = existingCustomerIdValue,
+                //!DeviceId = Guid.NewGuid(),
+                CategoryId = request.CategoryId,
                 Type = request.Type,
                 PaymentMethod = request.PaymentMethod,
                 Status = TradeStatus.Pending,
@@ -114,6 +120,7 @@ public sealed class TradeService : ITradeService
                     Brand = device.Brand,
                     Model = device.Model,
                     SerialNumber = device.SerialNumber,
+                    SKU = device.SKU,
                     ProblemDescription = device.ProblemDescription,
                     GuaranteePeriod = device.GuaranteePeriod,
                     WarrantyStartAtUtc = device.WarrantyStartAtUtc,
@@ -152,6 +159,8 @@ public sealed class TradeService : ITradeService
             Id = tradeId,
             TenantId = tenantId,
             BranchId = branchId,
+            //!DeviceId = Guid.NewGuid(),
+            CategoryId = request.CategoryId,
             Type = request.Type,
             PaymentMethod = request.PaymentMethod,
             Status = TradeStatus.Pending,
@@ -174,6 +183,7 @@ public sealed class TradeService : ITradeService
                 Brand = device.Brand,
                 Model = device.Model,
                 SerialNumber = device.SerialNumber,
+                SKU = device.SKU,   
                 ProblemDescription = device.ProblemDescription,
                 GuaranteePeriod = device.GuaranteePeriod,
                 WarrantyStartAtUtc = device.WarrantyStartAtUtc,
@@ -492,7 +502,6 @@ public sealed class TradeService : ITradeService
         if (branchId != Guid.Empty && trade.BranchId != branchId)
             throw new ArgumentException("Trade branch mismatch.", nameof(branchId));
 
-        // Retry-safe behavior: if already finalized from accounting feedback, return as no-op.
         if (trade.Status == TradeStatus.Completed)
             return true;
 

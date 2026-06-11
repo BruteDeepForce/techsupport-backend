@@ -5,6 +5,8 @@ import 'package:techsupport_mobile/features/customer/data/customer_service.dart'
 import 'package:techsupport_mobile/features/customer/models/customer_models.dart';
 import 'package:techsupport_mobile/features/device/data/device_service.dart';
 import 'package:techsupport_mobile/features/device/model/device_model.dart';
+import 'package:techsupport_mobile/features/stock/data/stock_service.dart';
+import 'package:techsupport_mobile/features/stock/models/stock_models.dart';
 import 'package:techsupport_mobile/features/trade/data/trade_service.dart';
 import 'package:techsupport_mobile/features/trade/model/trade_models.dart';
 
@@ -44,6 +46,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       TextEditingController(text: '0');
   final TextEditingController _barcodeController =
       TextEditingController(text: 'Barkod');
+  final TextEditingController _skuController =
+      TextEditingController(text: 'SKU');
   final TextEditingController _warrantyMonthsController =
       TextEditingController(text: '12');
   final TextEditingController _warrantyStartController =
@@ -53,6 +57,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   final TradeService _tradeService = TradeService();
   final CustomerService _customerService = CustomerService();
   final DeviceService _deviceService = DeviceService();
+  final StockService _stockService = StockService();
 
   final RealtimeTradeService _realtimeTradeService =
       RealtimeTradeService('http://localhost:5001/trade-status-hub');
@@ -61,11 +66,26 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   bool isRecordDevice = false;
   Customer? _selectedCustomer;
   DeviceRecord? _selectedDevice;
+  StockCategory? _selectedStockCategory;
   late Future<List<Customer>> _customersFuture;
   late Future<List<DeviceRecord>> _devicesFuture;
+  late Future<List<StockCategory>> _stockCategoriesFuture;
 
   List<_RecentTrade> _recentTrades = [];
   bool _recentTradesLoading = false;
+  bool _stockCategoriesLoading = false;
+
+  String _generateBarcode() {
+    final now = DateTime.now();
+    final random = Random().nextInt(9000) + 1000;
+    return 'TSI${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}$random';
+  }
+
+  String _generateSku() {
+    final now = DateTime.now();
+    final random = Random().nextInt(9000) + 1000;
+    return 'SKU${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}$random';
+  }
 
   DateTime? _parseWarrantyStartDate(String value) {
     final trimmed = value.trim();
@@ -100,6 +120,14 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     try {
       final devices = await _deviceService.getDevices();
       return devices.toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<StockCategory>> _fetchStockCategories() async {
+    try {
+      return await _stockService.listCategories();
     } catch (e) {
       return [];
     }
@@ -140,6 +168,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     super.initState();
     _customersFuture = _fetchCustomerSuggestions();
     _devicesFuture = _fetchDeviceList();
+    _stockCategoriesFuture = _fetchStockCategories();
     _loadRecentTrades();
   }
 
@@ -182,6 +211,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
         _modelController.text = 'Model X';
         _serialController.clear();
         _barcodeController.text = 'Barkod';
+        _skuController.text = 'SKU';
         _warrantyMonthsController.text = '12';
         _warrantyStartController.text = 'GG/AA/YYYY';
       }
@@ -213,7 +243,38 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     });
   }
 
+  void _handleTradeTypeChanged(String value) {
+    setState(() {
+      _tradeType = value;
+      if (value != 'Alış') {
+        _selectedStockCategory = null;
+      }
+    });
+  }
+
+  void _selectStockCategory(StockCategory? category) {
+    setState(() {
+      _selectedStockCategory = category;
+    });
+  }
+
   Future<void> _startTrade() async {
+    final isPurchase = _tradeType == 'Alış';
+    final barcodeValue = isPurchase
+        ? _barcodeController.text.trim().isNotEmpty
+            ? _barcodeController.text.trim()
+            : _generateBarcode()
+        : _barcodeController.text.trim();
+    final skuValue = isPurchase
+        ? _skuController.text.trim().isNotEmpty
+            ? _skuController.text.trim()
+            : _generateSku()
+        : null;
+
+    if (isPurchase && _selectedStockCategory == null) {
+      return;
+    }
+
     final request = StartTradeRequest(
       existingCustomerId: isRecordCustomer ? _selectedCustomer?.id : null,
       existingCustomerName:
@@ -221,6 +282,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       existingCusomerAppUserId:
           isRecordCustomer ? _selectedCustomer?.appUserId : null,
       existingDeviceId: isRecordDevice ? _selectedDevice?.id : null,
+      categoryId: isPurchase ? _selectedStockCategory?.id : null,
       customer: isRecordCustomer
           ? null
           : StartTradeCustomerPayload(
@@ -234,7 +296,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
         model: _modelController.text,
         customerName: _customerController.text,
         serialNumber: _serialController.text,
-        barcodeNumber: _barcodeController.text,
+        sku: isPurchase ? skuValue : null,
+        barcodeNumber: barcodeValue,
         problemDescription: _noteController.text,
         guaranteePeriod: int.tryParse(_warrantyMonthsController.text) ?? 0,
         warrantyStartAtUtc:
@@ -305,8 +368,6 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   String _paymentType = 'Nakit';
   bool _sendReceipt = true;
 
-  List<_SaleLine> _lines = [];
-
   @override
   void dispose() {
     _customerController.dispose();
@@ -321,6 +382,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     _quantityController.dispose();
     _unitPriceController.dispose();
     _discountController.dispose();
+    _skuController.dispose();
     _warrantyMonthsController.dispose();
     _warrantyStartController.dispose();
     _noteController.dispose();
@@ -330,44 +392,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   int get _quantity => int.tryParse(_quantityController.text) ?? 1;
   double get _unitPrice => double.tryParse(_unitPriceController.text) ?? 0;
   double get _discount => double.tryParse(_discountController.text) ?? 0;
-  double get _subtotal => _lines.fold(0, (sum, item) => sum + item.total);
-  double get _currentLineTotal => _quantity * _unitPrice;
-  double get _totalPreview =>
-      (_subtotal + _currentLineTotal - _discount).clamp(0, double.infinity);
-
-  void _addCurrentLineToCart() {
-    final name = _productController.text.trim();
-    final code = _barcodeController.text.trim().isNotEmpty
-        ? _barcodeController.text.trim()
-        : (_serialController.text.trim().isNotEmpty
-            ? _serialController.text.trim()
-            : 'SKU-${_lines.length + 1}');
-    final quantity = _quantity;
-    final unitPrice = _unitPrice;
-    final total = ((quantity * unitPrice) - _discount)
-        .clamp(0, double.infinity)
-        .toDouble();
-
-    setState(() {
-      _lines = [
-        ..._lines,
-        _SaleLine(
-          name: name.isNotEmpty ? name : 'Yeni Ürün',
-          code: code,
-          quantity: quantity,
-          unitPrice: unitPrice,
-          total: total,
-        ),
-      ];
-
-      _productController.clear();
-      _barcodeController.clear();
-      _serialController.clear();
-      _quantityController.text = '1';
-      _unitPriceController.text = '0';
-      _discountController.text = '0';
-    });
-  }
+  double get _transactionTotal =>
+      ((_quantity * _unitPrice) - _discount).clamp(0, double.infinity);
 
   Future<void> _pickWarrantyStartDate() async {
     final now = DateTime.now();
@@ -408,8 +434,10 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       _noteController.clear();
       _selectedCustomer = null;
       _selectedDevice = null;
+      _selectedStockCategory = null;
       _customersFuture = _fetchCustomerSuggestions();
       _devicesFuture = _fetchDeviceList();
+      _stockCategoriesFuture = _fetchStockCategories();
       _tradeType = 'Satış';
       _paymentType = 'Nakit';
       _sendReceipt = true;
@@ -464,6 +492,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
                     brandController: _brandController,
                     modelController: _modelController,
                     barcodeController: _barcodeController,
+                    skuController: _skuController,
                     serialController: _serialController,
                     quantityController: _quantityController,
                     unitPriceController: _unitPriceController,
@@ -475,24 +504,30 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
                     tradeType: _tradeType,
                     paymentType: _paymentType,
                     sendReceipt: _sendReceipt,
-                    currentLineTotal: _currentLineTotal,
-                    onTradeTypeChanged: (value) =>
-                        setState(() => _tradeType = value),
+                    onTradeTypeChanged: _handleTradeTypeChanged,
                     onPaymentTypeChanged: (value) =>
                         setState(() => _paymentType = value),
                     onSendReceiptChanged: (value) =>
                         setState(() => _sendReceipt = value),
                     onValuesChanged: () => setState(() {}),
-                    onAddToCart: _addCurrentLineToCart,
+                    selectedStockCategory: _selectedStockCategory,
+                    stockCategoriesFuture: _stockCategoriesFuture,
+                    onStockCategoryChanged: _selectStockCategory,
                   ),
                 ),
                 const SizedBox(width: 18),
                 Expanded(
                   flex: 5,
                   child: _TradeSummaryPanel(
-                    lines: _lines,
-                    totalPreview: _totalPreview,
+                    tradeType: _tradeType,
+                    paymentType: _paymentType,
+                    quantity: _quantity,
+                    unitPrice: _unitPrice,
                     discount: _discount,
+                    total: _transactionTotal,
+                    sendReceipt: _sendReceipt,
+                    customerName: _customerController.text,
+                    productName: _productController.text,
                     onComplete: _startTrade,
                   ),
                 ),
@@ -518,6 +553,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
               brandController: _brandController,
               modelController: _modelController,
               barcodeController: _barcodeController,
+              skuController: _skuController,
               serialController: _serialController,
               quantityController: _quantityController,
               unitPriceController: _unitPriceController,
@@ -529,20 +565,27 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
               tradeType: _tradeType,
               paymentType: _paymentType,
               sendReceipt: _sendReceipt,
-              currentLineTotal: _currentLineTotal,
-              onTradeTypeChanged: (value) => setState(() => _tradeType = value),
+              onTradeTypeChanged: _handleTradeTypeChanged,
               onPaymentTypeChanged: (value) =>
                   setState(() => _paymentType = value),
               onSendReceiptChanged: (value) =>
                   setState(() => _sendReceipt = value),
               onValuesChanged: () => setState(() {}),
-              onAddToCart: _addCurrentLineToCart,
+              selectedStockCategory: _selectedStockCategory,
+              stockCategoriesFuture: _stockCategoriesFuture,
+              onStockCategoryChanged: _selectStockCategory,
             ),
             const SizedBox(height: 18),
             _TradeSummaryPanel(
-              lines: _lines,
-              totalPreview: _totalPreview,
+              tradeType: _tradeType,
+              paymentType: _paymentType,
+              quantity: _quantity,
+              unitPrice: _unitPrice,
               discount: _discount,
+              total: _transactionTotal,
+              sendReceipt: _sendReceipt,
+              customerName: _customerController.text,
+              productName: _productController.text,
               onComplete: _startTrade,
             ),
           ],
@@ -636,6 +679,7 @@ class _TradeEntryPanel extends StatelessWidget {
     required this.modelController,
     required this.serialController,
     required this.barcodeController,
+    required this.skuController,
     required this.quantityController,
     required this.unitPriceController,
     required this.discountController,
@@ -646,12 +690,13 @@ class _TradeEntryPanel extends StatelessWidget {
     required this.tradeType,
     required this.paymentType,
     required this.sendReceipt,
-    required this.currentLineTotal,
     required this.onTradeTypeChanged,
     required this.onPaymentTypeChanged,
     required this.onSendReceiptChanged,
     required this.onValuesChanged,
-    required this.onAddToCart,
+    required this.selectedStockCategory,
+    required this.stockCategoriesFuture,
+    required this.onStockCategoryChanged,
   });
 
   final TextEditingController customerController;
@@ -673,6 +718,7 @@ class _TradeEntryPanel extends StatelessWidget {
   final TextEditingController modelController;
   final TextEditingController serialController;
   final TextEditingController barcodeController;
+  final TextEditingController skuController;
   final TextEditingController quantityController;
   final TextEditingController unitPriceController;
   final TextEditingController discountController;
@@ -683,12 +729,13 @@ class _TradeEntryPanel extends StatelessWidget {
   final String tradeType;
   final String paymentType;
   final bool sendReceipt;
-  final double currentLineTotal;
   final ValueChanged<String> onTradeTypeChanged;
   final ValueChanged<String> onPaymentTypeChanged;
   final ValueChanged<bool> onSendReceiptChanged;
   final VoidCallback onValuesChanged;
-  final VoidCallback onAddToCart;
+  final StockCategory? selectedStockCategory;
+  final Future<List<StockCategory>> stockCategoriesFuture;
+  final ValueChanged<StockCategory?> onStockCategoryChanged;
 
   String generateBarcodeNumber() {
     final now = DateTime.now();
@@ -844,6 +891,21 @@ class _TradeEntryPanel extends StatelessWidget {
               ),
             ],
           ),
+          if (tradeType == 'Alış') ...[
+            const SizedBox(height: 12),
+            FutureBuilder<List<StockCategory>>(
+              future: stockCategoriesFuture,
+              builder: (context, snapshot) {
+                final categories = snapshot.data ?? const <StockCategory>[];
+                return _CategorySelectField(
+                  label: 'Stok Kategorisi',
+                  value: selectedStockCategory?.id,
+                  categories: categories,
+                  onChanged: onStockCategoryChanged,
+                );
+              },
+            ),
+          ],
           const SizedBox(height: 18),
           const LinearSection(title: 'ÜRÜN / CİHAZ DETAYI'),
           const SizedBox(height: 8),
@@ -970,11 +1032,43 @@ class _TradeEntryPanel extends StatelessWidget {
                   width: 120,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      final barcode = generateBarcodeNumber();
-                      barcodeController.text = barcode;
+                      barcodeController.text =
+                          'TSI${DateTime.now().millisecondsSinceEpoch}';
                     },
                     icon: const Icon(Icons.qr_code_2_rounded, size: 18),
                     label: const Text('Barkod Üret'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _FormField(
+                  label: 'SKU',
+                  controller: skuController,
+                  readOnly: true,
+                  hint: 'Otomatik SKU',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: SizedBox(
+                  width: 120,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      skuController.text =
+                          'SKU${DateTime.now().millisecondsSinceEpoch}';
+                    },
+                    icon: const Icon(Icons.label_rounded, size: 18),
+                    label: const Text('SKU Üret'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.accent,
                       foregroundColor: Colors.white,
@@ -1094,45 +1188,6 @@ class _TradeEntryPanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.bg,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded,
-                    color: AppColors.accent),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Girilen Ürünleri Sepete Ekleyin',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: onAddToCart,
-                  label: const Text('Sepete Ekle'),
-                  icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -1141,15 +1196,27 @@ class _TradeEntryPanel extends StatelessWidget {
 
 class _TradeSummaryPanel extends StatelessWidget {
   const _TradeSummaryPanel({
-    required this.lines,
-    required this.totalPreview,
+    required this.tradeType,
+    required this.paymentType,
+    required this.quantity,
+    required this.unitPrice,
     required this.discount,
+    required this.total,
+    required this.sendReceipt,
+    required this.customerName,
+    required this.productName,
     required this.onComplete,
   });
 
-  final List<_SaleLine> lines;
-  final double totalPreview;
+  final String tradeType;
+  final String paymentType;
+  final int quantity;
+  final double unitPrice;
   final double discount;
+  final double total;
+  final bool sendReceipt;
+  final String customerName;
+  final String productName;
   final VoidCallback onComplete;
 
   @override
@@ -1160,18 +1227,51 @@ class _TradeSummaryPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const LinearSection(
-            title: 'SEPET ÖZETİ',
+            title: 'İŞLEM ÖZETİ',
             trailing: LinearBadge(
-              label: 'Taslak',
+              label: 'Tek Kayıt',
               color: AppColors.statusBlue,
             ),
           ),
           const SizedBox(height: 8),
-          ...lines.map(
-            (line) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _LineItemTile(line: line),
-            ),
+          Wrap(
+            runSpacing: 10,
+            spacing: 10,
+            children: [
+              _QuickStatChip(
+                icon: Icons.swap_horiz_rounded,
+                label: 'İşlem',
+                value: tradeType,
+              ),
+              _QuickStatChip(
+                icon: Icons.payments_rounded,
+                label: 'Ödeme',
+                value: paymentType,
+              ),
+              _QuickStatChip(
+                icon: Icons.confirmation_num_outlined,
+                label: 'Adet',
+                value: '$quantity',
+              ),
+              _QuickStatChip(
+                icon: Icons.receipt_long_outlined,
+                label: 'Fiş/Fatura',
+                value: sendReceipt ? 'Aktif' : 'Kapalı',
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _SummaryRow(
+            label: 'Müşteri',
+            value: customerName.trim().isEmpty ? '-' : customerName.trim(),
+          ),
+          _SummaryRow(
+            label: 'Ürün/Hizmet',
+            value: productName.trim().isEmpty ? '-' : productName.trim(),
+          ),
+          _SummaryRow(
+            label: 'Birim Fiyat',
+            value: '₺${unitPrice.toStringAsFixed(2)}',
           ),
           const Divider(color: AppColors.border),
           _SummaryRow(
@@ -1188,7 +1288,7 @@ class _TradeSummaryPanel extends StatelessWidget {
             ),
             child: _SummaryRow(
               label: 'Toplam',
-              value: '₺${totalPreview.toStringAsFixed(2)}',
+              value: '₺${total.toStringAsFixed(2)}',
               emphasize: true,
             ),
           ),
@@ -1212,6 +1312,45 @@ class _TradeSummaryPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickStatChip extends StatelessWidget {
+  const _QuickStatChip({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppColors.accent),
+          const SizedBox(width: 8),
+          Text(
+            '$label: $value',
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
             ),
           ),
         ],
@@ -1247,7 +1386,6 @@ class _SelectedCustomerInfo extends StatelessWidget {
                 ? customer.phoneNumber!
                 : '-',
           ),
-          _InfoLabel(title: 'Müşteri ID', value: customer.id),
         ],
       ),
     );
@@ -1452,71 +1590,6 @@ class _RecentTradeRow extends StatelessWidget {
   }
 }
 
-class _LineItemTile extends StatelessWidget {
-  const _LineItemTile({required this.line});
-
-  final _SaleLine line;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.accentBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              size: 18,
-              color: AppColors.accent,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  line.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${line.code} • ${line.quantity} adet',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            '₺${line.total.toStringAsFixed(0)}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _SummaryRow extends StatelessWidget {
   const _SummaryRow({
     required this.label,
@@ -1686,20 +1759,81 @@ class _SelectField extends StatelessWidget {
   }
 }
 
-class _SaleLine {
-  const _SaleLine({
-    required this.name,
-    required this.code,
-    required this.quantity,
-    required this.unitPrice,
-    required this.total,
+class _CategorySelectField extends StatelessWidget {
+  const _CategorySelectField({
+    required this.label,
+    required this.value,
+    required this.categories,
+    required this.onChanged,
   });
 
-  final String name;
-  final String code;
-  final int quantity;
-  final double unitPrice;
-  final double total;
+  final String label;
+  final String? value;
+  final List<StockCategory> categories;
+  final ValueChanged<StockCategory?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final uniqueCategories = <String, StockCategory>{
+      for (final category in categories) category.id: category,
+    }.values.toList();
+
+    final validValue =
+        uniqueCategories.any((category) => category.id == value) ? value : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        DropdownButtonFormField<String>(
+          key: ValueKey<String?>(validValue),
+          initialValue: validValue,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: AppColors.bg,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.accent),
+            ),
+          ),
+          items: uniqueCategories
+              .map(
+                (category) => DropdownMenuItem<String>(
+                  value: category.id,
+                  child: Text(category.name),
+                ),
+              )
+              .toList(),
+          onChanged: (next) {
+            if (next == null) {
+              onChanged(null);
+              return;
+            }
+
+            final selected = uniqueCategories.cast<StockCategory?>().firstWhere(
+                  (category) => category?.id == next,
+                  orElse: () => null,
+                );
+            onChanged(selected);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 class _RecentTrade {
