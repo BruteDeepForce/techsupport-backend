@@ -27,6 +27,7 @@ public static class HRModule
         services.AddScoped<IEmployeeSalaryService, EmployeeSalaryService>();
         services.AddScoped<IDisciplineService, DisciplineService>();
         services.AddScoped<IRewardService, RewardService>();
+        services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
 
         return services;
     }

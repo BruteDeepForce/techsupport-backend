@@ -63,20 +63,20 @@ public sealed class EmployeesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] Guid? branchId, [FromQuery] bool includeInactive = false, CancellationToken ct = default)
+    public async Task<IActionResult> List([FromQuery] Guid? branchId,  CancellationToken ct = default)
     {
         if (!TryGetTenantId(out var tenantId))
         {
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var resolvedBranchId = branchId ?? GetBranchId();
-        if (!resolvedBranchId.HasValue || resolvedBranchId.Value == Guid.Empty)
-        {
-            return Unauthorized("BranchId is required in claim (branch_id) or query.");
-        }
+        // var resolvedBranchId = branchId ?? GetBranchId();
+        // if (!resolvedBranchId.HasValue || resolvedBranchId.Value == Guid.Empty)
+        // {
+        //     return Unauthorized("BranchId is required in claim (branch_id) or query.");
+        // }
 
-        var result = await _service.ListAsync(tenantId, resolvedBranchId.Value, includeInactive, ct);
+        var result = await _service.ListAsync(tenantId, null, ct);
         if (!result.Succeeded)
         {
             return BadRequest(result.Error);

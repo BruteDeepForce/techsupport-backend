@@ -61,8 +61,8 @@ public sealed class DeviceService : IDeviceService
             WarrantyStartAtUtc = normalizedWarrantyStart,
             WarrantyEndAtUtc = normalizedWarrantyEnd,
             BarcodeNumber = barcodeNumber?.Trim(),
-            CustomerId = appUserId.Value,  //!burada gelen appuserid customerid olarak kaydediyoruz
-            CustomerName = customerName?.Trim(),
+            CustomerId = Guid.Empty,  //!burada gelen appuserid customerid olarak kaydediyoruz
+            CustomerName = customerName?.Trim() ?? string.Empty,
             Status = Enum.TryParse<DeviceStatus>(status, true, out var parsedStatus) ? parsedStatus : DeviceStatus.Other,
             IsActive = true,
             CreatedAtUtc = DateTimeOffset.UtcNow
@@ -82,7 +82,7 @@ public sealed class DeviceService : IDeviceService
             {
                 TenantId = tenantId,
                 BranchId = branchId,
-                CustomerId = customerId.Value, //!burada gelen appuserid customerid olarak kaydediyoruz
+                CustomerId = customerId.HasValue ? customerId.Value : Guid.Empty, //!burada gelen appuserid customerid olarak kaydediyoruz
                 DeviceId = device.Id,
                 ProblemDescription = device.ProblemDescription,
                 Brand = device.Brand,

@@ -22,6 +22,7 @@ using TechSupport.Trade.Consumers;
 using TechSupport.Trade.SignalR;
 using TechSupport.Device.Consumers;
 using TechSupport.Stock.Consumers;
+using Modules.HR.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TradeDeviceCreatedEventWithoutMapping>();
     x.AddConsumer<TradeDeviceUpdateRequestConsumer>();
     x.AddConsumer<TradeStockProcessConsumer>();
+    x.AddConsumer<TechnicianHrEmployeeSyncRequestedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {

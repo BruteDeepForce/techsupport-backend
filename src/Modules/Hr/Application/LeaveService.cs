@@ -9,9 +9,9 @@ public interface ILeaveService
 {
     Task<HRServiceResult<LeaveResponse>> CreateAsync(Guid tenantId, CreateLeaveRequest request, CancellationToken ct);
     Task<HRServiceResult<LeaveResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
-    Task<HRServiceResult<IReadOnlyCollection<LeaveResponse>>> ListAsync(
+    Task<HRServiceResult<LargeLeaveResponseList>> ListAsync(
         Guid tenantId,
-        Guid branchId,
+        Guid? branchId,
         Guid? employeeId,
         LeaveStatus? status,
         DateTime? startDate,
@@ -33,14 +33,15 @@ public sealed class LeaveService : ILeaveService
 
     public async Task<HRServiceResult<LeaveResponse>> CreateAsync(Guid tenantId, CreateLeaveRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        //!  branch ve departmenidleri opsiyonel bypass
+        if (tenantId == Guid.Empty )
         {
-            return HRServiceResult<LeaveResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<LeaveResponse>.Fail("TenantId is required.");
         }
 
-        if (request.EmployeeId == Guid.Empty || request.DepartmentId == Guid.Empty)
+        if (request.EmployeeId == Guid.Empty )
         {
-            return HRServiceResult<LeaveResponse>.Fail("EmployeeId and DepartmentId are required.");
+            return HRServiceResult<LeaveResponse>.Fail("EmployeeId is required.");
         }
 
         if (request.StartDate.Date > request.EndDate.Date)
@@ -58,7 +59,8 @@ public sealed class LeaveService : ILeaveService
             .FirstOrDefaultAsync(x =>
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
+                //!x.BranchId == request.BranchId
+                
                 x.DeletedAtUtc == null,
                 ct);
 
@@ -67,19 +69,19 @@ public sealed class LeaveService : ILeaveService
             return HRServiceResult<LeaveResponse>.NotFound("Employee not found.");
         }
 
-        var departmentExists = await _db.Departments
-            .AsNoTracking()
-            .AnyAsync(x => x.Id == request.DepartmentId && x.TenantId == tenantId, ct);
+        // var departmentExists = await _db.Departments
+        //     .AsNoTracking()
+        //     .AnyAsync(x => x.Id == request.DepartmentId && x.TenantId == tenantId, ct);
 
-        if (!departmentExists)
-        {
-            return HRServiceResult<LeaveResponse>.NotFound("Department not found.");
-        }
+        // if (!departmentExists)
+        // {
+        //     return HRServiceResult<LeaveResponse>.NotFound("Department not found.");
+        // }
 
-        if (employee.DepartmentId.HasValue && employee.DepartmentId.Value != request.DepartmentId)
-        {
-            return HRServiceResult<LeaveResponse>.Fail("DepartmentId does not match employee department.");
-        }
+        // if (employee.DepartmentId.HasValue && employee.DepartmentId.Value != request.DepartmentId)
+        // {
+        //     return HRServiceResult<LeaveResponse>.Fail("DepartmentId does not match employee department.");
+        // }
 
         var startDate = request.StartDate.Date;
         var endDate = request.EndDate.Date;
@@ -104,8 +106,8 @@ public sealed class LeaveService : ILeaveService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
-            DepartmentId = request.DepartmentId,
+            BranchId = request.BranchId ?? Guid.Empty,
+            DepartmentId = request.DepartmentId ?? null,
             EmployeeId = request.EmployeeId,
             StartDate = startDate,
             EndDate = endDate,
@@ -114,7 +116,7 @@ public sealed class LeaveService : ILeaveService
             Status = LeaveStatus.Pending,
             CreatedAtUtc = now,
             UpdatedAtUtc = now,
-            LeaveDeductionId = request.LeaveDeductionId
+            LeaveDeductionId = request.LeaveDeductionId ?? null
         };
 
         _db.Leaves.Add(leave);
@@ -134,28 +136,28 @@ public sealed class LeaveService : ILeaveService
             : HRServiceResult<LeaveResponse>.Ok(ToResponse(leave));
     }
 
-    public async Task<HRServiceResult<IReadOnlyCollection<LeaveResponse>>> ListAsync(
+    public async Task<HRServiceResult<LargeLeaveResponseList>> ListAsync(
         Guid tenantId,
-        Guid branchId,
+        Guid? branchId,
         Guid? employeeId,
         LeaveStatus? status,
         DateTime? startDate,
         DateTime? endDate,
         CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<LeaveResponse>>.Fail("BranchId is required.");
-        }
+        // if (branchId.HasValue && branchId.Value == Guid.Empty)
+        // {
+        //     return HRServiceResult<IReadOnlyCollection<LeaveResponse>>.Fail("BranchId is required.");
+        // }
 
         if (startDate.HasValue && endDate.HasValue && startDate.Value.Date > endDate.Value.Date)
         {
-            return HRServiceResult<IReadOnlyCollection<LeaveResponse>>.Fail("startDate must be earlier than or equal to endDate.");
+            return HRServiceResult<LargeLeaveResponseList>.Fail("startDate must be earlier than or equal to endDate.");
         }
-
-        var query = _db.Leaves
+        //! branchid bypass
+        var query = _db.Leaves.Include(x => x.Employee)
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
 
         if (employeeId.HasValue && employeeId.Value != Guid.Empty)
         {
@@ -182,8 +184,19 @@ public sealed class LeaveService : ILeaveService
         var leaves = await query
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
+        var totalLeaves = leaves.Select( x=> ToResponse(x)).ToList();
+        var pendingLeaves = leaves.Where(x => x.Status == LeaveStatus.Pending).Select(x => ToResponse(x)).ToList();
+        var approvedLeaves = leaves.Where(x => x.Status == LeaveStatus.Approved).Select(x => ToResponse(x)).ToList();
+        var rejectedLeaves = leaves.Where(x => x.Status == LeaveStatus.Rejected).Select(x => ToResponse(x)).ToList();
 
-        return HRServiceResult<IReadOnlyCollection<LeaveResponse>>.Ok(leaves.Select(ToResponse).ToList());
+        var largeLeaveResponseList = new LargeLeaveResponseList(
+            AllLeaves: totalLeaves,
+            PendingLeaves: pendingLeaves,
+            ApprovedLeaves: approvedLeaves,
+            RejectedLeaves: rejectedLeaves
+        );
+
+        return HRServiceResult<LargeLeaveResponseList>.Ok(largeLeaveResponseList);
     }
 
     public async Task<HRServiceResult<LeaveResponse>> UpdateAsync(Guid tenantId, Guid id, UpdateLeaveRequest request, CancellationToken token)
@@ -249,7 +262,7 @@ public sealed class LeaveService : ILeaveService
             return HRServiceResult<LeaveResponse>.Fail("Invalid leave status.");
         }
 
-        var leave = await _db.Leaves
+        var leave = await _db.Leaves.Include(x => x.Employee)
             .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId, ct);
 
         if (leave is null)
@@ -282,8 +295,9 @@ public sealed class LeaveService : ILeaveService
             leave.Id,
             leave.TenantId,
             leave.BranchId,
-            leave.DepartmentId,
+            leave.DepartmentId ?? Guid.Empty,
             leave.EmployeeId,
+            leave.Employee?.FullName ?? string.Empty,
             leave.StartDate,
             leave.EndDate,
             leave.Type,

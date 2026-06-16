@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../admin_web_customers_page.dart';
 import '../admin_web_device_page.dart';
 import '../admin_web_home_page.dart';
+import '../HR/hr_pages/admin_web_hr_page.dart';
 import '../admin_web_trade_page.dart';
 import '../admin_web_offer_detail_page.dart';
 import '../admin_web_offers_page.dart';
@@ -21,6 +22,7 @@ enum AdminNavKey {
   trades,
   offers,
   team,
+  hr,
   customers,
   devices,
   stock
@@ -77,6 +79,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Ekip Yönetimi',
       icon: Icons.group_outlined,
       pageBuilder: (_) => const AdminWebTeamPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.hr,
+      label: 'İnsan Kaynakları',
+      icon: Icons.badge_outlined,
+      pageBuilder: (_) => const AdminWebHrPage(),
     ),
     AdminNavItem(
       key: AdminNavKey.customers,

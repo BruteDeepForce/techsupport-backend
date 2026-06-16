@@ -8,6 +8,7 @@ public sealed record LeaveResponse(
     Guid BranchId,
     Guid DepartmentId,
     Guid EmployeeId,
+    string EmployeeFullName,
     DateTime StartDate,
     DateTime EndDate,
     LeaveType Type,
@@ -17,3 +18,10 @@ public sealed record LeaveResponse(
     DateTime? ApprovedAtUtc,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc);
+
+public sealed record LargeLeaveResponseList(
+    IReadOnlyCollection<LeaveResponse> AllLeaves,
+    IReadOnlyCollection<LeaveResponse> PendingLeaves,
+    IReadOnlyCollection<LeaveResponse> ApprovedLeaves,
+    IReadOnlyCollection<LeaveResponse> RejectedLeaves
+);

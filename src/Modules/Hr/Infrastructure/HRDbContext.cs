@@ -145,7 +145,7 @@ public class HRDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.TenantId).IsRequired();
             entity.Property(x => x.BranchId).IsRequired();
-            entity.Property(x => x.DepartmentId).IsRequired();
+            entity.Property(x => x.DepartmentId);
             entity.Property(x => x.EmployeeId).IsRequired();
             entity.Property(x => x.StartDate).IsRequired();
             entity.Property(x => x.EndDate).IsRequired();

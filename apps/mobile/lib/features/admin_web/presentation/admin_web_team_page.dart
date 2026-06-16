@@ -189,24 +189,31 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                     tempPasswordController.text.trim(),
                                 expertiseIds: selectedExpertiseIds.toList(),
                               );
-                              if (mounted) Navigator.of(context).pop();
-                              if (mounted) {
-                                _refresh();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Teknisyen oluşturma başlatıldı')),
-                                );
-                              }
+
+                              if (!context.mounted) return;
+
+                              Navigator.of(context)
+                                  .pop(); // loading dialog kapatır
+
+                              _refresh();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text('Teknisyen oluşturma başlatıldı'),
+                                ),
+                              );
                             } catch (_) {
-                              if (mounted) Navigator.of(context).pop();
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Teknisyen oluşturulamadı')),
-                                );
-                              }
+                              if (!context.mounted) return;
+
+                              Navigator.of(context)
+                                  .pop(); // loading dialog kapatır
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Teknisyen oluşturulamadı'),
+                                ),
+                              );
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -334,7 +341,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'Personel Yönetimi',
+                      'Ekip Yönetimi',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
@@ -343,7 +350,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Personelleri yönetin',
+                      'Ekibinizi yönetin',
                       style: TextStyle(
                         color: Color(0xFF64748B),
                       ),
@@ -405,7 +412,7 @@ class _Breadcrumb extends StatelessWidget {
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Personel Yönetimi',
+        Text('Ekip Yönetimi',
             style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );

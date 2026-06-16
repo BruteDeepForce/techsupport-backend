@@ -62,7 +62,7 @@ public sealed class LeavesController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> List(
-        [FromQuery] Guid branchId,
+        [FromQuery] Guid? branchId,
         [FromQuery] Guid? employeeId,
         [FromQuery] LeaveStatus? status,
         [FromQuery] DateTime? startDate,
@@ -74,12 +74,12 @@ public sealed class LeavesController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
-        }
+        // if (branchId == Guid.Empty)
+        // {
+        //     return BadRequest("BranchId is required.");
+        // }
 
-        var result = await _service.ListAsync(tenantId, branchId, employeeId, status, startDate, endDate, ct);
+        var result = await _service.ListAsync(tenantId, null, employeeId, status, startDate, endDate, ct);
         if (!result.Succeeded)
         {
             return BadRequest(result.Error);
@@ -88,8 +88,8 @@ public sealed class LeavesController : ControllerBase
         return Ok(result.Data);
     }
 
-    [HttpPost("{id:guid}/decision")]
-    public async Task<IActionResult> Decide(Guid id, [FromBody] DecideLeaveRequest request, CancellationToken ct)
+    [HttpPost("decision")]
+    public async Task<IActionResult> Decide( [FromBody] DecideLeaveRequest request, CancellationToken ct)
     {
         if (!TryGetTenantId(out var tenantId))
         {
@@ -97,15 +97,18 @@ public sealed class LeavesController : ControllerBase
         }
 
         var claimUserId = TryGetUserId();
-        var approverId = request.ApprovedByUserId ?? claimUserId;
+        var approverId = claimUserId;
+        if(approverId != null)
+        {
+            request = request with { ApprovedByUserId = approverId };
+        }
 
         if (request.Status is LeaveStatus.Approved or LeaveStatus.Rejected && approverId is null)
         {
             return Unauthorized("UserId is required in claim (user_id).");
         }
 
-        var payload = request with { ApprovedByUserId = approverId };
-        var result = await _service.DecideAsync(tenantId, id, payload, ct);
+        var result = await _service.DecideAsync(tenantId, request.LeaveId, request, ct);
 
         if (!result.Succeeded)
         {

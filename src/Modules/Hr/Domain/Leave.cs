@@ -10,12 +10,12 @@ namespace Modules.HR.Domain
         public Guid Id { get; set; }
         public Guid TenantId { get; set; }
         public Guid BranchId { get; set; }
-        public Guid DepartmentId { get; set; }
-        public Department Department { get; set; } = null!;
+        public Guid? DepartmentId { get; set; }
+        public Department? Department { get; set; }
         public Guid EmployeeId { get; set; }
         public Employee Employee { get; set; } = null!;
-        public Guid LeaveDeductionId { get; set; }
-        public LeaveDeduction LeaveDeduction { get; set; } = null!;
+        public Guid? LeaveDeductionId { get; set; }
+        public LeaveDeduction? LeaveDeduction { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public LeaveType Type { get; set; }

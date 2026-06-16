@@ -258,6 +258,20 @@ public sealed class TechnicianService : ITechnicianService
         request.FailureReason = null;
 
         await _db.SaveChangesAsync(ct);
+
+        await _bus.Publish(new TechnicianHrEmployeeSyncRequested(
+            correlationId,
+            existing.Id,
+            appUserId,
+            tenantId,
+            branchId,
+            existing.FirstName,
+            existing.Email,
+            existing.PhoneNumber,
+            existing.PictureUrl,
+            existing.IsActive,
+            existing.EmploymentStartDate,
+            DateTimeOffset.UtcNow), ct);
     }
 
     public async Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct)
@@ -305,6 +319,24 @@ public sealed class TechnicianService : ITechnicianService
 
         technician.IsActive = isActive;
         await _db.SaveChangesAsync(ct);
+
+        if (technician.AppUserId.HasValue)
+        {
+            await _bus.Publish(new TechnicianHrEmployeeSyncRequested(
+                Guid.NewGuid(),
+                technician.Id,
+                technician.AppUserId.Value,
+                technician.TenantId,
+                technician.BranchId,
+                technician.FirstName,
+                technician.Email,
+                technician.PhoneNumber,
+                technician.PictureUrl,
+                technician.IsActive,
+                technician.EmploymentStartDate,
+                DateTimeOffset.UtcNow), ct);
+        }
+
         return true;
     }
 
@@ -335,6 +367,24 @@ public sealed class TechnicianService : ITechnicianService
 
         _db.Technicians.Update(technician);
         await _db.SaveChangesAsync(ct);
+
+        if (technician.AppUserId.HasValue)
+        {
+            await _bus.Publish(new TechnicianHrEmployeeSyncRequested(
+                Guid.NewGuid(),
+                technician.Id,
+                technician.AppUserId.Value,
+                technician.TenantId,
+                technician.BranchId,
+                technician.FirstName,
+                technician.Email,
+                technician.PhoneNumber,
+                technician.PictureUrl,
+                technician.IsActive,
+                technician.EmploymentStartDate,
+                DateTimeOffset.UtcNow), ct);
+        }
+
         return new { Success = true, Message = $"Picture Url: {technician.PictureUrl}" };
     }
 
