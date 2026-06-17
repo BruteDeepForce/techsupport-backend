@@ -4,6 +4,7 @@ import 'package:techsupport_mobile/features/admin_web/presentation/HR/hr_pages/a
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
 
 import 'admin_web_hr_employee_detail_page.dart';
+import 'admin_web_hr_discipline_reward_section_page.dart';
 import 'admin_web_hr_leave_section_page.dart';
 import 'admin_web_hr_leaves_page.dart';
 import '../../shared/admin_web_nav.dart';
@@ -70,11 +71,7 @@ class _AdminWebHrPageState extends State<AdminWebHrPage> {
         );
         break;
       case HrSection.discipline:
-        content = const _PlaceholderSection(
-          title: 'Disiplin & Ödül',
-          description:
-              'Bu alan disiplin kayıtları ve ödül geçmişi için ayrıldı.',
-        );
+        content = const AdminWebHrDisciplineRewardSectionPage();
         break;
       case HrSection.performance:
         content = const _PlaceholderSection(

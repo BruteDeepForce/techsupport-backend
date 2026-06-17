@@ -1,7 +1,7 @@
 namespace Modules.HR.DTO;
 
 public sealed record CreateRewardRequest(
-    Guid BranchId,
+    Guid? BranchId,
     string Description,
     decimal RewardAmount);
 
@@ -10,7 +10,7 @@ public sealed record UpdateRewardRequest(
     decimal? RewardAmount);
 
 public sealed record CreateRewardEmployeeRecordRequest(
-    Guid BranchId,
+    Guid? BranchId,
     Guid EmployeeId,
     Guid RewardId,
     string Description,

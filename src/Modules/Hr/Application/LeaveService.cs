@@ -101,6 +101,24 @@ public sealed class LeaveService : ILeaveService
             return HRServiceResult<LeaveResponse>.Conflict("Leave date range overlaps with an existing leave.");
         }
 
+        if(request.Type == LeaveType.UnpaidLeave)
+        {
+            var unpaidLeaveDeduction = await _db.LeaveDeductions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.TenantId == tenantId &&
+                    //!x.BranchId == request.BranchId
+                    x.DeductionType == LeaveType.UnpaidLeave,
+                    ct);
+
+            if (unpaidLeaveDeduction is null)
+            {
+                return HRServiceResult<LeaveResponse>.NotFound("Unpaid leave deduction configuration not found.");
+            }
+
+            request = request with { LeaveDeductionId = unpaidLeaveDeduction.Id };
+        }
+
         var now = DateTime.UtcNow;
         var leave = new Leave
         {

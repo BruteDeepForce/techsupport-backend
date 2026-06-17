@@ -60,19 +60,14 @@ public sealed class RewardsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] Guid branchId, CancellationToken ct)
+    public async Task<IActionResult> List(CancellationToken ct)
     {
         if (!TryGetTenantId(out var tenantId))
         {
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
-        }
-
-        var result = await _service.ListAsync(tenantId, branchId, ct);
+        var result = await _service.ListAsync(tenantId, ct);
         if (!result.Succeeded)
         {
             return BadRequest(result.Error);
@@ -146,7 +141,6 @@ public sealed class RewardsController : ControllerBase
 
     [HttpGet("records")]
     public async Task<IActionResult> ListRecords(
-        [FromQuery] Guid branchId,
         [FromQuery] Guid? employeeId,
         [FromQuery] Guid? rewardId,
         [FromQuery] DateTime? startDate,
@@ -158,12 +152,7 @@ public sealed class RewardsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
-        }
-
-        var result = await _service.ListRecordsAsync(tenantId, branchId, employeeId, rewardId, startDate, endDate, ct);
+        var result = await _service.ListRecordsAsync(tenantId, employeeId, rewardId, startDate, endDate, ct);
         if (!result.Succeeded)
         {
             return BadRequest(result.Error);

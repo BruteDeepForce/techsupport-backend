@@ -9,14 +9,13 @@ public interface IDisciplineService
 {
     Task<HRServiceResult<DisciplineResponse>> CreateAsync(Guid tenantId, CreateDisciplineRequest request, CancellationToken ct);
     Task<HRServiceResult<DisciplineResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
-    Task<HRServiceResult<IReadOnlyCollection<DisciplineResponse>>> ListAsync(Guid tenantId, Guid branchId, CancellationToken ct);
+    Task<HRServiceResult<IReadOnlyCollection<DisciplineResponse>>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<HRServiceResult<DisciplineResponse>> UpdateAsync(Guid tenantId, Guid id, UpdateDisciplineRequest request, CancellationToken ct);
 
     Task<HRServiceResult<DisciplineEmployeeRecordResponse>> CreateRecordAsync(Guid tenantId, CreateDisciplineEmployeeRecordRequest request, CancellationToken ct);
     Task<HRServiceResult<DisciplineEmployeeRecordResponse>> GetRecordByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
     Task<HRServiceResult<IReadOnlyCollection<DisciplineEmployeeRecordResponse>>> ListRecordsAsync(
         Guid tenantId,
-        Guid branchId,
         Guid? employeeId,
         Guid? disciplineId,
         DateTime? startDate,
@@ -37,9 +36,9 @@ public sealed class DisciplineService : IDisciplineService
 
     public async Task<HRServiceResult<DisciplineResponse>> CreateAsync(Guid tenantId, CreateDisciplineRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<DisciplineResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<DisciplineResponse>.Fail("TenantId is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.Description))
@@ -57,7 +56,7 @@ public sealed class DisciplineService : IDisciplineService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = Guid.Empty,
             Description = request.Description.Trim(),
             PenaltyAmount = decimal.Round(request.PenaltyAmount, 2),
             CreatedAtUtc = now,
@@ -81,16 +80,11 @@ public sealed class DisciplineService : IDisciplineService
             : HRServiceResult<DisciplineResponse>.Ok(ToResponse(discipline));
     }
 
-    public async Task<HRServiceResult<IReadOnlyCollection<DisciplineResponse>>> ListAsync(Guid tenantId, Guid branchId, CancellationToken ct)
+    public async Task<HRServiceResult<IReadOnlyCollection<DisciplineResponse>>> ListAsync(Guid tenantId, CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<DisciplineResponse>>.Fail("BranchId is required.");
-        }
-
         var disciplines = await _db.Disciplines
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId)
+            .Where(x => x.TenantId == tenantId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
 
@@ -136,9 +130,9 @@ public sealed class DisciplineService : IDisciplineService
 
     public async Task<HRServiceResult<DisciplineEmployeeRecordResponse>> CreateRecordAsync(Guid tenantId, CreateDisciplineEmployeeRecordRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<DisciplineEmployeeRecordResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<DisciplineEmployeeRecordResponse>.Fail("TenantId is required.");
         }
 
         if (request.EmployeeId == Guid.Empty || request.DisciplineId == Guid.Empty)
@@ -156,7 +150,6 @@ public sealed class DisciplineService : IDisciplineService
             .AnyAsync(x =>
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
                 x.DeletedAtUtc == null,
                 ct);
 
@@ -169,8 +162,7 @@ public sealed class DisciplineService : IDisciplineService
             .AsNoTracking()
             .AnyAsync(x =>
                 x.Id == request.DisciplineId &&
-                x.TenantId == tenantId &&
-                x.BranchId == request.BranchId,
+                x.TenantId == tenantId,
                 ct);
 
         if (!disciplineExists)
@@ -182,7 +174,7 @@ public sealed class DisciplineService : IDisciplineService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = Guid.Empty,
             EmployeeId = request.EmployeeId,
             DisciplineId = request.DisciplineId,
             Description = request.Description.Trim(),
@@ -209,18 +201,12 @@ public sealed class DisciplineService : IDisciplineService
 
     public async Task<HRServiceResult<IReadOnlyCollection<DisciplineEmployeeRecordResponse>>> ListRecordsAsync(
         Guid tenantId,
-        Guid branchId,
         Guid? employeeId,
         Guid? disciplineId,
         DateTime? startDate,
         DateTime? endDate,
         CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<DisciplineEmployeeRecordResponse>>.Fail("BranchId is required.");
-        }
-
         if (startDate.HasValue && endDate.HasValue && startDate.Value.Date > endDate.Value.Date)
         {
             return HRServiceResult<IReadOnlyCollection<DisciplineEmployeeRecordResponse>>.Fail("startDate must be earlier than or equal to endDate.");
@@ -228,7 +214,7 @@ public sealed class DisciplineService : IDisciplineService
 
         var query = _db.DisciplineEmployeeRecords
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
 
         if (employeeId.HasValue && employeeId.Value != Guid.Empty)
         {

@@ -9,14 +9,13 @@ public interface IRewardService
 {
     Task<HRServiceResult<RewardResponse>> CreateAsync(Guid tenantId, CreateRewardRequest request, CancellationToken ct);
     Task<HRServiceResult<RewardResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
-    Task<HRServiceResult<IReadOnlyCollection<RewardResponse>>> ListAsync(Guid tenantId, Guid branchId, CancellationToken ct);
+    Task<HRServiceResult<IReadOnlyCollection<RewardResponse>>> ListAsync(Guid tenantId, CancellationToken ct);
     Task<HRServiceResult<RewardResponse>> UpdateAsync(Guid tenantId, Guid id, UpdateRewardRequest request, CancellationToken ct);
 
     Task<HRServiceResult<RewardEmployeeRecordResponse>> CreateRecordAsync(Guid tenantId, CreateRewardEmployeeRecordRequest request, CancellationToken ct);
     Task<HRServiceResult<RewardEmployeeRecordResponse>> GetRecordByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
     Task<HRServiceResult<IReadOnlyCollection<RewardEmployeeRecordResponse>>> ListRecordsAsync(
         Guid tenantId,
-        Guid branchId,
         Guid? employeeId,
         Guid? rewardId,
         DateTime? startDate,
@@ -37,9 +36,9 @@ public sealed class RewardService : IRewardService
 
     public async Task<HRServiceResult<RewardResponse>> CreateAsync(Guid tenantId, CreateRewardRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<RewardResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<RewardResponse>.Fail("TenantId is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.Description))
@@ -57,7 +56,7 @@ public sealed class RewardService : IRewardService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = Guid.Empty,
             Description = request.Description.Trim(),
             RewardAmount = decimal.Round(request.RewardAmount, 2),
             CreatedAtUtc = now,
@@ -81,16 +80,11 @@ public sealed class RewardService : IRewardService
             : HRServiceResult<RewardResponse>.Ok(ToResponse(reward));
     }
 
-    public async Task<HRServiceResult<IReadOnlyCollection<RewardResponse>>> ListAsync(Guid tenantId, Guid branchId, CancellationToken ct)
+    public async Task<HRServiceResult<IReadOnlyCollection<RewardResponse>>> ListAsync(Guid tenantId, CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<RewardResponse>>.Fail("BranchId is required.");
-        }
-
         var rewards = await _db.Rewards
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId)
+            .Where(x => x.TenantId == tenantId)
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
 
@@ -136,9 +130,9 @@ public sealed class RewardService : IRewardService
 
     public async Task<HRServiceResult<RewardEmployeeRecordResponse>> CreateRecordAsync(Guid tenantId, CreateRewardEmployeeRecordRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<RewardEmployeeRecordResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<RewardEmployeeRecordResponse>.Fail("TenantId is required.");
         }
 
         if (request.EmployeeId == Guid.Empty || request.RewardId == Guid.Empty)
@@ -156,7 +150,6 @@ public sealed class RewardService : IRewardService
             .AnyAsync(x =>
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
                 x.DeletedAtUtc == null,
                 ct);
 
@@ -169,8 +162,7 @@ public sealed class RewardService : IRewardService
             .AsNoTracking()
             .AnyAsync(x =>
                 x.Id == request.RewardId &&
-                x.TenantId == tenantId &&
-                x.BranchId == request.BranchId,
+                x.TenantId == tenantId,
                 ct);
 
         if (!rewardExists)
@@ -182,7 +174,7 @@ public sealed class RewardService : IRewardService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = Guid.Empty,
             EmployeeId = request.EmployeeId,
             RewardId = request.RewardId,
             Description = request.Description.Trim(),
@@ -209,18 +201,12 @@ public sealed class RewardService : IRewardService
 
     public async Task<HRServiceResult<IReadOnlyCollection<RewardEmployeeRecordResponse>>> ListRecordsAsync(
         Guid tenantId,
-        Guid branchId,
         Guid? employeeId,
         Guid? rewardId,
         DateTime? startDate,
         DateTime? endDate,
         CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<RewardEmployeeRecordResponse>>.Fail("BranchId is required.");
-        }
-
         if (startDate.HasValue && endDate.HasValue && startDate.Value.Date > endDate.Value.Date)
         {
             return HRServiceResult<IReadOnlyCollection<RewardEmployeeRecordResponse>>.Fail("startDate must be earlier than or equal to endDate.");
@@ -228,7 +214,7 @@ public sealed class RewardService : IRewardService
 
         var query = _db.RewardEmployeeRecords
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
 
         if (employeeId.HasValue && employeeId.Value != Guid.Empty)
         {

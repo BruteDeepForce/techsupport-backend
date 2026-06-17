@@ -22,6 +22,7 @@ public static class HRModule
         services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IAdvanceService, AdvanceService>();
         services.AddScoped<ILeaveService, LeaveService>();
+        services.AddScoped<ILeaveSettingsService, LeaveSettingsService>();
         services.AddScoped<IMiniReportService, MiniReportService>();
         services.AddScoped<IBordroService, BordroService>();
         services.AddScoped<IEmployeeSalaryService, EmployeeSalaryService>();

@@ -1,7 +1,7 @@
 namespace Modules.HR.DTO;
 
 public sealed record CreateDisciplineRequest(
-    Guid BranchId,
+    Guid? BranchId,
     string Description,
     decimal PenaltyAmount);
 
@@ -10,7 +10,7 @@ public sealed record UpdateDisciplineRequest(
     decimal? PenaltyAmount);
 
 public sealed record CreateDisciplineEmployeeRecordRequest(
-    Guid BranchId,
+    Guid? BranchId,
     Guid EmployeeId,
     Guid DisciplineId,
     string Description,
