@@ -40,6 +40,28 @@ public sealed class ShiftAssignmentsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
+    [HttpPost("block-insert")]
+    public async Task<IActionResult> BlockInsert([FromBody] CreateShiftAssignmentMultipleRequest request, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _service.BlockShiftAssignmentAsync(tenantId, request, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType switch
+            {
+                HRServiceErrorType.NotFound => NotFound(result.Error),
+                HRServiceErrorType.Conflict => Conflict(result.Error),
+                _ => BadRequest(result.Error)
+            };
+        }
+
+        return Ok(result.Data);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
@@ -65,11 +87,6 @@ public sealed class ShiftAssignmentsController : ControllerBase
         if (!TryGetTenantId(out var tenantId))
         {
             return Unauthorized("TenantId is required in claim (tenant_id).");
-        }
-
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
         }
 
         var result = await _service.ListAsync(tenantId, branchId, date, ct);

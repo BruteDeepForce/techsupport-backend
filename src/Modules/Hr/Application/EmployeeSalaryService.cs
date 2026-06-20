@@ -25,9 +25,9 @@ public sealed class EmployeeSalaryService : IEmployeeSalaryService
 
     public async Task<HRServiceResult<EmployeeSalaryResponse>> CreateAsync(Guid tenantId, CreateEmployeeSalaryRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty || request.EmployeeId == Guid.Empty)
+        if (tenantId == Guid.Empty || request.EmployeeId == Guid.Empty)
         {
-            return HRServiceResult<EmployeeSalaryResponse>.Fail("TenantId, BranchId and EmployeeId are required.");
+            return HRServiceResult<EmployeeSalaryResponse>.Fail("TenantId and EmployeeId are required.");
         }
 
         if (request.GrossSalary <= 0 || request.NetSalary <= 0)
@@ -48,25 +48,26 @@ public sealed class EmployeeSalaryService : IEmployeeSalaryService
             .FirstOrDefaultAsync(x =>
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
+                (request.BranchId == Guid.Empty || x.BranchId == request.BranchId) &&
                 x.DeletedAtUtc == null,
                 ct);
+        
 
         if (employee is null)
         {
             return HRServiceResult<EmployeeSalaryResponse>.NotFound("Employee not found.");
         }
 
-        var hasOverlap = await _db.EmployeeSalaries
+        var lastSalary = await _db.EmployeeSalaries
             .AsNoTracking()
-            .AnyAsync(x =>
+            .Where(x =>
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
-                x.EmployeeId == request.EmployeeId &&
-                RangesOverlap(x.EffectiveFrom, x.EffectiveTo, effectiveFrom, effectiveTo),
-                ct);
+                x.BranchId == employee.BranchId &&
+                x.EmployeeId == request.EmployeeId)
+            .OrderByDescending(x => x.EffectiveFrom)
+            .FirstOrDefaultAsync(ct);
 
-        if (hasOverlap)
+        if (lastSalary != null && RangesOverlap(lastSalary.EffectiveFrom, lastSalary.EffectiveTo, effectiveFrom, effectiveTo))
         {
             return HRServiceResult<EmployeeSalaryResponse>.Conflict("Salary range overlaps with an existing record.");
         }
@@ -75,7 +76,7 @@ public sealed class EmployeeSalaryService : IEmployeeSalaryService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = employee.BranchId,
             EmployeeId = request.EmployeeId,
             GrossSalary = decimal.Round(request.GrossSalary, 2),
             NetSalary = decimal.Round(request.NetSalary, 2),
@@ -103,14 +104,14 @@ public sealed class EmployeeSalaryService : IEmployeeSalaryService
 
     public async Task<HRServiceResult<IReadOnlyCollection<EmployeeSalaryResponse>>> ListAsync(Guid tenantId, Guid branchId, Guid? employeeId, CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<EmployeeSalaryResponse>>.Fail("BranchId is required.");
-        }
-
         var query = _db.EmployeeSalaries
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
+
+        if (branchId != Guid.Empty)
+        {
+            query = query.Where(x => x.BranchId == branchId);
+        }
         
 
         if (employeeId.HasValue && employeeId.Value != Guid.Empty)

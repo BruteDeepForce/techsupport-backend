@@ -15,3 +15,13 @@ public sealed record AdvanceResponse(
     DateTime? ApprovedAtUtc,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc);
+
+public sealed record AdvanceSettingsResponse(
+    Guid Id,
+    Guid TenantId,
+    Guid? BranchId,
+    decimal MaxAdvanceAmountPerPerson,
+    int MaxAdvanceCountPerYear,
+    bool AllowFutureAdvances,
+    DateTime CreatedAtUtc,
+    DateTime? UpdatedAtUtc);

@@ -23,6 +23,7 @@ using TechSupport.Trade.SignalR;
 using TechSupport.Device.Consumers;
 using TechSupport.Stock.Consumers;
 using Modules.HR.Consumers;
+using TechSupport.Hr.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +126,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<TradeStatusHub>("/trade-status-hub"); //! şuan için modular monolith ihlal edildi.
+app.MapHub<HRNotificationHub>("/hr-notification-hub"); //! şuan için modular monolith ihlal edildi.
 
 app.MapGet("/", () => Results.Ok(new { service = "TechSupport Modular Monolith", version = "0.1" }));
 

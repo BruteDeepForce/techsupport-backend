@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Modules.HR.Domain;
 using Modules.HR.Domain.Bordro;
+using TechSupport.Hr.Domain;
 
 namespace Modules.HR.Infrastructure;
 
@@ -32,6 +33,8 @@ public class HRDbContext : DbContext
     public DbSet<DisciplineEmployeeRecord> DisciplineEmployeeRecords => Set<DisciplineEmployeeRecord>();
     public DbSet<Reward> Rewards => Set<Reward>();
     public DbSet<RewardEmployeeRecord> RewardEmployeeRecords => Set<RewardEmployeeRecord>();
+
+    public DbSet<AdvanceSetting> AdvanceSettings => Set<AdvanceSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -109,7 +112,7 @@ public class HRDbContext : DbContext
             entity.Property(x => x.TenantId).IsRequired();
             entity.Property(x => x.BranchId).IsRequired();
             entity.Property(x => x.EmployeeId).IsRequired();
-            entity.Property(x => x.ShiftTemplateId).IsRequired();
+            entity.Property(x => x.ShiftTemplateId);
             entity.Property(x => x.ShiftDate).IsRequired();
             entity.Property(x => x.PlannedStartTimeUtc).IsRequired();
             entity.Property(x => x.PlannedEndTimeUtc).IsRequired();
@@ -240,7 +243,7 @@ public class HRDbContext : DbContext
             entity.HasKey(x => x.Id);
             entity.Property(x => x.TenantId).IsRequired();
             entity.Property(x => x.BranchId).IsRequired();
-            entity.Property(x => x.DepartmentId).IsRequired();
+            entity.Property(x => x.DepartmentId);
             entity.Property(x => x.BordroDonemId).IsRequired();
             entity.Property(x => x.EmployeeId).IsRequired();
             entity.Property(x => x.EmployeeName).HasMaxLength(256).IsRequired();
@@ -251,6 +254,11 @@ public class HRDbContext : DbContext
             entity.HasOne(x => x.Employee)
                 .WithMany(x => x.BordroEmployees)
                 .HasForeignKey(x => x.EmployeeId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(x => x.Department)
+                .WithMany()
+                .HasForeignKey(x => x.DepartmentId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasMany(x => x.BordroKalems)
@@ -373,6 +381,20 @@ public class HRDbContext : DbContext
                 .WithMany(x => x.RewardEmployeeRecords)
                 .HasForeignKey(x => x.RewardId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<AdvanceSetting>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.TenantId).IsRequired();
+            entity.Property(x => x.BranchId);
+            entity.Property(x => x.MaxAdvanceAmountPerPerson).HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(x => x.MaxAdvanceCountPerYear).IsRequired();
+            entity.Property(x => x.AllowFutureAdvances).IsRequired();
+            entity.Property(x => x.IsActive).IsRequired();
+            entity.Property(x => x.CreatedAtUtc).IsRequired();
+
+            entity.HasIndex(x => new { x.TenantId, x.BranchId }).IsUnique();
         });
     }
 

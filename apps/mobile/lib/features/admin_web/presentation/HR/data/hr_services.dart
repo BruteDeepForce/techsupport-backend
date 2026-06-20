@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:typed_data';
 import '/core/network/api_client.dart';
 import '../model/hr_models.dart';
 
@@ -153,6 +154,61 @@ class HRService {
     }
     throw Exception(
         'Failed to delete leave deduction setting: ${response.statusCode}');
+  }
+
+  Future<HRAdvanceSettingsResponse> createAdvanceSettings(
+      HRCreateAdvanceSettingsRequest request) async {
+    final response = await _dio.post(
+      '/api/hr/settings/advance-settings',
+      data: request.toJson(),
+    );
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRAdvanceSettingsResponse.fromJson(data);
+    }
+    throw Exception(
+        'Failed to create advance settings: ${response.statusCode}');
+  }
+
+  Future<HRAdvanceSettingsResponse> updateAdvanceSettings(
+      String id, HRUpdateAdvanceSettingsRequest request) async {
+    final response = await _dio.patch(
+      '/api/hr/settings/advance-settings/$id',
+      data: request.toJson(),
+    );
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRAdvanceSettingsResponse.fromJson(data);
+    }
+    throw Exception(
+        'Failed to update advance settings: ${response.statusCode}');
+  }
+
+  Future<HRAdvanceSettingsResponse> getAdvanceSettingsById(String id) async {
+    final response = await _dio.get('/api/hr/settings/advance-settings/$id');
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRAdvanceSettingsResponse.fromJson(data);
+    }
+    throw Exception('Failed to load advance settings: ${response.statusCode}');
+  }
+
+  Future<HRAdvanceSettingsResponse> getCurrentAdvanceSettings() async {
+    final response = await _dio.get('/api/hr/settings/advance-settings/current');
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRAdvanceSettingsResponse.fromJson(data);
+    }
+    throw Exception(
+        'Failed to load current advance settings: ${response.statusCode}');
   }
 
   Future<List<HRDisciplineResponse>> getDisciplines() async {
@@ -326,5 +382,109 @@ class HRService {
       return HRRewardEmployeeRecordResponse.fromJson(data);
     }
     throw Exception('Failed to update reward record: ${response.statusCode}');
+  }
+
+  Future<List<HRBordroDonemResponse>> getBordroDonemler({
+    String? branchId,
+    bool includeClosed = true,
+  }) async {
+    final response = await _dio.get('/api/hr/bordro/donemler', queryParameters: {
+      if (branchId != null) 'branchId': branchId,
+      'includeClosed': includeClosed,
+    });
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as List<dynamic>;
+      return data
+          .map((item) =>
+              HRBordroDonemResponse.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to load bordro periods: ${response.statusCode}');
+  }
+
+  Future<HRBordroDonemResponse> createBordroDonem(
+      HRCreateBordroDonemRequest request) async {
+    final response =
+        await _dio.post('/api/hr/bordro/donemler', data: request.toJson());
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRBordroDonemResponse.fromJson(data);
+    }
+    throw Exception('Failed to create bordro period: ${response.statusCode}');
+  }
+
+  Future<List<HRBordroEmployeeResponse>> calculateBordroDonem(
+      String donemId) async {
+    final response = await _dio.post('/api/hr/bordro/donemler/$donemId/calculate');
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as List<dynamic>;
+      return data
+          .map((item) =>
+              HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to calculate bordro period: ${response.statusCode}');
+  }
+
+  Future<List<HRBordroEmployeeResponse>> getBordroEmployees(
+      String donemId) async {
+    final response = await _dio.get('/api/hr/bordro/donemler/$donemId/employees');
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as List<dynamic>;
+      return data
+          .map((item) =>
+              HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception(
+        'Failed to load bordro employees: ${response.statusCode}');
+  }
+
+  Future<Uint8List> generateBordroEmployeePdf(String bordroEmployeeId) async {
+    final response = await _dio.get<List<int>>(
+      '/api/hr/bordro/employees/$bordroEmployeeId/generatePdf',
+      options: Options(responseType: ResponseType.bytes),
+    );
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300 &&
+        response.data != null) {
+      return Uint8List.fromList(response.data!);
+    }
+    throw Exception('Failed to generate bordro pdf: ${response.statusCode}');
+  }
+
+  Future<HREmployeeDetailSalary> createEmployeeSalary(
+      HRCreateEmployeeSalaryRequest request) async {
+    final response =
+        await _dio.post('/api/hr/employee-salaries', data: request.toJson());
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HREmployeeDetailSalary.fromJson(data);
+    }
+    throw Exception('Failed to create employee salary: ${response.statusCode}');
+  }
+
+  Future<HREmployeeDetailSalary> updateEmployeeSalary(
+      String id, HRUpdateEmployeeSalaryRequest request) async {
+    final response =
+        await _dio.put('/api/hr/employee-salaries/$id', data: request.toJson());
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HREmployeeDetailSalary.fromJson(data);
+    }
+    throw Exception('Failed to update employee salary: ${response.statusCode}');
   }
 }

@@ -64,11 +64,6 @@ public sealed class ShiftTemplatesController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
-        }
-
         var result = await _service.ListAsync(tenantId, branchId, includeInactive, ct);
         if (!result.Succeeded)
         {

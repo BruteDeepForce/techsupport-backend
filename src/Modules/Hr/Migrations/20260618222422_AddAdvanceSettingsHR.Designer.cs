@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Modules.HR.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Modules.HR.Migrations
+namespace TechSupport.Hr.Migrations
 {
     [DbContext(typeof(HRDbContext))]
-    partial class HRDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260618222422_AddAdvanceSettingsHR")]
+    partial class AddAdvanceSettingsHR
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -778,7 +781,7 @@ namespace Modules.HR.Migrations
                     b.Property<DateTime>("ShiftDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("ShiftTemplateId")
+                    b.Property<Guid>("ShiftTemplateId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
@@ -1070,7 +1073,9 @@ namespace Modules.HR.Migrations
 
                     b.HasOne("Modules.HR.Domain.ShiftTemplate", "ShiftTemplate")
                         .WithMany("ShiftAssignments")
-                        .HasForeignKey("ShiftTemplateId");
+                        .HasForeignKey("ShiftTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Employee");
 

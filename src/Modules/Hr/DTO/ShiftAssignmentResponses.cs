@@ -16,3 +16,12 @@ public sealed record ShiftAssignmentResponse(
     ShiftAssignmentStatus Status,
     DateTime CreatedAtUtc,
     DateTime? UpdatedAtUtc);
+
+public sealed record BlockShiftAssignmentResponse
+(
+    Guid TenantId,
+    Guid EmployeeId,
+    DateTime StartTimeUtc,
+    DateTime EndTimeUtc
+);
+

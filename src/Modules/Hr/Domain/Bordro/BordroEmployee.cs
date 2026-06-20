@@ -10,8 +10,8 @@ namespace Modules.HR.Domain.Bordro
         public Guid Id { get; set; }
         public Guid TenantId { get; set; }
         public Guid BranchId { get; set; }
-        public Guid DepartmentId { get; set; }
-        public Department Department { get; set; } = null!;
+        public Guid? DepartmentId { get; set; }
+        public Department? Department { get; set; }
         public Guid BordroDonemId { get; set; }
         public BordroDonem BordroDonem { get; set; } = null!;
         public Guid EmployeeId { get; set; }

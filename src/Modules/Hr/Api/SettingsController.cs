@@ -11,11 +11,13 @@ namespace Modules.HR.Api;
 [Authorize]
 public sealed class SettingsController : ControllerBase
 {
-    private readonly ILeaveSettingsService _service;
+    private readonly ILeaveSettingsService _leaveSettingsService;
+    private readonly IAdvanceService _advanceService;
 
-    public SettingsController(ILeaveSettingsService service)
+    public SettingsController(ILeaveSettingsService leaveSettingsService, IAdvanceService advanceService)
     {
-        _service = service;
+        _leaveSettingsService = leaveSettingsService;
+        _advanceService = advanceService;
     }
 
     [HttpPost("leave-deductions")]
@@ -26,7 +28,7 @@ public sealed class SettingsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var result = await _service.CreateAsync(tenantId, request, ct);
+        var result = await _leaveSettingsService.CreateAsync(tenantId, request, ct);
         if (!result.Succeeded)
         {
             return result.ErrorType == HRServiceErrorType.Conflict
@@ -45,7 +47,7 @@ public sealed class SettingsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var result = await _service.GetByIdAsync(tenantId, id, ct);
+        var result = await _leaveSettingsService.GetByIdAsync(tenantId, id, ct);
         if (!result.Succeeded)
         {
             return result.ErrorType == HRServiceErrorType.NotFound
@@ -64,7 +66,7 @@ public sealed class SettingsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var result = await _service.ListAsync(tenantId, ct);
+        var result = await _leaveSettingsService.ListAsync(tenantId, ct);
         if (!result.Succeeded)
         {
             return BadRequest(result.Error);
@@ -81,7 +83,7 @@ public sealed class SettingsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var result = await _service.UpdateAsync(tenantId, id, request, ct);
+        var result = await _leaveSettingsService.UpdateAsync(tenantId, id, request, ct);
         if (!result.Succeeded)
         {
             return result.ErrorType switch
@@ -103,7 +105,7 @@ public sealed class SettingsController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        var result = await _service.DeleteAsync(tenantId, id, ct);
+        var result = await _leaveSettingsService.DeleteAsync(tenantId, id, ct);
         if (!result.Succeeded)
         {
             return result.ErrorType switch
@@ -115,6 +117,85 @@ public sealed class SettingsController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("advance-settings")]
+    public async Task<IActionResult> CreateAdvanceSettings([FromBody] CreateAdvanceSettingsRequest request, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _advanceService.CreateAdvanceSettingsAsync(tenantId, request, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType == HRServiceErrorType.Conflict
+                ? Conflict(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return CreatedAtAction(nameof(GetAdvanceSettingsById), new { id = result.Data!.Id }, result.Data);
+    }
+
+    [HttpPatch("advance-settings/{id:guid}")]
+    public async Task<IActionResult> UpdateAdvanceSettings(Guid id, [FromBody] UpdateAdvanceSettingsRequest request, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _advanceService.UpdateAdvanceSettingsAsync(tenantId, id, request, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType switch
+            {
+                HRServiceErrorType.NotFound => NotFound(result.Error),
+                HRServiceErrorType.Conflict => Conflict(result.Error),
+                _ => BadRequest(result.Error)
+            };
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpGet("advance-settings/{id:guid}")]
+    public async Task<IActionResult> GetAdvanceSettingsById(Guid id, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _advanceService.GetAdvanceSettingsByIdAsync(tenantId, id, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType == HRServiceErrorType.NotFound
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpGet("advance-settings/current")]
+    public async Task<IActionResult> GetCurrentAdvanceSettings(CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _advanceService.GetCurrentAdvanceSettingsAsync(tenantId, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType == HRServiceErrorType.NotFound
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return Ok(result.Data);
     }
 
     private bool TryGetTenantId(out Guid tenantId)

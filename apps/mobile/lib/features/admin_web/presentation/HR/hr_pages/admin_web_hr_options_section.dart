@@ -14,12 +14,51 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
   final HRService _hrService = HRService();
   late Future<List<HRPositionResponse>> _positionsFuture;
   late Future<List<HRLeaveDeductionResponse>> _leaveDeductionsFuture;
+  HRAdvanceSettingsResponse? _advanceSettings;
+  bool _isAdvanceSettingsLoading = false;
 
   @override
   void initState() {
     super.initState();
     _positionsFuture = _fetchPositions();
     _leaveDeductionsFuture = _fetchLeaveDeductions();
+    _loadCurrentAdvanceSettings();
+  }
+
+  Future<void> _loadCurrentAdvanceSettings() async {
+    setState(() => _isAdvanceSettingsLoading = true);
+    try {
+      final response = await _hrService.getCurrentAdvanceSettings();
+      if (!mounted) return;
+      setState(() {
+        _advanceSettings = response;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _advanceSettings = null;
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isAdvanceSettingsLoading = false);
+      }
+    }
+  }
+
+  Future<void> _showAdvanceSettingsDialog() async {
+    final response = await showDialog<HRAdvanceSettingsResponse>(
+      context: context,
+      builder: (context) => _AdvanceSettingsDialog(
+        hrService: _hrService,
+        initialValue: _advanceSettings,
+      ),
+    );
+
+    if (response != null && mounted) {
+      setState(() {
+        _advanceSettings = response;
+      });
+    }
   }
 
   Future<List<HRPositionResponse>> _fetchPositions() async {
@@ -255,8 +294,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                 if (snapshot.hasError) {
                   return Padding(
                     padding: const EdgeInsets.all(24),
-                    child:
-                        Text('İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
+                    child: Text(
+                        'İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
                   );
                 }
 
@@ -289,6 +328,43 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                   ),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 18),
+          _SettingsSectionShell(
+            title: 'Avans Ayarları',
+            subtitle:
+                'Tek avans ayar kaydını oluşturun ve güncel ayarı bu bölümden yönetin.',
+            action: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _isAdvanceSettingsLoading
+                      ? null
+                      : _loadCurrentAdvanceSettings,
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Yenile'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _showAdvanceSettingsDialog,
+                  icon: Icon(
+                    _advanceSettings == null ? Icons.add : Icons.edit_outlined,
+                    size: 16,
+                  ),
+                  label: Text(
+                    _advanceSettings == null
+                        ? 'Ayar Oluştur'
+                        : 'Ayarı Güncelle',
+                  ),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: _isAdvanceSettingsLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _AdvanceSettingsCard(setting: _advanceSettings),
             ),
           ),
           const SizedBox(height: 18),
@@ -904,6 +980,399 @@ class _SettingsSectionShell extends StatelessWidget {
           ),
           const Divider(height: 1, color: Color(0xFFE2E8F0)),
           child,
+        ],
+      ),
+    );
+  }
+}
+
+class _AdvanceSettingsCard extends StatelessWidget {
+  const _AdvanceSettingsCard({required this.setting});
+
+  final HRAdvanceSettingsResponse? setting;
+
+  @override
+  Widget build(BuildContext context) {
+    if (setting == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: const Text(
+          'Advance settings henüz yüklenmedi. İlk kurulum için ayar oluşturun veya mevcut ayarı id ile yükleyin.',
+          style: TextStyle(color: Color(0xFF64748B)),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _MiniPill(
+                label: setting!.allowFutureAdvances
+                    ? 'Taksitli Açık'
+                    : 'Taksitli Kapalı',
+                color: setting!.allowFutureAdvances
+                    ? const Color(0xFF16A34A)
+                    : const Color(0xFF64748B),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _SettingsMetricPill(
+                label: 'Kişi Başı Limit',
+                value:
+                    '${setting!.maxAdvanceAmountPerPerson.toStringAsFixed(2)} ₺',
+              ),
+              _SettingsMetricPill(
+                label: 'Yıllık Avans Hakkı',
+                value: setting!.maxAdvanceCountPerYear.toString(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdvanceSettingsDialog extends StatefulWidget {
+  const _AdvanceSettingsDialog({
+    required this.hrService,
+    this.initialValue,
+  });
+
+  final HRService hrService;
+  final HRAdvanceSettingsResponse? initialValue;
+
+  @override
+  State<_AdvanceSettingsDialog> createState() => _AdvanceSettingsDialogState();
+}
+
+class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
+  late final TextEditingController _maxAmountController;
+  late final TextEditingController _maxCountController;
+  bool _allowFutureAdvances = false;
+  bool _isSubmitting = false;
+
+  bool get _isEdit => widget.initialValue != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _maxAmountController = TextEditingController(
+      text: widget.initialValue?.maxAdvanceAmountPerPerson.toStringAsFixed(2) ??
+          '',
+    );
+    _maxCountController = TextEditingController(
+      text: widget.initialValue?.maxAdvanceCountPerYear.toString() ?? '',
+    );
+    _allowFutureAdvances = widget.initialValue?.allowFutureAdvances ?? false;
+  }
+
+  @override
+  void dispose() {
+    _maxAmountController.dispose();
+    _maxCountController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final maxAmount =
+        double.tryParse(_maxAmountController.text.trim().replaceAll(',', '.'));
+    final maxCount = int.tryParse(_maxCountController.text.trim());
+
+    if (maxAmount == null || maxAmount < 0) {
+      _showSnackBar('Geçerli bir kişi başı avans limiti girin.');
+      return;
+    }
+
+    if (maxCount == null || maxCount < 0) {
+      _showSnackBar('Geçerli bir yıllık avans hakkı girin.');
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      late final HRAdvanceSettingsResponse response;
+      if (_isEdit) {
+        response = await widget.hrService.updateAdvanceSettings(
+          widget.initialValue!.id,
+          HRUpdateAdvanceSettingsRequest(
+            maxAdvanceAmountPerPerson: maxAmount,
+            maxAdvanceCountPerYear: maxCount,
+            allowFutureAdvances: _allowFutureAdvances,
+          ),
+        );
+      } else {
+        response = await widget.hrService.createAdvanceSettings(
+          HRCreateAdvanceSettingsRequest(
+            maxAdvanceAmountPerPerson: maxAmount,
+            maxAdvanceCountPerYear: maxCount,
+            allowFutureAdvances: _allowFutureAdvances,
+          ),
+        );
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEdit
+                ? 'Advance settings güncellendi.'
+                : 'Advance settings oluşturuldu.',
+          ),
+        ),
+      );
+      Navigator.of(context).pop(response);
+    } catch (error) {
+      if (!mounted) return;
+      _showSnackBar('İşlem başarısız: $error');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        width: 760,
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _isEdit
+                                ? 'Advance Ayarını Güncelle'
+                                : 'Advance Ayarı Oluştur',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Kişi başı maksimum avans limiti, yıllık avans hakkı ve taksitli avans iznini yönetin.',
+                            style: TextStyle(color: Color(0xFF64748B)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _MiniPill(
+                      label: _allowFutureAdvances
+                          ? 'Taksitli Avans Açık'
+                          : 'Taksitli Avans Kapalı',
+                      color: _allowFutureAdvances
+                          ? const Color(0xFF16A34A)
+                          : const Color(0xFF64748B),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _maxAmountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: _inputDecoration(
+                              'Kişi Başı Maksimum Alınabilecek Avans Miktarı',
+                              'Örn. 15000.00',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _maxCountController,
+                            keyboardType: TextInputType.number,
+                            decoration: _inputDecoration(
+                              'Yıllık Maksimum Alınabilecek Avans Miktarı',
+                              'Örn. 3',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Taksitli Avans',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Personel taksitli avans alabilsin mi?',
+                                  style: TextStyle(
+                                    color: Color(0xFF0F172A),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _allowFutureAdvances,
+                            onChanged: _isSubmitting
+                                ? null
+                                : (value) => setState(
+                                    () => _allowFutureAdvances = value),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.initialValue != null) ...[
+                      const SizedBox(height: 14)
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(),
+                    child: const Text('İptal'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(_isEdit ? 'Güncelle' : 'Kaydet'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsMetricPill extends StatelessWidget {
+  const _SettingsMetricPill({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF0F172A),
+            ),
+          ),
         ],
       ),
     );

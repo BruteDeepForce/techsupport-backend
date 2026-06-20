@@ -70,11 +70,6 @@ public sealed class EmployeeSalariesController : ControllerBase
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
 
-        if (branchId == Guid.Empty)
-        {
-            return BadRequest("BranchId is required.");
-        }
-
         var result = await _service.ListAsync(tenantId, branchId, employeeId, ct);
         if (!result.Succeeded)
         {

@@ -25,6 +25,11 @@ public sealed class AttendanceController : ControllerBase
         {
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized("UserId is required in claim (user_id).");
+        }
+        request = request with { UserId = userId };
 
         var result = await _service.CheckInAsync(tenantId, request, ct);
         if (!result.Succeeded)
@@ -40,15 +45,19 @@ public sealed class AttendanceController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
-    [HttpPost("{id:guid}/check-out")]
-    public async Task<IActionResult> CheckOut(Guid id, [FromBody] CreateAttendanceCheckOutRequest request, CancellationToken ct)
+    [HttpPost("check-out")]
+    public async Task<IActionResult> CheckOut([FromBody] CreateAttendanceCheckOutRequest request, CancellationToken ct)
     {
         if (!TryGetTenantId(out var tenantId))
         {
             return Unauthorized("TenantId is required in claim (tenant_id).");
         }
-
-        var result = await _service.CheckOutAsync(tenantId, id, request, ct);
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized("UserId is required in claim (user_id).");
+        }
+        request = request with { UserId = userId };
+        var result = await _service.CheckOutAsync(tenantId, request, ct);
         if (!result.Succeeded)
         {
             return result.ErrorType switch
@@ -76,6 +85,27 @@ public sealed class AttendanceController : ControllerBase
             return result.ErrorType == HRServiceErrorType.NotFound
                 ? NotFound(result.Error)
                 : BadRequest(result.Error);
+        }
+
+        return Ok(result.Data);
+    }
+
+    [HttpGet("getmy-shifts")]
+    public async Task<IActionResult> GetMyShifts(CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized("UserId is required in claim (user_id).");
+        }
+
+        var result = await _service.GetMyShiftsAsync(tenantId, userId, ct);
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Error);
         }
 
         return Ok(result.Data);
@@ -128,4 +158,12 @@ public sealed class AttendanceController : ControllerBase
         var claimValue = User.FindFirstValue("tenant_id") ?? User.FindFirstValue("tenantId");
         return Guid.TryParse(claimValue, out tenantId);
     }
+
+    private bool TryGetUserId(out Guid userId)
+    {
+        userId = Guid.Empty;
+        var claimValue = User.FindFirstValue("user_id") ?? User.FindFirstValue("userId") ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(claimValue, out userId);
+    }
 }
+

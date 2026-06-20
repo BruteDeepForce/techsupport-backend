@@ -154,6 +154,25 @@ public sealed class BordroController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpGet("employees/{bordroEmployeeId:guid}/generatePdf")]
+    public async Task<IActionResult> GenerateBordroEmployeePdf(Guid bordroEmployeeId, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var result = await _service.GenerateBordroEmployeePdfAsync(tenantId, bordroEmployeeId, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType == HRServiceErrorType.NotFound
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        var pdfBytes = result.Data!;
+        return File(pdfBytes, "application/pdf", $"Bordro_{bordroEmployeeId}.pdf");
+    }
     [HttpPost("kalemler")]
     public async Task<IActionResult> AddKalem([FromBody] CreateBordroKalemRequest request, CancellationToken ct)
     {

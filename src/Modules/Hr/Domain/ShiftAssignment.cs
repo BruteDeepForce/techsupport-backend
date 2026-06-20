@@ -12,8 +12,8 @@ namespace Modules.HR.Domain
         public Guid BranchId { get; set; }
         public Guid EmployeeId { get; set; }
         public Employee Employee { get; set; } = null!;
-        public Guid ShiftTemplateId { get; set; }
-        public ShiftTemplate ShiftTemplate { get; set; } = null!;
+        public Guid? ShiftTemplateId { get; set; }
+        public ShiftTemplate? ShiftTemplate { get; set; }
         public DateTime PlannedStartTimeUtc { get; set; }
         public DateTime PlannedEndTimeUtc { get; set; }
         public DateTime? ActualStartTimeUtc { get; set; }

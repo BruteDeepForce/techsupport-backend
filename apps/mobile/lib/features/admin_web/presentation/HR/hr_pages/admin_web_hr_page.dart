@@ -4,6 +4,7 @@ import 'package:techsupport_mobile/features/admin_web/presentation/HR/hr_pages/a
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
 
 import 'admin_web_hr_employee_detail_page.dart';
+import 'admin_web_hr_bordro_section_page.dart';
 import 'admin_web_hr_discipline_reward_section_page.dart';
 import 'admin_web_hr_leave_section_page.dart';
 import 'admin_web_hr_leaves_page.dart';
@@ -63,6 +64,9 @@ class _AdminWebHrPageState extends State<AdminWebHrPage> {
         //! izin yönetimi ekranı buraya taşındı
         content = AdminWebHrLeaveSectionPage(onOpenLeaves: _openLeavesPage);
         break;
+      case HrSection.bordro:
+        content = const AdminWebHrBordroSectionPage();
+        break;
       case HrSection.advances:
         content = const _PlaceholderSection(
           title: 'Avanslar',
@@ -114,6 +118,7 @@ enum HrSection {
   dashboard('Dashboard'),
   personnel('Personeller'),
   leaves('İzin Yönetimi'),
+  bordro('Bordro'),
   advances('Avanslar'),
   discipline('Disiplin & Ödül'),
   performance('Performans'),

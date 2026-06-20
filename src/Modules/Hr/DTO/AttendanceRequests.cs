@@ -1,10 +1,11 @@
 namespace Modules.HR.DTO;
 
 public sealed record CreateAttendanceCheckInRequest(
-    Guid BranchId,
-    Guid EmployeeId,
+    Guid? BranchId,
     Guid ShiftAssignmentId,
-    DateTime? CheckInTimeUtc);
-
+    Guid UserId
+);
 public sealed record CreateAttendanceCheckOutRequest(
+    Guid UserId,
+    Guid ShiftAssignmentId,
     DateTime? CheckOutTimeUtc);

@@ -48,7 +48,8 @@ public static class ModuleExtensions
                     var path = context.HttpContext.Request.Path;
 
                     if (!string.IsNullOrWhiteSpace(accessToken)
-                        && path.StartsWithSegments("/trade-status-hub"))
+                        && (path.StartsWithSegments("/trade-status-hub")
+                        || path.StartsWithSegments("/hr-notification-hub")))
                     {
                         context.Token = accessToken;
                     }

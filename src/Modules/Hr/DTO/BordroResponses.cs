@@ -17,7 +17,7 @@ public sealed record BordroEmployeeResponse(
     Guid Id,
     Guid TenantId,
     Guid BranchId,
-    Guid DepartmentId,
+    Guid? DepartmentId,
     Guid BordroDonemId,
     Guid EmployeeId,
     string EmployeeName,

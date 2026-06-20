@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:techsupport_mobile/features/technician/data/technician_realtime_service.dart';
 
 import '../../../core/design/app_design.dart';
 import '../../../core/network/api_client.dart';
@@ -10,6 +11,7 @@ import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
 import '../data/technician_service.dart';
 import '../models/technician_models.dart';
+import 'technician_my_shifts_page.dart';
 import 'technician_payment_page.dart';
 import 'technician_operation_detail_page.dart';
 import 'technician_stock_page.dart';
@@ -24,16 +26,49 @@ class TechnicianHomePage extends StatefulWidget {
 class _TechnicianHomePageState extends State<TechnicianHomePage> {
   final OperationService _operationService = OperationService();
   final TechnicianService _technicianService = TechnicianService();
+  final RealTimeTechnicianShiftService _realtimeShiftService =
+      RealTimeTechnicianShiftService(
+          'http://localhost:5001/hr-notification-hub');
   final TokenStorage _tokenStorage = TokenStorage();
   final ImagePicker _picker = ImagePicker();
   late Future<List<OperationRecord>> _opsFuture;
   late Future<Technician?> _meFuture;
+  late Future<List<ShiftAssignmentModel>> _myShiftsFuture;
 
   @override
   void initState() {
     super.initState();
     _opsFuture = _operationService.listOperations();
     _meFuture = _loadMe();
+    _myShiftsFuture = _loadMyShifts();
+    _realtimeShiftService.connect().then((_) async {
+      final me = await _loadMe();
+      if (me != null) {
+        _realtimeShiftService.joinPersonalNotification();
+        _realtimeShiftService.subscribeToTechnicianShiftUpdates((data) {
+          debugPrint('Received shift update: $data');
+          _showShiftAssigned();
+          _refreshMyShifts();
+        });
+      }
+    });
+  }
+
+  void _showShiftAssigned() {
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Yeni Vardiya Atandı'),
+        content: const Text('Sana yeni bir vardiya atandı. Lütfen kontrol et.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _refreshOperations() {
@@ -48,6 +83,93 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
     });
   }
 
+  void _refreshMyShifts() {
+    setState(() {
+      _myShiftsFuture = _loadMyShifts();
+    });
+  }
+
+  Future<void> _handleCheckIn(ShiftAssignmentModel shift) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await _technicianService.checkIn(
+        CreateAttendanceCheckInPayload(
+          shiftAssignmentId: shift.id,
+        ),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      _refreshMyShifts();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Check-in başarıyla başlatıldı.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      if (error is AttendanceConflictException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu vardiya için daha önce check-in yapılmış.'),
+          ),
+        );
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Check-in başlatılamadı: $error')),
+      );
+    }
+  }
+
+  Future<void> _handleCheckOut(ShiftAssignmentModel shift) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await _technicianService.checkOut(
+        CreateAttendanceCheckOutPayload(
+          checkOutTimeUtc: DateTime.now().toUtc(),
+          shiftAssignmentId: shift.id,
+        ),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      _refreshMyShifts();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Check-out başarıyla tamamlandı.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      if (error is AttendanceNotStartedException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu vardiya için önce check-in yapmalısınız.'),
+          ),
+        );
+        return;
+      }
+      if (error is AttendanceConflictException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu vardiya için check-out zaten tamamlanmış.'),
+          ),
+        );
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Check-out tamamlanamadı: $error')),
+      );
+    }
+  }
+
   Future<Technician?> _loadMe() async {
     final token = await _tokenStorage.getToken();
     if (token == null || token.isEmpty) return null;
@@ -55,6 +177,10 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
     final userId = payload['user_id']?.toString();
     if (userId == null || userId.isEmpty) return null;
     return _technicianService.getTechnician(userId);
+  }
+
+  Future<List<ShiftAssignmentModel>> _loadMyShifts() {
+    return _technicianService.getMyShiftAssignments();
   }
 
   Map<String, dynamic> _decodeJwtPayload(String token) {
@@ -83,7 +209,9 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
       maxWidth: 1600,
     );
     if (picked == null) return;
+    if (!mounted) return;
 
+    final navigator = Navigator.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -91,7 +219,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
     );
     try {
       await _technicianService.updateProfile(picturePath: picked.path);
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) navigator.pop();
       if (mounted) {
         _refreshMe();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -276,7 +404,7 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: LinearCommand(
                         icon: Icons.qr_code_scanner_rounded,
                         label: 'Cihaz Tara',
@@ -300,6 +428,112 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
                     MaterialPageRoute<void>(
                         builder: (_) => const TechnicianStockPage()),
                   ),
+                ),
+                const SizedBox(height: 10),
+                FutureBuilder<List<ShiftAssignmentModel>>(
+                  future: _myShiftsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const LinearCard(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              CircularProgressIndicator(strokeWidth: 2),
+                              SizedBox(width: 12),
+                              Text('Vardiyalar yükleniyor...'),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return LinearCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Vardiyalarım',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text('Vardiya bilgisi yüklenemedi'),
+                            const SizedBox(height: 10),
+                            OutlinedButton(
+                              onPressed: _refreshMyShifts,
+                              child: const Text('Tekrar dene'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final shifts = snapshot.data ?? [];
+                    final spotlight = _selectSpotlightShift(shifts);
+
+                    return InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const TechnicianMyShiftsPage(),
+                        ),
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: LinearCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Vardiyalarım',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  'Tümünü Gör',
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(width: 6),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 18,
+                                  color: AppColors.accent,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            if (spotlight == null)
+                              const Text(
+                                'Atanmış vardiya bulunmuyor',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                              )
+                            else
+                              _HomeShiftSummary(
+                                shift: spotlight,
+                                onCheckIn: () => _handleCheckIn(spotlight),
+                                onCheckOut: () => _handleCheckOut(spotlight),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 14),
                 const LinearFilterTabs(
@@ -550,4 +784,168 @@ class _Tag extends StatelessWidget {
       ),
     );
   }
+}
+
+class _HomeShiftSummary extends StatelessWidget {
+  const _HomeShiftSummary({
+    required this.shift,
+    required this.onCheckIn,
+    required this.onCheckOut,
+  });
+
+  final ShiftAssignmentModel shift;
+  final VoidCallback onCheckIn;
+  final VoidCallback onCheckOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = shift.plannedStartTimeUtc.toLocal();
+    final end = shift.plannedEndTimeUtc.toLocal();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _homeShiftHeadline(shift),
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            LinearBadge(
+              label: _homeShiftStatus(shift),
+              color: _homeShiftStatusColor(shift),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '${_formatHomeDate(start)} • ${_formatHomeTime(start)} - ${_formatHomeTime(end)}',
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+          ),
+        ),
+        if (_canCheckIn(shift)) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onCheckIn,
+              icon: const Icon(Icons.login_rounded, size: 18),
+              label: const Text('Check-in Yap'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.statusGreen,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ] else if (_canCheckOut(shift)) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onCheckOut,
+              icon: const Icon(Icons.logout_rounded, size: 18),
+              label: const Text('Check-out Yap'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+ShiftAssignmentModel? _selectSpotlightShift(List<ShiftAssignmentModel> shifts) {
+  if (shifts.isEmpty) return null;
+  final now = DateTime.now().toUtc();
+
+  for (final shift in shifts) {
+    if (shift.plannedStartTimeUtc.isBefore(now) &&
+        shift.plannedEndTimeUtc.isAfter(now)) {
+      return shift;
+    }
+  }
+
+  final upcoming = shifts
+      .where((x) => x.plannedStartTimeUtc.isAfter(now))
+      .toList()
+    ..sort((a, b) => a.plannedStartTimeUtc.compareTo(b.plannedStartTimeUtc));
+  if (upcoming.isNotEmpty) return upcoming.first;
+
+  final past = shifts.where((x) => x.plannedEndTimeUtc.isBefore(now)).toList()
+    ..sort((a, b) => b.plannedEndTimeUtc.compareTo(a.plannedEndTimeUtc));
+  if (past.isNotEmpty) return past.first;
+
+  return shifts.first;
+}
+
+String _homeShiftHeadline(ShiftAssignmentModel shift) {
+  final now = DateTime.now().toUtc();
+  if (shift.actualEndTimeUtc != null) {
+    return 'Son tamamlanan vardiyan';
+  }
+  if (shift.actualStartTimeUtc != null) {
+    return 'Check-in yaptığın vardiya';
+  }
+  if (shift.plannedStartTimeUtc.isBefore(now) &&
+      shift.plannedEndTimeUtc.isAfter(now)) {
+    return 'Check-in bekleyen vardiyan';
+  }
+  if (shift.plannedStartTimeUtc.isAfter(now)) {
+    return 'Sıradaki vardiyan';
+  }
+  return 'Check-in yapılmayan vardiya';
+}
+
+String _homeShiftStatus(ShiftAssignmentModel shift) {
+  if (shift.actualEndTimeUtc != null) {
+    return 'Check-out Yapıldı';
+  }
+  if (shift.actualStartTimeUtc != null) {
+    return 'Check-in Yapıldı';
+  }
+  if (shift.plannedStartTimeUtc.isAfter(DateTime.now().toUtc())) {
+    return 'Yaklaşan';
+  }
+  return 'Check-in Yapılmadı';
+}
+
+Color _homeShiftStatusColor(ShiftAssignmentModel shift) {
+  if (shift.actualEndTimeUtc != null) {
+    return AppColors.statusGray;
+  }
+  if (shift.actualStartTimeUtc != null) {
+    return AppColors.statusGreen;
+  }
+  if (shift.plannedStartTimeUtc.isAfter(DateTime.now().toUtc())) {
+    return AppColors.statusBlue;
+  }
+  return AppColors.statusOrange;
+}
+
+bool _canCheckIn(ShiftAssignmentModel shift) {
+  return shift.actualStartTimeUtc == null && shift.actualEndTimeUtc == null;
+}
+
+bool _canCheckOut(ShiftAssignmentModel shift) {
+  return shift.actualStartTimeUtc != null && shift.actualEndTimeUtc == null;
+}
+
+String _formatHomeDate(DateTime value) {
+  final day = value.day.toString().padLeft(2, '0');
+  final month = value.month.toString().padLeft(2, '0');
+  final year = value.year.toString();
+  return '$day.$month.$year';
+}
+
+String _formatHomeTime(DateTime value) {
+  final hour = value.hour.toString().padLeft(2, '0');
+  final minute = value.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
 }

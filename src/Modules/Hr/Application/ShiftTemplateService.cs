@@ -24,9 +24,9 @@ public sealed class ShiftTemplateService : IShiftTemplateService
 
     public async Task<HRServiceResult<ShiftTemplateResponse>> CreateAsync(Guid tenantId, CreateShiftTemplateRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<ShiftTemplateResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<ShiftTemplateResponse>.Fail("TenantId is required.");
         }
 
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -34,9 +34,9 @@ public sealed class ShiftTemplateService : IShiftTemplateService
             return HRServiceResult<ShiftTemplateResponse>.Fail("Name is required.");
         }
 
-        if (request.StartTime >= request.EndTime)
+        if (!IsValidTimeRange(request.StartTime, request.EndTime, request.IsNightShift ?? false))
         {
-            return HRServiceResult<ShiftTemplateResponse>.Fail("StartTime must be earlier than EndTime.");
+            return HRServiceResult<ShiftTemplateResponse>.Fail("Shift time range is invalid.");
         }
 
         var trimmedName = request.Name.Trim();
@@ -85,7 +85,12 @@ public sealed class ShiftTemplateService : IShiftTemplateService
     {
         var query = _db.ShiftTemplates
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
+
+        if (branchId != Guid.Empty)
+        {
+            query = query.Where(x => x.BranchId == branchId);
+        }
 
         if (!includeInactive)
         {
@@ -136,9 +141,9 @@ public sealed class ShiftTemplateService : IShiftTemplateService
             template.EndTime = request.EndTime.Value;
         }
 
-        if (template.StartTime >= template.EndTime)
+        if (!IsValidTimeRange(template.StartTime, template.EndTime, template.IsNightShift))
         {
-            return HRServiceResult<ShiftTemplateResponse>.Fail("StartTime must be earlier than EndTime.");
+            return HRServiceResult<ShiftTemplateResponse>.Fail("Shift time range is invalid.");
         }
 
         if (request.IsNightShift.HasValue)
@@ -172,4 +177,19 @@ public sealed class ShiftTemplateService : IShiftTemplateService
             template.Description,
             template.CreatedAtUtc,
             template.UpdatedAtUtc);
+
+    private static bool IsValidTimeRange(TimeSpan startTime, TimeSpan endTime, bool isNightShift)
+    {
+        if (startTime == endTime)
+        {
+            return false;
+        }
+
+        if (isNightShift)
+        {
+            return true;
+        }
+
+        return startTime < endTime;
+    }
 }

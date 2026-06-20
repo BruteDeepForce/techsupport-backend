@@ -20,6 +20,10 @@ public interface IAdvanceService
         CancellationToken ct);
     Task<HRServiceResult<AdvanceResponse>> UpdateAsync(Guid tenantId, Guid id, UpdateAdvanceRequest request, CancellationToken ct);
     Task<HRServiceResult<AdvanceResponse>> DecideAsync(Guid tenantId, Guid id, DecideAdvanceRequest request, CancellationToken ct);
+    Task<HRServiceResult<AdvanceSettingsResponse>> CreateAdvanceSettingsAsync(Guid tenantId, CreateAdvanceSettingsRequest request, CancellationToken ct);
+    Task<HRServiceResult<AdvanceSettingsResponse>> UpdateAdvanceSettingsAsync(Guid tenantId, Guid id, UpdateAdvanceSettingsRequest request, CancellationToken ct);
+    Task<HRServiceResult<AdvanceSettingsResponse>> GetAdvanceSettingsByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
+    Task<HRServiceResult<AdvanceSettingsResponse>> GetCurrentAdvanceSettingsAsync(Guid tenantId, CancellationToken ct);
 }
 
 public sealed class AdvanceService : IAdvanceService
@@ -33,14 +37,14 @@ public sealed class AdvanceService : IAdvanceService
 
     public async Task<HRServiceResult<AdvanceResponse>> CreateAsync(Guid tenantId, CreateAdvanceRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<AdvanceResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<AdvanceResponse>.Fail("TenantId is required.");
         }
 
-        if (request.EmployeeId == Guid.Empty || request.DepartmentId == Guid.Empty)
+        if (request.EmployeeId == Guid.Empty)
         {
-            return HRServiceResult<AdvanceResponse>.Fail("EmployeeId and DepartmentId are required.");
+            return HRServiceResult<AdvanceResponse>.Fail("EmployeeId is required.");
         }
 
         if (request.Amount <= 0)
@@ -58,7 +62,7 @@ public sealed class AdvanceService : IAdvanceService
             .FirstOrDefaultAsync(x =>
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
-                x.BranchId == request.BranchId &&
+                (x.BranchId == request.BranchId || request.BranchId == Guid.Empty) &&
                 x.DeletedAtUtc == null,
                 ct);
 
@@ -67,19 +71,86 @@ public sealed class AdvanceService : IAdvanceService
             return HRServiceResult<AdvanceResponse>.NotFound("Employee not found.");
         }
 
-        var departmentExists = await _db.Departments
+        var advanceSettings = await _db.AdvanceSettings
             .AsNoTracking()
-            .AnyAsync(x => x.Id == request.DepartmentId && x.TenantId == tenantId, ct);
-
-        if (!departmentExists)
+            .FirstOrDefaultAsync(x =>
+                x.TenantId == tenantId &&
+                (x.BranchId == request.BranchId || request.BranchId == Guid.Empty) &&
+                x.IsActive,
+                ct);
+                
+        if (advanceSettings is null)
         {
-            return HRServiceResult<AdvanceResponse>.NotFound("Department not found.");
+            return HRServiceResult<AdvanceResponse>.NotFound("Avans ayarları bulunamadı. Lütfen ayarları kontrol ediniz.");
         }
 
-        if (employee.DepartmentId.HasValue && employee.DepartmentId.Value != request.DepartmentId)
+        if (!advanceSettings.AllowFutureAdvances && request.isFutureAdvance)
         {
-            return HRServiceResult<AdvanceResponse>.Fail("DepartmentId does not match employee department.");
+            return HRServiceResult<AdvanceResponse>.Fail("Taksitli avanslar için izin verilmemektedir.");
         }
+        //! taksitli nakit avans sistemi
+
+        else if (advanceSettings.AllowFutureAdvances && request.isFutureAdvance)
+        {
+            var taksit = request.Amount / request.TaksitSayisi;
+
+            if (taksit <= 0)
+            {
+                return HRServiceResult<AdvanceResponse>.Fail("Taksitli avanslarda taksit miktarı sıfırdan büyük olmalıdır.");
+            }
+
+            for(int i = 0; i < request.TaksitSayisi; i++)
+            {
+                var taksitAmount = decimal.Round(taksit, 2);
+                var taksitAdvance = new Advance
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = tenantId,
+                    BranchId = request.BranchId,
+                    DepartmentId = request.DepartmentId,
+                    EmployeeId = request.EmployeeId,
+                    Amount = taksitAmount,
+                    Reason = $"{request.Reason.Trim()} - Taksit {i + 1}/{request.TaksitSayisi}",
+                    Status = AdvanceStatus.Pending,
+                    CreatedAtUtc = DateTime.UtcNow.AddMonths(i),
+                    UpdatedAtUtc = DateTime.UtcNow
+                };
+                _db.Advances.Add(taksitAdvance);
+            }          
+        }
+
+        var currentYear = DateTime.UtcNow.Year;
+        var advanceCountThisYear = await _db.Advances
+            .AsNoTracking()
+            .CountAsync(x =>
+                x.TenantId == tenantId &&
+                x.EmployeeId == request.EmployeeId &&
+                x.CreatedAtUtc.Year == currentYear,
+                ct);
+
+        if (advanceCountThisYear >= advanceSettings.MaxAdvanceCountPerYear)
+        {
+            return HRServiceResult<AdvanceResponse>.Fail($"Bu yıl için izin verilen maksimum avans sayısına ulaşıldı. (Yıllık Maksimum Avans Miktarı: {advanceSettings.MaxAdvanceCountPerYear})");
+        }
+        if (request.Amount > advanceSettings.MaxAdvanceAmountPerPerson)
+        {
+            return HRServiceResult<AdvanceResponse>.Fail($"Avans miktarı, kişi başına izin verilen maksimum avans miktarını aşmaktadır. (Maksimum Avans Miktarı: {advanceSettings.MaxAdvanceAmountPerPerson})");
+        }
+
+        //var departmentExists = await _db.Departments
+        //    .AsNoTracking()
+        //    .AnyAsync(x => x.Id == request.DepartmentId && x.TenantId == tenantId, ct);
+
+        //if (!departmentExists)
+        //{
+        //    return HRServiceResult<AdvanceResponse>.NotFound("Department not found.");
+        //}
+
+
+        // if (employee.DepartmentId.HasValue && employee.DepartmentId.Value != request.DepartmentId)
+        //{
+        //    return HRServiceResult<AdvanceResponse>.Fail("DepartmentId does not match employee department.");
+        //}
 
         var now = DateTime.UtcNow;
         var advance = new Advance
@@ -271,6 +342,152 @@ public sealed class AdvanceService : IAdvanceService
         return HRServiceResult<AdvanceResponse>.Ok(ToResponse(advance));
     }
 
+    public async Task<HRServiceResult<AdvanceSettingsResponse>> CreateAdvanceSettingsAsync(Guid tenantId, CreateAdvanceSettingsRequest request, CancellationToken ct)
+    {
+        if (tenantId == Guid.Empty)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("TenantId is required.");
+        }
+
+        if (request.MaxAdvanceAmountPerPerson < 0)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("MaxAdvanceAmountPerPerson cannot be negative.");
+        }
+
+        if (request.MaxAdvanceCountPerYear < 0)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("MaxAdvanceCountPerYear cannot be negative.");
+        }
+
+        var normalizedBranchId = NormalizeBranchId(request.BranchId);
+
+        var exists = await _db.AdvanceSettings
+            .AsNoTracking()
+            .AnyAsync(x =>
+                x.TenantId == tenantId &&
+                x.BranchId == normalizedBranchId,
+                ct);
+
+        if (exists)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Conflict("Advance settings already exist for this tenant scope.");
+        }
+
+        var now = DateTime.UtcNow;
+        var setting = new TechSupport.Hr.Domain.AdvanceSetting
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            BranchId = normalizedBranchId,
+            MaxAdvanceAmountPerPerson = decimal.Round(request.MaxAdvanceAmountPerPerson, 2),
+            MaxAdvanceCountPerYear = request.MaxAdvanceCountPerYear,
+            AllowFutureAdvances = request.AllowFutureAdvances,
+            IsActive = true,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now
+        };
+
+        _db.AdvanceSettings.Add(setting);
+        await _db.SaveChangesAsync(ct);
+
+        return HRServiceResult<AdvanceSettingsResponse>.Ok(ToResponse(setting));
+    }
+
+    public async Task<HRServiceResult<AdvanceSettingsResponse>> UpdateAdvanceSettingsAsync(Guid tenantId, Guid id, UpdateAdvanceSettingsRequest request, CancellationToken ct)
+    {
+        var setting = await _db.AdvanceSettings
+            .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId, ct);
+
+        if (setting is null)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.NotFound("Advance settings not found.");
+        }
+
+        if (request.MaxAdvanceAmountPerPerson.HasValue && request.MaxAdvanceAmountPerPerson.Value < 0)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("MaxAdvanceAmountPerPerson cannot be negative.");
+        }
+
+        if (request.MaxAdvanceCountPerYear.HasValue && request.MaxAdvanceCountPerYear.Value < 0)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("MaxAdvanceCountPerYear cannot be negative.");
+        }
+
+        if (request.BranchId.HasValue)
+        {
+            var normalizedBranchId = NormalizeBranchId(request.BranchId);
+            if (normalizedBranchId != setting.BranchId)
+            {
+                var exists = await _db.AdvanceSettings
+                    .AsNoTracking()
+                    .AnyAsync(x =>
+                        x.Id != id &&
+                        x.TenantId == tenantId &&
+                        x.BranchId == normalizedBranchId,
+                        ct);
+
+                if (exists)
+                {
+                    return HRServiceResult<AdvanceSettingsResponse>.Conflict("Advance settings already exist for this tenant scope.");
+                }
+
+                setting.BranchId = normalizedBranchId;
+            }
+        }
+
+        if (request.MaxAdvanceAmountPerPerson.HasValue)
+        {
+            setting.MaxAdvanceAmountPerPerson = decimal.Round(request.MaxAdvanceAmountPerPerson.Value, 2);
+        }
+
+        if (request.MaxAdvanceCountPerYear.HasValue)
+        {
+            setting.MaxAdvanceCountPerYear = request.MaxAdvanceCountPerYear.Value;
+        }
+
+        if (request.AllowFutureAdvances.HasValue)
+        {
+            setting.AllowFutureAdvances = request.AllowFutureAdvances.Value;
+        }
+
+        setting.UpdatedAtUtc = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
+
+        return HRServiceResult<AdvanceSettingsResponse>.Ok(ToResponse(setting));
+    }
+
+    public async Task<HRServiceResult<AdvanceSettingsResponse>> GetAdvanceSettingsByIdAsync(Guid tenantId, Guid id, CancellationToken ct)
+    {
+        var setting = await _db.AdvanceSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId, ct);
+
+        return setting is null
+            ? HRServiceResult<AdvanceSettingsResponse>.NotFound("Advance settings not found.")
+            : HRServiceResult<AdvanceSettingsResponse>.Ok(ToResponse(setting));
+    }
+
+    public async Task<HRServiceResult<AdvanceSettingsResponse>> GetCurrentAdvanceSettingsAsync(Guid tenantId, CancellationToken ct)
+    {
+        if (tenantId == Guid.Empty)
+        {
+            return HRServiceResult<AdvanceSettingsResponse>.Fail("TenantId is required.");
+        }
+
+        var setting = await _db.AdvanceSettings
+            .AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.IsActive)
+            .OrderByDescending(x => x.UpdatedAtUtc ?? x.CreatedAtUtc)
+            .FirstOrDefaultAsync(ct);
+
+        return setting is null
+            ? HRServiceResult<AdvanceSettingsResponse>.NotFound("Advance settings not found.")
+            : HRServiceResult<AdvanceSettingsResponse>.Ok(ToResponse(setting));
+    }
+
+    private static Guid? NormalizeBranchId(Guid? branchId)
+        => !branchId.HasValue || branchId.Value == Guid.Empty ? null : branchId;
+
     private static AdvanceResponse ToResponse(Advance advance)
         => new(
             advance.Id,
@@ -285,4 +502,15 @@ public sealed class AdvanceService : IAdvanceService
             advance.ApprovedAtUtc,
             advance.CreatedAtUtc,
             advance.UpdatedAtUtc);
+
+    private static AdvanceSettingsResponse ToResponse(TechSupport.Hr.Domain.AdvanceSetting setting)
+        => new(
+            setting.Id,
+            setting.TenantId,
+            setting.BranchId,
+            setting.MaxAdvanceAmountPerPerson,
+            setting.MaxAdvanceCountPerYear,
+            setting.AllowFutureAdvances,
+            setting.CreatedAtUtc,
+            setting.UpdatedAtUtc);
 }

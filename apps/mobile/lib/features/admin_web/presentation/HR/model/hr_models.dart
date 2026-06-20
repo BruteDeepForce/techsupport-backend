@@ -404,6 +404,102 @@ class HRUpdateLeaveDeductionRequest {
   }
 }
 
+class HRAdvanceSettingsResponse {
+  final String id;
+  final String tenantId;
+  final String? branchId;
+  final double maxAdvanceAmountPerPerson;
+  final int maxAdvanceCountPerYear;
+  final bool allowFutureAdvances;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HRAdvanceSettingsResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.maxAdvanceAmountPerPerson,
+    required this.maxAdvanceCountPerYear,
+    required this.allowFutureAdvances,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  factory HRAdvanceSettingsResponse.fromJson(Map<String, dynamic> json) {
+    return HRAdvanceSettingsResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
+      maxAdvanceAmountPerPerson:
+          ((json['maxAdvanceAmountPerPerson'] ??
+                      json['MaxAdvanceAmountPerPerson'])
+                  as num?)
+              ?.toDouble() ??
+              0,
+      maxAdvanceCountPerYear:
+          (json['maxAdvanceCountPerYear'] ?? json['MaxAdvanceCountPerYear'])
+              as int? ??
+              0,
+      allowFutureAdvances:
+          (json['allowFutureAdvances'] ?? json['AllowFutureAdvances']) as bool? ??
+              false,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+    );
+  }
+}
+
+class HRCreateAdvanceSettingsRequest {
+  final String? branchId;
+  final double maxAdvanceAmountPerPerson;
+  final int maxAdvanceCountPerYear;
+  final bool allowFutureAdvances;
+
+  HRCreateAdvanceSettingsRequest({
+    this.branchId,
+    required this.maxAdvanceAmountPerPerson,
+    required this.maxAdvanceCountPerYear,
+    required this.allowFutureAdvances,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'maxAdvanceAmountPerPerson': maxAdvanceAmountPerPerson,
+      'maxAdvanceCountPerYear': maxAdvanceCountPerYear,
+      'allowFutureAdvances': allowFutureAdvances,
+    };
+  }
+}
+
+class HRUpdateAdvanceSettingsRequest {
+  final String? branchId;
+  final double? maxAdvanceAmountPerPerson;
+  final int? maxAdvanceCountPerYear;
+  final bool? allowFutureAdvances;
+
+  HRUpdateAdvanceSettingsRequest({
+    this.branchId,
+    this.maxAdvanceAmountPerPerson,
+    this.maxAdvanceCountPerYear,
+    this.allowFutureAdvances,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (branchId != null) 'branchId': branchId,
+      if (maxAdvanceAmountPerPerson != null)
+        'maxAdvanceAmountPerPerson': maxAdvanceAmountPerPerson,
+      if (maxAdvanceCountPerYear != null)
+        'maxAdvanceCountPerYear': maxAdvanceCountPerYear,
+      if (allowFutureAdvances != null)
+        'allowFutureAdvances': allowFutureAdvances,
+    };
+  }
+}
+
 class HRDisciplineResponse {
   final String id;
   final String tenantId;
@@ -862,6 +958,134 @@ class HREmployeeDetailAdvance {
   }
 }
 
+class HRCreateBordroDonemRequest {
+  final String branchId;
+  final int year;
+  final int month;
+  final DateTime baslangicTarihi;
+  final DateTime bitisTarihi;
+
+  HRCreateBordroDonemRequest({
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.baslangicTarihi,
+    required this.bitisTarihi,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'year': year,
+      'month': month,
+      'baslangicTarihi': baslangicTarihi.toUtc().toIso8601String(),
+      'bitisTarihi': bitisTarihi.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRBordroDonemResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final int year;
+  final int month;
+  final DateTime baslangicTarihi;
+  final DateTime bitisTarihi;
+  final String status;
+  final DateTime createdAtUtc;
+
+  HRBordroDonemResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.baslangicTarihi,
+    required this.bitisTarihi,
+    required this.status,
+    required this.createdAtUtc,
+  });
+
+  String get periodLabel => '${month.toString().padLeft(2, '0')}.$year';
+
+  String get statusLabel {
+    switch (status.toLowerCase()) {
+      case 'open':
+      case '1':
+        return 'Açık';
+      case 'closed':
+      case '2':
+        return 'Kapalı';
+      default:
+        return status;
+    }
+  }
+
+  factory HRBordroDonemResponse.fromJson(Map<String, dynamic> json) {
+    return HRBordroDonemResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      year: (json['year'] ?? json['Year']) as int,
+      month: (json['month'] ?? json['Month']) as int,
+      baslangicTarihi: DateTime.parse(
+          (json['baslangicTarihi'] ?? json['BaslangicTarihi']).toString()),
+      bitisTarihi: DateTime.parse(
+          (json['bitisTarihi'] ?? json['BitisTarihi']).toString()),
+      status: (json['status'] ?? json['Status']).toString(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRBordroEmployeeResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String? departmentId;
+  final String bordroDonemId;
+  final String employeeId;
+  final String employeeName;
+  final num totalEarnings;
+  final num totalDeductions;
+  final num netPay;
+  final DateTime createdAtUtc;
+
+  HRBordroEmployeeResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.departmentId,
+    required this.bordroDonemId,
+    required this.employeeId,
+    required this.employeeName,
+    required this.totalEarnings,
+    required this.totalDeductions,
+    required this.netPay,
+    required this.createdAtUtc,
+  });
+
+  factory HRBordroEmployeeResponse.fromJson(Map<String, dynamic> json) {
+    return HRBordroEmployeeResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+      bordroDonemId: (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      employeeName: (json['employeeName'] ?? json['EmployeeName']).toString(),
+      totalEarnings: (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
+      totalDeductions:
+          (json['totalDeductions'] ?? json['TotalDeductions']) as num? ?? 0,
+      netPay: (json['netPay'] ?? json['NetPay']) as num? ?? 0,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
 class HREmployeeDetailRecord {
   final String id;
   final String description;
@@ -885,22 +1109,95 @@ class HREmployeeDetailRecord {
 
 class HREmployeeDetailSalary {
   final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeId;
+  final num grossSalary;
   final num netSalary;
+  final DateTime effectiveFrom;
+  final DateTime? effectiveTo;
   final DateTime createdAtUtc;
 
   HREmployeeDetailSalary({
     required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeId,
+    required this.grossSalary,
     required this.netSalary,
+    required this.effectiveFrom,
+    this.effectiveTo,
     required this.createdAtUtc,
   });
 
   factory HREmployeeDetailSalary.fromJson(Map<String, dynamic> json) {
     return HREmployeeDetailSalary(
       id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      grossSalary: (json['grossSalary'] ?? json['GrossSalary']) as num? ?? 0,
       netSalary: (json['netSalary'] ?? json['NetSalary']) as num? ?? 0,
+      effectiveFrom: DateTime.parse(
+          (json['effectiveFrom'] ?? json['EffectiveFrom']).toString()),
+      effectiveTo:
+          _parseNullableDate(json['effectiveTo'] ?? json['EffectiveTo']),
       createdAtUtc: DateTime.parse(
           (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
+  }
+}
+
+class HRCreateEmployeeSalaryRequest {
+  final String branchId;
+  final String employeeId;
+  final num grossSalary;
+  final num netSalary;
+  final DateTime effectiveFrom;
+  final DateTime? effectiveTo;
+
+  HRCreateEmployeeSalaryRequest({
+    required this.branchId,
+    required this.employeeId,
+    required this.grossSalary,
+    required this.netSalary,
+    required this.effectiveFrom,
+    this.effectiveTo,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'employeeId': employeeId,
+      'grossSalary': grossSalary,
+      'netSalary': netSalary,
+      'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
+      'effectiveTo': effectiveTo?.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRUpdateEmployeeSalaryRequest {
+  final num? grossSalary;
+  final num? netSalary;
+  final DateTime? effectiveFrom;
+  final DateTime? effectiveTo;
+
+  HRUpdateEmployeeSalaryRequest({
+    this.grossSalary,
+    this.netSalary,
+    this.effectiveFrom,
+    this.effectiveTo,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (grossSalary != null) 'grossSalary': grossSalary,
+      if (netSalary != null) 'netSalary': netSalary,
+      if (effectiveFrom != null)
+        'effectiveFrom': effectiveFrom!.toUtc().toIso8601String(),
+      'effectiveTo': effectiveTo?.toUtc().toIso8601String(),
+    };
   }
 }
 

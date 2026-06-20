@@ -5,6 +5,9 @@ using Modules.HR.Domain;
 using Modules.HR.Domain.Bordro;
 using Modules.HR.DTO;
 using Modules.HR.Infrastructure;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace Modules.HR.Application;
 
@@ -16,6 +19,7 @@ public interface IBordroService
     Task<HRServiceResult<IReadOnlyCollection<BordroEmployeeResponse>>> CalculateDonemAsync(Guid tenantId, Guid bordroDonemId, CancellationToken ct);
     Task<HRServiceResult<IReadOnlyCollection<BordroEmployeeResponse>>> ListDonemEmployeesAsync(Guid tenantId, Guid bordroDonemId, CancellationToken ct);
     Task<HRServiceResult<BordroEmployeeDetailResponse>> GetBordroEmployeeDetailAsync(Guid tenantId, Guid bordroEmployeeId, CancellationToken ct);
+    Task<HRServiceResult<byte[]>> GenerateBordroEmployeePdfAsync(Guid tenantId, Guid bordroEmployeeId, CancellationToken ct);
     Task<HRServiceResult<BordroKalemResponse>> AddKalemAsync(Guid tenantId, CreateBordroKalemRequest request, CancellationToken ct);
     Task<HRServiceResult<BordroDonemResponse>> UpdateDonemStatusAsync(Guid tenantId, Guid bordroDonemId, UpdateBordroDonemStatusRequest request, CancellationToken ct);
 }
@@ -23,17 +27,21 @@ public interface IBordroService
 public sealed class BordroService : IBordroService
 {
     private readonly HRDbContext _db;
+    private const string AccentBlue = "#1339A5";
+    private const string AccentPurple = "#5B21B6";
+    private const string TextDark = "#0F172A";
 
     public BordroService(HRDbContext db)
     {
         _db = db;
+        QuestPDF.Settings.License = LicenseType.Community;
     }
 
     public async Task<HRServiceResult<BordroDonemResponse>> CreateDonemAsync(Guid tenantId, CreateBordroDonemRequest request, CancellationToken ct)
     {
-        if (tenantId == Guid.Empty || request.BranchId == Guid.Empty)
+        if (tenantId == Guid.Empty)
         {
-            return HRServiceResult<BordroDonemResponse>.Fail("TenantId and BranchId are required.");
+            return HRServiceResult<BordroDonemResponse>.Fail("TenantId is required.");
         }
 
         if (request.Year < 2000 || request.Month is < 1 or > 12)
@@ -48,8 +56,10 @@ public sealed class BordroService : IBordroService
             return HRServiceResult<BordroDonemResponse>.Fail("BaslangicTarihi must be earlier than or equal to BitisTarihi.");
         }
 
+        var branchId = request.BranchId;
+
         var exists = await _db.BordroDonems
-            .AnyAsync(x => x.TenantId == tenantId && x.BranchId == request.BranchId && x.Year == request.Year && x.Month == request.Month, ct);
+            .AnyAsync(x => x.TenantId == tenantId && x.BranchId == branchId && x.Year == request.Year && x.Month == request.Month, ct);
 
         if (exists)
         {
@@ -60,7 +70,7 @@ public sealed class BordroService : IBordroService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
-            BranchId = request.BranchId,
+            BranchId = branchId,
             Year = request.Year,
             Month = request.Month,
             BaslangicTarihi = baslangic,
@@ -88,15 +98,14 @@ public sealed class BordroService : IBordroService
 
     public async Task<HRServiceResult<IReadOnlyCollection<BordroDonemResponse>>> ListDonemAsync(Guid tenantId, Guid branchId, bool includeClosed, CancellationToken ct)
     {
-        if (branchId == Guid.Empty)
-        {
-            return HRServiceResult<IReadOnlyCollection<BordroDonemResponse>>.Fail("BranchId is required.");
-        }
-
-
         var query = _db.BordroDonems
             .AsNoTracking()
-            .Where(x => x.TenantId == tenantId && x.BranchId == branchId);
+            .Where(x => x.TenantId == tenantId);
+
+        if (branchId != Guid.Empty)
+        {
+            query = query.Where(x => x.BranchId == branchId);
+        }
 
         if (!includeClosed)
         {
@@ -130,10 +139,9 @@ public sealed class BordroService : IBordroService
             .AsNoTracking()
             .Where(x =>
                 x.TenantId == tenantId &&
-                x.BranchId == donem.BranchId &&
+                (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
                 x.DeletedAtUtc == null &&
-                x.Status == EmployeeStatus.Active &&
-                x.DepartmentId.HasValue)
+                x.Status == EmployeeStatus.Active)
             .ToListAsync(ct);
 
         if (employees.Count == 0)
@@ -147,7 +155,7 @@ public sealed class BordroService : IBordroService
             .AsNoTracking()
             .Where(x =>
                 x.TenantId == tenantId &&
-                x.BranchId == donem.BranchId &&
+                (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
                 x.Status == AdvanceStatus.Approved &&
                 employeeIds.Contains(x.EmployeeId) &&
                 x.CreatedAtUtc.Date >= donem.BaslangicTarihi.Date &&
@@ -165,7 +173,7 @@ public sealed class BordroService : IBordroService
         var SalariesEmployee = await _db.EmployeeSalaries
         .AsNoTracking()
         .Where(x => x.TenantId == tenantId &&
-        x.BranchId == donem.BranchId &&
+        (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
         employeeIds.Contains(x.EmployeeId) &&
         x.EffectiveFrom.Date <= donem.BitisTarihi.Date &&
         (x.EffectiveTo == null || x.EffectiveTo.Value.Date >= donem.BitisTarihi.Date))
@@ -173,7 +181,7 @@ public sealed class BordroService : IBordroService
         .Select(g => new
         {
             EmployeeId = g.Key,
-            GrossSalary = g.OrderByDescending(x => x.EffectiveFrom).FirstOrDefault()!.GrossSalary
+            NetSalary = g.OrderByDescending(x => x.EffectiveFrom).FirstOrDefault()!.NetSalary
         })
         .ToListAsync(ct);
 
@@ -183,7 +191,7 @@ public sealed class BordroService : IBordroService
         .Include(x => x.Discipline)
         .AsNoTracking()
         .Where(x => x.TenantId == tenantId &&
-        x.BranchId == donem.BranchId &&
+        (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
         employeeIds.Contains(x.EmployeeId) &&
         x.CreatedAtUtc.Date >= donem.BaslangicTarihi.Date &&
         x.CreatedAtUtc.Date <= donem.BitisTarihi.Date)
@@ -201,7 +209,7 @@ public sealed class BordroService : IBordroService
         .Include(x => x.Reward)
         .AsNoTracking()
         .Where(x => x.TenantId == tenantId &&
-        x.BranchId == donem.BranchId &&
+        (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
         employeeIds.Contains(x.EmployeeId) &&
         x.CreatedAtUtc.Date >= donem.BaslangicTarihi.Date &&
         x.CreatedAtUtc.Date <= donem.BitisTarihi.Date)
@@ -218,7 +226,8 @@ public sealed class BordroService : IBordroService
         var leaveEmployee = await _db.Leaves.Include(x=> x.LeaveDeduction)
         .AsNoTracking()
         .Where(x => x.TenantId == tenantId &&
-        x.BranchId == donem.BranchId &&
+        (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId) &&
+        x.Status == LeaveStatus.Approved &&
         employeeIds.Contains(x.EmployeeId) &&
         x.CreatedAtUtc.Date >= donem.BaslangicTarihi.Date &&
         x.CreatedAtUtc.Date <= donem.BitisTarihi.Date)
@@ -235,7 +244,8 @@ public sealed class BordroService : IBordroService
         var existingBordros = await _db.BordroEmployees
         .Include(i => i.BordroKalems)
         .Where(x => x.TenantId == tenantId
-        && x.BordroDonemId == bordroDonemId && x.BranchId == donem.BranchId)
+        && x.BordroDonemId == bordroDonemId
+        && (donem.BranchId == Guid.Empty || x.BranchId == donem.BranchId))
         .ToListAsync(ct);
 
         if (existingBordros.Count > 0)
@@ -281,7 +291,7 @@ public sealed class BordroService : IBordroService
                         BordroComponentId = salaryComponent.Id,
                         Type = BordroKalemType.Earnings,
                         Description = "Maaş Kazancı",
-                        Amount = salary.GrossSalary,
+                        Amount = salary.NetSalary,
                         CreatedAtUtc = DateTime.UtcNow
                     };
                     kalemler.Add(kalem);
@@ -357,7 +367,7 @@ public sealed class BordroService : IBordroService
                 Id = BordroEmployeeID,
                 TenantId = tenantId,
                 BranchId = donem.BranchId,
-                DepartmentId = employe.DepartmentId!.Value,
+                DepartmentId = employe.DepartmentId,
                 BordroDonemId = donem.Id,
                 EmployeeId = employe.Id,
                 EmployeeName = employe.FullName,
@@ -421,6 +431,137 @@ public sealed class BordroService : IBordroService
                 .ToList());
 
         return HRServiceResult<BordroEmployeeDetailResponse>.Ok(detail);
+    }
+
+    public async Task<HRServiceResult<byte[]>> GenerateBordroEmployeePdfAsync(Guid tenantId, Guid bordroEmployeeId, CancellationToken ct)
+    {
+        var bordroEmployee = await _db.BordroEmployees
+            .AsNoTracking()
+            .Include(x => x.BordroDonem)
+            .Include(x=> x.Employee)
+                .ThenInclude(x=> x.Position)
+            .Include(x => x.Department)
+            .Include(x => x.BordroKalems)
+                .ThenInclude(x => x.BordroComponent)
+            .FirstOrDefaultAsync(x => x.Id == bordroEmployeeId && x.TenantId == tenantId, ct);
+
+        if (bordroEmployee is null)
+        {
+            return HRServiceResult<byte[]>.NotFound("Bordro employee not found.");
+        }
+
+        var pdfBytes = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(28);
+                page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextDark));
+
+                page.Header().Column(header =>
+                {
+                    header.Item().Row(row =>
+                    {
+                        row.RelativeItem().Column(left =>
+                        {
+                            left.Item().Text("BORDRO / HAKEDİŞ")
+                                .FontSize(24)
+                                .SemiBold()
+                                .FontColor(AccentBlue);
+                            left.Item().PaddingTop(4).Text(
+                                $"{bordroEmployee.BordroDonem.Month:00}/{bordroEmployee.BordroDonem.Year} Dönemi");
+                        });
+
+                        row.ConstantItem(180).AlignRight().Column(right =>
+                        {
+                            right.Item().AlignRight().Text($"No: {bordroEmployee.Id.ToString()[..8].ToUpperInvariant()}");
+                            right.Item().AlignRight().Text($"Oluşturulma Tarihi: {bordroEmployee.CreatedAtUtc:dd.MM.yyyy}");
+                            right.Item().AlignRight().Text($"Durum: {bordroEmployee.BordroDonem.Status}");
+                        });
+                    });
+                });
+
+                page.Content().PaddingTop(18).Column(content =>
+                {
+                    content.Spacing(14);
+
+                    content.Item().Container()
+                        .Border(1)
+                        .BorderColor(Colors.Grey.Lighten2)
+                        .Padding(14)
+                        .Column(col =>
+                        {
+                            col.Spacing(6);
+                            col.Item().Text($"Personel: {bordroEmployee.EmployeeName}").SemiBold();
+                            col.Item().Text($"Mesleki Rol: {bordroEmployee.Employee.Position?.Name ?? "Belirtilmemiş"}"); // Şube adı eklenebilir
+                            col.Item().Text($"Departman: {bordroEmployee.Department?.Name ?? "Merkez Departman"}");
+                            col.Item().Text(
+                                $"Dönem Aralığı: {bordroEmployee.BordroDonem.BaslangicTarihi:dd.MM.yyyy} - {bordroEmployee.BordroDonem.BitisTarihi:dd.MM.yyyy}");
+                        });
+
+                    content.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(3);
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(2);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(PdfHeaderCell).Text("Kalem");
+                            header.Cell().Element(PdfHeaderCell).AlignCenter().Text("Tip");
+                            header.Cell().Element(PdfHeaderCell).AlignRight().Text("Tutar");
+                        });
+
+                        foreach (var kalem in bordroEmployee.BordroKalems.OrderBy(x => x.Type).ThenBy(x => x.Description))
+                        {
+                            table.Cell().Element(PdfBodyCell).Text(kalem.Description);
+                            table.Cell().Element(PdfBodyCell).AlignCenter().Text(KalemTypeLabel(kalem.Type));
+                            table.Cell().Element(PdfBodyCell).AlignRight().Text($"{kalem.Amount:N2} ₺");
+                        }
+                    });
+
+                    content.Item().AlignRight().Width(260).Container()
+                        .Border(1)
+                        .BorderColor(Colors.Grey.Lighten2)
+                        .Padding(14)
+                        .Column(summary =>
+                        {
+                            summary.Spacing(8);
+                            summary.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Toplam Kazanç").SemiBold();
+                                r.ConstantItem(90).AlignRight().Text($"{bordroEmployee.TotalEarnings:N2} ₺").SemiBold();
+                            });
+                            summary.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Toplam Kesinti").SemiBold();
+                                r.ConstantItem(90).AlignRight().Text($"{bordroEmployee.TotalDeductions:N2} ₺").SemiBold();
+                            });
+                            summary.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
+                            summary.Item().Row(r =>
+                            {
+                                r.RelativeItem().Text("Net Ele Geçen")
+                                    .FontColor(AccentPurple)
+                                    .FontSize(12)
+                                    .SemiBold();
+                                r.ConstantItem(90).AlignRight().Text($"{bordroEmployee.NetPay:N2} ₺")
+                                    .FontColor(AccentPurple)
+                                    .FontSize(12)
+                                    .SemiBold();
+                            });
+                        });
+                });
+
+                page.Footer().AlignRight().Text(
+                    $"Lineer Destek Bordro Yönetim Sistemi| {DateTimeOffset.UtcNow:dd.MM.yyyy HH:mm}",
+                    TextStyle.Default.FontSize(8).FontColor(Colors.Grey.Darken1));
+            });
+        }).GeneratePdf();
+
+        return HRServiceResult<byte[]>.Ok(pdfBytes);
     }
 
     public async Task<HRServiceResult<BordroKalemResponse>> AddKalemAsync(Guid tenantId, CreateBordroKalemRequest request, CancellationToken ct)
@@ -700,4 +841,26 @@ public sealed class BordroService : IBordroService
             kalem.Description,
             kalem.Amount,
             kalem.CreatedAtUtc);
+
+    private static string KalemTypeLabel(BordroKalemType type)
+        => type switch
+        {
+            BordroKalemType.Earnings => "Kazanç",
+            BordroKalemType.Deductions => "Kesinti",
+            _ => "Diğer"
+        };
+
+    private static IContainer PdfHeaderCell(IContainer container)
+        => container
+            .Background(AccentBlue)
+            .PaddingVertical(8)
+            .PaddingHorizontal(8)
+            .DefaultTextStyle(x => x.FontColor(Colors.White).FontSize(10).SemiBold());
+
+    private static IContainer PdfBodyCell(IContainer container)
+        => container
+            .BorderBottom(1)
+            .BorderColor(Colors.Grey.Lighten2)
+            .PaddingVertical(8)
+            .PaddingHorizontal(8);
 }

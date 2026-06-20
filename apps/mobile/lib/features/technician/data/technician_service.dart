@@ -2,6 +2,33 @@ import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../models/technician_models.dart';
 
+class ShiftConflictException implements Exception {
+  const ShiftConflictException();
+
+  @override
+  String toString() {
+    return 'SHIFT_CONFLICT';
+  }
+}
+
+class AttendanceConflictException implements Exception {
+  const AttendanceConflictException();
+
+  @override
+  String toString() {
+    return 'ATTENDANCE_CONFLICT';
+  }
+}
+
+class AttendanceNotStartedException implements Exception {
+  const AttendanceNotStartedException();
+
+  @override
+  String toString() {
+    return 'ATTENDANCE_NOT_STARTED';
+  }
+}
+
 class TechnicianService {
   TechnicianService({Dio? dio}) : _dio = dio ?? ApiClient().dio;
 
@@ -125,5 +152,155 @@ class TechnicianService {
       return Technician.fromJson(res.data as Map<String, dynamic>);
     }
     throw Exception('Failed to update technician profile: ${res.statusCode}');
+  }
+
+  Future<List<ShiftTemplateModel>> listShiftTemplates({
+    String branchId = '00000000-0000-0000-0000-000000000000',
+    bool includeInactive = false,
+  }) async {
+    final res = await _dio.get(
+      '/api/hr/shifts/templates',
+      queryParameters: {
+        'branchId': branchId,
+        'includeInactive': includeInactive,
+      },
+    );
+    if (res.statusCode == 200) {
+      final list = (res.data as List).cast<dynamic>();
+      return list
+          .map((e) => ShiftTemplateModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to load shift templates: ${res.statusCode}');
+  }
+
+  Future<ShiftTemplateModel> createShiftTemplate(
+      CreateShiftTemplatePayload payload) async {
+    final res = await _dio.post(
+      '/api/hr/shifts/templates',
+      data: payload.toJson(),
+    );
+    if (res.statusCode != null &&
+        res.statusCode! >= 200 &&
+        res.statusCode! < 300) {
+      return ShiftTemplateModel.fromJson(res.data as Map<String, dynamic>);
+    }
+    throw Exception('Failed to create shift template: ${res.statusCode}');
+  }
+
+  Future<List<ShiftAssignmentModel>> listShiftAssignments({
+    String branchId = '00000000-0000-0000-0000-000000000000',
+    DateTime? date,
+  }) async {
+    final res = await _dio.get(
+      '/api/hr/shifts/assignments',
+      queryParameters: {
+        'branchId': branchId,
+        if (date != null) 'date': date.toUtc().toIso8601String(),
+      },
+    );
+    if (res.statusCode == 200) {
+      final list = (res.data as List).cast<dynamic>();
+      return list
+          .map((e) => ShiftAssignmentModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to load shift assignments: ${res.statusCode}');
+  }
+
+  Future<ShiftAssignmentModel> createShiftAssignment(
+      CreateShiftAssignmentPayload payload) async {
+    try {
+      final res = await _dio.post(
+        '/api/hr/shifts/assignments',
+        data: payload.toJson(),
+      );
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
+        return ShiftAssignmentModel.fromJson(res.data as Map<String, dynamic>);
+      }
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 409) {
+        throw const ShiftConflictException();
+      }
+      rethrow;
+    }
+    throw Exception('Failed to create shift assignment:');
+  }
+
+  Future<List<BlockShiftAssignmentResponse>> createBlockShiftAssignments(
+      CreateBlockShiftAssignmentPayload payload) async {
+    final res = await _dio.post(
+      '/api/hr/shifts/assignments/block-insert',
+      data: payload.toJson(),
+    );
+    if (res.statusCode != null &&
+        res.statusCode! >= 200 &&
+        res.statusCode! < 300) {
+      final list = (res.data as List).cast<dynamic>();
+      return list
+          .map((e) =>
+              BlockShiftAssignmentResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception(
+        'Failed to create block shift assignments: ${res.statusCode}');
+  }
+
+  Future<List<ShiftAssignmentModel>> getMyShiftAssignments() async {
+    final res = await _dio.get('/api/hr/attendance/getmy-shifts');
+    if (res.statusCode == 200) {
+      final list = (res.data as List).cast<dynamic>();
+      return list
+          .map((e) => ShiftAssignmentModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    throw Exception('Failed to load my shifts: ${res.statusCode}');
+  }
+
+  Future<void> checkIn(CreateAttendanceCheckInPayload payload) async {
+    try {
+      final res = await _dio.post(
+        '/api/hr/attendance/check-in',
+        data: payload.toJson(),
+      );
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
+        return;
+      }
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 409) {
+        throw const AttendanceConflictException();
+      }
+      rethrow;
+    }
+    throw Exception('Failed to check in.');
+  }
+
+  Future<void> checkOut(
+    CreateAttendanceCheckOutPayload payload,
+  ) async {
+    try {
+      final res = await _dio.post(
+        '/api/hr/attendance/check-out',
+        data: payload.toJson(),
+      );
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
+        return;
+      }
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 409) {
+        throw const AttendanceConflictException();
+      }
+      if (e is DioException && e.response?.statusCode == 404) {
+        throw const AttendanceNotStartedException();
+      }
+      rethrow;
+    }
+    throw Exception('Failed to check out.');
   }
 }
