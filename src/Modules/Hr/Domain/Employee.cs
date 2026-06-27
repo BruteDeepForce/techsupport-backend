@@ -1,4 +1,5 @@
 using Modules.HR.Domain.Bordro;
+using TechSupport.Hr.Domain;
 
 namespace Modules.HR.Domain;
 
@@ -37,4 +38,5 @@ public class Employee
     public ICollection<EmployeeSalary> EmployeeSalaries { get; set; } = new List<EmployeeSalary>();
     public ICollection<DisciplineEmployeeRecord> DisciplineEmployeeRecords { get; set; } = new List<DisciplineEmployeeRecord>();
     public ICollection<RewardEmployeeRecord> RewardEmployeeRecords { get; set; } = new List<RewardEmployeeRecord>();
+    public ICollection<EmployeePerformanceReport> EmployeePerformanceReports { get; set; } = new List<EmployeePerformanceReport>();
 }

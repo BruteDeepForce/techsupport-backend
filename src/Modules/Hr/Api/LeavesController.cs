@@ -41,6 +41,33 @@ public sealed class LeavesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
 
+    [HttpPost("leave-request-employee")]
+    public async Task<IActionResult> CreateLeaveRequestEmployee([FromBody] CreateLeaveRequestEmployee request, CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+        var useridClaim = TryGetUserId();
+        if (useridClaim is null)
+        {
+            return Unauthorized("UserId is required in claim (user_id).");
+        }
+
+        var result = await _service.CreateLeaveRequestEmployeeAsync(tenantId, useridClaim.Value, request, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType switch
+            {
+                HRServiceErrorType.NotFound => NotFound(result.Error),
+                HRServiceErrorType.Conflict => Conflict(result.Error),
+                _ => BadRequest(result.Error)
+            };
+        }
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {

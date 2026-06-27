@@ -404,6 +404,261 @@ class TechnicianMyShiftModel {
       );
 }
 
+class TechnicianEmployeeProfile {
+  TechnicianEmployeeProfile({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeNo,
+    required this.fullName,
+    this.departmentId,
+    this.positionId,
+    this.positionName,
+    this.userId,
+    this.email,
+    this.phone,
+    this.profileImageUrl,
+    required this.status,
+    this.jobsStartDateUtc,
+    this.jobsEndDateUtc,
+    this.createdAtUtc,
+    this.updatedAtUtc,
+    this.deletedAtUtc,
+    required this.employeeLeaves,
+    required this.employeeAdvances,
+    required this.disciplineEmployeeRecords,
+    required this.rewardEmployeeRecords,
+    required this.employeeSalaries,
+  });
+
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeNo;
+  final String fullName;
+  final String? departmentId;
+  final String? positionId;
+  final String? positionName;
+  final String? userId;
+  final String? email;
+  final String? phone;
+  final String? profileImageUrl;
+  final String status;
+  final DateTime? jobsStartDateUtc;
+  final DateTime? jobsEndDateUtc;
+  final DateTime? createdAtUtc;
+  final DateTime? updatedAtUtc;
+  final DateTime? deletedAtUtc;
+  final List<TechnicianEmployeeLeave> employeeLeaves;
+  final List<TechnicianEmployeeAdvance> employeeAdvances;
+  final List<TechnicianEmployeeRecord> disciplineEmployeeRecords;
+  final List<TechnicianEmployeeRecord> rewardEmployeeRecords;
+  final List<TechnicianEmployeeSalary> employeeSalaries;
+
+  factory TechnicianEmployeeProfile.fromJson(Map<String, dynamic> json) =>
+      TechnicianEmployeeProfile(
+        id: (json['id'] ?? json['Id']).toString(),
+        tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+        branchId: (json['branchId'] ?? json['BranchId']).toString(),
+        employeeNo: (json['employeeNo'] ?? json['EmployeeNo']).toString(),
+        fullName: (json['fullName'] ?? json['FullName']).toString(),
+        departmentId:
+            (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+        positionId: (json['positionId'] ?? json['PositionId'])?.toString(),
+        positionName:
+            (json['positionName'] ?? json['PositionName'])?.toString(),
+        userId: (json['userId'] ?? json['UserId'])?.toString(),
+        email: (json['email'] ?? json['Email'])?.toString(),
+        phone: (json['phone'] ?? json['Phone'])?.toString(),
+        profileImageUrl:
+            (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+        status: (json['status'] ?? json['Status']).toString(),
+        jobsStartDateUtc: _parseNullableDate(
+          json['jobsStartDateUtc'] ?? json['JobsStartDateUtc'],
+        ),
+        jobsEndDateUtc: _parseNullableDate(
+          json['jobsEndDateUtc'] ?? json['JobsEndDateUtc'],
+        ),
+        createdAtUtc: _parseNullableDate(
+          json['createdAtUtc'] ?? json['CreatedAtUtc'],
+        ),
+        updatedAtUtc: _parseNullableDate(
+          json['updatedAtUtc'] ?? json['UpdatedAtUtc'],
+        ),
+        deletedAtUtc: _parseNullableDate(
+          json['deletedAtUtc'] ?? json['DeletedAtUtc'],
+        ),
+        employeeLeaves: ((json['employeeLeaves'] ?? json['EmployeeLeaves'])
+                    as List<dynamic>? ??
+                const [])
+            .map(
+              (e) =>
+                  TechnicianEmployeeLeave.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
+        employeeAdvances: ((json['employeeAdvances'] ??
+                    json['EmployeeAdvances']) as List<dynamic>? ??
+                const [])
+            .map(
+              (e) =>
+                  TechnicianEmployeeAdvance.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
+        disciplineEmployeeRecords: ((json['disciplineEmployeeRecords'] ??
+                    json['DisciplineEmployeeRecords']) as List<dynamic>? ??
+                const [])
+            .map(
+              (e) =>
+                  TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
+        rewardEmployeeRecords: ((json['rewardEmployeeRecords'] ??
+                    json['RewardEmployeeRecords']) as List<dynamic>? ??
+                const [])
+            .map(
+              (e) =>
+                  TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
+        employeeSalaries: ((json['employeeSalaries'] ??
+                    json['EmployeeSalaries']) as List<dynamic>? ??
+                const [])
+            .map(
+              (e) =>
+                  TechnicianEmployeeSalary.fromJson(e as Map<String, dynamic>),
+            )
+            .toList(),
+      );
+}
+
+class TechnicianEmployeeLeave {
+  TechnicianEmployeeLeave({
+    required this.id,
+    required this.startDate,
+    required this.endDate,
+    this.type,
+    this.reason,
+    required this.status,
+    this.createdAtUtc,
+  });
+
+  final String id;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String? type;
+  final String? reason;
+  final String status;
+  final DateTime? createdAtUtc;
+
+  factory TechnicianEmployeeLeave.fromJson(Map<String, dynamic> json) =>
+      TechnicianEmployeeLeave(
+        id: (json['id'] ?? json['Id']).toString(),
+        startDate:
+            DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+        endDate:
+            DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
+        type: (json['type'] ?? json['Type'])?.toString(),
+        reason: (json['reason'] ?? json['Reason'])?.toString(),
+        status: (json['status'] ?? json['Status']).toString(),
+        createdAtUtc: _parseNullableDate(
+          json['createdAtUtc'] ?? json['CreatedAtUtc'],
+        ),
+      );
+}
+
+class TechnicianEmployeeAdvance {
+  TechnicianEmployeeAdvance({
+    required this.id,
+    this.amount,
+    this.reason,
+    required this.status,
+    this.createdAtUtc,
+  });
+
+  final String id;
+  final double? amount;
+  final String? reason;
+  final String status;
+  final DateTime? createdAtUtc;
+
+  factory TechnicianEmployeeAdvance.fromJson(Map<String, dynamic> json) =>
+      TechnicianEmployeeAdvance(
+        id: (json['id'] ?? json['Id']).toString(),
+        amount: (json['amount'] ?? json['Amount']) != null
+            ? double.tryParse((json['amount'] ?? json['Amount']).toString())
+            : null,
+        reason: (json['reason'] ?? json['Reason'])?.toString(),
+        status: (json['status'] ?? json['Status']).toString(),
+        createdAtUtc: _parseNullableDate(
+          json['createdAtUtc'] ?? json['CreatedAtUtc'],
+        ),
+      );
+}
+
+class TechnicianEmployeeRecord {
+  TechnicianEmployeeRecord({
+    required this.id,
+    required this.description,
+  });
+
+  final String id;
+  final String description;
+
+  factory TechnicianEmployeeRecord.fromJson(Map<String, dynamic> json) =>
+      TechnicianEmployeeRecord(
+        id: (json['id'] ?? json['Id']).toString(),
+        description: (json['description'] ?? json['Description']).toString(),
+      );
+}
+
+class TechnicianEmployeeSalary {
+  TechnicianEmployeeSalary({
+    required this.id,
+    this.grossSalary,
+    this.netSalary,
+    this.effectiveFrom,
+    this.effectiveTo,
+    this.createdAtUtc,
+  });
+
+  final String id;
+  final double? grossSalary;
+  final double? netSalary;
+  final DateTime? effectiveFrom;
+  final DateTime? effectiveTo;
+  final DateTime? createdAtUtc;
+
+  factory TechnicianEmployeeSalary.fromJson(Map<String, dynamic> json) =>
+      TechnicianEmployeeSalary(
+        id: (json['id'] ?? json['Id']).toString(),
+        grossSalary: (json['grossSalary'] ?? json['GrossSalary']) != null
+            ? double.tryParse(
+                (json['grossSalary'] ?? json['GrossSalary']).toString(),
+              )
+            : null,
+        netSalary: (json['netSalary'] ?? json['NetSalary']) != null
+            ? double.tryParse(
+                (json['netSalary'] ?? json['NetSalary']).toString())
+            : null,
+        effectiveFrom: _parseNullableDate(
+          json['effectiveFrom'] ?? json['EffectiveFrom'],
+        ),
+        effectiveTo: _parseNullableDate(
+          json['effectiveTo'] ?? json['EffectiveTo'],
+        ),
+        createdAtUtc: _parseNullableDate(
+          json['createdAtUtc'] ?? json['CreatedAtUtc'],
+        ),
+      );
+}
+
+DateTime? _parseNullableDate(dynamic value) {
+  if (value == null) return null;
+  final raw = value.toString();
+  if (raw.isEmpty || raw.toLowerCase() == 'null') return null;
+  return DateTime.tryParse(raw);
+}
+
 Duration _parseDuration(String value) {
   final parts = value.split(':');
   final hours = int.tryParse(parts[0]) ?? 0;

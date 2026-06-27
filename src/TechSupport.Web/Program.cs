@@ -94,6 +94,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TradeDeviceUpdateRequestConsumer>();
     x.AddConsumer<TradeStockProcessConsumer>();
     x.AddConsumer<TechnicianHrEmployeeSyncRequestedConsumer>();
+    x.AddConsumer<PerformanceUpdateConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {

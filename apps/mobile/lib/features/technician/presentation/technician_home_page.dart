@@ -11,6 +11,7 @@ import '../../operations/data/operation_service.dart';
 import '../../operations/models/operation_models.dart';
 import '../data/technician_service.dart';
 import '../models/technician_models.dart';
+import 'technician_hr_page.dart';
 import 'technician_my_shifts_page.dart';
 import 'technician_payment_page.dart';
 import 'technician_operation_detail_page.dart';
@@ -298,8 +299,8 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
   @override
   Widget build(BuildContext context) {
     return LinearPageShell(
-      title: 'Teknisyen',
-      subtitle: 'Teknisyen Portalı',
+      title: 'Teknisyen Personel Paneli',
+      subtitle: 'Hoşgeldiniz',
       trailing: FutureBuilder<Technician?>(
         future: _meFuture,
         builder: (context, snapshot) {
@@ -331,16 +332,30 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
           );
         },
       ),
-      tabBar: const LinearTabBar(
+      tabBar: LinearTabBar(
         items: [
+          const LinearTabItem(
+            icon: Icons.assignment_outlined,
+            label: 'İş Emirleri',
+            active: true,
+          ),
+          const LinearTabItem(
+            icon: Icons.confirmation_number_outlined,
+            label: 'Talepler',
+          ),
           LinearTabItem(
-              icon: Icons.assignment_outlined,
-              label: 'İş Emirleri',
-              active: true),
-          LinearTabItem(
-              icon: Icons.confirmation_number_outlined, label: 'Talepler'),
-          LinearTabItem(icon: Icons.devices_other_outlined, label: 'Cihazlar'),
-          LinearTabItem(icon: Icons.logout_rounded, label: 'Çıkış'),
+            icon: Icons.badge_outlined,
+            label: 'Özlük',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const TechnicianHrPage(),
+              ),
+            ),
+          ),
+          const LinearTabItem(
+            icon: Icons.logout_rounded,
+            label: 'Çıkış',
+          ),
         ],
       ),
       children: [
@@ -799,6 +814,9 @@ class _HomeShiftSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCheckedIn =
+        shift.actualStartTimeUtc != null && shift.actualEndTimeUtc == null;
+
     final start = shift.plannedStartTimeUtc.toLocal();
     final end = shift.plannedEndTimeUtc.toLocal();
     return Column(
@@ -806,6 +824,10 @@ class _HomeShiftSummary extends StatelessWidget {
       children: [
         Row(
           children: [
+            if (isCheckedIn) ...[
+              const _PulseStatusLed(color: AppColors.statusGreen),
+              const SizedBox(width: 4),
+            ],
             Expanded(
               child: Text(
                 _homeShiftHeadline(shift),
@@ -857,6 +879,90 @@ class _HomeShiftSummary extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _PulseStatusLed extends StatefulWidget {
+  const _PulseStatusLed({required this.color});
+
+  final Color color;
+
+  @override
+  State<_PulseStatusLed> createState() => _PulseStatusLedState();
+}
+
+class _PulseStatusLedState extends State<_PulseStatusLed>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _pulseOpacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1, end: 1.55).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _pulseOpacityAnimation = Tween<double>(begin: 0.80, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return SizedBox(
+          width: 18,
+          height: 18,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.color.withValues(
+                      alpha: _pulseOpacityAnimation.value,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.color,
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.30),
+                      blurRadius: 10,
+                      spreadRadius: 1.2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

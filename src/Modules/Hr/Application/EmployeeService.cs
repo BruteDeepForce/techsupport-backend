@@ -9,6 +9,7 @@ public interface IEmployeeService
 {
     Task<HRServiceResult<EmployeeResponse>> CreateAsync(Guid tenantId, Guid branchId, CreateEmployeeRequest request, CancellationToken ct);
     Task<HRServiceResult<EmployeeDetailResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
+    Task<HRServiceResult<EmployeeDetailResponse>> GetByClaimUserIdAsync(Guid tenantId, Guid userId, CancellationToken ct);
     Task<HRServiceResult<EmployeeLargeDetailResponse>> ListAsync(Guid tenantId, Guid? branchId, CancellationToken ct);
     Task<HRServiceResult<EmployeeResponse>> UpdateAsync(Guid tenantId, Guid id, UpdateEmployeeRequest request, CancellationToken ct);
     Task<HRServiceResult<bool>> DeleteAsync(Guid tenantId, Guid id, CancellationToken ct);
@@ -85,6 +86,23 @@ public sealed class EmployeeService : IEmployeeService
             .Include(x => x.EmployeeSalaries)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id && x.TenantId == tenantId && x.DeletedAtUtc == null, ct);
+
+        return employee is null
+            ? HRServiceResult<EmployeeDetailResponse>.NotFound("Employee not found.")
+            : HRServiceResult<EmployeeDetailResponse>.Ok(ToDetailResponse(employee));
+    }
+
+    public async Task<HRServiceResult<EmployeeDetailResponse>> GetByClaimUserIdAsync(Guid tenantId, Guid userId, CancellationToken ct)
+    {
+        var employee = await _db.Employees
+            .Include(x => x.Position)
+            .Include(x => x.EmployeeLeaves)
+            .Include(x => x.EmployeeAdvances)
+            .Include(x => x.DisciplineEmployeeRecords)
+            .Include(x => x.RewardEmployeeRecords)
+            .Include(x => x.EmployeeSalaries)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.TenantId == tenantId && x.DeletedAtUtc == null, ct);
 
         return employee is null
             ? HRServiceResult<EmployeeDetailResponse>.NotFound("Employee not found.")

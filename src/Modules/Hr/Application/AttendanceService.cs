@@ -79,6 +79,7 @@ public sealed class AttendanceService : IAttendanceService
         using var tx = await _db.Database.BeginTransactionAsync(ct);
 
         assignment.ActualStartTimeUtc = DateTime.UtcNow;
+        assignment.Status = ShiftAssignmentStatus.CheckedIn;
 
         var checkInTime = DateTime.UtcNow;
         var now = DateTime.UtcNow;

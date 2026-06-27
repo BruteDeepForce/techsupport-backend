@@ -53,6 +53,21 @@ class TechnicianService {
     throw Exception('Failed to get technician: ${res.statusCode}');
   }
 
+  Future<TechnicianEmployeeProfile> getEmployeeProfileByClaimUser() async {
+    final detailRes = await _dio.get('/api/hr/employees/by-claim-user');
+    if (detailRes.statusCode != null &&
+        detailRes.statusCode! >= 200 &&
+        detailRes.statusCode! < 300) {
+      return TechnicianEmployeeProfile.fromJson(
+        detailRes.data as Map<String, dynamic>,
+      );
+    }
+
+    throw Exception(
+      'Failed to load employee profile detail: ${detailRes.statusCode}',
+    );
+  }
+
   Future<String?> createTechnician({
     required String firstName,
     String? lastName,

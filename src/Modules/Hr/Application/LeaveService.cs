@@ -8,6 +8,8 @@ namespace Modules.HR.Application;
 public interface ILeaveService
 {
     Task<HRServiceResult<LeaveResponse>> CreateAsync(Guid tenantId, CreateLeaveRequest request, CancellationToken ct);
+
+    Task<HRServiceResult<LeaveResponse>> CreateLeaveRequestEmployeeAsync(Guid tenantId, Guid userId, CreateLeaveRequestEmployee request, CancellationToken ct);
     Task<HRServiceResult<LeaveResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct);
     Task<HRServiceResult<LargeLeaveResponseList>> ListAsync(
         Guid tenantId,
@@ -34,12 +36,12 @@ public sealed class LeaveService : ILeaveService
     public async Task<HRServiceResult<LeaveResponse>> CreateAsync(Guid tenantId, CreateLeaveRequest request, CancellationToken ct)
     {
         //!  branch ve departmenidleri opsiyonel bypass
-        if (tenantId == Guid.Empty )
+        if (tenantId == Guid.Empty)
         {
             return HRServiceResult<LeaveResponse>.Fail("TenantId is required.");
         }
 
-        if (request.EmployeeId == Guid.Empty )
+        if (request.EmployeeId == Guid.Empty)
         {
             return HRServiceResult<LeaveResponse>.Fail("EmployeeId is required.");
         }
@@ -60,7 +62,7 @@ public sealed class LeaveService : ILeaveService
                 x.Id == request.EmployeeId &&
                 x.TenantId == tenantId &&
                 //!x.BranchId == request.BranchId
-                
+
                 x.DeletedAtUtc == null,
                 ct);
 
@@ -101,7 +103,7 @@ public sealed class LeaveService : ILeaveService
             return HRServiceResult<LeaveResponse>.Conflict("Leave date range overlaps with an existing leave.");
         }
 
-        if(request.Type == LeaveType.UnpaidLeave)
+        if (request.Type == LeaveType.UnpaidLeave)
         {
             var unpaidLeaveDeduction = await _db.LeaveDeductions
                 .AsNoTracking()
@@ -141,6 +143,99 @@ public sealed class LeaveService : ILeaveService
         await _db.SaveChangesAsync(ct);
 
         return HRServiceResult<LeaveResponse>.Ok(ToResponse(leave));
+    }
+    public async Task<HRServiceResult<LeaveResponse>> CreateLeaveRequestEmployeeAsync(Guid tenantId, Guid userId, CreateLeaveRequestEmployee request, CancellationToken ct)
+    {
+        if (tenantId == Guid.Empty)
+        {
+            return HRServiceResult<LeaveResponse>.Fail("TenantId is required.");
+        }
+
+        if (request.StartDate.Date > request.EndDate.Date)
+        {
+            return HRServiceResult<LeaveResponse>.Fail("StartDate must be earlier than or equal to EndDate.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Reason))
+        {
+            return HRServiceResult<LeaveResponse>.Fail("Reason is required.");
+        }
+
+        var employee = await _db.Employees
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x =>
+                x.UserId == userId &&
+                x.TenantId == tenantId &&
+                //!x.BranchId == request.BranchId
+
+                x.DeletedAtUtc == null,
+                ct);
+
+        if (employee is null)
+        {
+            return HRServiceResult<LeaveResponse>.NotFound("Employee not found.");
+        }
+
+        var startDate = request.StartDate.Date;
+        var endDate = request.EndDate.Date;
+
+        var overlaps = await _db.Leaves
+            .AsNoTracking()
+            .AnyAsync(x =>
+                x.TenantId == tenantId &&
+                x.EmployeeId == employee.Id &&
+                x.Status != LeaveStatus.Rejected &&
+                x.StartDate.Date <= endDate &&
+                x.EndDate.Date >= startDate,
+                ct);
+
+        if (overlaps)
+        {
+            return HRServiceResult<LeaveResponse>.Conflict("Leave date range overlaps with an existing leave.");
+        }
+
+        if (request.Type == LeaveType.UnpaidLeave)
+        {
+            var unpaidLeaveDeduction = await _db.LeaveDeductions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.TenantId == tenantId &&
+                    //!x.BranchId == request.BranchId
+                    x.DeductionType == LeaveType.UnpaidLeave,
+                    ct);
+
+            if (unpaidLeaveDeduction is null)
+            {
+                return HRServiceResult<LeaveResponse>.NotFound("Unpaid leave deduction configuration not found.");
+            }
+
+            request = request with { LeaveDeductionId = unpaidLeaveDeduction.Id };
+        }
+
+        var now = DateTime.UtcNow;
+        var leave = new Leave
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            BranchId = request.BranchId ?? Guid.Empty,
+            DepartmentId = request.DepartmentId ?? null,
+            EmployeeId = employee.Id,
+            StartDate = startDate,
+            EndDate = endDate,
+            Type = request.Type,
+            Reason = request.Reason.Trim(),
+            Status = LeaveStatus.Pending,
+            CreatedAtUtc = now,
+            UpdatedAtUtc = now,
+            LeaveDeductionId = request.LeaveDeductionId ?? null
+        };
+
+        _db.Leaves.Add(leave);
+        await _db.SaveChangesAsync(ct);
+
+        return HRServiceResult<LeaveResponse>.Ok(ToResponse(leave));
+
+
     }
 
     public async Task<HRServiceResult<LeaveResponse>> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct)
@@ -202,7 +297,7 @@ public sealed class LeaveService : ILeaveService
         var leaves = await query
             .OrderByDescending(x => x.CreatedAtUtc)
             .ToListAsync(ct);
-        var totalLeaves = leaves.Select( x=> ToResponse(x)).ToList();
+        var totalLeaves = leaves.Select(x => ToResponse(x)).ToList();
         var pendingLeaves = leaves.Where(x => x.Status == LeaveStatus.Pending).Select(x => ToResponse(x)).ToList();
         var approvedLeaves = leaves.Where(x => x.Status == LeaveStatus.Approved).Select(x => ToResponse(x)).ToList();
         var rejectedLeaves = leaves.Where(x => x.Status == LeaveStatus.Rejected).Select(x => ToResponse(x)).ToList();

@@ -31,6 +31,7 @@ public static class HRModule
         services.AddScoped<IDisciplineService, DisciplineService>();
         services.AddScoped<IRewardService, RewardService>();
         services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
+        services.AddScoped<IEmployeePerformanceService, EmployeePerformanceService>();
         services.AddScoped<IHRNotificationHub, ShiftStatusNotifier>();
 
         return services;

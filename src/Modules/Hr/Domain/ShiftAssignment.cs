@@ -27,7 +27,9 @@ namespace Modules.HR.Domain
     public enum ShiftAssignmentStatus
     {
         Planned = 1,
-        Completed = 2,
-        Cancelled = 3
+        CheckedIn = 2,
+        CheckedOut = 3,
+        Completed = 4,
+        Cancelled = 5
     }
 }

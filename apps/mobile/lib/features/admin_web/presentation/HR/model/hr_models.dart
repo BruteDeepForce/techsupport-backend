@@ -242,6 +242,29 @@ class HRLeaveCreateRequest {
   }
 }
 
+class HRLeaveRequestByEmployee {
+  final DateTime startDate;
+  final DateTime endDate;
+  final String type;
+  final String reason;
+
+  HRLeaveRequestByEmployee({
+    required this.startDate,
+    required this.endDate,
+    required this.type,
+    required this.reason,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+      'type': type,
+      'reason': reason,
+    };
+  }
+}
+
 class HRLeaveDecideRequest {
   final String leaveId;
   final String status; // "approved" or "rejected"
@@ -430,19 +453,16 @@ class HRAdvanceSettingsResponse {
       id: (json['id'] ?? json['Id']).toString(),
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
-      maxAdvanceAmountPerPerson:
-          ((json['maxAdvanceAmountPerPerson'] ??
-                      json['MaxAdvanceAmountPerPerson'])
-                  as num?)
+      maxAdvanceAmountPerPerson: ((json['maxAdvanceAmountPerPerson'] ??
+                  json['MaxAdvanceAmountPerPerson']) as num?)
               ?.toDouble() ??
-              0,
-      maxAdvanceCountPerYear:
-          (json['maxAdvanceCountPerYear'] ?? json['MaxAdvanceCountPerYear'])
-              as int? ??
-              0,
-      allowFutureAdvances:
-          (json['allowFutureAdvances'] ?? json['AllowFutureAdvances']) as bool? ??
-              false,
+          0,
+      maxAdvanceCountPerYear: (json['maxAdvanceCountPerYear'] ??
+              json['MaxAdvanceCountPerYear']) as int? ??
+          0,
+      allowFutureAdvances: (json['allowFutureAdvances'] ??
+              json['AllowFutureAdvances']) as bool? ??
+          false,
       createdAtUtc: DateTime.parse(
           (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
       updatedAtUtc:
@@ -795,7 +815,8 @@ class HRUpdateRewardEmployeeRecordRequest {
     return {
       if (rewardId != null) 'rewardId': rewardId,
       if (description != null) 'description': description,
-      if (rewardDate != null) 'rewardDate': rewardDate!.toUtc().toIso8601String(),
+      if (rewardDate != null)
+        'rewardDate': rewardDate!.toUtc().toIso8601String(),
     };
   }
 }
@@ -1073,10 +1094,12 @@ class HRBordroEmployeeResponse {
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
-      bordroDonemId: (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
+      bordroDonemId:
+          (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
       employeeName: (json['employeeName'] ?? json['EmployeeName']).toString(),
-      totalEarnings: (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
+      totalEarnings:
+          (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
       totalDeductions:
           (json['totalDeductions'] ?? json['TotalDeductions']) as num? ?? 0,
       netPay: (json['netPay'] ?? json['NetPay']) as num? ?? 0,

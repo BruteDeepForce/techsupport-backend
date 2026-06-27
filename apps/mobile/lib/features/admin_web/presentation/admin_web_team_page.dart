@@ -1390,6 +1390,8 @@ class _PlannedShiftRow extends StatelessWidget {
     final personName =
         employee?.fullName ?? technician?.name ?? 'Personel bulunamadı';
     final roleName = employee?.positionName ?? 'Teknisyen';
+    final isCheckedIn = _isCheckedInStatus(assignment.status);
+    final statusColor = _resolveShiftStatusColor(assignment.status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -1419,9 +1421,17 @@ class _PlannedShiftRow extends StatelessWidget {
               child: Text(
                   _formatDateTime(assignment.plannedEndTimeUtc.toLocal()))),
           Expanded(
-            child: _StatusBadge(
-              label: _formatShiftStatus(assignment.status),
-              color: _resolveShiftStatusColor(assignment.status),
+            child: Row(
+              children: [
+                if (isCheckedIn) ...[
+                  _PulseStatusLed(color: statusColor),
+                  const SizedBox(width: 10),
+                ],
+                _StatusBadge(
+                  label: _formatShiftStatus(assignment.status),
+                  color: statusColor,
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -1486,19 +1496,108 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
+class _PulseStatusLed extends StatefulWidget {
+  const _PulseStatusLed({required this.color});
+
+  final Color color;
+
+  @override
+  State<_PulseStatusLed> createState() => _PulseStatusLedState();
+}
+
+class _PulseStatusLedState extends State<_PulseStatusLed>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _pulseOpacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 1, end: 1.55).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _pulseOpacityAnimation = Tween<double>(begin: 0.80, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return SizedBox(
+          width: 18,
+          height: 18,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.color.withValues(
+                      alpha: _pulseOpacityAnimation.value,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.color,
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.30),
+                      blurRadius: 10,
+                      spreadRadius: 1.2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
 String _formatShiftStatus(String rawStatus) {
   final value = rawStatus.toLowerCase();
   if (value.contains('planned')) return 'Planlandı';
-  if (value.contains('started')) return 'Başladı';
+  if (value.contains('checkedin')) return 'Başladı';
   if (value.contains('completed')) return 'Tamamlandı';
   if (value.contains('cancel')) return 'İptal';
+  if (value.contains('checkedout')) return 'Tamamlandı';
   return rawStatus;
+}
+
+bool _isCheckedInStatus(String rawStatus) {
+  return rawStatus.toLowerCase().contains('checkedin');
 }
 
 Color _resolveShiftStatusColor(String rawStatus) {
   final value = rawStatus.toLowerCase();
   if (value.contains('planned')) return const Color(0xFF2563EB);
-  if (value.contains('started')) return const Color(0xFF16A34A);
+  if (value.contains('checkedin')) return const Color(0xFF16A34A);
   if (value.contains('completed')) return const Color(0xFF64748B);
   if (value.contains('cancel')) return const Color(0xFFDC2626);
   return const Color(0xFF64748B);

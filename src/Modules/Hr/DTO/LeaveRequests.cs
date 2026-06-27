@@ -12,6 +12,15 @@ public sealed record CreateLeaveRequest(
     LeaveType Type,
     string Reason);
 
+public sealed record CreateLeaveRequestEmployee(
+    Guid? BranchId,
+    Guid? DepartmentId,
+    Guid? LeaveDeductionId,
+    DateTime StartDate,
+    DateTime EndDate,
+    LeaveType Type,
+    string Reason);
+
 public sealed record DecideLeaveRequest(
     Guid LeaveId,
     LeaveStatus Status,

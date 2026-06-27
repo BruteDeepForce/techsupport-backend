@@ -61,6 +61,30 @@ public sealed class EmployeesController : ControllerBase
 
         return Ok(result.Data);
     }
+    [HttpGet("by-claim-user")]
+    public async Task<IActionResult> GetByClaimUser(CancellationToken ct)
+    {
+        if (!TryGetTenantId(out var tenantId))
+        {
+            return Unauthorized("TenantId is required in claim (tenant_id).");
+        }
+
+        var userId = GetUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized("UserId is required in claim (user_id).");
+        }
+
+        var result = await _service.GetByClaimUserIdAsync(tenantId, userId.Value, ct);
+        if (!result.Succeeded)
+        {
+            return result.ErrorType == HRServiceErrorType.NotFound
+                ? NotFound(result.Error)
+                : BadRequest(result.Error);
+        }
+
+        return Ok(result.Data);
+    }
 
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] Guid? branchId,  CancellationToken ct = default)
@@ -115,5 +139,10 @@ public sealed class EmployeesController : ControllerBase
     {
         var claimValue = User.FindFirstValue("branch_id") ?? User.FindFirstValue("branchId");
         return Guid.TryParse(claimValue, out var branchId) ? branchId : null;
+    }
+    private Guid? GetUserId()
+    {
+        var claimValue = User.FindFirstValue("user_id") ?? User.FindFirstValue("userId");
+        return Guid.TryParse(claimValue, out var userId) ? userId : null;
     }
 }

@@ -36,6 +36,8 @@ public class HRDbContext : DbContext
 
     public DbSet<AdvanceSetting> AdvanceSettings => Set<AdvanceSetting>();
 
+    public DbSet<EmployeePerformanceReport> EmployeePerformanceReports => Set<EmployeePerformanceReport>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -60,7 +62,7 @@ public class HRDbContext : DbContext
             entity.HasIndex(x => new { x.TenantId, x.DepartmentId });
             entity.HasOne(x => x.Department).WithMany(x => x.Employees).HasForeignKey(x => x.DepartmentId);
             entity.HasOne(x => x.Position).WithMany(x => x.Employees).HasForeignKey(x => x.PositionId).OnDelete(DeleteBehavior.SetNull);
-        
+            entity.HasMany(x => x.EmployeePerformanceReports).WithOne(x => x.Employee).HasForeignKey(x => x.EmployeeId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Department>(entity =>
@@ -395,6 +397,35 @@ public class HRDbContext : DbContext
             entity.Property(x => x.CreatedAtUtc).IsRequired();
 
             entity.HasIndex(x => new { x.TenantId, x.BranchId }).IsUnique();
+        });
+
+        modelBuilder.Entity<EmployeePerformanceReport>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.TenantId).IsRequired();
+            entity.Property(x => x.BranchId);
+            entity.Property(x => x.EmployeeId).IsRequired();
+            entity.Property(x => x.Year).IsRequired();
+            entity.Property(x => x.Month).IsRequired();
+            entity.Property(x => x.TotalAssignedTasks).IsRequired();
+            entity.Property(x => x.TotalCompletedTasks).IsRequired();
+            entity.Property(x => x.TotalPendingTasks).IsRequired();
+            entity.Property(x => x.TotalOverdueTasks).IsRequired();
+            entity.Property(x => x.TotalCompletedOnTime);
+            entity.Property(x => x.TotalCompletedLate);
+            entity.Property(x => x.RewardCount).IsRequired();
+            entity.Property(x => x.PenaltyCount).IsRequired();
+            entity.Property(x => x.LeaveCount).IsRequired();
+            entity.Property(x => x.ShiftAttendanceCount).IsRequired();
+            entity.Property(x => x.NotJoinedShiftCount).IsRequired();
+            entity.Property(x => x.OvertimeCount).IsRequired();
+
+            entity.HasIndex(x => new { x.TenantId, x.EmployeeId, x.Year, x.Month }).IsUnique();
+
+            entity.HasOne(x => x.Employee)
+                .WithMany(x => x.EmployeePerformanceReports)
+                .HasForeignKey(x => x.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
