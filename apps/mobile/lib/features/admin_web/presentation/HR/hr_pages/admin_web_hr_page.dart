@@ -8,6 +8,7 @@ import 'admin_web_hr_bordro_section_page.dart';
 import 'admin_web_hr_discipline_reward_section_page.dart';
 import 'admin_web_hr_leave_section_page.dart';
 import 'admin_web_hr_leaves_page.dart';
+import 'admin_web_hr_performance_section_page.dart';
 import '../../shared/admin_web_nav.dart';
 import '../../shared/admin_web_shell.dart';
 import '../../shared/admin_web_topbar.dart';
@@ -78,10 +79,8 @@ class _AdminWebHrPageState extends State<AdminWebHrPage> {
         content = const AdminWebHrDisciplineRewardSectionPage();
         break;
       case HrSection.performance:
-        content = const _PlaceholderSection(
-          title: 'Performans Değerlendirmeleri',
-          description:
-              'Bu alan performans değerlendirmeleri ve raporları için ayrıldı.',
+        content = AdminWebHrPerformanceSectionPage(
+          onOpenEmployee: _openEmployeeDetail,
         );
         break;
       case HrSection.ayarlar:

@@ -337,6 +337,80 @@ class HRCreatePositionRequest {
   }
 }
 
+class HRPerformanceReportResponse {
+  final String id;
+  final String employeeId;
+  final String tenantId;
+  final String? branchId;
+  final int year;
+  final int month;
+  final int totalAssignedTasks;
+  final int totalCompletedTasks;
+  final int totalPendingTasks;
+  final int totalOverdueTasks;
+  final int? totalCompletedOnTime;
+  final int? totalCompletedLate;
+  final int rewardCount;
+  final int penaltyCount;
+  final int leaveCount;
+  final int shiftAttendanceCount;
+  final int notJoinedShiftCount;
+  final int overtimeCount;
+
+  HRPerformanceReportResponse({
+    required this.id,
+    required this.employeeId,
+    required this.tenantId,
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.totalAssignedTasks,
+    required this.totalCompletedTasks,
+    required this.totalPendingTasks,
+    required this.totalOverdueTasks,
+    required this.totalCompletedOnTime,
+    required this.totalCompletedLate,
+    required this.rewardCount,
+    required this.penaltyCount,
+    required this.leaveCount,
+    required this.shiftAttendanceCount,
+    required this.notJoinedShiftCount,
+    required this.overtimeCount,
+  });
+
+  factory HRPerformanceReportResponse.fromJson(Map<String, dynamic> json) {
+    int readInt(String lower, String upper) =>
+        (json[lower] ?? json[upper] ?? 0) as int;
+
+    return HRPerformanceReportResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
+      year: readInt('year', 'Year'),
+      month: readInt('month', 'Month'),
+      totalAssignedTasks:
+          readInt('totalAssignedTasks', 'TotalAssignedTasks'),
+      totalCompletedTasks:
+          readInt('totalCompletedTasks', 'TotalCompletedTasks'),
+      totalPendingTasks: readInt('totalPendingTasks', 'TotalPendingTasks'),
+      totalOverdueTasks: readInt('totalOverdueTasks', 'TotalOverdueTasks'),
+      totalCompletedOnTime:
+          json['totalCompletedOnTime'] ?? json['TotalCompletedOnTime'] as int?,
+      totalCompletedLate:
+          json['totalCompletedLate'] ?? json['TotalCompletedLate'] as int?,
+      rewardCount: readInt('rewardCount', 'RewardCount'),
+      penaltyCount: readInt('penaltyCount', 'PenaltyCount'),
+      leaveCount: readInt('leaveCount', 'LeaveCount'),
+      shiftAttendanceCount:
+          readInt('shiftAttendanceCount', 'ShiftAttendanceCount'),
+      notJoinedShiftCount:
+          readInt('notJoinedShiftCount', 'NotJoinedShiftCount'),
+      overtimeCount: readInt('overtimeCount', 'OvertimeCount'),
+    );
+  }
+}
+
 class HRLeaveDeductionResponse {
   final String id;
   final String tenantId;

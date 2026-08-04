@@ -80,8 +80,6 @@ public sealed class ShiftAssignmentService : IShiftAssignmentService
             return HRServiceResult<ShiftAssignmentResponse>.Conflict("Same shift already has been assigned.");
         }
 
-
-
         var now = DateTime.UtcNow;
         var assignment = new ShiftAssignment
         {

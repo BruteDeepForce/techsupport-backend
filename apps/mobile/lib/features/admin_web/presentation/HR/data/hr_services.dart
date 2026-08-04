@@ -30,6 +30,56 @@ class HRService {
     throw Exception('Failed to load employee detail: ${response.statusCode}');
   }
 
+  Future<List<HRPerformanceReportResponse>> getPerformanceReports({
+    required int year,
+    required int month,
+  }) async {
+    final response = await _dio.get(
+      '/api/hr/performance/all',
+      queryParameters: {
+        'year': year,
+        'month': month,
+      },
+    );
+
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as List<dynamic>;
+      return data
+          .map((item) => HRPerformanceReportResponse.fromJson(
+              item as Map<String, dynamic>))
+          .toList();
+    }
+
+    throw Exception(
+        'Failed to load performance reports: ${response.statusCode}');
+  }
+
+  Future<HRPerformanceReportResponse> getEmployeePerformanceReport(
+    String employeeId, {
+    required int year,
+    required int month,
+  }) async {
+    final response = await _dio.get(
+      '/api/hr/performance/employee/$employeeId',
+      queryParameters: {
+        'year': year,
+        'month': month,
+      },
+    );
+
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
+      final data = response.data as Map<String, dynamic>;
+      return HRPerformanceReportResponse.fromJson(data);
+    }
+
+    throw Exception(
+        'Failed to load employee performance report: ${response.statusCode}');
+  }
+
   Future<HRLargeLeaveResponseList> getLeaves(
       {String? branchId, String? startDate, String? endDate}) async {
     final response = await _dio.get('/api/hr/leaves', queryParameters: {
