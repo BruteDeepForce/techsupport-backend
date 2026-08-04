@@ -162,34 +162,4 @@ public class StockService : IStockService
             ))
             .ToListAsync(ct);
     }
-
-    public async Task ConsumeForQuickSaleAsync(Guid tenantId, Guid? branchId, Guid quickSaleId, Guid stockItemId, int quantity, string reference, CancellationToken ct = default)
-    {
-        var balance = await _db.StockBalances
-            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.StockItemId == stockItemId
-                && (branchId == null ? x.BranchId == null : x.BranchId == branchId), ct);
-
-        if (balance == null)
-            throw new InvalidOperationException($"Stock balance not found for item '{stockItemId}' in tenant '{tenantId}'");
-
-        if (balance.QuantityAvailable < quantity)
-            throw new InvalidOperationException($"Insufficient stock for item '{stockItemId}': available={balance.QuantityAvailable}, requested={quantity}");
-
-        balance.QuantityAvailable -= quantity;
-
-        _db.StockTransactions.Add(new StockTransaction
-        {
-            Id = Guid.NewGuid(),
-            TenantId = tenantId,
-            StockItemId = stockItemId,
-            BranchId = branchId,
-            OperationId = quickSaleId,
-            Quantity = -quantity,
-            Type = StockTransactionType.QuickSale,
-            Reference = reference,
-            CreatedAtUtc = DateTime.UtcNow
-        });
-
-        await _db.SaveChangesAsync(ct);
-    }
 }

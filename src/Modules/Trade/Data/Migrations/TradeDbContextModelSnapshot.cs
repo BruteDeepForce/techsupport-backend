@@ -111,110 +111,6 @@ namespace TechSupport.Trade.Data.Migrations
                     b.ToTable("device_registerations", "trade");
                 });
 
-            modelBuilder.Entity("TechSupport.Trade.Domain.Entities.QuickSale", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("BranchId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<decimal>("PaidAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("SaleNumber")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<decimal>("SubtotalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId", "CreatedAtUtc");
-
-                    b.HasIndex("TenantId", "Status");
-
-                    b.ToTable("quick_sales", "trade");
-                });
-
-            modelBuilder.Entity("TechSupport.Trade.Domain.Entities.QuickSaleLine", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("LineTotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("QuickSaleId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Sku")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<Guid>("StockItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("numeric(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuickSaleId");
-
-                    b.ToTable("quick_sale_lines", "trade");
-                });
-
             modelBuilder.Entity("TechSupport.Trade.Domain.Entities.TradeRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -318,22 +214,6 @@ namespace TechSupport.Trade.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Trade");
-                });
-
-            modelBuilder.Entity("TechSupport.Trade.Domain.Entities.QuickSaleLine", b =>
-                {
-                    b.HasOne("TechSupport.Trade.Domain.Entities.QuickSale", "QuickSale")
-                        .WithMany("Lines")
-                        .HasForeignKey("QuickSaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("QuickSale");
-                });
-
-            modelBuilder.Entity("TechSupport.Trade.Domain.Entities.QuickSale", b =>
-                {
-                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("TechSupport.Trade.Domain.Entities.TradeRecord", b =>

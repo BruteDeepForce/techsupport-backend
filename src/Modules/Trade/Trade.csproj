@@ -10,8 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="../Trade.Contracts/Trade.Contracts.csproj" />
     <ProjectReference Include="../Accounting.Contracts/Accounting.Contracts.csproj" />
-    <ProjectReference Include="../Stock/Stock.csproj" />
-    <ProjectReference Include="../Account/Account.csproj" />
     <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="../Customer.Contracts/Customer.Contracts.csproj" />
     <ProjectReference Include="../Device.Contracts/Device.Contracts.csproj" />
@@ -20,7 +18,6 @@
   <ItemGroup>
     <PackageReference Include="MassTransit" Version="8.0.7" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -15,7 +15,6 @@ public static class ModuleExtensions
 
         services.AddDbContext<TradeDbContext>(opt => opt.UseNpgsql(conn));
         services.AddScoped<ITradeService, TradeService>();
-        services.AddScoped<IQuickSaleService, QuickSaleService>();
         services.AddScoped<ITradeStatusHub, TradeStatusNotifier>();
 
         return services;
