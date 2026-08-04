@@ -105,4 +105,37 @@ public class StockService : IStockService
     {
         return await _db.StockItems.FirstOrDefaultAsync(x => x.Id == id, ct);
     }
+
+    public async Task ConsumeForQuickSaleAsync(Guid tenantId, Guid? branchId, Guid quickSaleId, Guid stockItemId, int quantity, string reference, CancellationToken ct = default)
+    {
+        if (quantity <= 0)
+            throw new InvalidOperationException("Quantity must be greater than zero");
+
+        var balance = await _db.StockBalances.FirstOrDefaultAsync(
+            x => x.TenantId == tenantId && x.StockItemId == stockItemId && x.BranchId == branchId, ct);
+
+        if (balance == null)
+            throw new InvalidOperationException("Stock balance not found");
+
+        if (balance.QuantityAvailable < quantity)
+            throw new InvalidOperationException("Insufficient stock balance");
+
+        balance.QuantityAvailable -= quantity;
+
+        var transaction = new StockTransaction
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            BranchId = branchId,
+            StockItemId = stockItemId,
+            OperationId = quickSaleId,
+            Quantity = quantity,
+            Type = StockTransactionType.QuickSale,
+            Reference = reference,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        _db.StockTransactions.Add(transaction);
+        await _db.SaveChangesAsync(ct);
+    }
 }

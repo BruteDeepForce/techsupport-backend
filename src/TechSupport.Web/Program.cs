@@ -11,6 +11,8 @@ using TechSupport.User;
 using TechSupport.Reports;
 using TechSupport.Ai;
 using TechSupport.Technician;
+using TechSupport.Account;
+using TechSupport.Trade;
 using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
 using Reports.Consumers;
@@ -37,6 +39,8 @@ builder.Services.AddOperationModule(builder.Configuration);
 builder.Services.AddReportsModule(builder.Configuration);
 builder.Services.AddTechnicianModule(builder.Configuration);
 builder.Services.AddStockModule(builder.Configuration);
+builder.Services.AddAccountModule(builder.Configuration);
+builder.Services.AddTradeModule(builder.Configuration);
 
 // MassTransit + RabbitMQ configuration
 builder.Services.AddMassTransit(x =>
