@@ -5,7 +5,6 @@ import 'core/navigation/app_navigator.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/landing/presentation/landing_page.dart';
-import 'features/quicksale/presentation/quicksale_dashboard_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +28,7 @@ class TechSupportMobileApp extends StatelessWidget {
       },
       // On web show the marketing/landing homepage. On mobile keep the
       // existing login flow as the app entrypoint.
-      home: kIsWeb ? const QuickSaleDashboardPage() : const LoginPage(),
+      home: kIsWeb ? const LandingPage() : const LoginPage(),
     );
   }
 }

@@ -9,8 +9,7 @@ public enum StockTransactionType
     Consume,
     Return,
     Adjust,
-    Reserve,
-    QuickSale
+    Reserve
 }
 
 public class StockTransaction

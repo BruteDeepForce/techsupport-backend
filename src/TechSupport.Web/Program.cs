@@ -11,8 +11,6 @@ using TechSupport.User;
 using TechSupport.Reports;
 using TechSupport.Ai;
 using TechSupport.Technician;
-using TechSupport.Account;
-using TechSupport.Trade;
 using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
 using Reports.Consumers;
