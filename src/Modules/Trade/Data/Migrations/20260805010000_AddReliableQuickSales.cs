@@ -19,12 +19,12 @@ public sealed class AddReliableQuickSales : Migration
             ProcessedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true), RetryCount = table.Column<int>(type: "integer", nullable: false),
             NextAttemptAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true), LastError = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true)
         }, constraints: table => table.PrimaryKey("PK_outbox_messages", x => x.Id));
-        migrationBuilder.CreateTable(name: "processed_messages", schema: "trade", columns: table => new
+        migrationBuilder.CreateTable(name: "inbox_messages", schema: "trade", columns: table => new
         {
             Id = table.Column<Guid>(type: "uuid", nullable: false), MessageId = table.Column<Guid>(type: "uuid", nullable: false),
             ConsumerName = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
             ProcessedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
-        }, constraints: table => table.PrimaryKey("PK_processed_messages", x => x.Id));
+        }, constraints: table => table.PrimaryKey("PK_inbox_messages", x => x.Id));
         migrationBuilder.CreateTable(name: "quick_sales", schema: "trade", columns: table => new
         {
             Id = table.Column<Guid>(type: "uuid", nullable: false), TenantId = table.Column<Guid>(type: "uuid", nullable: false), BranchId = table.Column<Guid>(type: "uuid", nullable: false),
@@ -51,7 +51,7 @@ public sealed class AddReliableQuickSales : Migration
 
         migrationBuilder.CreateIndex(name: "IX_outbox_messages_MessageId", schema: "trade", table: "outbox_messages", column: "MessageId", unique: true);
         migrationBuilder.CreateIndex(name: "IX_outbox_messages_ProcessedAtUtc_NextAttemptAtUtc", schema: "trade", table: "outbox_messages", columns: new[] { "ProcessedAtUtc", "NextAttemptAtUtc" });
-        migrationBuilder.CreateIndex(name: "IX_processed_messages_ConsumerName_MessageId", schema: "trade", table: "processed_messages", columns: new[] { "ConsumerName", "MessageId" }, unique: true);
+        migrationBuilder.CreateIndex(name: "IX_inbox_messages_ConsumerName_MessageId", schema: "trade", table: "inbox_messages", columns: new[] { "ConsumerName", "MessageId" }, unique: true);
         migrationBuilder.CreateIndex(name: "IX_quick_sales_TenantId_IdempotencyKey", schema: "trade", table: "quick_sales", columns: new[] { "TenantId", "IdempotencyKey" }, unique: true);
         migrationBuilder.CreateIndex(name: "IX_quick_sales_TenantId_SaleNumber", schema: "trade", table: "quick_sales", columns: new[] { "TenantId", "SaleNumber" }, unique: true);
         migrationBuilder.CreateIndex(name: "IX_quick_sales_TenantId_BranchId_CreatedAtUtc", schema: "trade", table: "quick_sales", columns: new[] { "TenantId", "BranchId", "CreatedAtUtc" });
@@ -61,6 +61,6 @@ public sealed class AddReliableQuickSales : Migration
     protected override void Down(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.DropTable("quick_sale_items", "trade"); migrationBuilder.DropTable("quick_sales", "trade");
-        migrationBuilder.DropTable("outbox_messages", "trade"); migrationBuilder.DropTable("processed_messages", "trade");
+        migrationBuilder.DropTable("outbox_messages", "trade"); migrationBuilder.DropTable("inbox_messages", "trade");
     }
 }

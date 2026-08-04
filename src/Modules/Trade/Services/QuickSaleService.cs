@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using TechSupport.Shared.Integration;
 using TechSupport.Trade.Contracts.Events;
 using TechSupport.Trade.Data;
 using TechSupport.Trade.Domain.Entities;
+using TechSupport.Trade.Outbox;
 
 namespace TechSupport.Trade.Services;
 
@@ -64,7 +64,7 @@ public sealed class QuickSaleService : IQuickSaleService
         };
 
         _db.QuickSales.Add(sale);
-        _db.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(
+        _db.OutboxMessages.Add(TradeOutboxMessage.Create(
             new QuickSaleStockRequested(
                 messageId,
                 correlationId,

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TechSupport.Trade.Data;
 using TechSupport.Trade.Services;
 using TechSupport.Trade.SignalR;
-using TechSupport.Shared.Integration;
+using TechSupport.Trade.Outbox;
 
 namespace TechSupport.Trade;
 
@@ -22,7 +22,7 @@ public static class ModuleExtensions
         services.AddScoped<ITradeService, TradeService>();
         services.AddScoped<IQuickSaleService, QuickSaleService>();
         services.AddScoped<ITradeStatusHub, TradeStatusNotifier>();
-        services.AddHostedService<IntegrationOutboxDispatcher<TradeDbContext>>();
+        services.AddHostedService<TradeOutboxDispatcher>();
 
         return services;
     }

@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TechSupport.Stock.Data;
-using TechSupport.Shared.Integration;
 
 namespace TechSupport.Stock;
 
@@ -24,7 +23,6 @@ public static class ModuleExtensions
         services.AddScoped<Services.ICategoryService, Services.CategoryService>();
         services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
         services.AddScoped<Services.IStockTradeProcessService, Services.StockTradeProcessService>();
-        services.AddHostedService<IntegrationOutboxDispatcher<StockDbContext>>();
         return services;
     }
 }

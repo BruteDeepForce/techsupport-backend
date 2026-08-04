@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using TechSupport.Shared.Integration;
 using TechSupport.Trade.Domain.Entities;
+using TechSupport.Trade.Outbox;
 
 namespace TechSupport.Trade.Data;
 
-public sealed class TradeDbContext : DbContext, IIntegrationMessageDbContext
+public sealed class TradeDbContext : DbContext
 {
     public TradeDbContext(DbContextOptions<TradeDbContext> options) : base(options)
     {
@@ -14,8 +14,8 @@ public sealed class TradeDbContext : DbContext, IIntegrationMessageDbContext
     public DbSet<DeviceRegisteration> DeviceRegisterations => Set<DeviceRegisteration>();
     public DbSet<QuickSale> QuickSales => Set<QuickSale>();
     public DbSet<QuickSaleItem> QuickSaleItems => Set<QuickSaleItem>();
-    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
-    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
+    public DbSet<TradeOutboxMessage> OutboxMessages => Set<TradeOutboxMessage>();
+    public DbSet<TradeInboxMessage> InboxMessages => Set<TradeInboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -105,7 +105,24 @@ public sealed class TradeDbContext : DbContext, IIntegrationMessageDbContext
             b.HasIndex(x => new { x.QuickSaleId, x.StockItemId }).IsUnique();
         });
 
-        modelBuilder.ConfigureIntegrationMessages();
+        modelBuilder.Entity<TradeOutboxMessage>(b =>
+        {
+            b.ToTable("outbox_messages");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.EventType).HasMaxLength(1000).IsRequired();
+            b.Property(x => x.Payload).HasColumnType("jsonb").IsRequired();
+            b.Property(x => x.LastError).HasMaxLength(4000);
+            b.HasIndex(x => x.MessageId).IsUnique();
+            b.HasIndex(x => new { x.ProcessedAtUtc, x.NextAttemptAtUtc });
+        });
+
+        modelBuilder.Entity<TradeInboxMessage>(b =>
+        {
+            b.ToTable("inbox_messages");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ConsumerName).HasMaxLength(300).IsRequired();
+            b.HasIndex(x => new { x.ConsumerName, x.MessageId }).IsUnique();
+        });
 
         base.OnModelCreating(modelBuilder);
     }

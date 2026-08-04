@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Accounting.Domain.Entities;
-using TechSupport.Shared.Integration;
 
 namespace TechSupport.Accounting.Data;
 
-public class AccountingDbContext : DbContext, IIntegrationMessageDbContext
+public class AccountingDbContext : DbContext
 {
     public AccountingDbContext(DbContextOptions<AccountingDbContext> options) : base(options)
     {
@@ -15,8 +14,7 @@ public class AccountingDbContext : DbContext, IIntegrationMessageDbContext
     public DbSet<InvoiceLineItem> InvoiceLineItems { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<CariHesapHareketi> CariHesapHareketleri { get; set; }
-    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
-    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
+    public DbSet<AccountingInboxMessage> InboxMessages => Set<AccountingInboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -214,6 +212,14 @@ public class AccountingDbContext : DbContext, IIntegrationMessageDbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.ConfigureIntegrationMessages();
+        modelBuilder.Entity<AccountingInboxMessage>(b =>
+        {
+            b.ToTable("inbox_messages");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ConsumerName).HasMaxLength(300).IsRequired();
+            b.Property(x => x.ResponseType).HasMaxLength(1000).IsRequired();
+            b.Property(x => x.ResponsePayload).HasColumnType("jsonb").IsRequired();
+            b.HasIndex(x => new { x.ConsumerName, x.MessageId }).IsUnique();
+        });
     }
 }

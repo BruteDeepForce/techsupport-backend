@@ -1,18 +1,17 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using TechSupport.Shared.Integration;
 using TechSupport.Stock.Data;
 using TechSupport.Stock.Domain.Entities;
 using TechSupport.Trade.Contracts.Events;
 
 namespace TechSupport.Stock.Consumers;
 
-public sealed class QuickSaleStockRequestedConsumer(StockDbContext dbContext) : IConsumer<QuickSaleStockRequested>
+public sealed class QuickSaleStockRequestedConsumer(StockDbContext dbContext, IPublishEndpoint publisher) : IConsumer<QuickSaleStockRequested>
 {
     public async Task Consume(ConsumeContext<QuickSaleStockRequested> context)
     {
         var message = context.Message;
-        if (await IsProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer), context.CancellationToken)) return;
+        if (await ReplayIfProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer), context.CancellationToken)) return;
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(context.CancellationToken);
         try
@@ -50,40 +49,44 @@ public sealed class QuickSaleStockRequestedConsumer(StockDbContext dbContext) : 
                     requested.Quantity, item.UnitPrice.Value, lineTotal));
             }
 
-            MarkProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer));
             var succeeded = new QuickSaleStockSucceeded(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
                 message.TenantId, message.BranchId, message.IdempotencyKey, pricedItems, pricedItems.Sum(x => x.LineTotal), DateTimeOffset.UtcNow);
-            dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(succeeded, succeeded.MessageId, succeeded.CorrelationId));
+            dbContext.InboxMessages.Add(StockInboxMessage.Create(message.MessageId, nameof(QuickSaleStockRequestedConsumer), succeeded));
             await dbContext.SaveChangesAsync(context.CancellationToken);
             await transaction.CommitAsync(context.CancellationToken);
+            await publisher.Publish(succeeded, context.CancellationToken);
         }
         catch (QuickSaleStockException exception)
         {
             await transaction.RollbackAsync(context.CancellationToken);
             dbContext.ChangeTracker.Clear();
-            if (await IsProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer), context.CancellationToken)) return;
-            MarkProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer));
+            if (await ReplayIfProcessed(message.MessageId, nameof(QuickSaleStockRequestedConsumer), context.CancellationToken)) return;
             var failed = new QuickSaleStockFailed(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
                 message.TenantId, message.BranchId, message.IdempotencyKey, exception.Message, DateTimeOffset.UtcNow);
-            dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(failed, failed.MessageId, failed.CorrelationId));
+            dbContext.InboxMessages.Add(StockInboxMessage.Create(message.MessageId, nameof(QuickSaleStockRequestedConsumer), failed));
             await dbContext.SaveChangesAsync(context.CancellationToken);
+            await publisher.Publish(failed, context.CancellationToken);
         }
     }
 
-    private Task<bool> IsProcessed(Guid id, string consumer, CancellationToken ct) =>
-        dbContext.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
-
-    private void MarkProcessed(Guid id, string consumer) =>
-        dbContext.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { MessageId = id, ConsumerName = consumer });
+    private async Task<bool> ReplayIfProcessed(Guid id, string consumer, CancellationToken ct)
+    {
+        var inbox = await dbContext.InboxMessages.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
+        if (inbox is null) return false;
+        var (response, type) = inbox.DeserializeResponse();
+        await publisher.Publish(response, type, ct);
+        return true;
+    }
 }
 
-public sealed class QuickSaleStockReleaseRequestedConsumer(StockDbContext dbContext) : IConsumer<QuickSaleStockReleaseRequested>
+public sealed class QuickSaleStockReleaseRequestedConsumer(StockDbContext dbContext, IPublishEndpoint publisher) : IConsumer<QuickSaleStockReleaseRequested>
 {
     public async Task Consume(ConsumeContext<QuickSaleStockReleaseRequested> context)
     {
         var message = context.Message;
         var consumerName = nameof(QuickSaleStockReleaseRequestedConsumer);
-        if (await dbContext.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == message.MessageId && x.ConsumerName == consumerName, context.CancellationToken)) return;
+        if (await ReplayIfProcessed(message.MessageId, consumerName, context.CancellationToken)) return;
 
         await using var transaction = await dbContext.Database.BeginTransactionAsync(context.CancellationToken);
         try
@@ -117,23 +120,33 @@ public sealed class QuickSaleStockReleaseRequestedConsumer(StockDbContext dbCont
                 });
             }
 
-            dbContext.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { MessageId = message.MessageId, ConsumerName = consumerName });
             var released = new QuickSaleStockReleased(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
                 message.TenantId, message.BranchId, message.IdempotencyKey, DateTimeOffset.UtcNow);
-            dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(released, released.MessageId, released.CorrelationId));
+            dbContext.InboxMessages.Add(StockInboxMessage.Create(message.MessageId, consumerName, released));
             await dbContext.SaveChangesAsync(context.CancellationToken);
             await transaction.CommitAsync(context.CancellationToken);
+            await publisher.Publish(released, context.CancellationToken);
         }
         catch (QuickSaleStockException exception)
         {
             await transaction.RollbackAsync(context.CancellationToken);
             dbContext.ChangeTracker.Clear();
-            dbContext.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { MessageId = message.MessageId, ConsumerName = consumerName });
             var failed = new QuickSaleStockReleaseFailed(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
                 message.TenantId, message.BranchId, message.IdempotencyKey, exception.Message, DateTimeOffset.UtcNow);
-            dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(failed, failed.MessageId, failed.CorrelationId));
+            dbContext.InboxMessages.Add(StockInboxMessage.Create(message.MessageId, consumerName, failed));
             await dbContext.SaveChangesAsync(context.CancellationToken);
+            await publisher.Publish(failed, context.CancellationToken);
         }
+    }
+
+    private async Task<bool> ReplayIfProcessed(Guid id, string consumer, CancellationToken ct)
+    {
+        var inbox = await dbContext.InboxMessages.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
+        if (inbox is null) return false;
+        var (response, type) = inbox.DeserializeResponse();
+        await publisher.Publish(response, type, ct);
+        return true;
     }
 }
 

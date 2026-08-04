@@ -10,7 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="../Trade.Contracts/Trade.Contracts.csproj" />
     <ProjectReference Include="../Accounting.Contracts/Accounting.Contracts.csproj" />
-    <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="../Customer.Contracts/Customer.Contracts.csproj" />
     <ProjectReference Include="../Device.Contracts/Device.Contracts.csproj" />
   </ItemGroup>

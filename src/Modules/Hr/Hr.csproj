@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="../Hr.Contracts/Hr.Contracts.csproj" />
     <ProjectReference Include="../Technician.Contracts/Technician.Contracts.csproj" />
   </ItemGroup>

@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using TechSupport.Shared.Integration;
 using TechSupport.Stock.Domain.Entities;
 
 namespace TechSupport.Stock.Data;
 
-public class StockDbContext : DbContext, IIntegrationMessageDbContext
+public class StockDbContext : DbContext
 {
     public StockDbContext(DbContextOptions<StockDbContext> options) : base(options)
     {
@@ -15,8 +14,7 @@ public class StockDbContext : DbContext, IIntegrationMessageDbContext
     public DbSet<StockTransaction> StockTransactions { get; set; }
     public DbSet<StockReservation> StockReservations { get; set; }
     public DbSet<TechSupport.Stock.Domain.Entities.StockCategories> StockCategories { get; set; }
-    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
-    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
+    public DbSet<StockInboxMessage> InboxMessages => Set<StockInboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -92,6 +90,14 @@ public class StockDbContext : DbContext, IIntegrationMessageDbContext
              .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.ConfigureIntegrationMessages();
+        modelBuilder.Entity<StockInboxMessage>(b =>
+        {
+            b.ToTable("inbox_messages");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ConsumerName).HasMaxLength(300).IsRequired();
+            b.Property(x => x.ResponseType).HasMaxLength(1000).IsRequired();
+            b.Property(x => x.ResponsePayload).HasColumnType("jsonb").IsRequired();
+            b.HasIndex(x => new { x.ConsumerName, x.MessageId }).IsUnique();
+        });
     }
 }

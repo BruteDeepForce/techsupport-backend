@@ -4,19 +4,18 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Accounting.Data;
 using TechSupport.Accounting.Domain.Entities;
-using TechSupport.Shared.Integration;
 using TechSupport.Trade.Contracts.Events;
 
 namespace TechSupport.Accounting.Consumers;
 
-public sealed class QuickSaleAccountingRequestedConsumer(AccountingDbContext dbContext)
+public sealed class QuickSaleAccountingRequestedConsumer(AccountingDbContext dbContext, IPublishEndpoint publisher)
     : IConsumer<QuickSaleAccountingRequested>
 {
     public async Task Consume(ConsumeContext<QuickSaleAccountingRequested> context)
     {
         var message = context.Message;
         var consumerName = nameof(QuickSaleAccountingRequestedConsumer);
-        if (await dbContext.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == message.MessageId && x.ConsumerName == consumerName, context.CancellationToken)) return;
+        if (await ReplayIfProcessed(message.MessageId, consumerName, context.CancellationToken)) return;
 
         if (message.TotalAmount < 0 || message.PaidAmount < 0 || message.PaidAmount > message.TotalAmount)
         {
@@ -116,21 +115,31 @@ public sealed class QuickSaleAccountingRequestedConsumer(AccountingDbContext dbC
             });
         }
 
-        dbContext.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { MessageId = message.MessageId, ConsumerName = consumerName });
         var succeeded = new QuickSaleAccountingSucceeded(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
             message.TenantId, message.BranchId, message.IdempotencyKey, invoice.Id, payment?.Id, now);
-        dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(succeeded, succeeded.MessageId, succeeded.CorrelationId));
+        dbContext.InboxMessages.Add(AccountingInboxMessage.Create(message.MessageId, consumerName, succeeded));
         await dbContext.SaveChangesAsync(context.CancellationToken);
         await transaction.CommitAsync(context.CancellationToken);
+        await publisher.Publish(succeeded, context.CancellationToken);
     }
 
     private async Task PublishBusinessFailure(QuickSaleAccountingRequested message, string consumerName, string reason, CancellationToken ct)
     {
-        dbContext.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { MessageId = message.MessageId, ConsumerName = consumerName });
         var failed = new QuickSaleAccountingFailed(Guid.NewGuid(), message.CorrelationId, message.QuickSaleId,
             message.TenantId, message.BranchId, message.IdempotencyKey, reason, DateTimeOffset.UtcNow);
-        dbContext.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(failed, failed.MessageId, failed.CorrelationId));
+        dbContext.InboxMessages.Add(AccountingInboxMessage.Create(message.MessageId, consumerName, failed));
         await dbContext.SaveChangesAsync(ct);
+        await publisher.Publish(failed, ct);
+    }
+
+    private async Task<bool> ReplayIfProcessed(Guid id, string consumer, CancellationToken ct)
+    {
+        var inbox = await dbContext.InboxMessages.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
+        if (inbox is null) return false;
+        var (response, type) = inbox.DeserializeResponse();
+        await publisher.Publish(response, type, ct);
+        return true;
     }
 
     private static PaymentMethod MapPaymentMethod(string method) => method switch

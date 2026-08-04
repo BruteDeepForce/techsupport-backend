@@ -1,9 +1,9 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using TechSupport.Shared.Integration;
 using TechSupport.Trade.Contracts.Events;
 using TechSupport.Trade.Data;
 using TechSupport.Trade.Domain.Entities;
+using TechSupport.Trade.Outbox;
 
 namespace TechSupport.Trade.Consumers;
 
@@ -71,11 +71,11 @@ public sealed class QuickSaleStockSucceededConsumer : IConsumer<QuickSaleStockSu
     private void AddOutbox<T>(T message, Guid correlationId) where T : class
     {
         var messageId = (Guid)(typeof(T).GetProperty("MessageId")?.GetValue(message) ?? Guid.NewGuid());
-        _db.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(message, messageId, correlationId));
+        _db.OutboxMessages.Add(TradeOutboxMessage.Create(message, messageId, correlationId));
     }
     private Task<bool> AlreadyProcessed(Guid messageId, string consumer, CancellationToken ct) =>
-        _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == messageId && x.ConsumerName == consumer, ct);
-    private void MarkProcessed(Guid messageId, string consumer) => _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage
+        _db.InboxMessages.AnyAsync(x => x.MessageId == messageId && x.ConsumerName == consumer, ct);
+    private void MarkProcessed(Guid messageId, string consumer) => _db.InboxMessages.Add(new TradeInboxMessage
         { Id = Guid.NewGuid(), MessageId = messageId, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
 }
 
@@ -87,7 +87,7 @@ public sealed class QuickSaleStockFailedConsumer : IConsumer<QuickSaleStockFaile
     {
         var m = context.Message;
         var consumer = nameof(QuickSaleStockFailedConsumer);
-        if (await _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
+        if (await _db.InboxMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
         var sale = await _db.QuickSales.SingleOrDefaultAsync(x => x.Id == m.QuickSaleId && x.TenantId == m.TenantId, context.CancellationToken);
         if (sale is null) throw new InvalidOperationException($"Quick sale {m.QuickSaleId} was not found.");
         if (sale.Status == QuickSaleStatus.StockProcessing)
@@ -99,7 +99,7 @@ public sealed class QuickSaleStockFailedConsumer : IConsumer<QuickSaleStockFaile
         Mark(m.MessageId, consumer);
         await _db.SaveChangesAsync(context.CancellationToken);
     }
-    private void Mark(Guid id, string consumer) => _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
+    private void Mark(Guid id, string consumer) => _db.InboxMessages.Add(new TradeInboxMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
 }
 
 public sealed class QuickSaleAccountingSucceededConsumer : IConsumer<QuickSaleAccountingSucceeded>
@@ -124,8 +124,8 @@ public sealed class QuickSaleAccountingSucceededConsumer : IConsumer<QuickSaleAc
         Mark(m.MessageId, consumer);
         await _db.SaveChangesAsync(context.CancellationToken);
     }
-    private Task<bool> Seen(Guid id, string consumer, CancellationToken ct) => _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
-    private void Mark(Guid id, string consumer) => _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
+    private Task<bool> Seen(Guid id, string consumer, CancellationToken ct) => _db.InboxMessages.AnyAsync(x => x.MessageId == id && x.ConsumerName == consumer, ct);
+    private void Mark(Guid id, string consumer) => _db.InboxMessages.Add(new TradeInboxMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
 }
 
 public sealed class QuickSaleAccountingFailedConsumer : IConsumer<QuickSaleAccountingFailed>
@@ -136,7 +136,7 @@ public sealed class QuickSaleAccountingFailedConsumer : IConsumer<QuickSaleAccou
     {
         var m = context.Message;
         var consumer = nameof(QuickSaleAccountingFailedConsumer);
-        if (await _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
+        if (await _db.InboxMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
         var sale = await _db.QuickSales.SingleOrDefaultAsync(x => x.Id == m.QuickSaleId && x.TenantId == m.TenantId, context.CancellationToken)
             ?? throw new InvalidOperationException($"Quick sale {m.QuickSaleId} was not found.");
         if (sale.Status == QuickSaleStatus.AccountingProcessing)
@@ -147,12 +147,12 @@ public sealed class QuickSaleAccountingFailedConsumer : IConsumer<QuickSaleAccou
             var eventId = Guid.NewGuid();
             var release = new QuickSaleStockReleaseRequested(eventId, m.CorrelationId, sale.Id, sale.TenantId,
                 sale.BranchId, sale.IdempotencyKey, m.Reason, DateTimeOffset.UtcNow);
-            _db.IntegrationOutboxMessages.Add(IntegrationOutboxMessage.Create(release, eventId, m.CorrelationId));
+            _db.OutboxMessages.Add(TradeOutboxMessage.Create(release, eventId, m.CorrelationId));
         }
         Mark(m.MessageId, consumer);
         await _db.SaveChangesAsync(context.CancellationToken);
     }
-    private void Mark(Guid id, string consumer) => _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
+    private void Mark(Guid id, string consumer) => _db.InboxMessages.Add(new TradeInboxMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
 }
 
 public sealed class QuickSaleStockReleasedConsumer : IConsumer<QuickSaleStockReleased>
@@ -163,7 +163,7 @@ public sealed class QuickSaleStockReleasedConsumer : IConsumer<QuickSaleStockRel
     {
         var m = context.Message;
         var consumer = nameof(QuickSaleStockReleasedConsumer);
-        if (await _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
+        if (await _db.InboxMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
         var sale = await _db.QuickSales.SingleOrDefaultAsync(x => x.Id == m.QuickSaleId && x.TenantId == m.TenantId, context.CancellationToken)
             ?? throw new InvalidOperationException($"Quick sale {m.QuickSaleId} was not found.");
         if (sale.Status == QuickSaleStatus.Compensating)
@@ -174,7 +174,7 @@ public sealed class QuickSaleStockReleasedConsumer : IConsumer<QuickSaleStockRel
         Mark(m.MessageId, consumer);
         await _db.SaveChangesAsync(context.CancellationToken);
     }
-    private void Mark(Guid id, string consumer) => _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
+    private void Mark(Guid id, string consumer) => _db.InboxMessages.Add(new TradeInboxMessage { Id = Guid.NewGuid(), MessageId = id, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
 }
 
 public sealed class QuickSaleStockReleaseFailedConsumer : IConsumer<QuickSaleStockReleaseFailed>
@@ -185,13 +185,13 @@ public sealed class QuickSaleStockReleaseFailedConsumer : IConsumer<QuickSaleSto
     {
         var m = context.Message;
         var consumer = nameof(QuickSaleStockReleaseFailedConsumer);
-        if (await _db.ProcessedIntegrationMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
+        if (await _db.InboxMessages.AnyAsync(x => x.MessageId == m.MessageId && x.ConsumerName == consumer, context.CancellationToken)) return;
         var sale = await _db.QuickSales.SingleOrDefaultAsync(x => x.Id == m.QuickSaleId && x.TenantId == m.TenantId, context.CancellationToken)
             ?? throw new InvalidOperationException($"Quick sale {m.QuickSaleId} was not found.");
         sale.Status = QuickSaleStatus.CompensationFailed;
         sale.FailureReason = $"{sale.FailureReason} Stock compensation failed: {m.Reason}";
         sale.UpdatedAtUtc = DateTimeOffset.UtcNow;
-        _db.ProcessedIntegrationMessages.Add(new ProcessedIntegrationMessage { Id = Guid.NewGuid(), MessageId = m.MessageId, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
+        _db.InboxMessages.Add(new TradeInboxMessage { Id = Guid.NewGuid(), MessageId = m.MessageId, ConsumerName = consumer, ProcessedAtUtc = DateTimeOffset.UtcNow });
         await _db.SaveChangesAsync(context.CancellationToken);
     }
 }
