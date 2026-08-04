@@ -51,6 +51,7 @@ public class StockDbContext : DbContext
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.StockItemId, x.BranchId }).IsUnique();
             b.Property(x => x.RowVersion).IsRowVersion();
+            //! burada sıkıntı var gibi. bir item için birden fazla balance niye var? 
 
             // relation: StockBalance -> StockItem (many balances for one item), cascade on delete
             b.HasOne(x => x.StockItem)
@@ -77,6 +78,7 @@ public class StockDbContext : DbContext
             b.ToTable("stock_reservations");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.OperationId });
+            b.HasIndex(x => new { x.IdempotentcyKey }).IsUnique();
 
             b.HasOne(x => x.StockItem)
              .WithMany(i => i.Reservations)

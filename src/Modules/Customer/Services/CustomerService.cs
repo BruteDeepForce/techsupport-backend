@@ -9,6 +9,8 @@ using TechSupport.Customer.Contracts.Events;
 using TechSupport.Customer.Domain.Entities;
 using TechSupport.Identity.Contracts.Events;
 using MassTransit.Initializers;
+using Customer.Contracts.Events;
+using Microsoft.Extensions.Logging;
 
 namespace TechSupport.Customer.Services
 {
@@ -17,14 +19,16 @@ namespace TechSupport.Customer.Services
         Task<bool> GetCustomerExistsAsync(Guid customerId);
         Task<TechSupport.Customer.Domain.Entities.Customer> CreateCustomerAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, CancellationToken ct);
         Task<bool> DeleteCustomerAsync(Guid customerId, CancellationToken ct);
-        Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid deviceId, 
-        string? deviceSerialNumber, string? barcodeNumber, string? problemDescription, 
+        Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid? customerAppUserId, Guid deviceId,
+        string? deviceSerialNumber, string? barcodeNumber, string? problemDescription,
         string? model, string status, CancellationToken ct,
         string? brand = null, bool isActive = true, int? guaranteePeriod = null,
-        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null);
+        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null,
+        Guid? tradeId = null, string? idempotencyKey = null);
         Task<TechSupport.Customer.Domain.Entities.Customer?> GetByIdAsync(Guid tenantId, Guid customerId, CancellationToken ct);
         Task<IReadOnlyList<TechSupport.Customer.Domain.Entities.Customer>> ListAsync(Guid tenantId, CancellationToken ct);
-        Task<CustomerProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct);
+        Task<CustomerProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string name, string email,
+        string? phoneNumber, string temporaryPassword, Guid? tradeID, string? TradeCorelationId, CancellationToken ct);
         Task<CustomerProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct);
         Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, CancellationToken ct);
         Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
@@ -34,27 +38,36 @@ namespace TechSupport.Customer.Services
     {
         private readonly CustomerDbContext _db;
         private readonly IBus _bus;
+        private readonly ILogger<CustomerService> _logger;
 
-        public CustomerService(CustomerDbContext db, IBus bus)
+        public CustomerService(CustomerDbContext db, IBus bus, ILogger<CustomerService> logger)
         {
             _db = db;
             _bus = bus;
+            _logger = logger;
         }
 
-        public async Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid deviceId, 
+        public async Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid? customerAppUserId, Guid deviceId,
         string? deviceSerialNumber, string? barcodeNumber, string? problemDescription,
         string? model, string status, CancellationToken ct,
         string? brand = null, bool isActive = true, int? guaranteePeriod = null,
-        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null)
+        DateTimeOffset? warrantyStartAtUtc = null, DateTimeOffset? warrantyEndAtUtc = null,
+        Guid? tradeId = null, string? idempotencyKey = null)
         {
             var customer = await _db.Customers.FirstOrDefaultAsync(x => x.Id == customerId && x.TenantId == tenantId, ct);
-            if (customer is null) return false;
+            if (customer is null)
+            {
+                _logger.LogWarning("Customer with Id: {CustomerId} not found for TenantId: {TenantId}. Cannot assign device.", customerId, tenantId);
+                return false;
+            }
+            _logger.LogCritical("IdempotencyKey: {IdempotencyKey}", idempotencyKey);
 
             var existing = await _db.CustomerDevices
                 .FirstOrDefaultAsync(x => x.CustomerId == customerId && x.DeviceId == deviceId, ct);
 
             if (existing is null)
             {
+                _logger.LogInformation("Creating new CustomerDevice mapping for CustomerId: {CustomerId} and DeviceId: {DeviceId}", customerId, deviceId);
                 existing = new CustomerDevice
                 {
                     Id = Guid.NewGuid(),
@@ -67,7 +80,7 @@ namespace TechSupport.Customer.Services
 
                 await _db.CustomerDevices.AddAsync(existing, ct);
             }
-
+            _logger.LogWarning("Updating CustomerDevice mapping for CustomerId: {CustomerId} and DeviceId: {DeviceId}", customerId, deviceId);
             existing.TenantId = customer.TenantId;
             existing.BranchId = branchId ?? customer.BranchId;
             existing.Brand = brand?.Trim();
@@ -83,17 +96,74 @@ namespace TechSupport.Customer.Services
             existing.UpdatedAtUtc = DateTime.UtcNow;
             if (!isActive && existing.DeletedAtUtc is null)
             {
+                _logger.LogCritical("Soft deleting CustomerDevice mapping for CustomerId: {CustomerId} and DeviceId: {DeviceId}", customerId, deviceId);
                 existing.DeletedAtUtc = DateTime.UtcNow;
             }
             else if (isActive)
             {
+                _logger.LogInformation("Restoring CustomerDevice mapping for CustomerId: {CustomerId} and DeviceId: {DeviceId}", customerId, deviceId);
                 existing.DeletedAtUtc = null;
             }
 
+            //! trade id doluysa event publish edilecek. 
+
             await _db.SaveChangesAsync(ct);
+            if (tradeId.HasValue && !string.IsNullOrWhiteSpace(idempotencyKey))
+            {
+                try
+                {
+                await _bus.Publish(new TradeDeviceUpdateRequest
+                {
+                    TenantId = tenantId,
+                    BranchId = branchId ?? Guid.Empty,
+                    CustomerId = customerAppUserId ?? Guid.Empty,
+                    DeviceId = deviceId,
+                    Brand = brand?.Trim(),
+                    Model = model?.Trim(),
+                    SerialNumber = deviceSerialNumber?.Trim(),
+                    BarcodeNumber = barcodeNumber?.Trim(),
+                    ProblemDescription = problemDescription?.Trim(),
+                    Status = string.IsNullOrWhiteSpace(status) ? null : status.Trim(),
+                    GuaranteePeriod = guaranteePeriod,
+                    WarrantyStartAtUtc = warrantyStartAtUtc,
+                    TradeId = tradeId.Value,
+                    IdempotencyKey = idempotencyKey.Trim()
+                }, ct);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error publishing TradeDeviceUpdateRequest for TradeId: {TradeId}, CustomerId: {CustomerId}, DeviceId: {DeviceId}", tradeId.Value, customerId, deviceId);
+                    // Decide whether to rethrow, swallow, or handle the exception based on your application's needs
+                }
+
+                _logger.LogInformation("Publishing TradeCustomerDeviceMapCompleted event for TradeId: {TradeId}, CustomerId: {CustomerId}, TenantId: {TenantId}", tradeId.Value, customerId, tenantId);
+                await _bus.Publish(new TradeCustomerDeviceMapCompleted
+                {
+                    TenantId = tenantId,
+                    BranchId = branchId ?? Guid.Empty,
+                    CustomerId = customerId,
+                    DeviceId = deviceId,
+                    Brand = brand?.Trim(),
+                    Model = model?.Trim(),
+                    SerialNumber = deviceSerialNumber?.Trim(),
+                    BarcodeNumber = barcodeNumber?.Trim(),
+                    ProblemDescription = problemDescription?.Trim(),
+                    Status = string.IsNullOrWhiteSpace(status) ? null : status.Trim(),
+                    IsActive = isActive,
+                    GuaranteePeriod = guaranteePeriod,
+                    WarrantyStartAtUtc = warrantyStartAtUtc,
+                    WarrantyEndAtUtc = warrantyEndAtUtc,
+                    TradeId = tradeId.Value,
+                    IdempotencyKey = idempotencyKey.Trim(),
+                }, ct);
+            }
+            else
+            {
+                _logger.LogCritical("TradeId or IdempotencyKey is missing. Skipping publishing TradeCustomerDeviceMapCompleted event for CustomerId: {CustomerId} and DeviceId: {DeviceId}", customerId, deviceId);
+            }
             return true;
         }
-        // kaldırıldı kullanılmıyor StartProvisioningAsync metodu içerisinde müşteri oluşturuluyor.
+        //! kaldırıldı kullanılmıyor StartProvisioningAsync metodu içerisinde müşteri oluşturuluyor.
         public async Task<TechSupport.Customer.Domain.Entities.Customer> CreateCustomerAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, CancellationToken ct)
         {
             var exists = await _db.Customers.AnyAsync(x => x.TenantId == tenantId && x.Email == email, ct);
@@ -146,7 +216,8 @@ namespace TechSupport.Customer.Services
                 .ToListAsync(ct);
         }
 
-        public async Task<CustomerProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId, string name, string email, string? phoneNumber, string temporaryPassword, CancellationToken ct)
+        public async Task<CustomerProvisionRequest> StartProvisioningAsync(Guid tenantId, Guid? branchId,
+        string name, string email, string? phoneNumber, string temporaryPassword, Guid? TradeID, string? TradeCorelationId, CancellationToken ct)
         {
             //varsa bu müşteri start yapmıyoruz. Aynı email ve telefon numarasıyla müşteri varsa yeni bir provision request oluşturulmaz, var olan request döndürülür veya hata verilir. Bu sayede aynı müşteri için birden fazla provisioning süreci başlamasının önüne geçilir.
             var correlationId = Guid.NewGuid();
@@ -174,8 +245,38 @@ namespace TechSupport.Customer.Services
                     CompletedAtUtc = DateTimeOffset.UtcNow
                 };
             }
+            if (TradeID != null && TradeCorelationId != null) //!trade işleminden gelen request ise 
+            {
+                var request = new CustomerProvisionRequest
+                {
+                    Id = Guid.NewGuid(),
+                    CorrelationId = correlationId,
+                    TenantId = tenantId,
+                    BranchId = branchId,
+                    Name = name.Trim(),
+                    Email = email.Trim(),
+                    PhoneNumber = phoneNumber?.Trim() ?? string.Empty,
+                    Status = ProvisioningStatus.Pending,
+                    TradeId = TradeID,
+                    TradeCorelationKey = TradeCorelationId,
+                    CreatedAtUtc = DateTimeOffset.UtcNow
+                };
 
-            var request = new CustomerProvisionRequest
+                await _db.CustomerProvisionRequests.AddAsync(request, ct);
+                await _db.SaveChangesAsync(ct);
+
+                await _bus.Publish(new CustomerAccountProvisionRequested(
+                    request.CorrelationId,
+                    request.TenantId,
+                    request.BranchId,
+                    request.Name,
+                    request.Email,
+                    request.PhoneNumber,
+                    temporaryPassword), ct);
+
+                return request;
+            }
+            var requestWithoutTrade = new CustomerProvisionRequest
             {
                 Id = Guid.NewGuid(),
                 CorrelationId = correlationId,
@@ -187,21 +288,20 @@ namespace TechSupport.Customer.Services
                 Status = ProvisioningStatus.Pending,
                 CreatedAtUtc = DateTimeOffset.UtcNow
             };
-
-            await _db.CustomerProvisionRequests.AddAsync(request, ct);
+            await _db.CustomerProvisionRequests.AddAsync(requestWithoutTrade, ct);
             await _db.SaveChangesAsync(ct);
-
             await _bus.Publish(new CustomerAccountProvisionRequested(
-                request.CorrelationId,
-                request.TenantId,
-                request.BranchId,
-                request.Name,
-                request.Email,
-                request.PhoneNumber,
-                temporaryPassword), ct);
+                    requestWithoutTrade.CorrelationId,
+                    requestWithoutTrade.TenantId,
+                    requestWithoutTrade.BranchId,
+                    requestWithoutTrade.Name,
+                    requestWithoutTrade.Email,
+                    requestWithoutTrade.PhoneNumber,
+                    temporaryPassword), ct);
 
-            return request;
+            return requestWithoutTrade;
         }
+
 
         public Task<CustomerProvisionRequest?> GetProvisioningStatusAsync(Guid correlationId, CancellationToken ct)
         {
@@ -251,9 +351,26 @@ namespace TechSupport.Customer.Services
             await _db.SaveChangesAsync(ct);
 
             //customer create eventini report ve operation modülleri dinliyor.
-            await _bus.Publish(new CustomerCreated(existingCustomer.Id, existingCustomer.AppUserId, existingCustomer.TenantId, existingCustomer.BranchId, existingCustomer.Name, existingCustomer.Email, DateTimeOffset.UtcNow), ct);
+            await _bus.Publish(new CustomerCreated(existingCustomer.Id, existingCustomer.AppUserId, existingCustomer.TenantId,
+            existingCustomer.BranchId, existingCustomer.Name, existingCustomer.Email, DateTimeOffset.UtcNow), ct);
             //await _bus.Publish(new CustomerIdentityLinked(existingCustomer.Id, appUserId, correlationId, DateTimeOffset.UtcNow), ct);
+
+            if (request.TradeId != null && request.TradeCorelationKey != null) //! trade işleminden gelen request ise TradeCustomerCreatedComplete eventi 
+                await _bus.Publish(new TradeCustomerCreatedComplete
+                {
+                    TenantId = existingCustomer.TenantId,
+                    BranchId = existingCustomer.BranchId,
+                    Name = existingCustomer.Name,
+                    Email = existingCustomer.Email,
+                    PhoneNumber = existingCustomer.PhoneNumber,
+                    AppUserId = appUserId,
+                    CustomerId = existingCustomer.Id,
+                    TradeId = request.TradeId.Value,
+                    TradeCorelationKey = request.TradeCorelationKey,
+                    OccurredAtUtc = DateTimeOffset.UtcNow
+                }, ct);
         }
+
 
         public async Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct)
         {

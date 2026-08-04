@@ -127,6 +127,85 @@ namespace TechSupport.Operation.Data.Migrations
                     b.ToTable("maintenance_template_checklists", "operations");
                 });
 
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OfferRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid?>("CustomerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("LaborAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TechnicianUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("offer_records", "operations");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OfferRecordItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("OfferRecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StockItemId")
+                        .HasMaxLength(256)
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfferRecordId");
+
+                    b.ToTable("offer_record_items", "operations");
+                });
+
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationBrand", b =>
                 {
                     b.Property<Guid>("Id")
@@ -238,6 +317,10 @@ namespace TechSupport.Operation.Data.Migrations
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CustomerFullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
@@ -280,6 +363,10 @@ namespace TechSupport.Operation.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("TechnicianFullName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -337,6 +424,9 @@ namespace TechSupport.Operation.Data.Migrations
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -451,6 +541,17 @@ namespace TechSupport.Operation.Data.Migrations
                     b.Navigation("MaintenanceTemplate");
                 });
 
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OfferRecordItem", b =>
+                {
+                    b.HasOne("TechSupport.Operation.Domain.Entities.OfferRecord", "OfferRecord")
+                        .WithMany("Items")
+                        .HasForeignKey("OfferRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OfferRecord");
+                });
+
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OperationRecord", b =>
                 {
                     b.HasOne("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", "MaintenanceTemplate")
@@ -481,6 +582,11 @@ namespace TechSupport.Operation.Data.Migrations
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.MaintenanceTemplate", b =>
                 {
                     b.Navigation("Checklists");
+                });
+
+            modelBuilder.Entity("TechSupport.Operation.Domain.Entities.OfferRecord", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("TechSupport.Operation.Domain.Entities.Ticket", b =>

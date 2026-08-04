@@ -1,10 +1,14 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../../core/design/app_design.dart';
 import '../../admin/presentation/admin_home_page.dart';
+import '../../admin_web/presentation/admin_web_home_page.dart';
+import '../../customer_web/presentation/customer_web_ticket_page.dart';
 import '../../customer/presentation/customer_home_page.dart';
 import '../../technician/presentation/technician_home_page.dart';
+import '../../technician_web/presentation/technician_web_home_page.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key, this.initialRole});
@@ -61,7 +65,8 @@ class RoleSelectionPage extends StatelessWidget {
                   metric: '6 talep',
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                          builder: (_) => const AdminHomePage())),
+                          builder: (_) =>
+                              kIsWeb ? const AdminWebHomePage() : const AdminHomePage())),
                 ),
                 const SizedBox(height: 8),
                 _RoleTile(
@@ -73,7 +78,9 @@ class RoleSelectionPage extends StatelessWidget {
                   metric: '3 açık',
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                          builder: (_) => const CustomerHomePage())),
+                          builder: (_) => kIsWeb
+                              ? const CustomerWebTicketPage()
+                              : const CustomerHomePage())),
                 ),
                 const SizedBox(height: 8),
                 _RoleTile(
@@ -85,7 +92,9 @@ class RoleSelectionPage extends StatelessWidget {
                   metric: '2 aktif',
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                          builder: (_) => const TechnicianHomePage())),
+                          builder: (_) => kIsWeb
+                              ? const TechnicianWebHomePage()
+                              : const TechnicianHomePage())),
                 ),
               ],
             ),

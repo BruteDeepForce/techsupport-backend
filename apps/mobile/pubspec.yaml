@@ -16,6 +16,9 @@ dependencies:
   go_router: ^14.2.0
   flutter_riverpod: ^2.5.1
   google_fonts: ^6.2.1
+  image_picker: ^1.1.2
+  syncfusion_flutter_pdfviewer: ^28.2.12
+  signalr_netcore: ^1.4.4
 
 dev_dependencies:
   flutter_test:
@@ -35,4 +38,3 @@ flutter:
     - assets/branding/
     - assets/photos/
     - assets/mockups.png
-

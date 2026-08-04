@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/design/app_design.dart';
 import '../../technician/data/technician_service.dart';
 import '../../technician/models/technician_models.dart';
-import '../../technician/presentation/technician_detail_page.dart';
 import 'admin_home_page.dart';
 import 'admin_tickets_page.dart';
 import 'admin_devices_page.dart';
@@ -309,34 +308,24 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
                       ]
                     : List.generate(_technicians.length, (i) {
                         final t = _technicians[i];
-                        final name =
-                            '${t.firstName}${t.lastName != null ? ' ${t.lastName}' : ''}';
+                        final name = t.name;
                         return _TeamMemberRow(
-                          id: t.id,
+                          id: t.userId,
                           name: name,
                           role: 'Teknisyen',
                           tasks: 0,
                           isActive: t.isActive,
-                          status: t.isActive ? 'Aktif' : 'Pasif',
-                          statusColor: t.isActive
-                              ? AppColors.statusGreen
-                              : AppColors.statusGray,
+                          status: t.isActive == null
+                              ? 'Bilinmiyor'
+                              : (t.isActive! ? 'Aktif' : 'Pasif'),
+                          statusColor: t.isActive == null
+                              ? AppColors.statusGray
+                              : (t.isActive!
+                                  ? AppColors.statusGreen
+                                  : AppColors.statusGray),
                           showDivider: i != _technicians.length - 1,
-                          onToggleActive: (newVal) async {
-                            try {
-                              await _techService.setActive(t.id, newVal);
-                              await _loadTechnicians();
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Aktif/pasif güncelleme başarısız')));
-                            }
-                          },
-                          onViewDetails: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (_) =>
-                                      TechnicianDetailPage(id: t.id))),
+                          onToggleActive: null,
+                          onViewDetails: null,
                         );
                       }),
           ),
@@ -495,26 +484,32 @@ class _TeamMemberRow extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w500)),
                   const SizedBox(width: 8),
-                  PopupMenuButton<String>(
-                    onSelected: (val) async {
-                      if (val == 'toggle' &&
-                          onToggleActive != null &&
-                          isActive != null) {
-                        await onToggleActive!(!isActive!);
-                      }
-                      if (val == 'details' && onViewDetails != null)
-                        onViewDetails!();
-                    },
-                    itemBuilder: (_) => [
-                      PopupMenuItem(value: 'details', child: Text('Detay')),
-                      PopupMenuItem(
-                          value: 'toggle',
-                          child: Text(
-                              isActive == true ? 'Pasif Yap' : 'Aktif Yap')),
-                    ],
-                    child: const Icon(Icons.more_vert,
-                        size: 18, color: AppColors.textTertiary),
-                  ),
+                  if (onToggleActive != null || onViewDetails != null)
+                    PopupMenuButton<String>(
+                      onSelected: (val) async {
+                        if (val == 'toggle' &&
+                            onToggleActive != null &&
+                            isActive != null) {
+                          await onToggleActive!(!isActive!);
+                        }
+                        if (val == 'details' && onViewDetails != null) {
+                          onViewDetails!();
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        if (onViewDetails != null)
+                          const PopupMenuItem(
+                              value: 'details', child: Text('Detay')),
+                        if (onToggleActive != null && isActive != null)
+                          PopupMenuItem(
+                              value: 'toggle',
+                              child: Text(isActive == true
+                                  ? 'Pasif Yap'
+                                  : 'Aktif Yap')),
+                      ],
+                      child: const Icon(Icons.more_vert,
+                          size: 18, color: AppColors.textTertiary),
+                    ),
                 ],
               ),
             ],

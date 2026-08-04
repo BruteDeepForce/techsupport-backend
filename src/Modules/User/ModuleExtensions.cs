@@ -12,6 +12,12 @@ public static class ModuleExtensions
 
         services.AddDbContext<TechSupport.User.Data.UserDbContext>(opt =>
             opt.UseNpgsql(conn));
+        
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<TechSupport.User.Data.UserDbContext>();
+            dbContext.Database.Migrate();
+        }
 
         services.AddScoped<Services.IUserService, Services.UserService>();
 

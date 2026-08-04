@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TechSupport.Operation.Services;
 using TechSupport.Operation.DTO;
 using TechSupport.Operation.Domain.Entities;
+using System.Security.Claims;
 
 namespace TechSupport.Operation.Api.Controllers;
 
@@ -24,10 +25,11 @@ public sealed class TicketsController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var userId = GetUserIdFromClaims();
         var branchId = GetBranchIdFromClaims();
+        var username = GetUserNameFromClaims();
     if (tenantId == null || userId == null) return Unauthorized();
 
     // CustomerId is taken from authenticated user claims (userId)
-    var ticket = await _tickets.CreateAsync(tenantId.Value, branchId, userId.Value, dto.DeviceId, dto.Title, dto.Description, dto.Priority ?? Priority.Normal, ct);
+    var ticket = await _tickets.CreateAsync(tenantId.Value, branchId, userId.Value, username, dto.DeviceId, dto.Title, dto.Description, dto.Priority ?? Priority.Normal, ct);
         return Ok(ToResponse(ticket));
     }
 
@@ -48,17 +50,19 @@ public sealed class TicketsController : ControllerBase
     {
         var tenantId = GetTenantIdFromClaims();
         if (tenantId == null) return Unauthorized();
-        var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+        var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
         if (role == "customer")
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return Unauthorized();
             var list = await _tickets.CustomerGetAllAsync(tenantId.Value, userId.Value, ct);
+            if (!list.Any()) return NotFound();
             return Ok(list.Select(ToResponse));
         }
         else if (role == "admin")
         {
             var list = await _tickets.AdminGetAllAsync(tenantId.Value, ct);
+            if (!list.Any()) return NotFound();
             return Ok(list.Select(ToResponse));
         }
         return Forbid();
@@ -71,7 +75,7 @@ public sealed class TicketsController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var userId = GetUserIdFromClaims();
         if (tenantId == null || userId == null) return Unauthorized();
-        var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+        var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
         if (role != "admin") return Forbid();
 
         var op = await _tickets.ConvertAsync(tenantId.Value, id, userId.Value, dto.TechnicianInfo, dto.operationType, dto.InternalNote, dto.priority, ct);
@@ -85,7 +89,7 @@ public sealed class TicketsController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var userId = GetUserIdFromClaims();
         if (tenantId == null || userId == null) return Unauthorized();
-        var role = User.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+        var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
         if (role != "admin") return Forbid();
 
         try
@@ -126,9 +130,15 @@ public sealed class TicketsController : ControllerBase
         }
         return null;
     }
+    private string? GetUserNameFromClaims()
+    {
+        var username = User.Claims.FirstOrDefault(x=> x.Type == "username")?.Value;
+        
+        return username;
+    }
 
     private static ResponseTicket ToResponse(Ticket t)
     {
-        return new ResponseTicket(t.Id, t.TenantId, t.BranchId, t.CustomerId, t.DeviceId, t.Title, t.Description, t.Priority.ToString(), t.Status.ToString(), t.CreatedAtUtc, t.OperationId);
+        return new ResponseTicket(t.Id, t.TenantId, t.BranchId, t.CustomerId, t.CustomerName,t.DeviceId, t.Title, t.Description, t.Priority.ToString(), t.Status.ToString(), t.CreatedAtUtc, t.OperationId);
     }
 }

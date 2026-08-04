@@ -46,8 +46,8 @@ public class UserService : IUserService
         return profile;
     }
 
-    public Task<UserProfile?> GetByAppUserIdAsync(Guid appUserId, CancellationToken ct)
+    public async Task<UserProfile?> GetByAppUserIdAsync(Guid appUserId, CancellationToken ct)
     {
-        return _db.UserProfiles.AsNoTracking().FirstOrDefaultAsync(x => x.AppUserId == appUserId, ct);
+        return await _db.UserProfiles.AsNoTracking().FirstOrDefaultAsync(x => x.AppUserId == appUserId, ct);
     }
 }

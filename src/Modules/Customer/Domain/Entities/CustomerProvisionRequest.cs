@@ -15,6 +15,9 @@ public sealed class CustomerProvisionRequest
     public string? FailureReason { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? CompletedAtUtc { get; set; }
+
+    public Guid? TradeId {get;set;}
+    public string? TradeCorelationKey {get;set;}
 }
 
 public enum ProvisioningStatus

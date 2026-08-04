@@ -11,6 +11,12 @@ namespace TechSupport.Device.Contracts.Events
         public Guid TenantId { get; set; }
         public Guid BranchId { get; set; }
         public Guid CustomerId { get; set; }
+
+        public Guid? AppUserId { get; set; }
+
+        public Guid? TradeId { get; set; }
+        public string? IdempotencyKey { get; set; }
+        
         public string Status { get; set; } = string.Empty;
         public string? CustomerName { get; set; }
         public string? ProblemDescription { get; set; } = string.Empty;

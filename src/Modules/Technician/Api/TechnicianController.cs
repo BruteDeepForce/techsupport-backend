@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TechSupport.Technician.Services;
 
@@ -15,9 +16,17 @@ public class TechnicianController : ControllerBase
         _technicians = technicians;
     }
 
-    public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, string? PhoneNumber, string TemporaryPassword);
+    public sealed record CreateTechnicianDto(string FirstName, string LastName, string Email, 
+    string? PhoneNumber, string TemporaryPassword,
+    DateTimeOffset? EmploymentStartDate, List<string>? ExpertIds);
+
+    public sealed record UpdateTechnicianDto(string? FirstName, string? LastName, string? Email, 
+    string? PhoneNumber, string? TemporaryPassword,
+    DateTimeOffset? EmploymentStartDate, List<string>? ExpertIds);
     public sealed record SetActiveDto(bool IsActive);
     public sealed record UpdateWorkItemStatusDto(string Status);
+
+    public sealed record ExpertDTO(string Name);
 
     [Authorize(Roles = "admin")]
     [HttpPost]
@@ -27,12 +36,34 @@ public class TechnicianController : ControllerBase
         var branchId = GetBranchIdFromClaims();
         if (tenantId is null) return Unauthorized();
 
-        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.Email, dto.PhoneNumber, dto.TemporaryPassword, ct);
+        var request = await _technicians.StartProvisioningAsync(tenantId.Value, branchId, dto.FirstName, dto.Email, dto.PhoneNumber, 
+        dto.TemporaryPassword, dto.ExpertIds, dto.EmploymentStartDate, ct);
         return Accepted(new
         {
             correlationId = request.CorrelationId,
             status = request.Status.ToString()
         });
+    }
+    [Authorize]
+    [HttpPost("createExperts")]
+    public async Task<IActionResult> CreateExperts([FromBody] ExpertDTO dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        var experts = await _technicians.CreateTechnicianExpertiseAsync(tenantId.Value, dto.Name, ct);
+        return Ok(experts);
+    }
+    
+    [Authorize]
+    [HttpGet("experts")]
+    public async Task<IActionResult> GetExperts(CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        var experts = await _technicians.GetTechnicianExpertiseByNameAsync(tenantId.Value, ct);
+        return Ok(experts);
     }
 
     [Authorize(Roles = "admin")]
@@ -73,6 +104,18 @@ public class TechnicianController : ControllerBase
             status.CompletedAtUtc
         });
     }
+    [Authorize]
+    [HttpPut("update-profile")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateTechnicianDto? dto, [FromForm] IFormFile? picture, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var branchId = GetBranchIdFromClaims();
+        var technicianId = GetUserIdFromClaims();
+        if (tenantId is null || technicianId is null) return Unauthorized();
+        var updated = await _technicians.UpdateTechnicianProfileAsync(tenantId.Value, branchId.Value, technicianId.Value, 
+        dto.FirstName, dto.Email, dto.PhoneNumber, dto.ExpertIds, picture, ct);
+        return Ok(updated);
+    }
 
     [Authorize(Roles = "admin")]
     [HttpPatch("{technicianId:guid}/active")]
@@ -111,5 +154,11 @@ public class TechnicianController : ControllerBase
     {
         var branchClaim = User.Claims.FirstOrDefault(c => c.Type == "branch_id");
         return branchClaim != null && Guid.TryParse(branchClaim.Value, out var branchId) ? branchId : null;
+    }
+
+    private Guid? GetUserIdFromClaims()
+    {
+        var userClaim = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "user_id" || c.Type.EndsWith("nameidentifier", StringComparison.OrdinalIgnoreCase));
+        return userClaim != null && Guid.TryParse(userClaim.Value, out var userId) ? userId : null;
     }
 }

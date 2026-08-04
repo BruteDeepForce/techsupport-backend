@@ -1,0 +1,1304 @@
+class HREmployeeLargeDetailResponse {
+  final List<EmployeeResponse> employees;
+  final int totalEmployees;
+  final int activeCount;
+  final int passiveCount;
+  final int employeeOnLeaveCount;
+  final int pendingLeavesCount;
+  final int employeePendingAdvancesRequests;
+
+  HREmployeeLargeDetailResponse({
+    required this.employees,
+    required this.totalEmployees,
+    required this.activeCount,
+    required this.passiveCount,
+    required this.employeeOnLeaveCount,
+    required this.pendingLeavesCount,
+    required this.employeePendingAdvancesRequests,
+  });
+
+  factory HREmployeeLargeDetailResponse.fromJson(Map<String, dynamic> json) {
+    return HREmployeeLargeDetailResponse(
+      employees: (json['employees'] as List<dynamic>)
+          .map((e) => EmployeeResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      totalEmployees: json['TotalCount'] ?? json['totalCount'] as int,
+      activeCount: json['ActiveCount'] ?? json['activeCount'] as int,
+      passiveCount: json['PassiveCount'] ?? json['passiveCount'] as int,
+      employeeOnLeaveCount:
+          json['EmployeesOnLeaveCount'] ?? json['employeesOnLeaveCount'] as int,
+      pendingLeavesCount:
+          json['PendingLeavesCount'] ?? json['pendingLeavesCount'] as int,
+      employeePendingAdvancesRequests:
+          json['EmployeesWithPendingAdvanceRequestsCount'] ??
+              json['employeesWithPendingAdvanceRequestsCount'] as int,
+    );
+  }
+}
+
+class EmployeeResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String fullName;
+  final String employeeNo;
+  final String? departmentId;
+  final String? positionId;
+  final String? positionName;
+  final String? email;
+  final String? phone;
+  final String? profileImageUrl;
+  final String status;
+  final DateTime? jobsStartDateUtc;
+  final DateTime? jobsEndDateUtc;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+  final DateTime? deletedAtUtc;
+  final String userId;
+
+  EmployeeResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.fullName,
+    required this.employeeNo,
+    this.departmentId,
+    this.positionId,
+    this.positionName,
+    this.email,
+    this.phone,
+    this.profileImageUrl,
+    required this.status,
+    this.jobsStartDateUtc,
+    this.jobsEndDateUtc,
+    required this.createdAtUtc,
+    this.updatedAtUtc,
+    this.deletedAtUtc,
+    required this.userId,
+  });
+
+  factory EmployeeResponse.fromJson(Map<String, dynamic> json) {
+    final jobsStartDateValue =
+        json['jobsStartDateUtc'] ?? json['JobsStartDateUtc'];
+
+    final jobsEndDateValue = json['jobsEndDateUtc'] ?? json['JobsEndDateUtc'];
+
+    final createdAtValue = json['createdAtUtc'] ?? json['CreatedAtUtc'];
+
+    final updatedAtValue = json['updatedAtUtc'] ?? json['UpdatedAtUtc'];
+
+    final deletedAtValue = json['deletedAtUtc'] ?? json['DeletedAtUtc'];
+
+    return EmployeeResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      fullName: (json['fullName'] ?? json['FullName']).toString(),
+      employeeNo: (json['employeeNo'] ?? json['EmployeeNo']).toString(),
+      departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+      positionId: (json['positionId'] ?? json['PositionId'])?.toString(),
+      positionName: (json['positionName'] ?? json['PositionName'])?.toString(),
+      email: (json['email'] ?? json['Email'])?.toString(),
+      phone: (json['phone'] ?? json['Phone'])?.toString(),
+      profileImageUrl:
+          (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+      status: (json['status'] ?? json['Status']).toString(),
+      jobsStartDateUtc: jobsStartDateValue != null
+          ? DateTime.parse(jobsStartDateValue.toString())
+          : null,
+      jobsEndDateUtc: jobsEndDateValue != null
+          ? DateTime.parse(jobsEndDateValue.toString())
+          : null,
+      createdAtUtc: DateTime.parse(createdAtValue.toString()),
+      updatedAtUtc: updatedAtValue != null
+          ? DateTime.parse(updatedAtValue.toString())
+          : null,
+      deletedAtUtc: deletedAtValue != null
+          ? DateTime.parse(deletedAtValue.toString())
+          : null,
+      userId: (json['userId'] ?? json['UserId'] ?? '').toString(),
+    );
+  }
+}
+
+class HRLargeLeaveResponseList {
+  final List<HRLeaveResponse> allLeaves;
+  final List<HRLeaveResponse> pendingLeaves;
+  final List<HRLeaveResponse> approvedLeaves;
+  final List<HRLeaveResponse> rejectedLeaves;
+
+  HRLargeLeaveResponseList({
+    required this.allLeaves,
+    required this.pendingLeaves,
+    required this.approvedLeaves,
+    required this.rejectedLeaves,
+  });
+
+  factory HRLargeLeaveResponseList.fromJson(Map<String, dynamic> json) {
+    return HRLargeLeaveResponseList(
+      allLeaves: (json['allLeaves'] as List<dynamic>)
+          .map((e) => HRLeaveResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      pendingLeaves: (json['pendingLeaves'] as List<dynamic>)
+          .map((e) => HRLeaveResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      approvedLeaves: (json['approvedLeaves'] as List<dynamic>)
+          .map((e) => HRLeaveResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      rejectedLeaves: (json['rejectedLeaves'] as List<dynamic>)
+          .map((e) => HRLeaveResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class HRLeaveResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String departmentId;
+  final String employeeId;
+  final String employeeFullName;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String type;
+  final String reason;
+  final String status;
+  final String? approvedByUserId;
+  final DateTime? approvedAtUtc;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HRLeaveResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.departmentId,
+    required this.employeeId,
+    required this.employeeFullName,
+    required this.startDate,
+    required this.endDate,
+    required this.type,
+    required this.reason,
+    required this.status,
+    this.approvedByUserId,
+    this.approvedAtUtc,
+    required this.createdAtUtc,
+    this.updatedAtUtc,
+  });
+
+  factory HRLeaveResponse.fromJson(Map<String, dynamic> json) {
+    return HRLeaveResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      departmentId: (json['departmentId'] ?? json['DepartmentId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      employeeFullName:
+          (json['employeeFullName'] ?? json['EmployeeFullName']).toString(),
+      startDate:
+          DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+      endDate: DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
+      type: (json['type'] ?? json['Type']).toString(),
+      reason: (json['reason'] ?? json['Reason']).toString(),
+      status: (json['status'] ?? json['Status']).toString(),
+      approvedByUserId:
+          (json['approvedByUserId'] ?? json['ApprovedByUserId'])?.toString(),
+      approvedAtUtc: json['approvedAtUtc'] != null
+          ? DateTime.parse(json['approvedAtUtc'].toString())
+          : null,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: json['updatedAtUtc'] != null
+          ? DateTime.parse(json['updatedAtUtc'].toString())
+          : null,
+    );
+  }
+}
+
+class HRLeaveCreateRequest {
+  final String employeeId;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String type;
+  final String reason;
+
+  HRLeaveCreateRequest({
+    required this.employeeId,
+    required this.startDate,
+    required this.endDate,
+    required this.type,
+    required this.reason,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'employeeId': employeeId,
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+      'type': type,
+      'reason': reason,
+    };
+  }
+}
+
+class HRLeaveRequestByEmployee {
+  final DateTime startDate;
+  final DateTime endDate;
+  final String type;
+  final String reason;
+
+  HRLeaveRequestByEmployee({
+    required this.startDate,
+    required this.endDate,
+    required this.type,
+    required this.reason,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+      'type': type,
+      'reason': reason,
+    };
+  }
+}
+
+class HRLeaveDecideRequest {
+  final String leaveId;
+  final String status; // "approved" or "rejected"
+
+  HRLeaveDecideRequest({
+    required this.leaveId,
+    required this.status,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'LeaveId': leaveId,
+      'Status': status,
+    };
+  }
+}
+
+class HRPositionResponse {
+  final String id;
+  final String tenantId;
+  final String name;
+  final String description;
+  final bool isActive;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HRPositionResponse({
+    required this.id,
+    required this.tenantId,
+    required this.name,
+    required this.description,
+    required this.isActive,
+    required this.createdAtUtc,
+    this.updatedAtUtc,
+  });
+
+  factory HRPositionResponse.fromJson(Map<String, dynamic> json) {
+    return HRPositionResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      name: (json['name'] ?? json['Name']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      isActive: (json['isActive'] ?? json['IsActive']) as bool,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: json['updatedAtUtc'] != null
+          ? DateTime.parse(json['updatedAtUtc'].toString())
+          : null,
+    );
+  }
+}
+
+class HRCreatePositionRequest {
+  final String name;
+  final String? description;
+  final bool? isActive;
+
+  HRCreatePositionRequest({
+    required this.name,
+    this.description,
+    this.isActive,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'description': description,
+      'isActive': isActive,
+    };
+  }
+}
+
+class HRPerformanceReportResponse {
+  final String id;
+  final String employeeId;
+  final String tenantId;
+  final String? branchId;
+  final int year;
+  final int month;
+  final int totalAssignedTasks;
+  final int totalCompletedTasks;
+  final int totalPendingTasks;
+  final int totalOverdueTasks;
+  final int? totalCompletedOnTime;
+  final int? totalCompletedLate;
+  final int rewardCount;
+  final int penaltyCount;
+  final int leaveCount;
+  final int shiftAttendanceCount;
+  final int notJoinedShiftCount;
+  final int overtimeCount;
+
+  HRPerformanceReportResponse({
+    required this.id,
+    required this.employeeId,
+    required this.tenantId,
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.totalAssignedTasks,
+    required this.totalCompletedTasks,
+    required this.totalPendingTasks,
+    required this.totalOverdueTasks,
+    required this.totalCompletedOnTime,
+    required this.totalCompletedLate,
+    required this.rewardCount,
+    required this.penaltyCount,
+    required this.leaveCount,
+    required this.shiftAttendanceCount,
+    required this.notJoinedShiftCount,
+    required this.overtimeCount,
+  });
+
+  factory HRPerformanceReportResponse.fromJson(Map<String, dynamic> json) {
+    int readInt(String lower, String upper) =>
+        (json[lower] ?? json[upper] ?? 0) as int;
+
+    return HRPerformanceReportResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
+      year: readInt('year', 'Year'),
+      month: readInt('month', 'Month'),
+      totalAssignedTasks:
+          readInt('totalAssignedTasks', 'TotalAssignedTasks'),
+      totalCompletedTasks:
+          readInt('totalCompletedTasks', 'TotalCompletedTasks'),
+      totalPendingTasks: readInt('totalPendingTasks', 'TotalPendingTasks'),
+      totalOverdueTasks: readInt('totalOverdueTasks', 'TotalOverdueTasks'),
+      totalCompletedOnTime:
+          json['totalCompletedOnTime'] ?? json['TotalCompletedOnTime'] as int?,
+      totalCompletedLate:
+          json['totalCompletedLate'] ?? json['TotalCompletedLate'] as int?,
+      rewardCount: readInt('rewardCount', 'RewardCount'),
+      penaltyCount: readInt('penaltyCount', 'PenaltyCount'),
+      leaveCount: readInt('leaveCount', 'LeaveCount'),
+      shiftAttendanceCount:
+          readInt('shiftAttendanceCount', 'ShiftAttendanceCount'),
+      notJoinedShiftCount:
+          readInt('notJoinedShiftCount', 'NotJoinedShiftCount'),
+      overtimeCount: readInt('overtimeCount', 'OvertimeCount'),
+    );
+  }
+}
+
+class HRLeaveDeductionResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String description;
+  final String? deductionType;
+  final String? deductionPeriod;
+  final double deductionAmount;
+  final DateTime createdAtUtc;
+  final DateTime updatedAtUtc;
+
+  HRLeaveDeductionResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.description,
+    required this.deductionType,
+    required this.deductionPeriod,
+    required this.deductionAmount,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  factory HRLeaveDeductionResponse.fromJson(Map<String, dynamic> json) {
+    return HRLeaveDeductionResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      deductionType:
+          (json['deductionType'] ?? json['DeductionType'])?.toString(),
+      deductionPeriod:
+          (json['deductionPeriod'] ?? json['DeductionPeriod'])?.toString(),
+      deductionAmount:
+          ((json['deductionAmount'] ?? json['DeductionAmount']) as num)
+              .toDouble(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: DateTime.parse(
+          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRCreateLeaveDeductionRequest {
+  final String description;
+  final String deductionType;
+  final String deductionPeriod;
+  final double deductionAmount;
+
+  HRCreateLeaveDeductionRequest({
+    required this.description,
+    required this.deductionType,
+    required this.deductionPeriod,
+    required this.deductionAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'description': description,
+      'deductionType': deductionType,
+      'deductionPeriod': deductionPeriod,
+      'deductionAmount': deductionAmount,
+    };
+  }
+}
+
+class HRUpdateLeaveDeductionRequest {
+  final String? description;
+  final String? deductionType;
+  final String? deductionPeriod;
+  final double? deductionAmount;
+
+  HRUpdateLeaveDeductionRequest({
+    this.description,
+    this.deductionType,
+    this.deductionPeriod,
+    this.deductionAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (description != null) 'description': description,
+      if (deductionType != null) 'deductionType': deductionType,
+      if (deductionPeriod != null) 'deductionPeriod': deductionPeriod,
+      if (deductionAmount != null) 'deductionAmount': deductionAmount,
+    };
+  }
+}
+
+class HRAdvanceSettingsResponse {
+  final String id;
+  final String tenantId;
+  final String? branchId;
+  final double maxAdvanceAmountPerPerson;
+  final int maxAdvanceCountPerYear;
+  final bool allowFutureAdvances;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HRAdvanceSettingsResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.maxAdvanceAmountPerPerson,
+    required this.maxAdvanceCountPerYear,
+    required this.allowFutureAdvances,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  factory HRAdvanceSettingsResponse.fromJson(Map<String, dynamic> json) {
+    return HRAdvanceSettingsResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
+      maxAdvanceAmountPerPerson: ((json['maxAdvanceAmountPerPerson'] ??
+                  json['MaxAdvanceAmountPerPerson']) as num?)
+              ?.toDouble() ??
+          0,
+      maxAdvanceCountPerYear: (json['maxAdvanceCountPerYear'] ??
+              json['MaxAdvanceCountPerYear']) as int? ??
+          0,
+      allowFutureAdvances: (json['allowFutureAdvances'] ??
+              json['AllowFutureAdvances']) as bool? ??
+          false,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+    );
+  }
+}
+
+class HRCreateAdvanceSettingsRequest {
+  final String? branchId;
+  final double maxAdvanceAmountPerPerson;
+  final int maxAdvanceCountPerYear;
+  final bool allowFutureAdvances;
+
+  HRCreateAdvanceSettingsRequest({
+    this.branchId,
+    required this.maxAdvanceAmountPerPerson,
+    required this.maxAdvanceCountPerYear,
+    required this.allowFutureAdvances,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'maxAdvanceAmountPerPerson': maxAdvanceAmountPerPerson,
+      'maxAdvanceCountPerYear': maxAdvanceCountPerYear,
+      'allowFutureAdvances': allowFutureAdvances,
+    };
+  }
+}
+
+class HRUpdateAdvanceSettingsRequest {
+  final String? branchId;
+  final double? maxAdvanceAmountPerPerson;
+  final int? maxAdvanceCountPerYear;
+  final bool? allowFutureAdvances;
+
+  HRUpdateAdvanceSettingsRequest({
+    this.branchId,
+    this.maxAdvanceAmountPerPerson,
+    this.maxAdvanceCountPerYear,
+    this.allowFutureAdvances,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (branchId != null) 'branchId': branchId,
+      if (maxAdvanceAmountPerPerson != null)
+        'maxAdvanceAmountPerPerson': maxAdvanceAmountPerPerson,
+      if (maxAdvanceCountPerYear != null)
+        'maxAdvanceCountPerYear': maxAdvanceCountPerYear,
+      if (allowFutureAdvances != null)
+        'allowFutureAdvances': allowFutureAdvances,
+    };
+  }
+}
+
+class HRDisciplineResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String description;
+  final double penaltyAmount;
+  final DateTime createdAtUtc;
+  final DateTime updatedAtUtc;
+
+  HRDisciplineResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.description,
+    required this.penaltyAmount,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  factory HRDisciplineResponse.fromJson(Map<String, dynamic> json) {
+    return HRDisciplineResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      penaltyAmount:
+          ((json['penaltyAmount'] ?? json['PenaltyAmount']) as num).toDouble(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: DateTime.parse(
+          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRRewardResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String description;
+  final double rewardAmount;
+  final DateTime createdAtUtc;
+  final DateTime updatedAtUtc;
+
+  HRRewardResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.description,
+    required this.rewardAmount,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  factory HRRewardResponse.fromJson(Map<String, dynamic> json) {
+    return HRRewardResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      rewardAmount:
+          ((json['rewardAmount'] ?? json['RewardAmount']) as num).toDouble(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: DateTime.parse(
+          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRDisciplineEmployeeRecordResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeId;
+  final String disciplineId;
+  final String description;
+  final DateTime incidentDate;
+  final DateTime createdAtUtc;
+
+  HRDisciplineEmployeeRecordResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeId,
+    required this.disciplineId,
+    required this.description,
+    required this.incidentDate,
+    required this.createdAtUtc,
+  });
+
+  factory HRDisciplineEmployeeRecordResponse.fromJson(
+      Map<String, dynamic> json) {
+    return HRDisciplineEmployeeRecordResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      disciplineId: (json['disciplineId'] ?? json['DisciplineId']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      incidentDate: DateTime.parse(
+          (json['incidentDate'] ?? json['IncidentDate']).toString()),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRRewardEmployeeRecordResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeId;
+  final String rewardId;
+  final String description;
+  final DateTime rewardDate;
+  final DateTime createdAtUtc;
+
+  HRRewardEmployeeRecordResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeId,
+    required this.rewardId,
+    required this.description,
+    required this.rewardDate,
+    required this.createdAtUtc,
+  });
+
+  factory HRRewardEmployeeRecordResponse.fromJson(Map<String, dynamic> json) {
+    return HRRewardEmployeeRecordResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      rewardId: (json['rewardId'] ?? json['RewardId']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      rewardDate:
+          DateTime.parse((json['rewardDate'] ?? json['RewardDate']).toString()),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRCreateDisciplineRequest {
+  final String description;
+  final double penaltyAmount;
+
+  HRCreateDisciplineRequest({
+    required this.description,
+    required this.penaltyAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'description': description,
+      'penaltyAmount': penaltyAmount,
+    };
+  }
+}
+
+class HRUpdateDisciplineRequest {
+  final String? description;
+  final double? penaltyAmount;
+
+  HRUpdateDisciplineRequest({
+    this.description,
+    this.penaltyAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (description != null) 'description': description,
+      if (penaltyAmount != null) 'penaltyAmount': penaltyAmount,
+    };
+  }
+}
+
+class HRCreateRewardRequest {
+  final String description;
+  final double rewardAmount;
+
+  HRCreateRewardRequest({
+    required this.description,
+    required this.rewardAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'description': description,
+      'rewardAmount': rewardAmount,
+    };
+  }
+}
+
+class HRUpdateRewardRequest {
+  final String? description;
+  final double? rewardAmount;
+
+  HRUpdateRewardRequest({
+    this.description,
+    this.rewardAmount,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (description != null) 'description': description,
+      if (rewardAmount != null) 'rewardAmount': rewardAmount,
+    };
+  }
+}
+
+class HRCreateDisciplineEmployeeRecordRequest {
+  final String employeeId;
+  final String disciplineId;
+  final String description;
+  final DateTime incidentDate;
+
+  HRCreateDisciplineEmployeeRecordRequest({
+    required this.employeeId,
+    required this.disciplineId,
+    required this.description,
+    required this.incidentDate,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'employeeId': employeeId,
+      'disciplineId': disciplineId,
+      'description': description,
+      'incidentDate': incidentDate.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRUpdateDisciplineEmployeeRecordRequest {
+  final String? disciplineId;
+  final String? description;
+  final DateTime? incidentDate;
+
+  HRUpdateDisciplineEmployeeRecordRequest({
+    this.disciplineId,
+    this.description,
+    this.incidentDate,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (disciplineId != null) 'disciplineId': disciplineId,
+      if (description != null) 'description': description,
+      if (incidentDate != null)
+        'incidentDate': incidentDate!.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRCreateRewardEmployeeRecordRequest {
+  final String employeeId;
+  final String rewardId;
+  final String description;
+  final DateTime rewardDate;
+
+  HRCreateRewardEmployeeRecordRequest({
+    required this.employeeId,
+    required this.rewardId,
+    required this.description,
+    required this.rewardDate,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'employeeId': employeeId,
+      'rewardId': rewardId,
+      'description': description,
+      'rewardDate': rewardDate.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRUpdateRewardEmployeeRecordRequest {
+  final String? rewardId;
+  final String? description;
+  final DateTime? rewardDate;
+
+  HRUpdateRewardEmployeeRecordRequest({
+    this.rewardId,
+    this.description,
+    this.rewardDate,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (rewardId != null) 'rewardId': rewardId,
+      if (description != null) 'description': description,
+      if (rewardDate != null)
+        'rewardDate': rewardDate!.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HREmployeeDetailResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeNo;
+  final String fullName;
+  final String? departmentId;
+  final String? positionId;
+  final String? positionName;
+  final String? userId;
+  final String? email;
+  final String? phone;
+  final String? profileImageUrl;
+  final DateTime? jobsStartDateUtc;
+  final DateTime? jobsEndDateUtc;
+  final String status;
+  final List<HREmployeeDetailLeave> employeeLeaves;
+  final List<HREmployeeDetailAdvance> employeeAdvances;
+  final List<HREmployeeDetailRecord> disciplineEmployeeRecords;
+  final List<HREmployeeDetailRecord> rewardEmployeeRecords;
+  final List<HREmployeeDetailSalary> employeeSalaries;
+
+  HREmployeeDetailResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeNo,
+    required this.fullName,
+    this.departmentId,
+    this.positionId,
+    this.positionName,
+    this.userId,
+    this.email,
+    this.phone,
+    this.profileImageUrl,
+    this.jobsStartDateUtc,
+    this.jobsEndDateUtc,
+    required this.status,
+    required this.employeeLeaves,
+    required this.employeeAdvances,
+    required this.disciplineEmployeeRecords,
+    required this.rewardEmployeeRecords,
+    required this.employeeSalaries,
+  });
+
+  factory HREmployeeDetailResponse.fromJson(Map<String, dynamic> json) {
+    return HREmployeeDetailResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      employeeNo: (json['employeeNo'] ?? json['EmployeeNo']).toString(),
+      fullName: (json['fullName'] ?? json['FullName']).toString(),
+      departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+      positionId: (json['positionId'] ?? json['PositionId'])?.toString(),
+      positionName: (json['positionName'] ?? json['PositionName'])?.toString(),
+      userId: (json['userId'] ?? json['UserId'])?.toString(),
+      email: (json['email'] ?? json['Email'])?.toString(),
+      phone: (json['phone'] ?? json['Phone'])?.toString(),
+      profileImageUrl:
+          (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+      jobsStartDateUtc: _parseNullableDate(
+          json['jobsStartDateUtc'] ?? json['JobsStartDateUtc']),
+      jobsEndDateUtc:
+          _parseNullableDate(json['jobsEndDateUtc'] ?? json['JobsEndDateUtc']),
+      status: (json['status'] ?? json['Status']).toString(),
+      employeeLeaves: ((json['employeeLeaves'] ?? json['EmployeeLeaves'])
+                  as List<dynamic>? ??
+              const [])
+          .map((e) => HREmployeeDetailLeave.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      employeeAdvances: ((json['employeeAdvances'] ?? json['EmployeeAdvances'])
+                  as List<dynamic>? ??
+              const [])
+          .map((e) =>
+              HREmployeeDetailAdvance.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      disciplineEmployeeRecords: ((json['disciplineEmployeeRecords'] ??
+                  json['DisciplineEmployeeRecords']) as List<dynamic>? ??
+              const [])
+          .map(
+              (e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      rewardEmployeeRecords: ((json['rewardEmployeeRecords'] ??
+                  json['RewardEmployeeRecords']) as List<dynamic>? ??
+              const [])
+          .map(
+              (e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      employeeSalaries: ((json['employeeSalaries'] ?? json['EmployeeSalaries'])
+                  as List<dynamic>? ??
+              const [])
+          .map(
+              (e) => HREmployeeDetailSalary.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class HREmployeeDetailLeave {
+  final String id;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String status;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HREmployeeDetailLeave({
+    required this.id,
+    required this.startDate,
+    required this.endDate,
+    required this.status,
+    required this.createdAtUtc,
+    this.updatedAtUtc,
+  });
+
+  factory HREmployeeDetailLeave.fromJson(Map<String, dynamic> json) {
+    return HREmployeeDetailLeave(
+      id: (json['id'] ?? json['Id']).toString(),
+      startDate:
+          DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+      endDate: DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
+      status: (json['status'] ?? json['Status']).toString(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+    );
+  }
+}
+
+class HREmployeeDetailAdvance {
+  final String id;
+  final num amount;
+  final String status;
+  final DateTime createdAtUtc;
+  final DateTime? updatedAtUtc;
+
+  HREmployeeDetailAdvance({
+    required this.id,
+    required this.amount,
+    required this.status,
+    required this.createdAtUtc,
+    this.updatedAtUtc,
+  });
+
+  factory HREmployeeDetailAdvance.fromJson(Map<String, dynamic> json) {
+    return HREmployeeDetailAdvance(
+      id: (json['id'] ?? json['Id']).toString(),
+      amount: (json['amount'] ?? json['Amount']) as num? ?? 0,
+      status: (json['status'] ?? json['Status']).toString(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+    );
+  }
+}
+
+class HRCreateBordroDonemRequest {
+  final String branchId;
+  final int year;
+  final int month;
+  final DateTime baslangicTarihi;
+  final DateTime bitisTarihi;
+
+  HRCreateBordroDonemRequest({
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.baslangicTarihi,
+    required this.bitisTarihi,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'year': year,
+      'month': month,
+      'baslangicTarihi': baslangicTarihi.toUtc().toIso8601String(),
+      'bitisTarihi': bitisTarihi.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRBordroDonemResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final int year;
+  final int month;
+  final DateTime baslangicTarihi;
+  final DateTime bitisTarihi;
+  final String status;
+  final DateTime createdAtUtc;
+
+  HRBordroDonemResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.year,
+    required this.month,
+    required this.baslangicTarihi,
+    required this.bitisTarihi,
+    required this.status,
+    required this.createdAtUtc,
+  });
+
+  String get periodLabel => '${month.toString().padLeft(2, '0')}.$year';
+
+  String get statusLabel {
+    switch (status.toLowerCase()) {
+      case 'open':
+      case '1':
+        return 'Açık';
+      case 'closed':
+      case '2':
+        return 'Kapalı';
+      default:
+        return status;
+    }
+  }
+
+  factory HRBordroDonemResponse.fromJson(Map<String, dynamic> json) {
+    return HRBordroDonemResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      year: (json['year'] ?? json['Year']) as int,
+      month: (json['month'] ?? json['Month']) as int,
+      baslangicTarihi: DateTime.parse(
+          (json['baslangicTarihi'] ?? json['BaslangicTarihi']).toString()),
+      bitisTarihi: DateTime.parse(
+          (json['bitisTarihi'] ?? json['BitisTarihi']).toString()),
+      status: (json['status'] ?? json['Status']).toString(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRBordroEmployeeResponse {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String? departmentId;
+  final String bordroDonemId;
+  final String employeeId;
+  final String employeeName;
+  final num totalEarnings;
+  final num totalDeductions;
+  final num netPay;
+  final DateTime createdAtUtc;
+
+  HRBordroEmployeeResponse({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.departmentId,
+    required this.bordroDonemId,
+    required this.employeeId,
+    required this.employeeName,
+    required this.totalEarnings,
+    required this.totalDeductions,
+    required this.netPay,
+    required this.createdAtUtc,
+  });
+
+  factory HRBordroEmployeeResponse.fromJson(Map<String, dynamic> json) {
+    return HRBordroEmployeeResponse(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+      bordroDonemId:
+          (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      employeeName: (json['employeeName'] ?? json['EmployeeName']).toString(),
+      totalEarnings:
+          (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
+      totalDeductions:
+          (json['totalDeductions'] ?? json['TotalDeductions']) as num? ?? 0,
+      netPay: (json['netPay'] ?? json['NetPay']) as num? ?? 0,
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HREmployeeDetailRecord {
+  final String id;
+  final String description;
+  final DateTime createdAtUtc;
+
+  HREmployeeDetailRecord({
+    required this.id,
+    required this.description,
+    required this.createdAtUtc,
+  });
+
+  factory HREmployeeDetailRecord.fromJson(Map<String, dynamic> json) {
+    return HREmployeeDetailRecord(
+      id: (json['id'] ?? json['Id']).toString(),
+      description: (json['description'] ?? json['Description']).toString(),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HREmployeeDetailSalary {
+  final String id;
+  final String tenantId;
+  final String branchId;
+  final String employeeId;
+  final num grossSalary;
+  final num netSalary;
+  final DateTime effectiveFrom;
+  final DateTime? effectiveTo;
+  final DateTime createdAtUtc;
+
+  HREmployeeDetailSalary({
+    required this.id,
+    required this.tenantId,
+    required this.branchId,
+    required this.employeeId,
+    required this.grossSalary,
+    required this.netSalary,
+    required this.effectiveFrom,
+    this.effectiveTo,
+    required this.createdAtUtc,
+  });
+
+  factory HREmployeeDetailSalary.fromJson(Map<String, dynamic> json) {
+    return HREmployeeDetailSalary(
+      id: (json['id'] ?? json['Id']).toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
+      branchId: (json['branchId'] ?? json['BranchId']).toString(),
+      employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
+      grossSalary: (json['grossSalary'] ?? json['GrossSalary']) as num? ?? 0,
+      netSalary: (json['netSalary'] ?? json['NetSalary']) as num? ?? 0,
+      effectiveFrom: DateTime.parse(
+          (json['effectiveFrom'] ?? json['EffectiveFrom']).toString()),
+      effectiveTo:
+          _parseNullableDate(json['effectiveTo'] ?? json['EffectiveTo']),
+      createdAtUtc: DateTime.parse(
+          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+    );
+  }
+}
+
+class HRCreateEmployeeSalaryRequest {
+  final String branchId;
+  final String employeeId;
+  final num grossSalary;
+  final num netSalary;
+  final DateTime effectiveFrom;
+  final DateTime? effectiveTo;
+
+  HRCreateEmployeeSalaryRequest({
+    required this.branchId,
+    required this.employeeId,
+    required this.grossSalary,
+    required this.netSalary,
+    required this.effectiveFrom,
+    this.effectiveTo,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'branchId': branchId,
+      'employeeId': employeeId,
+      'grossSalary': grossSalary,
+      'netSalary': netSalary,
+      'effectiveFrom': effectiveFrom.toUtc().toIso8601String(),
+      'effectiveTo': effectiveTo?.toUtc().toIso8601String(),
+    };
+  }
+}
+
+class HRUpdateEmployeeSalaryRequest {
+  final num? grossSalary;
+  final num? netSalary;
+  final DateTime? effectiveFrom;
+  final DateTime? effectiveTo;
+
+  HRUpdateEmployeeSalaryRequest({
+    this.grossSalary,
+    this.netSalary,
+    this.effectiveFrom,
+    this.effectiveTo,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (grossSalary != null) 'grossSalary': grossSalary,
+      if (netSalary != null) 'netSalary': netSalary,
+      if (effectiveFrom != null)
+        'effectiveFrom': effectiveFrom!.toUtc().toIso8601String(),
+      'effectiveTo': effectiveTo?.toUtc().toIso8601String(),
+    };
+  }
+}
+
+DateTime? _parseNullableDate(dynamic value) {
+  if (value == null) return null;
+  return DateTime.parse(value.toString());
+}

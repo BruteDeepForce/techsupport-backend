@@ -13,8 +13,16 @@ public static class ModuleExtensions
         var conn = configuration.GetConnectionString("DefaultConnection") ?? configuration["ConnectionStrings:DefaultConnection"];
 
         services.AddDbContext<OperationDbContext>(opt => opt.UseNpgsql(conn));
+
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<OperationDbContext>();
+            dbContext.Database.Migrate();
+        }
+
         services.AddScoped<IOperationService, OperationService>();
-    services.AddScoped<ITicketService, TicketService>();
+        services.AddScoped<ITicketService, TicketService>();
+        services.AddScoped<IOfferService, OfferService>();
 
         return services;
     }

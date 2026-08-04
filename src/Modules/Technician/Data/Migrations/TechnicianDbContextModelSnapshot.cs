@@ -23,6 +23,25 @@ namespace TechSupport.Technician.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.ExpertsTechnicianProvision", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ExpertiseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TechnicianProvisionRequestId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TechnicianProvisionRequestId");
+
+                    b.ToTable("ExpertsTechnicianProvision", "technicians");
+                });
+
             modelBuilder.Entity("TechSupport.Technician.Domain.Entities.Technician", b =>
                 {
                     b.Property<Guid>("Id")
@@ -35,10 +54,16 @@ namespace TechSupport.Technician.Data.Migrations
                     b.Property<Guid?>("BranchId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
+
+                    b.Property<DateTimeOffset?>("EmploymentStartDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -53,8 +78,14 @@ namespace TechSupport.Technician.Data.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<string>("PictureUrl")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -65,6 +96,51 @@ namespace TechSupport.Technician.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("technicians", "technicians");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpert", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ExpertiseName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TechnicianExperts", "technicians");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpertMapping", b =>
+                {
+                    b.Property<Guid>("TechnicianId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TechnicianExpertId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("tenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TechnicianId", "TechnicianExpertId", "tenantId");
+
+                    b.HasIndex("TechnicianExpertId");
+
+                    b.ToTable("technician_expert_mappings", "technicians");
                 });
 
             modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianOperation", b =>
@@ -149,6 +225,9 @@ namespace TechSupport.Technician.Data.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("character varying(320)");
 
+                    b.Property<DateTimeOffset?>("EmploymentStartDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FailureReason")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -182,6 +261,50 @@ namespace TechSupport.Technician.Data.Migrations
                     b.HasIndex("TenantId", "Email");
 
                     b.ToTable("technician_provision_requests", "technicians");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.ExpertsTechnicianProvision", b =>
+                {
+                    b.HasOne("TechSupport.Technician.Domain.Entities.TechnicianProvisionRequest", "TechnicianProvisionRequest")
+                        .WithMany("ExpertsId")
+                        .HasForeignKey("TechnicianProvisionRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("TechnicianProvisionRequest");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpertMapping", b =>
+                {
+                    b.HasOne("TechSupport.Technician.Domain.Entities.TechnicianExpert", "TechnicianExpert")
+                        .WithMany("TechnicianExpertMappings")
+                        .HasForeignKey("TechnicianExpertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TechSupport.Technician.Domain.Entities.Technician", "Technician")
+                        .WithMany("TechnicianExpertMappings")
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Technician");
+
+                    b.Navigation("TechnicianExpert");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.Technician", b =>
+                {
+                    b.Navigation("TechnicianExpertMappings");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianExpert", b =>
+                {
+                    b.Navigation("TechnicianExpertMappings");
+                });
+
+            modelBuilder.Entity("TechSupport.Technician.Domain.Entities.TechnicianProvisionRequest", b =>
+                {
+                    b.Navigation("ExpertsId");
                 });
 #pragma warning restore 612, 618
         }

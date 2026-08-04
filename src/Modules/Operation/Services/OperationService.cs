@@ -21,6 +21,7 @@ public interface IOperationService
         string? internalNote,
         Guid? ticketId,
         OperationPriority priority,
+        string? customerName,
         OperationType type,
         Guid? maintenanceTemplateId,
         DateTimeOffset? scheduledAtUtc,
@@ -61,6 +62,7 @@ public sealed class OperationService : IOperationService
         string? internalNote,
         Guid? ticketId,
         OperationPriority priority,
+        string? customerName,
         OperationType type,
         Guid? maintenanceTemplateId,
         DateTimeOffset? scheduledAtUtc,
@@ -76,6 +78,7 @@ public sealed class OperationService : IOperationService
             CreatedByUserId = createdBy,
             FieldTechnicianUserId = toTechnician,
             TicketId = ticketId,
+            CustomerFullName = customerName ?? string.Empty,
             Type = type,
             MaintenanceTemplateId = type == OperationType.Maintenance ? maintenanceTemplateId : null,
             ScheduledAtUtc = type == OperationType.Maintenance ? scheduledAtUtc : null,
@@ -202,6 +205,8 @@ public sealed class OperationService : IOperationService
         {
             op.IsClosed = true;
             op.ClosedAtUtc = DateTimeOffset.UtcNow;
+            //! burada account modülüne publish event çakalım. ödeme alındı mı alınmadı mı onu düşüncem.
+
         }
 
         await _db.SaveChangesAsync(ct);

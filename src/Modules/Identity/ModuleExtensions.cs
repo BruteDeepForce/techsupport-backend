@@ -22,6 +22,7 @@ public static class ModuleExtensions
         services.AddIdentity<AppUser, AppRole>(options =>
         {
             options.User.RequireUniqueEmail = true;
+            options.User.AllowedUserNameCharacters = "abcçdefgğhıijklmnoöpqrsştuüvwxyzABCÇDEFGĞHIİJKLMNOÖPQRSŞTUÜVWXYZ0123456789-._@+ ";
         })
         .AddEntityFrameworkStores<IdentityDbContext>()
         .AddDefaultTokenProviders();
@@ -34,10 +35,28 @@ public static class ModuleExtensions
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
-        .AddJwtBearer(options =>
+        .AddJwtBearer(options => 
         {
             options.RequireHttpsMetadata = false;
             options.SaveToken = true;
+            //!SIGNALR tokeni queryden gönderiyor kural ekledim. queryden okuyorum tokeni
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query["access_token"];
+                    var path = context.HttpContext.Request.Path;
+
+                    if (!string.IsNullOrWhiteSpace(accessToken)
+                        && (path.StartsWithSegments("/trade-status-hub")
+                        || path.StartsWithSegments("/hr-notification-hub")))
+                    {
+                        context.Token = accessToken;
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -47,6 +66,12 @@ public static class ModuleExtensions
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
             };
         });
+
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+            dbContext.Database.Migrate();
+        }
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITenantService, TenantService>();

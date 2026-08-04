@@ -23,7 +23,7 @@ public class StockCategoriesController : ControllerBase
         return tenantClaim != null && Guid.TryParse(tenantClaim.Value, out var tenantId) ? tenantId : null;
     }
 
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin, technician")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto, CancellationToken ct)
     {

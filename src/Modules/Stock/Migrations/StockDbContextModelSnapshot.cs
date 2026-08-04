@@ -91,7 +91,6 @@ namespace TechSupport.Stock.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Barcode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid?>("BranchId")
@@ -104,6 +103,12 @@ namespace TechSupport.Stock.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ImeiOrSerial")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -119,6 +124,9 @@ namespace TechSupport.Stock.Migrations
 
                     b.Property<string>("Unit")
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("UnitPrice")
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -142,6 +150,9 @@ namespace TechSupport.Stock.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid?>("BranchId")
                         .HasColumnType("uuid");
 
@@ -151,11 +162,30 @@ namespace TechSupport.Stock.Migrations
                     b.Property<DateTime?>("ExpiresAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("FinalizedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IdempotentcyKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("OperationId")
                         .HasColumnType("uuid");
 
                     b.Property<long>("Quantity")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("RejectedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RejectedReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReleasedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RequestedAtUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -169,7 +199,13 @@ namespace TechSupport.Stock.Migrations
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("UnitPriceSnapshot")
+                        .HasColumnType("numeric");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("IdempotentcyKey")
+                        .IsUnique();
 
                     b.HasIndex("StockItemId");
 

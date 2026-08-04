@@ -1,10 +1,10 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/design/app_design.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/network/auth_interceptor.dart';
 import '../../auth/data/auth_service.dart';
 import '../../auth/data/token_storage.dart';
 import 'role_selection_page.dart';
@@ -35,6 +35,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return _buildWebLogin(context);
+    }
+
     final theme = Theme.of(context);
     final _authService = AuthService();
     final _tokenStorage = TokenStorage();
@@ -202,10 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                                       await _authService.login(email, password);
                                   await _tokenStorage.saveToken(token);
 
-                                  // Register interceptor so subsequent requests include the token
-                                  ApiClient().dio.interceptors.add(
-                                        AuthInterceptor(_tokenStorage.getToken),
-                                      );
+                                  // ApiClient already has a global auth interceptor.
 
                                   if (context.mounted) {
                                     Navigator.of(context)
@@ -262,6 +263,320 @@ class _LoginPageState extends State<LoginPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildWebLogin(BuildContext context) {
+    final theme = Theme.of(context);
+    final _authService = AuthService();
+    final _tokenStorage = TokenStorage();
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF0B3B91), Color(0xFF0A6EEA)],
+              ),
+            ),
+          ),
+          Positioned(
+            left: -120,
+            bottom: -120,
+            child: _GlowBlob(
+              size: 320,
+              colors: const [Color(0x66256CE8), Color(0x00000000)],
+            ),
+          ),
+          Positioned(
+            right: -160,
+            top: -140,
+            child: _GlowBlob(
+              size: 360,
+              colors: const [Color(0x6622D3EE), Color(0x00000000)],
+            ),
+          ),
+          Positioned(
+            right: 120,
+            bottom: 80,
+            child: _GlowBlob(
+              size: 220,
+              colors: const [Color(0x5538BDF8), Color(0x00000000)],
+            ),
+          ),
+          Center(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 900;
+                return ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isNarrow ? 520 : 980),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: isNarrow
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Lineer Destek',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Uçtan Uca Operasyon Merkezi Giriş Sayfası.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  fontSize: 14,
+                                  height: 1.5,
+                                  color: const Color(0xFF8FB6F3),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              _LoginCard(
+                                authService: _authService,
+                                tokenStorage: _tokenStorage,
+                                emailController: _usernameController,
+                                passwordController: _passwordController,
+                              ),
+                            ],
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: SizedBox(
+                                  height: double.infinity,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Lineer Destek',
+                                        style: GoogleFonts.playfairDisplay(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Uçtan Uca Operasyon Merkezi Giriş Sayfası.',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 15,
+                                          height: 1.5,
+                                          color: const Color(0xFF8FB6F3),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 0),
+                              Expanded(
+                                flex: 5,
+                                child: SizedBox(
+                                  height: double.infinity,
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: _LoginCard(
+                                      authService: _authService,
+                                      tokenStorage: _tokenStorage,
+                                      emailController: _usernameController,
+                                      passwordController: _passwordController,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlowBlob extends StatelessWidget {
+  const _GlowBlob({required this.size, required this.colors});
+
+  final double size;
+  final List<Color> colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: colors),
+      ),
+    );
+  }
+}
+
+class _LoginCard extends StatelessWidget {
+  const _LoginCard({
+    required this.authService,
+    required this.tokenStorage,
+    required this.emailController,
+    required this.passwordController,
+  });
+
+  final AuthService authService;
+  final TokenStorage tokenStorage;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 460,
+      padding: const EdgeInsets.fromLTRB(32, 28, 32, 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B4BA8).withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF2C7BEF), width: 1),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 40,
+            offset: Offset(0, 24),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _WebField(
+            label: 'E-posta',
+            controller: emailController,
+            hint: 'ornek@firma.com',
+          ),
+          const SizedBox(height: 12),
+          _WebField(
+            label: 'Şifre',
+            controller: passwordController,
+            hint: 'Şifre',
+            obscureText: true,
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F3F8C),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () async {
+                final email = emailController.text.trim();
+                final password = passwordController.text;
+                if (email.isEmpty || password.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Lütfen e-posta ve şifre girin')));
+                  return;
+                }
+
+                showDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+
+                try {
+                  final token = await authService.login(email, password);
+                  await tokenStorage.saveToken(token);
+
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const RoleSelectionPage()),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Giriş başarısız: ${e.toString()}'),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Giriş Yap'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebField extends StatelessWidget {
+  const _WebField({
+    required this.label,
+    required this.controller,
+    required this.hint,
+    this.obscureText = false,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final bool obscureText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: GoogleFonts.dmSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFB7D4FF))),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          obscureText: obscureText,
+          style: const TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+            filled: true,
+            fillColor: Colors.white,
+            isDense: true,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

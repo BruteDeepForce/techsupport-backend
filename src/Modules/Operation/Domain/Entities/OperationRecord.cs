@@ -7,9 +7,10 @@ public sealed class OperationRecord
     public Guid? BranchId { get; set; }
 
     public Guid CustomerId { get; set; }
+    public string CustomerFullName { get; set; } = string.Empty;
     public Guid DeviceId { get; set; }
-
     public Guid? FieldTechnicianUserId { get; set; }
+    public string TechnicianFullName { get; set; } = string.Empty;
     //public string FieldTechnicianFullName { get; set; } = string.Empty;
     // Optional link back to originating Ticket (one-to-one, nullable)
     public Guid? TicketId { get; set; }
