@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Accounting.Domain.Entities;
+using TechSupport.Shared.Integration;
 
 namespace TechSupport.Accounting.Data;
 
-public class AccountingDbContext : DbContext
+public class AccountingDbContext : DbContext, IIntegrationMessageDbContext
 {
     public AccountingDbContext(DbContextOptions<AccountingDbContext> options) : base(options)
     {
@@ -14,6 +15,8 @@ public class AccountingDbContext : DbContext
     public DbSet<InvoiceLineItem> InvoiceLineItems { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<CariHesapHareketi> CariHesapHareketleri { get; set; }
+    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
+    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -189,6 +192,8 @@ public class AccountingDbContext : DbContext
             b.HasIndex(x => new { x.TenantId, x.IslemTarihi });
             // Composite index for account statement (ekstre) queries
             b.HasIndex(x => new { x.TenantId, x.AccountId, x.IslemTarihi });
+            b.HasIndex(x => new { x.TenantId, x.ReferansNumarasi }).IsUnique()
+                .HasFilter("\"ReferansNumarasi\" IS NOT NULL");
             
             // Relation: CariHesapHareketi -> Account
             b.HasOne(x => x.Account)
@@ -208,5 +213,7 @@ public class AccountingDbContext : DbContext
                 .HasForeignKey(x => x.PaymentId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
+
+        modelBuilder.ConfigureIntegrationMessages();
     }
 }

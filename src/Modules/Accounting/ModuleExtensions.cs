@@ -5,6 +5,7 @@ using TechSupport.Accounting.Data;
 using TechSupport.Accounting.Services;
 using StackExchange.Redis;
 using TechSupport.Accounting.RedisService;
+using TechSupport.Shared.Integration;
 
 namespace TechSupport.Accounting;
 
@@ -35,6 +36,7 @@ public static class ModuleExtensions
         services.AddScoped<IInvoicePdfService, InvoicePdfService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IRedisCacheService, RedisCacheService>();
+        services.AddHostedService<IntegrationOutboxDispatcher<AccountingDbContext>>();
 
         return services;
     }

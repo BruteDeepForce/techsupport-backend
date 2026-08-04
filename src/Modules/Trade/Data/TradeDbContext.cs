@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using TechSupport.Shared.Integration;
 using TechSupport.Trade.Domain.Entities;
 
 namespace TechSupport.Trade.Data;
 
-public sealed class TradeDbContext : DbContext
+public sealed class TradeDbContext : DbContext, IIntegrationMessageDbContext
 {
     public TradeDbContext(DbContextOptions<TradeDbContext> options) : base(options)
     {
@@ -11,6 +12,10 @@ public sealed class TradeDbContext : DbContext
 
     public DbSet<TradeRecord> Trades => Set<TradeRecord>();
     public DbSet<DeviceRegisteration> DeviceRegisterations => Set<DeviceRegisteration>();
+    public DbSet<QuickSale> QuickSales => Set<QuickSale>();
+    public DbSet<QuickSaleItem> QuickSaleItems => Set<QuickSaleItem>();
+    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
+    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +70,42 @@ public sealed class TradeDbContext : DbContext
             b.HasIndex(x => x.TradeId).IsUnique();
             b.HasIndex(x => new { x.TenantId, x.IdempotencyKey }).IsUnique();
         });
+
+        modelBuilder.Entity<QuickSale>(b =>
+        {
+            b.ToTable("quick_sales");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.SaleNumber).HasMaxLength(64).IsRequired();
+            b.Property(x => x.IdempotencyKey).HasMaxLength(256).IsRequired();
+            b.Property(x => x.Status).HasConversion<string>().HasMaxLength(32).IsRequired();
+            b.Property(x => x.PaymentMethod).HasConversion<string>().HasMaxLength(20).IsRequired();
+            b.Property(x => x.Subtotal).HasPrecision(18, 2);
+            b.Property(x => x.DiscountAmount).HasPrecision(18, 2);
+            b.Property(x => x.TotalAmount).HasPrecision(18, 2);
+            b.Property(x => x.PaidAmount).HasPrecision(18, 2);
+            b.Property(x => x.FailureReason).HasMaxLength(2000);
+            b.HasIndex(x => new { x.TenantId, x.IdempotencyKey }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.SaleNumber }).IsUnique();
+            b.HasIndex(x => new { x.TenantId, x.BranchId, x.CreatedAtUtc });
+            b.HasMany(x => x.Items)
+                .WithOne(x => x.QuickSale)
+                .HasForeignKey(x => x.QuickSaleId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<QuickSaleItem>(b =>
+        {
+            b.ToTable("quick_sale_items");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.ProductNameSnapshot).HasMaxLength(256).IsRequired();
+            b.Property(x => x.SkuSnapshot).HasMaxLength(128).IsRequired();
+            b.Property(x => x.BarcodeSnapshot).HasMaxLength(128);
+            b.Property(x => x.UnitPriceSnapshot).HasPrecision(18, 2);
+            b.Property(x => x.LineTotal).HasPrecision(18, 2);
+            b.HasIndex(x => new { x.QuickSaleId, x.StockItemId }).IsUnique();
+        });
+
+        modelBuilder.ConfigureIntegrationMessages();
 
         base.OnModelCreating(modelBuilder);
     }

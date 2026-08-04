@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Shared/Shared.csproj" />
     <ProjectReference Include="..\Accounting.Contracts\Accounting.Contracts.csproj" />
     <ProjectReference Include="..\Customer\Customer.csproj" />
     <ProjectReference Include="..\Operation.Contracts\Operation.Contracts.csproj" />

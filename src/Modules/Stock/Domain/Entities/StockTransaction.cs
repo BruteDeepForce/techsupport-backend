@@ -9,7 +9,9 @@ public enum StockTransactionType
     Consume,
     Return,
     Adjust,
-    Reserve
+    Reserve,
+    QuickSale,
+    QuickSaleReturn
 }
 
 public class StockTransaction
@@ -23,6 +25,9 @@ public class StockTransaction
     public long Quantity { get; set; }
     public StockTransactionType Type { get; set; }
     public string? Reference { get; set; }
+    public Guid? ReferenceId { get; set; }
+    public string? ReferenceType { get; set; }
+    public string? IdempotencyKey { get; set; }
     public string? Barcode { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 

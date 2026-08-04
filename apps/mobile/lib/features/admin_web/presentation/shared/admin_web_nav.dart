@@ -14,11 +14,13 @@ import '../admin_web_team_page.dart';
 import '../admin_web_ticket_detail_page.dart';
 import '../admin_web_tickets_page.dart';
 import '../admin_web_route.dart';
+import '../../../quick_sale/presentation/admin_web_quick_sale_page.dart';
 
 enum AdminNavKey {
   home,
   tickets,
   operations,
+  quickSales,
   trades,
   offers,
   team,
@@ -61,6 +63,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Operasyonlar',
       icon: Icons.receipt_long_outlined,
       pageBuilder: (_) => const AdminWebOperationsPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.quickSales,
+      label: 'Hızlı Satış',
+      icon: Icons.point_of_sale,
+      pageBuilder: (_) => const AdminWebQuickSalePage(),
     ),
     AdminNavItem(
       key: AdminNavKey.trades,

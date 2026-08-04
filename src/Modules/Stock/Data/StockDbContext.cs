@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using TechSupport.Shared.Integration;
 using TechSupport.Stock.Domain.Entities;
 
 namespace TechSupport.Stock.Data;
 
-public class StockDbContext : DbContext
+public class StockDbContext : DbContext, IIntegrationMessageDbContext
 {
     public StockDbContext(DbContextOptions<StockDbContext> options) : base(options)
     {
@@ -14,6 +15,8 @@ public class StockDbContext : DbContext
     public DbSet<StockTransaction> StockTransactions { get; set; }
     public DbSet<StockReservation> StockReservations { get; set; }
     public DbSet<TechSupport.Stock.Domain.Entities.StockCategories> StockCategories { get; set; }
+    public DbSet<IntegrationOutboxMessage> IntegrationOutboxMessages => Set<IntegrationOutboxMessage>();
+    public DbSet<ProcessedIntegrationMessage> ProcessedIntegrationMessages => Set<ProcessedIntegrationMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,6 +68,9 @@ public class StockDbContext : DbContext
             b.ToTable("stock_transactions");
             b.HasKey(x => x.Id);
             b.HasIndex(x => new { x.TenantId, x.StockItemId });
+            b.HasIndex(x => new { x.TenantId, x.ReferenceType, x.ReferenceId, x.StockItemId, x.Type }).IsUnique();
+            b.Property(x => x.ReferenceType).HasMaxLength(64);
+            b.Property(x => x.IdempotencyKey).HasMaxLength(256);
 
             // optional navigation; keep transactions for audit - do not cascade by default
             b.HasOne(x => x.StockItem)
@@ -85,5 +91,7 @@ public class StockDbContext : DbContext
              .HasForeignKey(x => x.StockItemId)
              .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.ConfigureIntegrationMessages();
     }
 }

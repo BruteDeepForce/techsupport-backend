@@ -95,6 +95,15 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TradeStockProcessConsumer>();
     x.AddConsumer<TechnicianHrEmployeeSyncRequestedConsumer>();
     x.AddConsumer<PerformanceUpdateConsumer>();
+    x.AddConsumer<QuickSaleStockRequestedConsumer>();
+    x.AddConsumer<QuickSaleStockReleaseRequestedConsumer>();
+    x.AddConsumer<QuickSaleAccountingRequestedConsumer>();
+    x.AddConsumer<QuickSaleStockSucceededConsumer>();
+    x.AddConsumer<QuickSaleStockFailedConsumer>();
+    x.AddConsumer<QuickSaleAccountingSucceededConsumer>();
+    x.AddConsumer<QuickSaleAccountingFailedConsumer>();
+    x.AddConsumer<QuickSaleStockReleasedConsumer>();
+    x.AddConsumer<QuickSaleStockReleaseFailedConsumer>();
 
     x.UsingRabbitMq((ctx, cfg) =>
     {
