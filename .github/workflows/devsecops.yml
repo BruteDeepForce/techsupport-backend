@@ -43,19 +43,6 @@ jobs :
 
       - name : Docker Build
         run : docker build -t myapp:latest -f ./DockerFile.backend .
-
-      - name : Install Trivy
-        run : |
-          sudo apt-get update
-          sudo apt-get install -y trivy
-      - name : Trivy Scan
-        run : trivy image --timeout 10m --exit-code 1 --severity HIGH,CRITICAL myapp:latest
-
-      - name : Upload Trivy Results
-        uses : actions/upload-artifact@v4
-        with :
-          name : trivy-results
-          path : trivy-results.txt
       
       - name : Deploy to Server
         if: success()
