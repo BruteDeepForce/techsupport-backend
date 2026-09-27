@@ -135,5 +135,5 @@ app.MapHub<TradeStatusHub>("/trade-status-hub"); //! şuan için modular monolit
 app.MapHub<HRNotificationHub>("/hr-notification-hub"); //! şuan için modular monolith ihlal edildi.
 
 app.MapGet("/", () => Results.Ok(new { service = "TechSupport Modular Monolith", version = "0.1" }));
-
+app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
 app.Run();
