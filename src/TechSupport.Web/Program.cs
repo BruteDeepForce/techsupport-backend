@@ -85,7 +85,12 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
     x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
     x.AddConsumer<OfferAdminApprovedForInvoicingConsumer>();
-    x.AddConsumer<TradeAccountInsertConsumer>();
+    x.AddConsumer<TenantAccountingAccountProvisioningConsumer>();
+    x.AddConsumer<TradeAccountInsertConsumer>(consumer =>
+    {
+        consumer.UseMessageRetry(retry => retry.Interval(3, TimeSpan.FromSeconds(2)));
+        consumer.UseInMemoryOutbox();
+    });
     x.AddConsumer<CustomerDeviceMapCompletedConsumer>();
     x.AddConsumer<TradeAccountingProcessResultedConsumer>();
     x.AddConsumer<CustomerCreateCompleted>();

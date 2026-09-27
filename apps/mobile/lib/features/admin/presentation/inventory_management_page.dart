@@ -8,6 +8,7 @@ import 'admin_tickets_page.dart';
 import 'admin_devices_page.dart';
 import 'admin_team_page.dart';
 import 'admin_work_orders_page.dart';
+import 'admin_accounting_page.dart';
 
 class InventoryManagementPage extends StatefulWidget {
   const InventoryManagementPage({super.key});
@@ -108,6 +109,16 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
                   transitionDuration: Duration.zero,
                 ),
               ),
+          ),
+          LinearTabItem(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Muhasebe',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminAccountingPage(),
+                transitionDuration: Duration.zero,
+              ),
+            ),
           ),
         ],
       ),
@@ -504,4 +515,3 @@ class _InventoryRow extends StatelessWidget {
     );
   }
 }
-

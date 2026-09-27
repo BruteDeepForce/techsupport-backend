@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 
@@ -39,5 +37,34 @@ class AuthService {
       throw Exception('No token in response');
     }
     throw Exception('Register failed: ${res.statusCode}');
+  }
+
+  Future<void> requestPasswordResetCode(String email) async {
+    await _dio.post(
+      '/api/identity/account/forgot-password',
+      data: {'email': email},
+    );
+  }
+
+  Future<String> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    final response = await _dio.post(
+      '/api/identity/account/reset-password',
+      data: {
+        'email': email,
+        'code': code,
+        'newPassword': newPassword,
+      },
+    );
+
+    final token = response.data['token'] as String?;
+    if (token == null || token.isEmpty) {
+      throw Exception('No token in password reset response');
+    }
+
+    return token;
   }
 }

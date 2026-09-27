@@ -51,6 +51,23 @@ public sealed class TradeAccountingProcessResultedConsumer : IConsumer<TradeAcco
         {
             trade.Status = TradeStatus.Completed;
             trade.CompletedAtUtc = DateTime.UtcNow;
+
+            var type = trade.Type.ToString();
+
+            await _bus.Publish(new TradeStockProcessEvent
+            {
+                TenantId = message.TenantId,
+                BranchId = trade.BranchId ?? Guid.Empty,
+                CategoryId = trade.CategoryId ?? Guid.Empty,
+                DeviceId = trade.DeviceId ?? Guid.Empty,
+                Name = $"{trade.DeviceInfo?.Brand} {trade.DeviceInfo?.Model}",
+                Quantity = trade.Quantity,
+                Sku = trade.DeviceInfo?.SKU ?? string.Empty,
+                ImeiOrSerial = trade.ImeiOrSerial ?? string.Empty,
+                Barcode = trade.DeviceInfo?.BarcodeNumber ?? string.Empty,
+                UnitPrice = trade.UnitPrice,
+                Type = type
+            }, context.CancellationToken);
         }
         else
         {
@@ -58,25 +75,6 @@ public sealed class TradeAccountingProcessResultedConsumer : IConsumer<TradeAcco
         }
 
         await _db.SaveChangesAsync(context.CancellationToken);
-
-        var type = trade.Type.ToString();
-
-        await _bus.Publish(new TradeStockProcessEvent
-        {
-            TenantId = message.TenantId,
-            BranchId = trade.BranchId ?? Guid.Empty,
-            CategoryId = trade.CategoryId ?? Guid.Empty,
-            DeviceId = trade.DeviceId ?? Guid.Empty,
-            Name = $"{trade.DeviceInfo?.Brand} {trade.DeviceInfo?.Model}",
-            Quantity = trade.Quantity,
-            Sku = trade.DeviceInfo?.SKU ?? string.Empty,
-            ImeiOrSerial = trade.ImeiOrSerial ?? string.Empty,
-            Barcode = trade.DeviceInfo?.BarcodeNumber ?? string.Empty,
-            UnitPrice = trade.UnitPrice,
-            Type = type
-        }, context.CancellationToken);
-
-
 
         await _tradeStatusHub.SendTradeStatusUpdate(message.TenantId, message.TradeId, trade.Status.ToString());
     }

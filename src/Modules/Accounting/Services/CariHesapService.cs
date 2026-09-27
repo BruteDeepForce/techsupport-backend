@@ -48,20 +48,38 @@ public class CariHesapService : ICariHesapService
     }
     public async Task<CariHesapHareketi> CreateHareketAsync(Guid tenantId, Guid? branchId, CreateCariHesapHareketiRequest request, string? createdBy = null, CancellationToken ct = default)
     {
-        //using var transaction = await _db.Database.BeginTransactionAsync(ct);
+        if (request.Tutar <= 0m)
+            throw new ArgumentOutOfRangeException(nameof(request.Tutar), "Movement amount must be greater than zero.");
+
         var account = await _db.Accounts
             .FirstOrDefaultAsync(x => x.Id == request.AccountId && x.TenantId == tenantId, ct);
         if (account == null)
             throw new InvalidOperationException("Account not found for tenant");
+
+        var currentBalance = await CalculateCustomerBakiyeAsync(
+            tenantId,
+            request.AccountId,
+            request.CustomerId,
+            ct);
+
+        decimal borc;
+        decimal alacak;
+        decimal newBalance;
         switch (request.HareketTipi)
         {
             case HareketTipi.Borc:
+                borc = request.Tutar;
+                alacak = 0m;
+                newBalance = currentBalance + request.Tutar;
                 account.TotalBorc += request.Tutar;
                 account.Balance += request.Tutar;
                 break;
             case HareketTipi.Alacak:
+                borc = 0m;
+                alacak = request.Tutar;
+                newBalance = currentBalance - request.Tutar;
                 account.TotalAlacak += request.Tutar;
-                //account.Balance -= request.Tutar;
+                account.Balance -= request.Tutar;
                 break;
             default:
                 throw new ArgumentException($"Invalid HareketTipi: {request.HareketTipi}");
@@ -77,9 +95,9 @@ public class CariHesapService : ICariHesapService
             InvoiceId = request.InvoiceId,
             PaymentId = request.PaymentId,
             HareketTipi = request.HareketTipi,
-            Borc = request.HareketTipi == HareketTipi.Borc ? request.Tutar : 0,
-            Alacak = request.HareketTipi == HareketTipi.Alacak ? request.Tutar : 0,
-            Bakiye = 0, // Will be calculated after saving
+            Borc = borc,
+            Alacak = alacak,
+            Bakiye = newBalance,
             Aciklama = request.Aciklama.Trim(),
             ReferansNumarasi = request.ReferansNumarasi?.Trim(),
             BelgeNumarasi = request.BelgeNumarasi?.Trim(),
@@ -96,11 +114,7 @@ public class CariHesapService : ICariHesapService
         account.UpdatedAtUtc = DateTimeOffset.UtcNow;
         account.UpdatedBy = createdBy;
         await _db.SaveChangesAsync(ct);
-        //await transaction.CommitAsync(ct);
-
-        //! create edilen hareket olduğu için ilgili keyi invalidate ettim. 
-        //! get Ekstre yaparken tekrar Db den çekilecek ve orada Set edilecek.
-        // Invalidate cache for the account's movements
+        // Invalidate statement caches after the ledger changes.
         var keys = new Dictionary<string, string>()
         {
             { "key1", $"carihesaplar:hareketler:{tenantId}" }, // Invalidate all movement list caches for tenant

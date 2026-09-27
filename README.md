@@ -166,6 +166,29 @@ Temel davranışlar:
 - `customer`: ticket açma, kendi kayıtlarını ve kendi operasyonlarını görüntüleme
 - `technician`: atanmış işlerin durumunu güncelleme
 
+## Parola Sıfırlama Ayarları
+
+Parola sıfırlama akışı kayıtlı e-posta adresine 6 haneli, tek kullanımlık bir kod gönderir.
+Production ortamında aşağıdaki değerler secret/environment variable olarak tanımlanmalıdır:
+
+```text
+Smtp__Host=smtp.example.com
+Smtp__Port=587
+Smtp__EnableSsl=true
+Smtp__Username=...
+Smtp__Password=...
+Smtp__FromAddress=no-reply@example.com
+Smtp__FromName=Lineer Destek
+PasswordReset__CodeLifetimeMinutes=10
+PasswordReset__MaxAttempts=5
+PasswordReset__MinimumRequestIntervalSeconds=60
+```
+
+Endpoint'ler:
+
+- `POST /api/identity/account/forgot-password` → `{ "email": "..." }`
+- `POST /api/identity/account/reset-password` → `{ "email": "...", "code": "123456", "newPassword": "..." }`; başarılı yanıtta yeni login JWT'si döner.
+
 ## Şu Anda Uygulamada Neler Yapılabiliyor
 
 ### 1. Tenant ve kullanıcı altyapısı kurulabiliyor

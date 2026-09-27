@@ -9,6 +9,8 @@ namespace TechSupport.Accounting.Services;
 
 public interface IAccountService
 {
+    Task<Account> EnsureDefaultAsync(Guid tenantId, Guid? branchId = null, string? createdBy = null, CancellationToken ct = default);
+
     // Account CRUD operations
     Task<Account?> GetByIdAsync(Guid tenantId, Guid accountId, CancellationToken ct = default);
     Task<Account?> GetByNumberAsync(Guid tenantId, string accountNumber, CancellationToken ct = default);

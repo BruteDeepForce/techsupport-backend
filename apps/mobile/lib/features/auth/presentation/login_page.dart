@@ -9,6 +9,7 @@ import '../../auth/data/auth_service.dart';
 import '../../auth/data/token_storage.dart';
 import 'role_selection_page.dart';
 import 'register_page.dart';
+import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -236,7 +237,13 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 12),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => ForgotPasswordPage(
+                              initialEmail: _usernameController.text.trim(),
+                            ),
+                          ),
+                        ),
                         child: Text(
                           'Şifrenizi mi unuttunuz?',
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -526,6 +533,22 @@ class _LoginCard extends StatelessWidget {
                 }
               },
               child: const Text('Giriş Yap'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ForgotPasswordPage(
+                    initialEmail: emailController.text.trim(),
+                  ),
+                ),
+              ),
+              child: const Text(
+                'Şifrenizi mi unuttunuz?',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ],

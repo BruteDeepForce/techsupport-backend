@@ -5,13 +5,11 @@ import '../admin_web_device_page.dart';
 import '../admin_web_home_page.dart';
 import '../HR/hr_pages/admin_web_hr_page.dart';
 import '../admin_web_trade_page.dart';
-import '../admin_web_offer_detail_page.dart';
+import '../admin_web_accounting_page.dart';
 import '../admin_web_offers_page.dart';
-import '../admin_web_operation_detail_page.dart';
 import '../admin_web_operations_page.dart';
 import '../admin_web_stock_page.dart';
 import '../admin_web_team_page.dart';
-import '../admin_web_ticket_detail_page.dart';
 import '../admin_web_tickets_page.dart';
 import '../admin_web_route.dart';
 
@@ -25,7 +23,8 @@ enum AdminNavKey {
   hr,
   customers,
   devices,
-  stock
+  stock,
+  accounting
 }
 
 class AdminNavItem {
@@ -103,6 +102,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Stok Yönetimi',
       icon: Icons.inventory_2_outlined,
       pageBuilder: (_) => const AdminWebStockPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.accounting,
+      label: 'Muhasebe',
+      icon: Icons.account_balance_wallet_outlined,
+      pageBuilder: (_) => const AdminWebAccountingPage(),
     ),
   ];
 }

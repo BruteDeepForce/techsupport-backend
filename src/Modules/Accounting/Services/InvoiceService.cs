@@ -174,8 +174,15 @@ public class InvoiceService : IInvoiceService
         if (invoice is null || invoice.Status != InvoiceStatus.Draft)
             return null;
 
-        var lineTotal = request.Quantity * request.UnitPrice;
-        var taxAmount = lineTotal * request.TaxRate;
+        var lineSubtotal = decimal.Round(
+            request.Quantity * request.UnitPrice,
+            2,
+            MidpointRounding.AwayFromZero);
+        var taxAmount = decimal.Round(
+            lineSubtotal * request.TaxRate,
+            2,
+            MidpointRounding.AwayFromZero);
+        var lineTotal = lineSubtotal + taxAmount;
 
         var lineItem = new InvoiceLineItem
         {
@@ -191,7 +198,7 @@ public class InvoiceService : IInvoiceService
             UnitPrice = request.UnitPrice,
             TaxRate = request.TaxRate,
             TaxAmount = taxAmount,
-            LineTotal = lineTotal + taxAmount,
+            LineTotal = lineTotal,
             CreatedAtUtc = DateTimeOffset.UtcNow,
             CreatedBy = createdBy
         };
@@ -199,7 +206,7 @@ public class InvoiceService : IInvoiceService
         await _db.InvoiceLineItems.AddAsync(lineItem, ct);
 
         // Recalculate invoice totals
-        invoice.Subtotal += lineTotal;
+        invoice.Subtotal += lineSubtotal;
         invoice.TaxAmount += taxAmount;
         invoice.TotalAmount = invoice.Subtotal + invoice.TaxAmount;
         invoice.UpdatedAtUtc = DateTimeOffset.UtcNow;
@@ -239,7 +246,7 @@ public class InvoiceService : IInvoiceService
         if (lineItem is null) return null;
 
         // Reverse totals
-        invoice.Subtotal -= lineItem.UnitPrice * lineItem.Quantity;
+        invoice.Subtotal -= lineItem.LineTotal - lineItem.TaxAmount;
         invoice.TaxAmount -= lineItem.TaxAmount;
         invoice.TotalAmount = invoice.Subtotal + invoice.TaxAmount;
 

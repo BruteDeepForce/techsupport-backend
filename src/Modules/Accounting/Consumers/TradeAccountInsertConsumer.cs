@@ -1,31 +1,26 @@
 using MassTransit;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TechSupport.Accounting.Data;
-using TechSupport.Accounting.Domain.Entities;
 using TechSupport.Accounting.DTO;
 using TechSupport.Accounting.Services;
 using TechSupport.Trade.Contracts.Events;
+using AccountingPaymentMethod = TechSupport.Accounting.Domain.Entities.PaymentMethod;
+using InvoiceType = TechSupport.Accounting.Domain.Entities.InvoiceType;
 
 namespace TechSupport.Accounting.Consumers
 {
     public class TradeAccountInsertConsumer : IConsumer<TradeAccountModuleInserted>
     {
-        private readonly AccountingDbContext _db;
-        private readonly ICariHesapService _cariHesapService;
-
+        private readonly IAccountService _accountService;
         private readonly IPaymentService _paymentService;
-
-        private readonly IInvoiceService _invoiceService;
-
         private readonly ILogger<TradeAccountInsertConsumer> _logger;
 
-        public TradeAccountInsertConsumer(AccountingDbContext db, ICariHesapService cariHesapService, IPaymentService paymentService, IInvoiceService invoiceService, ILogger<TradeAccountInsertConsumer> logger)
+        public TradeAccountInsertConsumer(
+            IAccountService accountService,
+            IPaymentService paymentService,
+            ILogger<TradeAccountInsertConsumer> logger)
         {
-            _db = db;
-            _cariHesapService = cariHesapService;
+            _accountService = accountService;
             _paymentService = paymentService;
-            _invoiceService = invoiceService;
             _logger = logger;
         }
 
@@ -33,40 +28,18 @@ namespace TechSupport.Accounting.Consumers
         {
             var message = context.Message;
 
-            var movementReference = message.IdempotencyKey;
-            var alreadyProcessed = await _db.CariHesapHareketleri
-                .AsNoTracking()
-                .AnyAsync(
-                    x => x.TenantId == message.TenantId && x.ReferansNumarasi == movementReference,
-                    context.CancellationToken);
+            if (message.Quantity <= 0)
+                throw new InvalidOperationException("Trade quantity must be greater than zero.");
 
-            if (alreadyProcessed)
-                return;
+            var paidAmount = message.PaidAmount ?? 0m;
+            if (paidAmount < 0m || paidAmount > message.TotalAmount)
+                throw new InvalidOperationException("Paid amount must be between zero and the trade total.");
 
-            var account = await _db.Accounts
-                .FirstOrDefaultAsync(x => x.TenantId == message.TenantId, context.CancellationToken);
-
-            if (account is null)
-            {
-                account = new Account
-                {
-                    Id = Guid.NewGuid(),
-                    TenantId = message.TenantId,
-                    BranchId = message.BranchId,
-                    Name = "Varsayilan Cari Hesap",
-                    AccountNumber = $"ACC-{message.TenantId:N}"[..16],
-                    Type = AccountType.CariHesap,
-                    Status = AccountStatus.Active,
-                    Balance = 0,
-                    TotalBorc = 0,
-                    TotalAlacak = 0,
-                    CreatedAtUtc = DateTimeOffset.UtcNow,
-                    CreatedBy = "trade-accounting-consumer"
-                };
-
-                await _db.Accounts.AddAsync(account, context.CancellationToken);
-                await _db.SaveChangesAsync(context.CancellationToken);
-            }
+            var account = await _accountService.EnsureDefaultAsync(
+                message.TenantId,
+                message.BranchId,
+                "trade-accounting-consumer",
+                context.CancellationToken);
      
             var invoice = new CreateInvoiceRequest()
             {
@@ -85,9 +58,10 @@ namespace TechSupport.Accounting.Consumers
             {
                 Description = $"Trade {message.TradeId} - {(message.IsPurchase ? "Alış" : "Satış")}",
                 Quantity = message.Quantity,
-                UnitPrice = message.UnitPrice,
+                // Trade.TotalAmount is authoritative because it may include a discount.
+                UnitPrice = decimal.Round(message.TotalAmount / message.Quantity, 4),
                 ProductCode = $"TRADE-{message.TradeId:N}",
-                TaxRate = 0.18m
+                TaxRate = 0m
             };
 
             var payment = new CreatePaymentRequest
@@ -95,16 +69,16 @@ namespace TechSupport.Accounting.Consumers
                 AccountId = account.Id,
                 CustomerId = message.CustomerId,
                 InvoiceId = invoice.Id,
-                Amount = message.TotalAmount,
+                Amount = paidAmount,
                 PaymentNumber = $"PAY-TRADE-{message.TradeId:N}",
                 PaymentDate = message.OccurredAtUtc,
-                ReferenceNumber = movementReference,
+                ReferenceNumber = message.IdempotencyKey,
                 Method = message.PaymentMethod switch
                 {
-                    Trade.Contracts.Events.PaymentMethod.Cash => Domain.Entities.PaymentMethod.Nakit,
-                    Trade.Contracts.Events.PaymentMethod.Card => Domain.Entities.PaymentMethod.KrediKarti,
-                    Trade.Contracts.Events.PaymentMethod.Transfer => Domain.Entities.PaymentMethod.BankaHavalesi,
-                    _ => Domain.Entities.PaymentMethod.Nakit
+                    Trade.Contracts.Events.PaymentMethod.Cash => AccountingPaymentMethod.Nakit,
+                    Trade.Contracts.Events.PaymentMethod.Card => AccountingPaymentMethod.KrediKarti,
+                    Trade.Contracts.Events.PaymentMethod.Transfer => AccountingPaymentMethod.BankaHavalesi,
+                    _ => AccountingPaymentMethod.Nakit
                 }
             };
 
@@ -118,7 +92,14 @@ namespace TechSupport.Accounting.Consumers
                 lineItem,
                 message.IsPurchase,
                 context.CancellationToken);
-                 // Log the failure and consider retrying or compensating actions
+
+            if (!result)
+            {
+                _logger.LogWarning(
+                    "Accounting processing failed for TradeId {TradeId}, TenantId {TenantId}",
+                    message.TradeId,
+                    message.TenantId);
+            }
         }
     }
 }

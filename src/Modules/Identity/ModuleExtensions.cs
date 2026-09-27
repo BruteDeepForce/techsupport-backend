@@ -27,6 +27,10 @@ public static class ModuleExtensions
         .AddEntityFrameworkStores<IdentityDbContext>()
         .AddDefaultTokenProviders();
 
+        services.AddScoped<IPasswordHasher<PasswordResetCode>, PasswordHasher<PasswordResetCode>>();
+        services.AddScoped<IPasswordResetEmailSender, SmtpPasswordResetEmailSender>();
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
+
         var key = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is required in configuration");
         var issuer = configuration["Jwt:Issuer"] ?? "TechSupport";
 
@@ -55,6 +59,24 @@ public static class ModuleExtensions
                     }
 
                     return Task.CompletedTask;
+                },
+                OnTokenValidated = async context =>
+                {
+                    var userIdValue = context.Principal?.FindFirst("user_id")?.Value;
+                    var tokenStamp = context.Principal?.FindFirst("security_stamp")?.Value;
+                    if (!Guid.TryParse(userIdValue, out var userId) || string.IsNullOrWhiteSpace(tokenStamp))
+                    {
+                        context.Fail("Token is missing required security claims.");
+                        return;
+                    }
+
+                    var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+                    var user = await userManager.FindByIdAsync(userId.ToString());
+                    var currentStamp = user is null ? null : await userManager.GetSecurityStampAsync(user);
+                    if (user is null || !string.Equals(tokenStamp, currentStamp, StringComparison.Ordinal))
+                    {
+                        context.Fail("Token is no longer valid.");
+                    }
                 }
             };
             options.TokenValidationParameters = new TokenValidationParameters

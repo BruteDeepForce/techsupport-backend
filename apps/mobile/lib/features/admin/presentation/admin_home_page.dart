@@ -9,6 +9,7 @@ import 'admin_team_page.dart';
 import 'admin_work_orders_page.dart';
 import 'admin_ai_autonomous_page.dart';
 import 'inventory_management_page.dart';
+import 'admin_accounting_page.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -247,6 +248,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
             onTap: () => Navigator.of(context).pushReplacement(
               PageRouteBuilder(
                 pageBuilder: (_, __, ___) => const AdminTeamPage(),
+                transitionDuration: Duration.zero,
+              ),
+            ),
+          ),
+          LinearTabItem(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Muhasebe',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminAccountingPage(),
                 transitionDuration: Duration.zero,
               ),
             ),

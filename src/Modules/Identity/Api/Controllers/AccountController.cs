@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel.DataAnnotations;
 using TechSupport.Identity.Contracts.Events;
 using TechSupport.Identity.Data;
 using TechSupport.Identity.Services;
@@ -22,10 +23,12 @@ public class AccountController : ControllerBase
     private readonly IdentityDbContext _dbContext;
     private readonly ITenantService _tenantService;
     private readonly IBus _bus;
+    private readonly IPasswordResetService _passwordResetService;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
     RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService,
-    IdentityDbContext dbContext, ITenantService tenantService, IBus bus)
+    IdentityDbContext dbContext, ITenantService tenantService, IBus bus,
+    IPasswordResetService passwordResetService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -35,10 +38,16 @@ public class AccountController : ControllerBase
         _dbContext = dbContext;
         _bus = bus;
         _tenantService = tenantService;
+        _passwordResetService = passwordResetService;
     }
 
     public record RegisterDto(string Email, string Password, string Role, string tenantName, Guid? BranchId);
     public record LoginDto(string Email, string Password);
+    public sealed record ForgotPasswordDto([Required, EmailAddress] string Email);
+    public sealed record ResetPasswordDto(
+        [Required, EmailAddress] string Email,
+        [Required, RegularExpression("^[0-9]{6}$")] string Code,
+        [Required] string NewPassword);
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -75,13 +84,33 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] string email)
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto, CancellationToken ct)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null) return NoContent();
+        await _passwordResetService.RequestCodeAsync(dto.Email.Trim(), ct);
+        return Accepted(new
+        {
+            message = "Bu e-posta sistemde kayıtlıysa parola sıfırlama kodu gönderildi."
+        });
+    }
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        // In real app you'd email the token. For scaffold we return it.
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto, CancellationToken ct)
+    {
+        var result = await _passwordResetService.ResetPasswordAsync(
+            dto.Email.Trim(), dto.Code, dto.NewPassword, ct);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors.Select(x => x.Description) });
+        }
+
+        var user = await _userManager.FindByEmailAsync(dto.Email.Trim());
+        if (user is null)
+        {
+            return BadRequest(new { errors = new[] { "Kullanıcı bulunamadı." } });
+        }
+
+        var token = await _tokenService.CreateTokenForUserAsync(user, ct);
         return Ok(new { token });
     }
 

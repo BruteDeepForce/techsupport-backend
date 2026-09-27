@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Accounting.Data;
 using TechSupport.Accounting.Domain.Entities;
+using TechSupport.Accounting.Services;
 using TechSupport.Operation.Contracts.Events;
 
 namespace TechSupport.Accounting.Consumers;
@@ -9,34 +10,25 @@ namespace TechSupport.Accounting.Consumers;
 public sealed class OfferAdminApprovedForInvoicingConsumer : IConsumer<OfferAdminApprovedForInvoicing>
 {
     private readonly AccountingDbContext _db;
+    private readonly IAccountService _accountService;
 
-    public OfferAdminApprovedForInvoicingConsumer(AccountingDbContext db)
+    public OfferAdminApprovedForInvoicingConsumer(
+        AccountingDbContext db,
+        IAccountService accountService)
     {
         _db = db;
+        _accountService = accountService;
     }
 
     public async Task Consume(ConsumeContext<OfferAdminApprovedForInvoicing> context)
     {
         var msg = context.Message;
 
-        var accountId = await _db.Invoices
-            .AsNoTracking()
-            .Where(x => x.TenantId == msg.TenantId && x.CustomerId == msg.CustomerId)
-            .Select(x => (Guid?)x.AccountId)
-            .FirstOrDefaultAsync(context.CancellationToken);
-
-        if (!accountId.HasValue)
-        {
-            accountId = await _db.Accounts
-                .AsNoTracking()
-                .Where(x => x.TenantId == msg.TenantId)
-                .OrderBy(x => x.CreatedAtUtc)
-                .Select(x => (Guid?)x.Id)
-                .FirstOrDefaultAsync(context.CancellationToken);
-        }
-
-        if (!accountId.HasValue)
-            return;
+        var account = await _accountService.EnsureDefaultAsync(
+            msg.TenantId,
+            msg.BranchId,
+            "operation.offer-admin-approve",
+            context.CancellationToken);
 
         var invoiceNumber = BuildInvoiceNumber(msg.OfferId);
 
@@ -106,7 +98,7 @@ public sealed class OfferAdminApprovedForInvoicingConsumer : IConsumer<OfferAdmi
             Id = invoiceId,
             TenantId = msg.TenantId,
             BranchId = msg.BranchId,
-            AccountId = accountId.Value,
+            AccountId = account.Id,
             CustomerId = msg.CustomerId,
             InvoiceNumber = invoiceNumber,
             Status = InvoiceStatus.Draft,

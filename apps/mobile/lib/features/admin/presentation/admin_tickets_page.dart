@@ -9,6 +9,7 @@ import 'admin_team_page.dart';
 import 'admin_work_orders_page.dart';
 import 'inventory_management_page.dart';
 import 'admin_ticket_detail_page.dart';
+import 'admin_accounting_page.dart';
 
 class AdminTicketsPage extends StatefulWidget {
   const AdminTicketsPage({super.key});
@@ -102,6 +103,16 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
             onTap: () => Navigator.of(context).pushReplacement(
               PageRouteBuilder(
                 pageBuilder: (_, __, ___) => const AdminTeamPage(),
+                transitionDuration: Duration.zero,
+              ),
+            ),
+          ),
+          LinearTabItem(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Muhasebe',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminAccountingPage(),
                 transitionDuration: Duration.zero,
               ),
             ),

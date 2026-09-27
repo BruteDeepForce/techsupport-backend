@@ -73,8 +73,6 @@ class AdminWebSidebar extends StatelessWidget {
                     ),
                   ),
                 const _NavItem(
-                    icon: Icons.payments_outlined, label: 'Finans'),
-                const _NavItem(
                     icon: Icons.query_stats_rounded, label: 'Analiz & Raporlar'),
                 const _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
               ],
@@ -207,4 +205,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-

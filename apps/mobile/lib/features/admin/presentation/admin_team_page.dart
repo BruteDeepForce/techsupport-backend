@@ -7,6 +7,7 @@ import 'admin_home_page.dart';
 import 'admin_tickets_page.dart';
 import 'admin_devices_page.dart';
 import 'admin_work_orders_page.dart';
+import 'admin_accounting_page.dart';
 import 'inventory_management_page.dart';
 
 class AdminTeamPage extends StatefulWidget {
@@ -276,6 +277,16 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
             icon: Icons.group_outlined,
             label: 'Ekip',
             active: true,
+          ),
+          LinearTabItem(
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Muhasebe',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminAccountingPage(),
+                transitionDuration: Duration.zero,
+              ),
+            ),
           ),
         ],
       ),

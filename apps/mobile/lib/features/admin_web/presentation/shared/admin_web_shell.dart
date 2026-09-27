@@ -58,4 +58,3 @@ class AdminWebShell extends StatelessWidget {
     );
   }
 }
-

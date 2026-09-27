@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using TechSupport.Accounting.Data;
 using TechSupport.Accounting.DTO;
 using TechSupport.Accounting.Domain.Entities;
@@ -17,6 +18,56 @@ public class AccountService : IAccountService
     public AccountService(AccountingDbContext db)
     {
         _db = db;
+    }
+
+    public async Task<Account> EnsureDefaultAsync(
+        Guid tenantId,
+        Guid? branchId = null,
+        string? createdBy = null,
+        CancellationToken ct = default)
+    {
+        if (tenantId == Guid.Empty)
+            throw new ArgumentException("TenantId is required.", nameof(tenantId));
+
+        var existing = await _db.Accounts
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId, ct);
+
+        if (existing is not null)
+            return existing;
+
+        var account = new Account
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            BranchId = branchId,
+            Name = "Genel Cari Hesap",
+            AccountNumber = $"ACC-{tenantId:N}",
+            Type = AccountType.CariHesap,
+            Status = AccountStatus.Active,
+            Balance = 0m,
+            TotalBorc = 0m,
+            TotalAlacak = 0m,
+            CreditLimit = 0m,
+            Description = "Tenant için otomatik oluşturulan genel cari hesap.",
+            CreatedAtUtc = DateTimeOffset.UtcNow,
+            CreatedBy = createdBy
+        };
+
+        await _db.Accounts.AddAsync(account, ct);
+
+        try
+        {
+            await _db.SaveChangesAsync(ct);
+            return account;
+        }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // Two messages may provision the same tenant concurrently. The database
+            // constraint is authoritative; return the account created by the winner.
+            _db.Entry(account).State = EntityState.Detached;
+            return await _db.Accounts.SingleAsync(x => x.TenantId == tenantId, ct);
+        }
     }
 
     public async Task<Account?> GetByIdAsync(Guid tenantId, Guid accountId, CancellationToken ct = default)

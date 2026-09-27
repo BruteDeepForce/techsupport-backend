@@ -311,11 +311,9 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
               : TradePaymentMethod.transfer,
       quantity: int.tryParse(_quantityController.text) ?? 1,
       unitPrice: double.tryParse(_unitPriceController.text) ?? 0,
-      totalAmount: ((double.tryParse(_unitPriceController.text) ?? 0) *
-              (int.tryParse(_quantityController.text) ?? 1) -
-          (double.tryParse(_discountController.text) ?? 0)),
+      totalAmount: _transactionTotal,
       costPrice: double.tryParse(_unitPriceController.text) ?? 0,
-      paidAmount: double.tryParse(_unitPriceController.text) ?? 0,
+      paidAmount: _transactionTotal,
       imeiOrSerial:
           _serialController.text.isNotEmpty ? _serialController.text : null,
       notes: _noteController.text.isNotEmpty ? _noteController.text : null,
