@@ -27,7 +27,7 @@
     <ProjectReference Include="../Modules/Stock/Stock.csproj" />
     <ProjectReference Include="../Modules/Ai/Ai.csproj" />
     <ProjectReference Include="../Modules/Accounting/Accounting.csproj" />
-    <ProjectReference Include= "../Modules/HR/Hr.csproj" />
+    <ProjectReference Include= "../Modules/Hr/Hr.csproj" />
     <ProjectReference Include="..\Modules\Trade\Trade.csproj" />
   </ItemGroup>
 
