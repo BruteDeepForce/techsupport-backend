@@ -22,13 +22,14 @@ public class AccountController : ControllerBase
     private readonly IUserService _userService;
     private readonly IdentityDbContext _dbContext;
     private readonly ITenantService _tenantService;
+    private readonly IBranchService _branchService;
     private readonly IBus _bus;
     private readonly IPasswordResetService _passwordResetService;
 
     public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
     RoleManager<AppRole> roleManager, ITokenService tokenService, IUserService userService,
     IdentityDbContext dbContext, ITenantService tenantService, IBus bus,
-    IPasswordResetService passwordResetService)
+    IPasswordResetService passwordResetService, IBranchService branchService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -39,9 +40,10 @@ public class AccountController : ControllerBase
         _bus = bus;
         _tenantService = tenantService;
         _passwordResetService = passwordResetService;
+        _branchService = branchService;
     }
 
-    public record RegisterDto(string Email, string Password, string Role, string tenantName, Guid? BranchId);
+    public record RegisterDto(string Email, string UserName, string Password, string Role, string tenantName, string? BranchName);
     public record LoginDto(string Email, string Password);
     public sealed record ForgotPasswordDto([Required, EmailAddress] string Email);
     public sealed record ResetPasswordDto(
@@ -52,7 +54,10 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
-        var user = new AppUser { UserName = dto.Email, Email = dto.Email };
+        if (string.IsNullOrWhiteSpace(dto.UserName))
+            return BadRequest("UserName is required");
+
+        var user = new AppUser { UserName = dto.UserName.Trim(), Email = dto.Email };
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -62,7 +67,8 @@ public class AccountController : ControllerBase
         await _userManager.AddToRoleAsync(user, dto.Role);
         var tenantId = await _tenantService.CreateTenantAsync(dto.tenantName, CancellationToken.None);
         if (tenantId == Guid.Empty) return BadRequest("Failed to create tenant");
-        await _userService.CreateAsync(user.Id, tenantId, dto.BranchId, dto.Email, dto.Role, CancellationToken.None);
+        var branch = await _branchService.CreateDefaultBranchAsync(tenantId, dto.BranchName, CancellationToken.None);
+        await _userService.CreateAsync(user.Id, tenantId, branch.Id, dto.Email, dto.Role, CancellationToken.None);
 
         var token = await _tokenService.CreateTokenForUserAsync(user);
 

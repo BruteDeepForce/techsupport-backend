@@ -20,15 +20,15 @@ class AuthService {
   }
 
   Future<String> register(
-      String email, String password, String role, String tenantName,
-      {String? branchId}) async {
-    // Backend RegisterDto now expects: Email, Password, Role, tenantName, BranchId
+      String email, String userName, String password, String role, String tenantName,
+      {String? branchName}) async {
     final data = {
       'Email': email,
+      'UserName': userName,
       'Password': password,
       'Role': role,
       'tenantName': tenantName,
-      'BranchId': branchId,
+      'BranchName': branchName,
     };
     final res = await _dio.post('/api/identity/account/register', data: data);
     if (res.statusCode == 200) {

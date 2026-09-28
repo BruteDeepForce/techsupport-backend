@@ -3,14 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../customer/data/customer_service.dart';
 import '../../customer/models/customer_models.dart';
-import 'admin_web_home_page.dart';
-import 'admin_web_operations_page.dart';
-import 'admin_web_route.dart';
-import 'admin_web_offers_page.dart';
-import 'admin_web_stock_page.dart';
-import 'admin_web_team_page.dart';
-import 'admin_web_tickets_page.dart';
-import 'admin_web_device_page.dart';
+import 'shared/admin_web_nav.dart';
+import 'shared/admin_web_sidebar.dart';
 
 class AdminWebCustomersPage extends StatefulWidget {
   const AdminWebCustomersPage({super.key});
@@ -174,13 +168,13 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: _WebSidebar(compact: true, active: _NavKey.customers)),
+                child: AdminWebSidebar(compact: true, active: AdminNavKey.customers)),
         body: Row(
           children: [
             if (showSidebar)
               const SizedBox(
                 width: 260,
-                child: _WebSidebar(active: _NavKey.customers),
+                child: AdminWebSidebar(active: AdminNavKey.customers),
               ),
             Expanded(
               child: Column(
@@ -247,261 +241,6 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-enum _NavKey {
-  home,
-  tickets,
-  operations,
-  offers,
-  team,
-  customers,
-  devices,
-  stock,
-  other
-}
-
-class _WebSidebar extends StatelessWidget {
-  const _WebSidebar({this.compact = false, required this.active});
-
-  final bool compact;
-  final _NavKey active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0C1E33), Color(0xFF0A1728)],
-        ),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/branding/logo.png',
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                if (!compact)
-                  const Text(
-                    'Lineer Destek',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                _NavItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Ana Menü',
-                  active: active == _NavKey.home,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebHomePage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.confirmation_number_outlined,
-                  label: 'Talepler',
-                  active: active == _NavKey.tickets,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebTicketsPage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.receipt_long_outlined,
-                  label: 'Operasyonlar',
-                  active: active == _NavKey.operations,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebOperationsPage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.local_offer_outlined,
-                  label: 'Teklifler',
-                  active: active == _NavKey.offers,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebOffersPage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.group_outlined,
-                  label: 'Ekip Yönetimi',
-                  active: active == _NavKey.team,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebTeamPage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.person_outline_rounded,
-                  label: 'Müşteri Yönetimi',
-                  active: active == _NavKey.customers,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebCustomersPage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.devices_other_outlined,
-                  label: 'Cihaz Takibi',
-                  active: active == _NavKey.devices,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebDevicePage()),
-                  ),
-                ),
-                _NavItem(
-                  icon: Icons.inventory_2_outlined,
-                  label: 'Stok Yönetimi',
-                  active: active == _NavKey.stock,
-                  onTap: () => Navigator.of(context).pushReplacement(
-                    adminWebRoute(const AdminWebStockPage()),
-                  ),
-                ),
-                const _NavItem(icon: Icons.payments_outlined, label: 'Finans'),
-                const _NavItem(
-                    icon: Icons.query_stats_rounded,
-                    label: 'Analiz & Raporlar'),
-                const _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(14),
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF14263F),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Depolama',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, color: Colors.white)),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: LinearProgressIndicator(
-                    value: 0.55,
-                    minHeight: 6,
-                    backgroundColor: const Color(0xFF1D3554),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text('4.88 GB / 8 GB',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF9FB3C8))),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add, size: 18, color: Colors.white),
-                    label: const Text('Depolama Ekle',
-                        style: TextStyle(color: Colors.white)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF2C4469)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Color(0xFF1C2F4A),
-                  child: Text('ST',
-                      style: TextStyle(fontSize: 11, color: Colors.white)),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Süleyman TÜY... \nTR',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF9FB3C8)),
-                  ),
-                ),
-                Icon(Icons.logout, size: 18, color: Color(0xFF9FB3C8)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    this.active = false,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: active ? const Color(0xFF1B3A5C) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: const Color(0xFF9FB3C8)),
-            const SizedBox(width: 10),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                  color: active ? Colors.white : const Color(0xFF9FB3C8),
-                )),
-            const Spacer(),
-            if (!active)
-              const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
           ],
         ),
       ),

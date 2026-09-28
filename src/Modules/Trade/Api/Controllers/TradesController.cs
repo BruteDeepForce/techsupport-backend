@@ -39,10 +39,9 @@ public sealed class TradesController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         if (tenantId is null)
             return Unauthorized(new { error = "Tenant claim not found" });
-        var branchId =  Guid.NewGuid();// Allow branchId to be optional, use Guid.Empty if not provided
-        //if (branchId is null)
-       //     return BadRequest(new { error = "Branch claim not found" });
-
+        var branchId =  GetBranchIdFromClaims();
+        if(branchId is null)
+            return BadRequest(new { error = "Branch claim not found" });
 
         var idempotencySource = request.ImeiOrSerial
             ?? request.Device?.SerialNumber;
@@ -57,7 +56,7 @@ public sealed class TradesController : ControllerBase
 
         try
         {
-            var created = await _tradeService.StartTradeAsync(tenantId.Value, branchId, request, idempotencyKey, cancellationToken);
+            var created = await _tradeService.StartTradeAsync(tenantId.Value, branchId.Value, request, idempotencyKey, cancellationToken);
             
             return Ok(new { tradeId = created.Id, idempotencyKey = created.IdempotencyKey });
         }

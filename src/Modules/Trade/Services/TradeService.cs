@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using TechSupport.Device.Contracts.Events;
+using TechSupport.Device.Contracts.Services;
 using TechSupport.Trade.Contracts.Events;
 using TechSupport.Trade.Data;
 using TechSupport.Trade.Domain.Entities;
@@ -13,13 +14,15 @@ namespace TechSupport.Trade.Services;
 public sealed class TradeService : ITradeService
 {
     private readonly TradeDbContext _db;
+    private readonly IDeviceSalePriceReader _deviceSalePriceReader;
     private readonly IBus _bus;
 
     private readonly ILogger<TradeService> _logger;
 
-    public TradeService(TradeDbContext db, IBus bus, ILogger<TradeService> logger)
+    public TradeService(TradeDbContext db, IDeviceSalePriceReader deviceSalePriceReader, IBus bus, ILogger<TradeService> logger)
     {
         _db = db;
+        _deviceSalePriceReader = deviceSalePriceReader;
         _bus = bus;
         _logger = logger;
     }
@@ -219,6 +222,7 @@ public sealed class TradeService : ITradeService
         if (request.ExistingDeviceId is not Guid existingDeviceId || existingDeviceId == Guid.Empty)
             throw new ArgumentException("ExistingDeviceId is required for non-purchase trades.", nameof(request.ExistingDeviceId));
 
+        var pricing = await GetExistingDevicePricingAsync(tenantId, existingDeviceId, request, cancellationToken);
         var existingCustomerId = request.ExistingCustomerId;
         var existingCustomerAppUserId = request.ExistingCusomerAppUserId;
         _logger.LogWarning("Existing CustomerID : {customerId}", existingCustomerId);
@@ -273,10 +277,10 @@ public sealed class TradeService : ITradeService
                 Status = TradeStatus.Pending,
                 ImeiOrSerial = request.ImeiOrSerial,
                 Quantity = request.Quantity,
-                UnitPrice = request.UnitPrice,
+                UnitPrice = pricing.UnitPrice,
                 CostPrice = request.CostPrice,
-                TotalAmount = request.TotalAmount,
-                PaidAmount = request.PaidAmount,
+                TotalAmount = pricing.TotalAmount,
+                PaidAmount = pricing.PaidAmount,
                 Notes = request.Notes,
                 CreatedAtUtc = DateTime.UtcNow,
                 IdempotencyKey = normalizedIdempotencyKey
@@ -357,10 +361,10 @@ public sealed class TradeService : ITradeService
             Status = TradeStatus.Pending,
             ImeiOrSerial = request.ImeiOrSerial,
             Quantity = request.Quantity,
-            UnitPrice = request.UnitPrice,
+            UnitPrice = pricing.UnitPrice,
             CostPrice = request.CostPrice,
-            TotalAmount = request.TotalAmount,
-            PaidAmount = request.PaidAmount,
+            TotalAmount = pricing.TotalAmount,
+            PaidAmount = pricing.PaidAmount,
             Notes = request.Notes,
             CreatedAtUtc = DateTime.UtcNow,
             IdempotencyKey = normalizedIdempotencyKey
@@ -470,6 +474,7 @@ public sealed class TradeService : ITradeService
             GuaranteePeriod: deviceInfo.GuaranteePeriod,
             WarrantyStartAtUtc: deviceInfo.WarrantyStartAtUtc,
             BarcodeNumber: deviceInfo.BarcodeNumber?.Trim(),
+            CurrentSalePrice: trade.UnitPrice,
             CustomerName: deviceInfo.CustomerName?.Trim(),
             Status: "Pending",
             OccurredAtUtc: DateTimeOffset.UtcNow),
@@ -606,6 +611,31 @@ public sealed class TradeService : ITradeService
         {
             throw new ArgumentException("Duplicate request with the same IdempotencyKey already exists.", "idempotencyKey");
         }
+    }
+
+    private async Task<(decimal UnitPrice, decimal TotalAmount, decimal? PaidAmount)> GetExistingDevicePricingAsync(
+        Guid tenantId,
+        Guid deviceId,
+        StartTradeRequest request,
+        CancellationToken cancellationToken)
+    {
+        var currentSalePrice = await _deviceSalePriceReader.GetCurrentSalePriceAsync(tenantId, deviceId, cancellationToken);
+
+        if (currentSalePrice is null or <= 0)
+            throw new ArgumentException("CurrentSalePrice is required for existing device sales.", nameof(request.ExistingDeviceId));
+
+        var unitPrice = currentSalePrice.Value;
+        var totalAmount = decimal.Round(unitPrice * request.Quantity, 2, MidpointRounding.AwayFromZero);
+
+        decimal? paidAmount = request.PaidAmount;
+        if (paidAmount.HasValue && request.TotalAmount > 0)
+        {
+            paidAmount = request.PaidAmount >= request.TotalAmount
+                ? totalAmount
+                : Math.Min(request.PaidAmount.Value, totalAmount);
+        }
+
+        return (unitPrice, totalAmount, paidAmount);
     }
 
     private static bool IsIdempotencyUniqueViolation(DbUpdateException ex)

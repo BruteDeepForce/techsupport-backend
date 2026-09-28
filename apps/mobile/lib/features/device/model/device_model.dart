@@ -10,6 +10,8 @@ class DeviceDTO {
   final String? appUserId;
   final String? customerName;
   final String status;
+  final double? currentSalePrice;
+  final String? productCondition;
 
   DeviceDTO({
     required this.brand,
@@ -23,6 +25,8 @@ class DeviceDTO {
     this.appUserId,
     this.customerName,
     required this.status,
+    this.currentSalePrice,
+    this.productCondition,
   });
 }
 
@@ -36,6 +40,8 @@ class DeviceRecord {
     required this.brand,
     required this.model,
     required this.serialNumber,
+    this.currentSalePrice,
+    this.productCondition,
     this.problemDescription,
     this.guaranteePeriod,
     this.warrantyStartAtUtc,
@@ -56,6 +62,8 @@ class DeviceRecord {
   final String brand;
   final String model;
   final String serialNumber;
+  final double? currentSalePrice;
+  final String? productCondition;
   final String? problemDescription;
   final int? guaranteePeriod;
   final DateTime? warrantyStartAtUtc;
@@ -77,6 +85,10 @@ class DeviceRecord {
       brand: (json['brand'] ?? json['Brand']).toString(),
       model: (json['model'] ?? json['Model']).toString(),
       serialNumber: (json['serialNumber'] ?? json['SerialNumber']).toString(),
+      currentSalePrice:
+          _parseDouble(json['currentSalePrice'] ?? json['CurrentSalePrice']),
+      productCondition:
+          (json['productCondition'] ?? json['ProductCondition'])?.toString(),
       problemDescription:
           (json['problemDescription'] ?? json['ProblemDescription'])
               ?.toString(),
@@ -103,4 +115,11 @@ DateTime? _parseDate(dynamic value) {
   final s = value.toString();
   if (s.isEmpty) return null;
   return DateTime.tryParse(s);
+}
+
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  return double.tryParse(value.toString());
 }

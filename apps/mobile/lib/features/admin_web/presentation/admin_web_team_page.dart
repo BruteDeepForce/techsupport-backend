@@ -2088,7 +2088,7 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              initialValue: _selectedTemplate?.id,
+              value: _selectedTemplate?.id,
               decoration: const InputDecoration(labelText: 'Şablon'),
               items: widget.templates
                   .where((t) => t.isActive)
@@ -2363,7 +2363,7 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              initialValue: _selectedEmployeeId,
+              value: _selectedEmployeeId,
               decoration: const InputDecoration(labelText: 'Personel'),
               items: widget.employeeOptions
                   .map(
@@ -2719,7 +2719,7 @@ class _SingleShiftPlanningDialogState
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              initialValue: _selectedEmployeeId,
+              value: _selectedEmployeeId,
               decoration: const InputDecoration(labelText: 'Personel'),
               items: widget.employeeOptions
                   .map(
@@ -2735,7 +2735,7 @@ class _SingleShiftPlanningDialogState
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              initialValue: _selectedTemplate?.id,
+              value: _selectedTemplate?.id,
               decoration: const InputDecoration(labelText: 'Şablon'),
               items: widget.templates
                   .map(

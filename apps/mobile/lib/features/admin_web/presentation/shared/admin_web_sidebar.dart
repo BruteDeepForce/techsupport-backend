@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/navigation/app_navigator.dart';
+import '../../../auth/data/token_storage.dart';
 import 'admin_web_nav.dart';
 
 class AdminWebSidebar extends StatelessWidget {
@@ -60,22 +62,21 @@ class AdminWebSidebar extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                for (final item in items)
-                  _NavItem(
-                    icon: item.icon,
-                    label: item.label,
-                    active: active == item.key,
-                    onTap: () => Navigator.of(context).pushReplacement(
-                      adminNavRoute(item.pageBuilder(context)),
+            child: Scrollbar(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  for (final item in items)
+                    _NavItem(
+                      icon: item.icon,
+                      label: item.label,
+                      active: active == item.key,
+                      onTap: () => Navigator.of(context).pushReplacement(
+                        adminNavRoute(item.pageBuilder(context)),
+                      ),
                     ),
-                  ),
-                const _NavItem(
-                    icon: Icons.query_stats_rounded, label: 'Analiz & Raporlar'),
-                const _NavItem(icon: Icons.settings_outlined, label: 'Ayarlar'),
-              ],
+                ],
+              ),
             ),
           ),
           const _SidebarFooter(),
@@ -88,75 +89,29 @@ class AdminWebSidebar extends StatelessWidget {
 class _SidebarFooter extends StatelessWidget {
   const _SidebarFooter();
 
+  /// Oturumu kapatır: saklanan token silinir ve kullanıcı doğrudan
+  /// giriş ekranına yönlendirilir (onay adımı yok).
+  Future<void> _logout() async {
+    await TokenStorage().clear();
+    redirectToLogin();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(14),
-          margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF14263F),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Depolama',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600, color: Colors.white)),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: 0.55,
-                  minHeight: 6,
-                  backgroundColor: const Color(0xFF1D3554),
-                  valueColor:
-                      const AlwaysStoppedAnimation(Color(0xFF60A5FA)),
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text('4.88 GB / 8 GB',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF9FB3C8))),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add, size: 18, color: Colors.white),
-                  label: const Text('Depolama Ekle',
-                      style: TextStyle(color: Colors.white)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFF2C4469)),
-                  ),
-                ),
-              ),
-            ],
-          ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 4, 18, 10),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: IconButton(
+          onPressed: _logout,
+          tooltip: 'Çıkış Yap',
+          iconSize: 20,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(width: 38, height: 38),
+          color: const Color(0xFF9FB3C8),
+          icon: const Icon(Icons.logout_rounded),
         ),
-        const SizedBox(height: 6),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          child: Row(
-            children: const [
-              CircleAvatar(
-                radius: 14,
-                backgroundColor: Color(0xFF1C2F4A),
-                child: Text('ST',
-                    style: TextStyle(fontSize: 11, color: Colors.white)),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Süleyman TÜY... \nTR',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF9FB3C8))),
-              ),
-              Icon(Icons.logout, size: 18, color: Color(0xFF9FB3C8)),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -196,9 +151,6 @@ class _NavItem extends StatelessWidget {
                   fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                   color: active ? Colors.white : const Color(0xFF9FB3C8),
                 )),
-            const Spacer(),
-            if (!active)
-              const Icon(Icons.expand_more, size: 14, color: Color(0xFF7B8FA8)),
           ],
         ),
       ),

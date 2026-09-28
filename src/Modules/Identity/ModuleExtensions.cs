@@ -97,6 +97,7 @@ public static class ModuleExtensions
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITenantService, TenantService>();
+        services.AddScoped<IBranchService, BranchService>();
 
         // Add Identity role seed or management services here if needed
 

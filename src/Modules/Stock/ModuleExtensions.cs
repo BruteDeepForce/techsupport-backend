@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Stock.Contracts.Services;
 using TechSupport.Stock.Data;
 
 namespace TechSupport.Stock;
@@ -23,6 +24,7 @@ public static class ModuleExtensions
         services.AddScoped<Services.ICategoryService, Services.CategoryService>();
         services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
         services.AddScoped<Services.IStockTradeProcessService, Services.StockTradeProcessService>();
+        services.AddScoped<IInventoryStockItemWriter, Services.InventoryStockItemWriter>();
         return services;
     }
 }

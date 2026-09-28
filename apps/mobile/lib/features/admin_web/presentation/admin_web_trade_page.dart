@@ -235,6 +235,12 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       _modelController.text = device.model;
       _serialController.text = device.serialNumber;
       _barcodeController.text = device.barcodeNumber ?? '';
+      if (device.currentSalePrice != null && device.currentSalePrice! > 0) {
+        _unitPriceController.text =
+            device.currentSalePrice!.toStringAsFixed(2);
+      } else {
+        _unitPriceController.text = '0';
+      }
       _warrantyMonthsController.text =
           (device.guaranteePeriod ?? 12).toString();
       _warrantyStartController.text = device.warrantyStartAtUtc != null
@@ -450,7 +456,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     final twoColumn = width >= 1280;
 
     return AdminWebShell(
-      active: AdminNavKey.home,
+      active: AdminNavKey.trades,
       actions: [
         AdminWebActionButton(
           label: 'Formu Temizle',
@@ -762,7 +768,7 @@ class _TradeEntryPanel extends StatelessWidget {
             children: [
               Switch(
                 value: isRecordedCustomer,
-                activeThumbColor: AppColors.accent,
+                activeColor: AppColors.accent,
                 onChanged: onRecordedCustomerChanged,
               ),
               const SizedBox(width: 8),
@@ -788,7 +794,7 @@ class _TradeEntryPanel extends StatelessWidget {
 
                 final customers = snapshot.data ?? const <Customer>[];
                 return DropdownButtonFormField<String>(
-                  initialValue: selectedCustomer?.id,
+                  value: selectedCustomer?.id,
                   items: customers
                       .map(
                         (customer) => DropdownMenuItem<String>(
@@ -911,7 +917,7 @@ class _TradeEntryPanel extends StatelessWidget {
             children: [
               Switch(
                 value: isRecordedDevice,
-                activeThumbColor: AppColors.accent,
+                activeColor: AppColors.accent,
                 onChanged: onRecordedDeviceChanged,
               ),
               const SizedBox(width: 8),
@@ -937,7 +943,7 @@ class _TradeEntryPanel extends StatelessWidget {
 
                 final devices = snapshot.data ?? const <DeviceRecord>[];
                 return DropdownButtonFormField<String>(
-                  initialValue: selectedDevice?.id,
+                  value: selectedDevice?.id,
                   items: devices
                       .map(
                         (device) => DropdownMenuItem<String>(
@@ -1725,7 +1731,7 @@ class _SelectField extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          initialValue: value,
+          value: value,
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.bg,
@@ -1793,7 +1799,7 @@ class _CategorySelectField extends StatelessWidget {
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
           key: ValueKey<String?>(validValue),
-          initialValue: validValue,
+          value: validValue,
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.bg,

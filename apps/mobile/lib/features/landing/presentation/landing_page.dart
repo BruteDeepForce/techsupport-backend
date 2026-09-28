@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/core/design/app_design.dart';
 import 'package:techsupport_mobile/features/auth/presentation/login_page.dart';
+import 'package:techsupport_mobile/features/auth/presentation/register_page.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -107,6 +108,12 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
+  void _navigateToRegister() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const RegisterPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -160,8 +167,20 @@ class _LandingPageState extends State<LandingPage> {
                 child: SizedBox(
                   width: double.infinity,
                   child: _PremiumButton(
+                    onPressed: _navigateToRegister,
+                    label: 'Kayıt Ol',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _PremiumButton(
                     onPressed: _navigateToLogin,
                     label: 'Giriş Yap',
+                    isPrimary: false,
                   ),
                 ),
               ),
@@ -237,6 +256,12 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                           const SizedBox(width: 24),
                           _PremiumButton(
+                            onPressed: _navigateToRegister,
+                            label: 'Kayıt Ol',
+                            isPrimary: false,
+                          ),
+                          const SizedBox(width: 12),
+                          _PremiumButton(
                             onPressed: _navigateToLogin,
                             label: 'Giriş Yap',
                             isPrimary: true,
@@ -285,7 +310,7 @@ class _LandingPageState extends State<LandingPage> {
                       child: isDesktop
                           ? Row(
                               children: [
-                                Expanded(child: _HeroContent(onLogin: _navigateToLogin)),
+                                Expanded(child: _HeroContent(onRegister: _navigateToRegister)),
                                 const SizedBox(width: 80),
                                 Expanded(
                                   child: ClipRRect(
@@ -300,7 +325,7 @@ class _LandingPageState extends State<LandingPage> {
                             )
                           : Column(
                               children: [
-                                _HeroContent(onLogin: _navigateToLogin),
+                                _HeroContent(onRegister: _navigateToRegister),
                                 const SizedBox(height: 60),
                                 _HeroImage(),
                               ],
@@ -632,8 +657,8 @@ class _NavLink extends StatelessWidget {
 }
 
 class _HeroContent extends StatelessWidget {
-  final VoidCallback onLogin;
-  const _HeroContent({required this.onLogin});
+  final VoidCallback onRegister;
+  const _HeroContent({required this.onRegister});
 
   @override
   Widget build(BuildContext context) {
@@ -674,8 +699,8 @@ class _HeroContent extends StatelessWidget {
           mainAxisAlignment: buttonMainAlign,
           children: [
             _PremiumButton(
-              onPressed: onLogin,
-              label: 'Demo Talep Et',
+              onPressed: onRegister,
+              label: 'Kayıt Ol',
             ),
             if (!isMobile) ...[
               const SizedBox(width: 20),

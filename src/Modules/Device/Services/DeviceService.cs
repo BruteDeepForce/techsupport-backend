@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using TechSupport.Device.Contracts.Events;
+using TechSupport.Device.Contracts.Services;
 using TechSupport.Device.Data;
 using TechSupport.Device.Domain.Entities;
 
@@ -13,7 +14,7 @@ public interface IDeviceService
 {
     Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, Guid? tradeId, string? tradeCorrelationId, string brand, string model,
     string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, CancellationToken ct);
+    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, decimal? currentSalePrice, CancellationToken ct);
     Task<Devices?> GetByIdAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<Devices> DeactivateAsync(Guid tenantId, Guid deviceId, CancellationToken ct);
     Task<IReadOnlyCollection<Devices>> GetAllAsync(Guid tenantId, CancellationToken ct);
@@ -38,7 +39,7 @@ public sealed class DeviceService : IDeviceService
 
     public async Task<Devices> RegisterAsync(Guid tenantId, Guid branchId, Guid? tradeId, string? tradeCorrelationId, string brand,
     string model, string serialNumber, string? problemDescription, int? guaranteePeriod, DateTimeOffset? warrantyStartAtUtc,
-    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, CancellationToken ct)
+    string? barcodeNumber, Guid? customerId, Guid? appUserId, string? customerName, string status, decimal? currentSalePrice, CancellationToken ct)
     {
         var exists = await _db.Devices.AnyAsync(x => x.TenantId == tenantId && x.SerialNumber == serialNumber, ct);
         if (exists) throw new InvalidOperationException("Device already exists for tenant (serialNumber must be unique)");
@@ -56,6 +57,7 @@ public sealed class DeviceService : IDeviceService
             Brand = brand.Trim(),
             Model = model.Trim(),
             SerialNumber = serialNumber.Trim(),
+            CurrentSalePrice = currentSalePrice,
             ProblemDescription = problemDescription?.Trim(),
             GuaranteePeriod = guaranteePeriod,
             WarrantyStartAtUtc = normalizedWarrantyStart,
@@ -88,6 +90,7 @@ public sealed class DeviceService : IDeviceService
                 Brand = device.Brand,
                 Model = device.Model,
                 SerialNumber = device.SerialNumber,
+                CurrentSalePrice = device.CurrentSalePrice,
                 Status = device.Status.ToString(),
                 IsActive = device.IsActive,
                 GuaranteePeriod = device.GuaranteePeriod,
@@ -182,9 +185,33 @@ public sealed class DeviceService : IDeviceService
 
         device.CustomerId = request.CustomerId ?? Guid.Empty; //!burada gelen appuserid customerid olarak kaydediyoruz
         device.CustomerName = request.CustomerName?.Trim();
+        if (!string.IsNullOrWhiteSpace(request.Status)
+            && Enum.TryParse<DeviceStatus>(request.Status.Trim(), true, out var parsedStatus))
+        {
+            device.Status = parsedStatus;
+        }
         device.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(ct);
         return true;
+    }
+}
+
+public sealed class DeviceSalePriceReader : IDeviceSalePriceReader
+{
+    private readonly DeviceDbContext _db;
+
+    public DeviceSalePriceReader(DeviceDbContext db)
+    {
+        _db = db;
+    }
+
+    public Task<decimal?> GetCurrentSalePriceAsync(Guid tenantId, Guid deviceId, CancellationToken cancellationToken = default)
+    {
+        return _db.Devices
+            .AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.Id == deviceId)
+            .Select(x => x.CurrentSalePrice)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

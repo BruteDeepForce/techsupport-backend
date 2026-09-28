@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Device.Contracts.Services;
 using TechSupport.Device.Data;
 using TechSupport.Device.Services;
 
@@ -20,6 +21,8 @@ public static class ModuleExtensions
             dbContext.Database.Migrate();
         }
         services.AddScoped<IDeviceService, DeviceService>();
+        services.AddScoped<IInventoryDeviceService, InventoryDeviceService>();
+        services.AddScoped<IDeviceSalePriceReader, DeviceSalePriceReader>();
 
         return services;
     }

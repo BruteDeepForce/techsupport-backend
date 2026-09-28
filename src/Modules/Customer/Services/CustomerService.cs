@@ -123,6 +123,7 @@ namespace TechSupport.Customer.Services
                     SerialNumber = deviceSerialNumber?.Trim(),
                     BarcodeNumber = barcodeNumber?.Trim(),
                     ProblemDescription = problemDescription?.Trim(),
+                    CustomerName = customer.Name?.Trim(),
                     Status = string.IsNullOrWhiteSpace(status) ? null : status.Trim(),
                     GuaranteePeriod = guaranteePeriod,
                     WarrantyStartAtUtc = warrantyStartAtUtc,

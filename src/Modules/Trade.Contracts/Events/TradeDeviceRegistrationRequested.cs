@@ -14,6 +14,7 @@ public sealed record TradeDeviceRegistrationRequested(
     int? GuaranteePeriod,
     DateTimeOffset? WarrantyStartAtUtc,
     string? BarcodeNumber,
+    decimal? CurrentSalePrice,
     string? CustomerName,
     string Status,
     DateTimeOffset OccurredAtUtc);

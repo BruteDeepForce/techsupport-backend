@@ -551,6 +551,22 @@ class _LoginCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 4),
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                    builder: (_) => const RegisterPage()),
+              ),
+              child: const Text(
+                'Kayıt Ol',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

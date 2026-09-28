@@ -27,6 +27,8 @@ public sealed class DeviceDbContext : DbContext
             b.Property(x => x.GuaranteePeriod).HasDefaultValue(0);
             b.Property(x => x.WarrantyStartAtUtc).IsRequired(false);
             b.Property(x => x.WarrantyEndAtUtc).IsRequired(false);
+            b.Property(x => x.CurrentSalePrice).HasPrecision(18, 2);
+            b.Property(x => x.ProductCondition).HasConversion<string>().HasMaxLength(64);
             b.Property(x=> x.Status).HasConversion<string>().HasMaxLength(64);
 
             b.HasIndex(x => new { x.TenantId, x.SerialNumber }).IsUnique();

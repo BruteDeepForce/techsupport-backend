@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using TechSupport.Identity.Data;
 using TechSupport.User.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace TechSupport.Identity.Services;
 
@@ -20,12 +21,14 @@ public class TokenService : ITokenService
     private readonly IConfiguration _config;
     private readonly UserManager<AppUser> _userManager;
     private readonly IUserService _userService;
+    private readonly IdentityDbContext _identityDbContext;
 
-    public TokenService(IConfiguration config, UserManager<AppUser> userManager, IUserService userService)
+    public TokenService(IConfiguration config, UserManager<AppUser> userManager, IUserService userService, IdentityDbContext identityDbContext)
     {
         _config = config;
         _userManager = userManager;
         _userService = userService;
+        _identityDbContext = identityDbContext;
     }
 
     public string CreateToken(ClaimsIdentity identity)
@@ -63,7 +66,17 @@ public class TokenService : ITokenService
             claims.Add(new Claim("tenant_id", profile.TenantId.ToString()));
             if (profile.BranchId.HasValue)
             {
-                claims.Add(new Claim("branch_id", profile.BranchId.Value.ToString()));
+                var branchName = await _identityDbContext.Branches
+                    .AsNoTracking()
+                    .Where(x => x.TenantId == profile.TenantId && x.Id == profile.BranchId.Value)
+                    .Select(x => x.Name)
+                    .FirstOrDefaultAsync(ct);
+
+                claims.AddRange(new[]
+                {
+                    new Claim("branch_id", profile.BranchId.Value.ToString()),
+                    new Claim("branch_name", branchName ?? string.Empty)
+                });
             }
         }
 

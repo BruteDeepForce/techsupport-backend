@@ -372,7 +372,7 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                 ),
                 const SizedBox(height: 14),
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedLeaveType,
+                  value: _selectedLeaveType,
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'İzin Tipi',

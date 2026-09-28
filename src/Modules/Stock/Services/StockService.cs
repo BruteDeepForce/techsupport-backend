@@ -25,13 +25,21 @@ public class StockService : IStockService
             throw new InvalidOperationException($"Category with id '{dto.CategoryId}' does not exist for tenant {tenantId}");
 
         var existing = await _db.StockItems
-            .FirstOrDefaultAsync(x => x.TenantId == tenantId && (x.Sku == dto.Sku || x.Barcode == dto.Barcode), ct);
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId
+                && (x.Sku == dto.Sku
+                    || x.Barcode == dto.Barcode
+                    || (dto.DeviceId.HasValue && x.DeviceId == dto.DeviceId)
+                    || (!string.IsNullOrWhiteSpace(dto.ImeiOrSerial) && x.ImeiOrSerial == dto.ImeiOrSerial.Trim())), ct);
         if (existing != null)
         {
             if (existing.Sku == dto.Sku)
                 throw new InvalidOperationException($"SKU '{dto.Sku}' already exists for tenant {tenantId}");
             if (existing.Barcode == dto.Barcode)
                 throw new InvalidOperationException($"Barcode '{dto.Barcode}' already exists for tenant {tenantId}");
+            if (dto.DeviceId.HasValue && existing.DeviceId == dto.DeviceId)
+                throw new InvalidOperationException($"Device '{dto.DeviceId}' already has a stock item for tenant {tenantId}");
+            if (!string.IsNullOrWhiteSpace(dto.ImeiOrSerial) && existing.ImeiOrSerial == dto.ImeiOrSerial.Trim())
+                throw new InvalidOperationException($"IMEI/serial '{dto.ImeiOrSerial}' already exists for tenant {tenantId}");
             // fallback
             throw new InvalidOperationException($"Stock item conflict for tenant {tenantId}");
         }
@@ -40,12 +48,15 @@ public class StockService : IStockService
         {
             Id = Guid.NewGuid(),
             TenantId = tenantId,
+            BranchId = branchId,
+            DeviceId = dto.DeviceId,
             CategoryId = dto.CategoryId,
-            Sku = dto.Sku,
-            Barcode = dto.Barcode,
-            Name = dto.Name,
-            Description = dto.Description,
-            Unit = dto.Unit,
+            Sku = dto.Sku.Trim(),
+            ImeiOrSerial = dto.ImeiOrSerial?.Trim(),
+            Barcode = dto.Barcode.Trim(),
+            Name = dto.Name.Trim(),
+            Description = dto.Description?.Trim(),
+            Unit = dto.Unit?.Trim(),
             UnitPrice = dto.UnitPrice
         };
 

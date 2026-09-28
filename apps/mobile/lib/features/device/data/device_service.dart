@@ -49,9 +49,49 @@ class DeviceService {
       'appUserId': device.appUserId,
       'customerName': device.customerName,
       'status': device.status,
+      'currentSalePrice': device.currentSalePrice,
+      'productCondition': device.productCondition,
     });
     if (response.statusCode != 200) {
       throw Exception('Failed to create device: ${response.statusCode}');
     }
+  }
+
+  Future<DeviceRecord> createInventoryDevice({
+    required String brand,
+    required String model,
+    required String serialNumber,
+    required String categoryId,
+    required String sku,
+    required String barcodeNumber,
+    required double currentSalePrice,
+    required String productCondition,
+    int? guaranteePeriod,
+    DateTime? warrantyStartAtUtc,
+    String? problemDescription,
+    String? description,
+    String? unit,
+    int quantity = 1,
+  }) async {
+    final response = await _dio.post('/api/devices/inventory', data: {
+      'brand': brand,
+      'model': model,
+      'serialNumber': serialNumber,
+      'categoryId': categoryId,
+      'sku': sku,
+      'barcodeNumber': barcodeNumber,
+      'currentSalePrice': currentSalePrice,
+      'productCondition': productCondition,
+      'guaranteePeriod': guaranteePeriod,
+      'warrantyStartAtUtc': warrantyStartAtUtc?.toIso8601String(),
+      'problemDescription': problemDescription,
+      'description': description,
+      'unit': unit,
+      'quantity': quantity,
+    });
+    if (response.statusCode == 200) {
+      return DeviceRecord.fromJson(response.data as Map<String, dynamic>);
+    }
+    throw Exception('Failed to create inventory device: ${response.statusCode}');
   }
 }

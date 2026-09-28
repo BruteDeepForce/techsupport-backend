@@ -34,6 +34,7 @@ namespace TechSupport.Device.Consumers
                 guaranteePeriod: message.GuaranteePeriod,
                 customerId: message.CustomerId,
                 appUserId: message.AppUserId,
+                currentSalePrice: message.CurrentSalePrice,
                 ct: context.CancellationToken);
             // Handle the event as needed, e.g., log it or update device registration status
 

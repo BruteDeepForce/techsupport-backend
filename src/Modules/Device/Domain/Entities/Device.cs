@@ -14,6 +14,8 @@ public sealed class Devices
     public string Brand { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
     public string SerialNumber { get; set; } = string.Empty;
+    public decimal? CurrentSalePrice { get; set; }
+    public DeviceProductCondition ProductCondition { get; set; } = DeviceProductCondition.Unknown;
     public bool IsActive { get; set; } = true;
     public int? GuaranteePeriod { get; set; } // in months
     public DateTimeOffset? WarrantyStartAtUtc { get; set; }
@@ -29,6 +31,15 @@ public enum DeviceStatus
     Other,
     InRepair,
     InMaintenance,
+    Saleable,
     Selled,
     Returned
+}
+
+public enum DeviceProductCondition
+{
+    Unknown,
+    New,
+    Used,
+    Refurbished
 }

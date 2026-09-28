@@ -13,5 +13,7 @@ namespace TechSupport.Stock.DTO
         string? Description,
         string? Unit,
         decimal? UnitPrice,
-        long InitialQuantity);
+        long InitialQuantity,
+        Guid? DeviceId = null,
+        string? ImeiOrSerial = null);
 }

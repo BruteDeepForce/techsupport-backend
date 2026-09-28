@@ -13,6 +13,7 @@ namespace TechSupport.Device.Contracts.Events
         public Guid DeviceId { get; set; }
         public string? SerialNumber { get; set; }
         public string? BarcodeNumber { get; set; }
+        public decimal? CurrentSalePrice { get; set; }
         public string? ProblemDescription { get; set; }
         public string Model { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;

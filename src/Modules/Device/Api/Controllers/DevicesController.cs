@@ -10,17 +10,36 @@ namespace TechSupport.Device.Api.Controllers;
 public sealed class DevicesController : ControllerBase
 {
     private readonly IDeviceService _devices;
+    private readonly IInventoryDeviceService _inventoryDevices;
 
-    public DevicesController(IDeviceService devices)
+    public DevicesController(IDeviceService devices, IInventoryDeviceService inventoryDevices)
     {
         _devices = devices;
+        _inventoryDevices = inventoryDevices;
     }
 
     public sealed record RegisterDeviceDto(
     string Brand, string Model, string SerialNumber,
     string? ProblemDescription, int? GuaranteePeriod, DateTimeOffset? WarrantyStartAtUtc,
     string? BarcodeNumber, Guid? CustomerId, Guid? appUserId, string? CustomerName,
-    string Status);
+    string Status,
+    decimal? CurrentSalePrice);
+
+    public sealed record CreateInventoryDeviceDto(
+        string Brand,
+        string Model,
+        string SerialNumber,
+        Guid CategoryId,
+        string Sku,
+        string BarcodeNumber,
+        decimal CurrentSalePrice,
+        DeviceProductCondition ProductCondition,
+        int? GuaranteePeriod,
+        DateTimeOffset? WarrantyStartAtUtc,
+        string? ProblemDescription,
+        string? Description,
+        string? Unit,
+        long Quantity = 1);
 
     [Authorize(Roles = "admin,customer")]
     [HttpPost]
@@ -29,13 +48,15 @@ public sealed class DevicesController : ControllerBase
         var tenantId = GetTenantIdFromClaims();
         var branchId = GetBranchIdFromClaims();
         var device = await _devices.RegisterAsync(tenantId.Value, branchId.Value, null, null, dto.Brand, dto.Model, dto.SerialNumber,
-            dto.ProblemDescription, dto.GuaranteePeriod, dto.WarrantyStartAtUtc, dto.BarcodeNumber, dto.CustomerId, dto.appUserId, dto.CustomerName, dto.Status, ct);
+            dto.ProblemDescription, dto.GuaranteePeriod, dto.WarrantyStartAtUtc, dto.BarcodeNumber, dto.CustomerId, dto.appUserId, dto.CustomerName, dto.Status, dto.CurrentSalePrice, ct);
         return Ok(new
         {
             device.Id,
             device.Brand,
             device.Model,
             device.SerialNumber,
+            device.CurrentSalePrice,
+            device.ProductCondition,
             device.IsActive,
             device.CreatedAtUtc,
             device.UpdatedAtUtc,
@@ -48,6 +69,37 @@ public sealed class DevicesController : ControllerBase
             device.CustomerName,
             device.Status
         });
+    }
+
+    [Authorize(Roles = "admin")]
+    [HttpPost("inventory")]
+    public async Task<IActionResult> CreateInventoryDevice([FromBody] CreateInventoryDeviceDto dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var branchId = GetBranchIdFromClaims();
+        if (tenantId == null || branchId == null) return Unauthorized();
+
+        var result = await _inventoryDevices.CreateAsync(
+            tenantId.Value,
+            branchId.Value,
+            new CreateInventoryDeviceRequest(
+                dto.Brand,
+                dto.Model,
+                dto.SerialNumber,
+                dto.CategoryId,
+                dto.Sku,
+                dto.BarcodeNumber,
+                dto.CurrentSalePrice,
+                dto.ProductCondition,
+                dto.GuaranteePeriod,
+                dto.WarrantyStartAtUtc,
+                dto.ProblemDescription,
+                dto.Description,
+                dto.Unit,
+                dto.Quantity),
+            ct);
+
+        return Ok(result);
     }
 
     [Authorize]

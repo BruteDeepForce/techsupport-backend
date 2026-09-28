@@ -5,7 +5,6 @@ import 'admin_web_offer_detail_page.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 import 'shared/admin_web_topbar.dart';
-import 'admin_web_device_page.dart';
 
 class AdminWebOffersPage extends StatefulWidget {
   const AdminWebOffersPage({super.key});
