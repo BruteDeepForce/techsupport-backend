@@ -100,11 +100,24 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TradeStockProcessConsumer>();
     x.AddConsumer<TechnicianHrEmployeeSyncRequestedConsumer>();
     x.AddConsumer<PerformanceUpdateConsumer>();
-
+    var rabbitHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
+    var rabbitPort = builder.Configuration["RabbitMq:Port"] ?? "5672";
+    var rabbitUser = builder.Configuration["RabbitMq:User"] ?? "";
+    var rabbitPass = builder.Configuration["RabbitMq:Pass"] ?? "";
+    var rabbitVhost = builder.Configuration["RabbitMq:Vhost"] ?? "/";
     x.UsingRabbitMq((ctx, cfg) =>
     {
         var rabbitHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
-        cfg.Host(rabbitHost, h => { });
+        var rabbitPort = builder.Configuration["RabbitMq:Port"] ?? "5672";
+        var rabbitUser = builder.Configuration["RabbitMq:User"] ?? "";
+        var rabbitPass = builder.Configuration["RabbitMq:Pass"] ?? "";
+        var rabbitVhost = builder.Configuration["RabbitMq:Vhost"] ?? "/";
+
+        cfg.Host(rabbitHost, ushort.Parse(rabbitPort), rabbitVhost, h =>
+        {
+            h.Username(rabbitUser);
+            h.Password(rabbitPass);
+        });
         cfg.ConfigureEndpoints(ctx);
     });
 });
