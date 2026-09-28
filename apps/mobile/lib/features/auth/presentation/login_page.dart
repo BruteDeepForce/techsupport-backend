@@ -535,8 +535,29 @@ class _LoginCard extends StatelessWidget {
               child: const Text('Giriş Yap'),
             ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                    builder: (_) => const RegisterPage()),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Color(0xFF5B9BFF)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                'Kayıt Ol',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Center(
             child: TextButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
@@ -546,24 +567,8 @@ class _LoginCard extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Şifrenizi mi unuttunuz?',
+                'Şifremi Unuttum',
                 style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Center(
-            child: TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const RegisterPage()),
-              ),
-              child: const Text(
-                'Kayıt Ol',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
               ),
             ),
           ),
