@@ -148,6 +148,18 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      _showStockInDialog(categories);
+                    },
+                    icon: const Icon(Icons.add_box_outlined, size: 18),
+                    label: const Text('Mevcut Ürüne Stok Girişi'),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 const Text(
                   'Stok Kalemi Ekle',
                   style: TextStyle(
@@ -309,6 +321,196 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                   ],
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showStockInDialog(List<StockCategory> categories) {
+    final formKey = GlobalKey<FormState>();
+    final qtyController = TextEditingController(text: '1');
+    final referenceController = TextEditingController();
+    final pageContext = context;
+    String? selectedCategoryId;
+    StockItem? selectedItem;
+    Future<List<StockItem>>? itemsFuture;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Mevcut Ürüne Stok Girişi',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Kategori ve ürün seçerek mevcut stok adedini artırın. SKU ve barkod seçilen üründen gelir.',
+                      style: TextStyle(color: Color(0xFF64748B)),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<String>(
+                      value: selectedCategoryId,
+                      items: [
+                        for (final category in categories)
+                          DropdownMenuItem(
+                            value: category.id,
+                            child: Text(category.name),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedCategoryId = value;
+                          selectedItem = null;
+                          itemsFuture = value == null || value.isEmpty
+                              ? null
+                              : _stockService.listItemsByCategory(value);
+                        });
+                      },
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Kategori seçin' : null,
+                      decoration: _dialogDecoration('Kategori'),
+                    ),
+                    const SizedBox(height: 12),
+                    if (itemsFuture != null)
+                      FutureBuilder<List<StockItem>>(
+                        future: itemsFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          final items = snapshot.data ?? const <StockItem>[];
+                          if (items.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                'Bu kategoride ürün bulunamadı.',
+                                style: TextStyle(color: Color(0xFF94A3B8)),
+                              ),
+                            );
+                          }
+                          return DropdownButtonFormField<String>(
+                            value: selectedItem?.id,
+                            items: [
+                              for (final item in items)
+                                DropdownMenuItem(
+                                  value: item.id,
+                                  child: Text('${item.name} · ${item.sku}'),
+                                ),
+                            ],
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedItem = items.firstWhere(
+                                  (item) => item.id == value,
+                                );
+                              });
+                            },
+                            validator: (value) =>
+                                value == null || value.isEmpty ? 'Ürün seçin' : null,
+                            decoration: _dialogDecoration('Ürün'),
+                          );
+                        },
+                      ),
+                    if (selectedItem != null) ...[
+                      const SizedBox(height: 12),
+                      _SelectedStockItemSummary(item: selectedItem!),
+                    ],
+                    const SizedBox(height: 12),
+                    _DialogField(
+                      label: 'Eklenecek Miktar',
+                      controller: qtyController,
+                      requiredField: true,
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 12),
+                    _DialogField(
+                      label: 'Referans / Açıklama',
+                      controller: referenceController,
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('İptal'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (!(formKey.currentState?.validate() ?? false)) return;
+                            final item = selectedItem;
+                            if (item == null) return;
+                            final qty =
+                                int.tryParse(qtyController.text.trim()) ?? 0;
+                            if (qty <= 0) return;
+
+                            Navigator.of(ctx).pop();
+                            showDialog(
+                              context: pageContext,
+                              barrierDismissible: false,
+                              builder: (_) =>
+                                  const Center(child: CircularProgressIndicator()),
+                            );
+                            try {
+                              await _stockService.stockIn(
+                                stockItemId: item.id,
+                                quantity: qty,
+                                reference: referenceController.text.trim().isEmpty
+                                    ? null
+                                    : referenceController.text.trim(),
+                              );
+                              if (mounted) Navigator.of(pageContext).pop();
+                              if (mounted) {
+                                _refresh();
+                                ScaffoldMessenger.of(pageContext).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Stok miktarı güncellendi'),
+                                  ),
+                                );
+                              }
+                            } catch (_) {
+                              if (mounted) Navigator.of(pageContext).pop();
+                              if (mounted) {
+                                ScaffoldMessenger.of(pageContext).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Stok girişi yapılamadı'),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3B82F6),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Stok Girişi Yap'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -1128,6 +1330,92 @@ class _TableRow extends StatelessWidget {
 String _formatPrice(double? value) {
   if (value == null) return '-';
   return value.toStringAsFixed(2);
+}
+
+InputDecoration _dialogDecoration(String label) {
+  return InputDecoration(
+    labelText: label,
+    filled: true,
+    fillColor: const Color(0xFFF8FAFC),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+    ),
+  );
+}
+
+class _SelectedStockItemSummary extends StatelessWidget {
+  const _SelectedStockItemSummary({required this.item});
+
+  final StockItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.name,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _SummaryPill(label: 'SKU', value: item.sku),
+              _SummaryPill(label: 'Barkod', value: item.barcode),
+              _SummaryPill(
+                label: 'Mevcut Stok',
+                value: item.quantityAvailable.toString(),
+              ),
+              _SummaryPill(
+                label: 'Rezerve',
+                value: item.quantityReserved.toString(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryPill extends StatelessWidget {
+  const _SummaryPill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+      ),
+    );
+  }
 }
 
 class _DialogField extends StatelessWidget {

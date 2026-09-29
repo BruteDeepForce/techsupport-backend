@@ -79,6 +79,20 @@ class StockService {
     return null;
   }
 
+  Future<void> stockIn({
+    required String stockItemId,
+    required int quantity,
+    String? reference,
+  }) async {
+    final res = await _dio.post('/api/stock/items/$stockItemId/stock-in', data: {
+      'quantity': quantity,
+      'reference': reference,
+    });
+    if (res.statusCode != 200) {
+      throw Exception('Failed to update stock: ${res.statusCode}');
+    }
+  }
+
   Future<void> reserveStock({
     required String stockItemId,
     required String operationId,

@@ -140,7 +140,6 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
                   children: [
                     const Text('Talepler yüklenemedi'),
                     const SizedBox(height: 8),
-                    Text(snapshot.error.toString()),
                     const SizedBox(height: 12),
                     OutlinedButton(
                       onPressed: _refreshTickets,

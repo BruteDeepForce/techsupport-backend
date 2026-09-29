@@ -78,4 +78,4 @@ STOCK MODÜLÜ
 -Şubeleri gösterelim Şubelerim gibi 
 -Stok ekleme sadece sku mu? intel i9 standart mesela gene eklemek istediğimde yeni satır oluşmamalı.
 -Trade işlemi şuan normal durumda. debug daha ileri alınacak
-- 
+-

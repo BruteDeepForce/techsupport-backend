@@ -125,53 +125,71 @@ class _AdminHomePageState extends State<AdminHomePage> {
       final customerCreatedAll =
           pickValue('customercreatedcount') ?? pickValue('customercreated');
 
+      var nextTotalValue = totalValue;
+      var nextResolutionRate = resolutionRate;
+      var nextCriticalCount = criticalCount;
+      var nextOpenCount = openCount;
+      var nextInProgressCount = inProgressCount;
+      var nextResolvedCount = resolvedCount;
+      var nextDevicesCount = devicesCount;
+      var nextMaintenanceCount = maintenanceCount;
+      var nextPersonnelCount = personnelCount;
+
       // Total: prefer total operations created (AllTime)
-      if (createdAll != null) totalValue = createdAll.toString();
+      if (createdAll != null) nextTotalValue = createdAll.toString();
 
       // Resolution rate: completed / created (AllTime) -> percentage
       if (createdAll != null && completedAll != null && createdAll > 0) {
         final pct = ((completedAll / createdAll) * 100).round();
-        resolutionRate = '$pct%';
+        nextResolutionRate = '$pct%';
       }
 
       // Critical: no dedicated metric in sample -> leave default unless present
       final critical =
           pickValue('criticalcount') ?? pickValue('operationcriticalcount');
-      if (critical != null) criticalCount = critical.toString();
+      if (critical != null) nextCriticalCount = critical.toString();
 
       // Second row
-      if (openAll != null) openCount = openAll.toString();
-      if (assignedAll != null) inProgressCount = assignedAll.toString();
-      if (completedAll != null) resolvedCount = completedAll.toString();
+      if (openAll != null) nextOpenCount = openAll.toString();
+      if (assignedAll != null) nextInProgressCount = assignedAll.toString();
+      if (completedAll != null) nextResolvedCount = completedAll.toString();
 
       // Third row (best-effort mapping)
       final deviceCount = pickValue('devicecount') ?? pickValue('devicescount');
-      if (deviceCount != null) devicesCount = deviceCount.toString();
+      if (deviceCount != null) nextDevicesCount = deviceCount.toString();
 
       final maintenance = pickValue('maintenancecount') ??
           pickValue('operationmaintenancecount');
-      if (maintenance != null) maintenanceCount = maintenance.toString();
+      if (maintenance != null) nextMaintenanceCount = maintenance.toString();
 
       // Personnel: prefer a dedicated personnel/technician count, otherwise use assigned-to-technician
       final personnel =
           pickValue('personnelcount') ?? pickValue('techniciancount');
       if (personnel != null) {
-        personnelCount = personnel.toString();
+        nextPersonnelCount = personnel.toString();
       } else if (assignedAll != null) {
-        personnelCount = assignedAll.toString();
+        nextPersonnelCount = assignedAll.toString();
       } else if (customerCreatedAll != null) {
         // fallback: show customers created as a small informative stat
-        personnelCount = customerCreatedAll.toString();
+        nextPersonnelCount = customerCreatedAll.toString();
       }
 
       final page = await _reportsService.listReports(page: 1, pageSize: 5);
+      if (!mounted) return;
       setState(() {
+        totalValue = nextTotalValue;
+        resolutionRate = nextResolutionRate;
+        criticalCount = nextCriticalCount;
+        openCount = nextOpenCount;
+        inProgressCount = nextInProgressCount;
+        resolvedCount = nextResolvedCount;
+        devicesCount = nextDevicesCount;
+        maintenanceCount = nextMaintenanceCount;
+        personnelCount = nextPersonnelCount;
         recentReports = page.items;
       });
     } catch (e) {
       // Swallow errors for now; UI will show default values. Could add SnackBar or error state.
-    } finally {
-      setState(() {});
     }
   }
 

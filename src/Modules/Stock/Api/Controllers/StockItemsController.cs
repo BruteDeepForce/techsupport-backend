@@ -30,6 +30,30 @@ public class StockItemsController : ControllerBase
     }
 
     [Authorize(Roles = "admin, technician")]
+    [HttpPost("{id:guid}/stock-in")]
+    public async Task<IActionResult> StockIn(Guid id, [FromBody] StockInDTO dto, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        var branchId = GetBranchIdFromClaims();
+        var userId = GetUserIdFromClaims();
+        if (tenantId == null) return Unauthorized();
+
+        var item = await _stockService.StockInAsync(tenantId.Value, branchId, userId, id, dto, ct);
+        var quantityAvailable = item.Balances.Sum(x => x.QuantityAvailable);
+        var quantityReserved = item.Balances.Sum(x => x.QuantityReserved);
+
+        return Ok(new
+        {
+            item.Id,
+            item.Sku,
+            item.Barcode,
+            item.Name,
+            QuantityAvailable = quantityAvailable,
+            QuantityReserved = quantityReserved
+        });
+    }
+
+    [Authorize(Roles = "admin, technician")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {

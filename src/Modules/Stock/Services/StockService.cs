@@ -118,6 +118,57 @@ public class StockService : IStockService
         return item;
     }
 
+    public async Task<StockItem> StockInAsync(Guid tenantId, Guid? branchId, Guid? userId, Guid stockItemId, StockInDTO dto, CancellationToken ct = default)
+    {
+        if (dto.Quantity <= 0)
+            throw new InvalidOperationException("Stock-in quantity must be greater than zero.");
+
+        var item = await _db.StockItems
+            .Include(x => x.Balances)
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == stockItemId, ct);
+
+        if (item is null)
+            throw new InvalidOperationException($"Stock item '{stockItemId}' does not exist for tenant {tenantId}.");
+
+        var balance = item.Balances.FirstOrDefault(x => x.TenantId == tenantId && x.BranchId == branchId);
+        if (balance is null)
+        {
+            balance = new StockBalance
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                StockItemId = item.Id,
+                BranchId = branchId,
+                QuantityAvailable = 0,
+                QuantityReserved = 0
+            };
+            _db.StockBalances.Add(balance);
+            item.Balances.Add(balance);
+        }
+
+        balance.QuantityAvailable += dto.Quantity;
+        item.UpdatedAtUtc = DateTime.UtcNow;
+
+        _db.StockTransactions.Add(new StockTransaction
+        {
+            Id = Guid.NewGuid(),
+            TenantId = tenantId,
+            StockItemId = item.Id,
+            BranchId = branchId,
+            UserId = userId,
+            Quantity = dto.Quantity,
+            Type = StockTransactionType.Adjust,
+            Reference = string.IsNullOrWhiteSpace(dto.Reference)
+                ? "Stock in"
+                : dto.Reference.Trim(),
+            Barcode = item.Barcode,
+            CreatedAtUtc = DateTime.UtcNow
+        });
+
+        await _db.SaveChangesAsync(ct);
+        return item;
+    }
+
     public async Task<StockItem?> GetByIdAsync(Guid tenantId, Guid id, CancellationToken ct = default)
     {
         return await _db.StockItems
