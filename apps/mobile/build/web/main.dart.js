@@ -116205,7 +116205,7 @@ n(a){var s=null
 return A.e5(A.cM(this.d,s,s,16),A.h(this.c,s,s,s,s,s,s,s),this.e,A.jV(s,s,B.l,s,s,s,s,s,s,B.Y,s,s,B.bS,s,new A.bk(A.L(10),B.t),B.U,s,s,s,s))}}
 A.u_.prototype={
 X(){var s="/trade-status-hub",r=$.an(),q=$.jp(),p=A.ahc(),o=A.ahM(),n=A.b1L()
-return new A.Lt(new A.aY(new A.bO("Ad Soyad",B.aw,B.a1),r),new A.aY(B.P,r),new A.aY(new A.bO("Ekran Koruyucu",B.aw,B.a1),r),new A.aY(new A.bO("E-posta",B.aw,B.a1),r),new A.aY(new A.bO("\u015eifre",B.aw,B.a1),r),new A.aY(new A.bO("Bosch",B.aw,B.a1),r),new A.aY(new A.bO("Model X",B.aw,B.a1),r),new A.aY(B.P,r),new A.aY(new A.bO("1",B.aw,B.a1),r),new A.aY(new A.bO("750",B.aw,B.a1),r),new A.aY(new A.bO("0",B.aw,B.a1),r),new A.aY(new A.bO("Barkod",B.aw,B.a1),r),new A.aY(new A.bO("SKU",B.aw,B.a1),r),new A.aY(new A.bO("12",B.aw,B.a1),r),new A.aY(new A.bO("GG/AA/YYYY",B.aw,B.a1),r),new A.aY(B.P,r),new A.aB0(q.a),p,o,n,A.bkJ("http://localhost:5001"+(B.c.bA(s,"/")?s:"//trade-status-hub")),A.b([],t.ev))}}
+return new A.Lt(new A.aY(new A.bO("Ad Soyad",B.aw,B.a1),r),new A.aY(B.P,r),new A.aY(new A.bO("Ekran Koruyucu",B.aw,B.a1),r),new A.aY(new A.bO("E-posta",B.aw,B.a1),r),new A.aY(new A.bO("\u015eifre",B.aw,B.a1),r),new A.aY(new A.bO("Bosch",B.aw,B.a1),r),new A.aY(new A.bO("Model X",B.aw,B.a1),r),new A.aY(B.P,r),new A.aY(new A.bO("1",B.aw,B.a1),r),new A.aY(new A.bO("750",B.aw,B.a1),r),new A.aY(new A.bO("0",B.aw,B.a1),r),new A.aY(new A.bO("Barkod",B.aw,B.a1),r),new A.aY(new A.bO("SKU",B.aw,B.a1),r),new A.aY(new A.bO("12",B.aw,B.a1),r),new A.aY(new A.bO("GG/AA/YYYY",B.aw,B.a1),r),new A.aY(B.P,r),new A.aB0(q.a),p,o,n,A.bkJ("https://lineerdestek.cyber2tech.com"+(B.c.bA(s,"/")?s:"//trade-status-hub")),A.b([],t.ev))}}
 A.Lt.prototype={
 asY(a){var s,r,q,p,o,n,m=null,l=B.c.aJ(a)
 if(l.length===0||l==="GG/AA/YYYY")return m
@@ -128092,7 +128092,7 @@ q=A.bgQ(t.H)
 return new A.atO(o,n,p,1000,new A.SL(q,A.aJ("SL<~>")))})
 s($,"bvq","bd9",()=>new A.Y())
 s($,"byp","b3Z",()=>A.biC(null,t.uK))
-s($,"btu","jp",()=>{var q,p=A.bg4("http://localhost:5001",B.tT,B.tT),o=A.bby(),n=new A.Wa(A.b([B.Ko],A.aJ("F<il?>")))
+s($,"btu","jp",()=>{var q,p=A.bg4("https://lineerdestek.cyber2tech.com",B.tT,B.tT),o=A.bby(),n=new A.Wa(A.b([B.Ko],A.aJ("F<il?>")))
 n.N(n,B.X_)
 o=new A.ahS(o,n,A.bby(),new A.alg(51200),!1)
 o.FU$=p
