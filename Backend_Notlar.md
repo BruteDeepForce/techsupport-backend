@@ -20,8 +20,8 @@ device işlemler fikirleri :
 - operation status değiştiğinde aynı şekilde device status da değişmesi lazım.  Ancak deviceda farklı bir status var şuan isim değişikliğine gidilecek. [STANDBY]
 
 - Teknisyen oluştururken branch/uzmanlık alanı sistemi getirilecek. [COMPLETED]
-- Teknisyen tablosunda profil fotoğrafı bulunduralım. [TODO]
-- Teknisyen tablosunda işe başlangıç tarihi verelim. [TODO]
+- Teknisyen tablosunda profil fotoğrafı bulunduralım. [COMPLETED]
+- Teknisyen tablosunda işe başlangıç tarihi verelim. [COMPLETED]
 
 
 
@@ -29,7 +29,7 @@ device işlemler fikirleri :
 - Raporlar modülü sağlam refactor ve review istiyor. [MEDIUM]
 - Teknisyen metriklerinde operasyonid gelmiyor [URGENT] [BUG] [SOLVED] operasyonid kayıt işlemi yapılıyor artık.
 
-- Backend Dokploya deploy işlemleri başlatılacak [INPROCCESS]
+- Backend Dokploya deploy işlemleri başlatılacak [COMPLETED]
 - DockerFile Rootda mı olacak ? [ROOTCOMPLETED] [ATROOTLOCATED] 
 
 - teknisyen modülü servisinden startprovisionrequest tarafında sistem şuan işe giriş tarhi ve expert göndermiyor. [COMPLETED]
@@ -75,7 +75,8 @@ STOCK MODÜLÜ
 
 
 [Eksikler]
--Şubeleri gösterelim Şubelerim gibi 
--Stok ekleme sadece sku mu? intel i9 standart mesela gene eklemek istediğimde yeni satır oluşmamalı.
--Trade işlemi şuan normal durumda. debug daha ileri alınacak
--
+-Şubeleri gösterelim Şubelerim gibi [ertelendi]
+-Stok ekleme sadece sku mu? intel i9 standart mesela gene eklemek istediğimde yeni satır oluşmamalı. [COMPLETED]
+-Trade işlemi şuan normal durumda. debug daha ileri alınacak [debug]
+-Bayi şube için ayrıca device create edilebilecek [COMPLETED]
+-Müşteriye cihaz modülünden ekleme yapınca operasyon başlatmak istersek o ürün için başlatılamıyor. müşteride cihaz görünmüyor operasyon modülünde [BUG]

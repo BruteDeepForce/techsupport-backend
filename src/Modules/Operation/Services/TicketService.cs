@@ -4,6 +4,7 @@ using TechSupport.Operation.Contracts.Events;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
 using TechSupport.Operation.DTO;
+using TechSupport.Reports.Contracts;
 
 namespace TechSupport.Operation.Services;
 
@@ -12,12 +13,14 @@ public sealed class TicketService : ITicketService
     private readonly OperationDbContext _db;
     private readonly IBus _bus;
     private readonly IOperationService _ops;
+    private readonly ITenantReportWriter _reports;
 
-    public TicketService(OperationDbContext db, IBus bus, IOperationService ops)
+    public TicketService(OperationDbContext db, IBus bus, IOperationService ops, ITenantReportWriter reports)
     {
         _db = db;
         _bus = bus;
         _ops = ops;
+        _reports = reports;
     }
 
     public async Task<Ticket> CreateAsync(Guid tenantId, Guid? branchId, Guid createdBy, string? CustomerName, Guid? deviceId, string title, string description, Priority priority, CancellationToken ct)
@@ -41,6 +44,7 @@ public sealed class TicketService : ITicketService
 
         _db.Tickets.Add(ticket);
         await _db.SaveChangesAsync(ct);
+        await IncrementTicketMetricSetAsync(tenantId, TenantReportMetricType.TicketCreated, ticket.CreatedAtUtc, 1, ct);
 
         //! Admine publish push notification yapılabilir.
 
@@ -102,6 +106,7 @@ public sealed class TicketService : ITicketService
         ticket.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(ct);
+        await IncrementTicketMetricSetAsync(tenantId, TenantReportMetricType.TicketConvertedToOperation, DateTimeOffset.UtcNow, 1, ct);
 
         //! customer-technician için publish event gidecek - operation created, ticket converted to operation gibi.
         return op;
@@ -130,10 +135,19 @@ public sealed class TicketService : ITicketService
         // TODO: persist rejection reason (not modeled in entity) or publish an event
 
         await _db.SaveChangesAsync(ct);
+        await IncrementTicketMetricSetAsync(tenantId, TenantReportMetricType.TicketClosed, DateTimeOffset.UtcNow, 1, ct);
 
         //! Optionally publish an event for the rejection so other modules can react
         //await _bus.Publish(new TicketRejected(ticket.Id, ticket.TenantId, adminUserId, reason, DateTimeOffset.UtcNow), ct);
 
         return ticket;
     }
+
+    private async Task IncrementTicketMetricSetAsync(Guid tenantId, TenantReportMetricType metricType, DateTimeOffset occurredAtUtc, long delta, CancellationToken ct)
+    {
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Daily, occurredAtUtc, delta, ct);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Monthly, occurredAtUtc, delta, ct);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, ct);
+    }
 }
+

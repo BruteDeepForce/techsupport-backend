@@ -9,6 +9,7 @@ using TechSupport.Operation.Contracts.Events;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
 using TechSupport.Operation.DTO;
+using TechSupport.Reports.Contracts;
 
 namespace TechSupport.Operation.Services
 {
@@ -16,11 +17,13 @@ namespace TechSupport.Operation.Services
     {
         private readonly OperationDbContext _dbContext;
         private readonly IBus _bus;
+        private readonly ITenantReportWriter _reports;
 
-        public OfferService(OperationDbContext dbContext, IBus bus)
+        public OfferService(OperationDbContext dbContext, IBus bus, ITenantReportWriter reports)
         {
             _dbContext = dbContext;
             _bus = bus;
+            _reports = reports;
         }
 
         public async Task<bool> AdminApproveOfferAsync(Guid TenantId, Guid? BranchId, Guid offerId, CancellationToken ct)
@@ -94,6 +97,7 @@ namespace TechSupport.Operation.Services
             offer.Status = OfferStatus.AdminRejected;
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
+            await IncrementOfferMetricSetAsync(TenantId, TenantReportMetricType.OfferRejected, DateTimeOffset.UtcNow, 1, ct);
 
             //! customera push bildirim göndeririz.
             return true;
@@ -126,6 +130,7 @@ namespace TechSupport.Operation.Services
             
             await _dbContext.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
+            await IncrementOfferMetricSetAsync(TenantId, TenantReportMetricType.OfferAccepted, DateTimeOffset.UtcNow, 1, ct);
 
             //! teknisyene ve customera push bildirim göndeririz.
             //! Stock modülüne StockReserve için Approved eventi publish ederiz.
@@ -142,6 +147,7 @@ namespace TechSupport.Operation.Services
             offer.Status = OfferStatus.CustomerRejected;
             offer.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(ct);
+            await IncrementOfferMetricSetAsync(TenantId, TenantReportMetricType.OfferRejected, DateTimeOffset.UtcNow, 1, ct);
 
             //! teknisyene ve customera push bildirim göndeririz.
             return true;
@@ -182,6 +188,7 @@ namespace TechSupport.Operation.Services
 
             await _dbContext.OfferRecords.AddAsync(offerRecord, ct);
             await _dbContext.SaveChangesAsync(ct);
+            await IncrementOfferMetricSetAsync(offer.TenantId, TenantReportMetricType.OfferCreated, DateTimeOffset.UtcNow, 1, ct);
 
             //!admine push bildirim göndeririz.
             return true;
@@ -258,5 +265,13 @@ namespace TechSupport.Operation.Services
 }
             return null;
         }
+
+        private async Task IncrementOfferMetricSetAsync(Guid tenantId, TenantReportMetricType metricType, DateTimeOffset occurredAtUtc, long delta, CancellationToken ct)
+        {
+            await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Daily, occurredAtUtc, delta, ct);
+            await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Monthly, occurredAtUtc, delta, ct);
+            await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, ct);
+        }
     }
 }
+

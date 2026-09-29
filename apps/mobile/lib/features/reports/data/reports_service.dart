@@ -41,4 +41,12 @@ class ReportsService {
     }
     throw Exception('Failed to load technician summaries: ${res.statusCode}');
   }
+
+  Future<TenantDashboard> getDashboard() async {
+    final res = await _dio.get('/api/reports/dashboard');
+    if (res.statusCode == 200) {
+      return TenantDashboard.fromJson(res.data as Map<String, dynamic>);
+    }
+    throw Exception('Failed to load dashboard: ${res.statusCode}');
+  }
 }

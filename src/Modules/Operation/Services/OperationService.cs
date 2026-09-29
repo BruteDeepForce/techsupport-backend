@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TechSupport.Operation.Contracts.Events;
 using TechSupport.Operation.Data;
 using TechSupport.Operation.Domain.Entities;
+using TechSupport.Reports.Contracts;
 
 namespace TechSupport.Operation.Services;
 
@@ -42,11 +43,13 @@ public sealed class OperationService : IOperationService
 {
     private readonly OperationDbContext _db;
     private readonly IBus _bus;
+    private readonly ITenantReportWriter _reports;
 
-    public OperationService(OperationDbContext db, IBus bus)
+    public OperationService(OperationDbContext db, IBus bus, ITenantReportWriter reports)
     {
         _db = db;
         _bus = bus;
+        _reports = reports;
     }
 
     public async Task<OperationRecord> CreateAsync(
@@ -95,6 +98,12 @@ public sealed class OperationService : IOperationService
         await _db.SaveChangesAsync(ct);
 
         var now = DateTimeOffset.UtcNow;
+        await _reports.IncrementSummaryAsync(
+            tenantId,
+            new TenantReportSummaryDelta(TotalOperations: 1, OpenOperations: 1),
+            ct);
+        await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OperationCreated, now, 1, ct);
+        await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OpenOperation, now, 1, ct);
 
         /// koşul teknisyenid var mı ??? 
         /// varsa teknisyen modülüne teknisyen operation assign et.
@@ -198,6 +207,7 @@ public sealed class OperationService : IOperationService
             throw new InvalidOperationException("Invalid status value");
         }
 
+        var oldStatus = op.Status;
         op.Status = newStatus;
         op.LastStatusChangedAtUtc = DateTimeOffset.UtcNow;
         op.UpdatedAtUtc = DateTimeOffset.UtcNow;
@@ -211,7 +221,39 @@ public sealed class OperationService : IOperationService
 
         await _db.SaveChangesAsync(ct);
 
+        if (oldStatus != newStatus)
+        {
+            var occurredAtUtc = DateTimeOffset.UtcNow;
+            switch (newStatus)
+            {
+                case OperationStatus.Completed:
+                    await _reports.IncrementSummaryAsync(
+                        tenantId,
+                        new TenantReportSummaryDelta(CompletedOperations: 1, OpenOperations: -1),
+                        ct);
+                    await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OperationCompleted, occurredAtUtc, 1, ct);
+                    await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OpenOperation, occurredAtUtc, -1, ct);
+                    break;
+                case OperationStatus.Delivered:
+                    await _reports.IncrementSummaryAsync(
+                        tenantId,
+                        new TenantReportSummaryDelta(DeliveredOperations: 1, OpenOperations: -1),
+                        ct);
+                    await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OperationDelivered, occurredAtUtc, 1, ct);
+                    await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OpenOperation, occurredAtUtc, -1, ct);
+                    break;
+            }
+        }
+
         return op;
     }
 
+    private async Task IncrementOperationMetricSetAsync(Guid tenantId, TenantReportMetricType metricType, DateTimeOffset occurredAtUtc, long delta, CancellationToken ct)
+    {
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Daily, occurredAtUtc, delta, ct);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Monthly, occurredAtUtc, delta, ct);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, ct);
+    }
+
 }
+

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using TechSupport.Device.Contracts.Events;
 using TechSupport.Device.Contracts.Services;
+using TechSupport.Reports.Contracts;
 using TechSupport.Trade.Contracts.Events;
 using TechSupport.Trade.Data;
 using TechSupport.Trade.Domain.Entities;
@@ -16,15 +17,17 @@ public sealed class TradeService : ITradeService
     private readonly TradeDbContext _db;
     private readonly IDeviceSalePriceReader _deviceSalePriceReader;
     private readonly IBus _bus;
+    private readonly ITenantReportWriter _reports;
 
     private readonly ILogger<TradeService> _logger;
 
-    public TradeService(TradeDbContext db, IDeviceSalePriceReader deviceSalePriceReader, IBus bus, ILogger<TradeService> logger)
+    public TradeService(TradeDbContext db, IDeviceSalePriceReader deviceSalePriceReader, IBus bus, ILogger<TradeService> logger, ITenantReportWriter reports)
     {
         _db = db;
         _deviceSalePriceReader = deviceSalePriceReader;
         _bus = bus;
         _logger = logger;
+        _reports = reports;
     }
 
     public async Task<TradeRecord> StartTradeAsync(Guid tenantId, Guid branchId, StartTradeRequest request, string idempotencyKey, CancellationToken cancellationToken = default)
@@ -137,6 +140,7 @@ public sealed class TradeService : ITradeService
 
             _db.Trades.Add(tradeForExistingCustomer);
             await SaveChangesWithIdempotencyGuardAsync(cancellationToken);
+            await IncrementTradeMetricSetAsync(tenantId, tradeForExistingCustomer.Type, DateTimeOffset.UtcNow, 1, cancellationToken);
 
             await StartDeviceCreateWithTradeAsync(
                 tenantId,
@@ -200,6 +204,7 @@ public sealed class TradeService : ITradeService
 
         _db.Trades.Add(trade);
         await SaveChangesWithIdempotencyGuardAsync(cancellationToken);
+        await IncrementTradeMetricSetAsync(tenantId, trade.Type, DateTimeOffset.UtcNow, 1, cancellationToken);
 
         var customer = request.Customer;
         await _bus.Publish(new TradeCustomerProvisionRequested(
@@ -288,6 +293,7 @@ public sealed class TradeService : ITradeService
 
             _db.Trades.Add(trade);
             await SaveChangesWithIdempotencyGuardAsync(cancellationToken);
+            await IncrementTradeMetricSetAsync(tenantId, trade.Type, DateTimeOffset.UtcNow, 1, cancellationToken);
 
             _logger.LogWarning("Publishing DeviceCustomerMapping for existing device {DeviceId} and customer {CustomerId} in trade {TradeId}", existingDeviceId, existingCustomerIdValue, trade.Id);
 
@@ -372,6 +378,7 @@ public sealed class TradeService : ITradeService
 
         _db.Trades.Add(newCustomerTrade);
         await SaveChangesWithIdempotencyGuardAsync(cancellationToken);
+        await IncrementTradeMetricSetAsync(tenantId, newCustomerTrade.Type, DateTimeOffset.UtcNow, 1, cancellationToken);
 
         await _bus.Publish(new TradeCustomerProvisionRequested(
             TradeId: newCustomerTrade.Id,
@@ -613,6 +620,17 @@ public sealed class TradeService : ITradeService
         }
     }
 
+    private async Task IncrementTradeMetricSetAsync(Guid tenantId, TradeType tradeType, DateTimeOffset occurredAtUtc, long delta, CancellationToken cancellationToken)
+    {
+        var metricType = tradeType == TradeType.Purchase
+            ? TenantReportMetricType.TradePurchase
+            : TenantReportMetricType.TradeSale;
+
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Daily, occurredAtUtc, delta, cancellationToken);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Monthly, occurredAtUtc, delta, cancellationToken);
+        await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, cancellationToken);
+    }
+
     private async Task<(decimal UnitPrice, decimal TotalAmount, decimal? PaidAmount)> GetExistingDevicePricingAsync(
         Guid tenantId,
         Guid deviceId,
@@ -649,3 +667,4 @@ public sealed class TradeService : ITradeService
         return false;
     }
 }
+

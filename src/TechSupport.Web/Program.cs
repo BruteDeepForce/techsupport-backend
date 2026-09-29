@@ -11,9 +11,7 @@ using TechSupport.User;
 using TechSupport.Reports;
 using TechSupport.Ai;
 using TechSupport.Technician;
-using TechSupport.Reports.Consumers;
 using TechSupport.Operation.Consumers;
-using Reports.Consumers;
 using TechSupport.Accounting;
 using TechSupport.Accounting.Consumers;
 using TechSupport.Hr;
@@ -28,6 +26,18 @@ using TechSupport.Hr.SignalR;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
+.AddApplicationPart(typeof(TechSupport.Accounting.Api.Controllers.AccountsController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Ai.Api.Controllers.AiController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Customer.Api.Controllers.CustomerController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Device.Api.Controllers.DevicesController).Assembly)
+.AddApplicationPart(typeof(Modules.HR.Api.EmployeesController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Identity.Api.Controllers.AccountController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Operation.Api.Controllers.OperationsController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Reports.Api.Controllers.ReportsDashboardController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Stock.Api.Controllers.StockItemsController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Technician.Api.Controllers.TechnicianController).Assembly)
+.AddApplicationPart(typeof(TechSupport.Trade.Api.Controllers.TradesController).Assembly)
+.AddApplicationPart(typeof(TechSupport.User.Api.Controllers.UsersController).Assembly)
 .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
@@ -71,15 +81,10 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<CustomerAccountProvisionFailedConsumer>();
     x.AddConsumer<TradeProvisionRequestConsumer>();
     x.AddConsumer<TechnicianAccountProvisionRequestedConsumer>();
-    x.AddConsumer<TechSupport.Reports.Consumers.CustomerCreatedConsumer>();
     x.AddConsumer<TechSupport.Technician.Consumers.OperationAssignedToTechnicianConsumer>();
-    x.AddConsumer<TechSupport.Reports.Consumers.OperationCreatedConsumer>();
-    x.AddConsumer<OperationStatusChangedConsumer>();
-    x.AddConsumer<TechSupport.Reports.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechSupport.Technician.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechnicianAccountProvisionFailedConsumer>();
     x.AddConsumer<TechnicianOperationStatusChangedConsumer>();
-    x.AddConsumer<TenantCreatedConsumer>();
     x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
     x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();

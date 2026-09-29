@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 import 'shared/admin_web_topbar.dart';
-import '../../operations/data/operation_service.dart';
-import '../../operations/models/operation_models.dart';
+import '../../reports/data/reports_service.dart';
+import '../../reports/models/report_models.dart';
 
 class AdminWebHomePage extends StatefulWidget {
   const AdminWebHomePage({super.key});
@@ -13,13 +13,13 @@ class AdminWebHomePage extends StatefulWidget {
 }
 
 class _AdminWebHomePageState extends State<AdminWebHomePage> {
-  final OperationService _operationService = OperationService();
-  late Future<List<OperationRecord>> _operationsFuture;
+  final ReportsService _reportsService = ReportsService();
+  late Future<TenantDashboard> _dashboardFuture;
 
   @override
   void initState() {
     super.initState();
-    _operationsFuture = _operationService.listOperations();
+    _dashboardFuture = _reportsService.getDashboard();
   }
 
   @override
@@ -29,7 +29,7 @@ class _AdminWebHomePageState extends State<AdminWebHomePage> {
       active: AdminNavKey.home,
       actions: [
         AdminWebActionButton(
-          label: 'İş Emri',
+          label: 'Is Emri',
           icon: Icons.add,
           onPressed: () {},
         ),
@@ -43,11 +43,11 @@ class _AdminWebHomePageState extends State<AdminWebHomePage> {
           const SizedBox(height: 16),
           const _CalendarCard(),
           const SizedBox(height: 16),
-          const _StatusListCard(),
+          _StatusListCard(dashboardFuture: _dashboardFuture),
           const SizedBox(height: 20),
-          _MiniStatsGrid(width: width),
+          _MiniStatsGrid(width: width, dashboardFuture: _dashboardFuture),
           const SizedBox(height: 20),
-          _ChartSection(width: width, operationsFuture: _operationsFuture),
+          _ChartSection(width: width, dashboardFuture: _dashboardFuture),
         ],
       ),
     );
@@ -62,7 +62,7 @@ class _Greeting extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Text('Merhaba, Süleyman Tuysuzoglu',
+        Text('Merhaba, Suleyman Tuysuzoglu',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
         SizedBox(height: 6),
       ],
@@ -92,7 +92,7 @@ class _TabStrip extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: const Text(
-                'Genel İstatistikler',
+                'Genel Istatistikler',
                 style: TextStyle(
                     color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
               ),
@@ -126,7 +126,7 @@ class _CalendarCard extends StatelessWidget {
               const SizedBox(width: 6),
               const _Pill(label: 'Ay'),
               const SizedBox(width: 6),
-              const _Pill(label: 'Bugün'),
+              const _Pill(label: 'Bugun'),
             ],
           ),
           const SizedBox(height: 12),
@@ -136,7 +136,7 @@ class _CalendarCard extends StatelessWidget {
             children: const [
               _DayCard(day: 'Pzt', date: '23'),
               _DayCard(day: 'Sal', date: '24'),
-              _DayCard(day: 'Çar', date: '25'),
+              _DayCard(day: 'Car', date: '25'),
               _DayCard(day: 'Per', date: '26'),
               _DayCard(day: 'Cum', date: '27'),
               _DayCard(day: 'Cts', date: '28'),
@@ -190,43 +190,68 @@ class _DayCard extends StatelessWidget {
 }
 
 class _StatusListCard extends StatelessWidget {
-  const _StatusListCard();
+  const _StatusListCard({required this.dashboardFuture});
+
+  final Future<TenantDashboard> dashboardFuture;
 
   @override
   Widget build(BuildContext context) {
     return _CardShell(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Durum Listesi',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-          const SizedBox(height: 12),
-          Row(
-            children: const [
-              _StatusPill(
-                  color: Color(0xFFFBBF24), label: 'Bekliyor', value: '0'),
-              SizedBox(width: 12),
-              _StatusPill(
-                  color: Color(0xFF3B82F6), label: 'Devam Ediyor', value: '0'),
-              SizedBox(width: 12),
-              _StatusPill(
-                  color: Color(0xFF22C55E), label: 'Tamamlandı', value: '0'),
-              SizedBox(width: 12),
-              _StatusPill(color: Color(0xFF64748B), label: 'İptal', value: '0'),
+      child: FutureBuilder<TenantDashboard>(
+        future: dashboardFuture,
+        builder: (context, snapshot) {
+          final dashboard = snapshot.data;
+          final summary = dashboard?.summary;
+          final completed =
+              (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
+          final failed = summary?.failedOperations ?? 0;
+          final open = summary?.openOperations ?? 0;
+          final cancelled = dashboard?.metricTotal('OperationCancelled') ?? 0;
+          final total = summary?.totalOperations ?? 0;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Durum Listesi',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _StatusPill(
+                      color: const Color(0xFFFBBF24),
+                      label: 'Bekliyor',
+                      value: open.toString()),
+                  const SizedBox(width: 12),
+                  const _StatusPill(
+                      color: Color(0xFF3B82F6),
+                      label: 'Devam Ediyor',
+                      value: '0'),
+                  const SizedBox(width: 12),
+                  _StatusPill(
+                      color: const Color(0xFF22C55E),
+                      label: 'Tamamlandi',
+                      value: completed.toString()),
+                  const SizedBox(width: 12),
+                  _StatusPill(
+                      color: const Color(0xFF64748B),
+                      label: 'Iptal',
+                      value: (cancelled + failed).toString()),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text('Toplam $total kayit',
+                    style: const TextStyle(
+                        color: Color(0xFF94A3B8), fontSize: 12)),
+              ),
             ],
-          ),
-          const SizedBox(height: 10),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text('Toplam 0 kayıt',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
-
 class _StatusPill extends StatelessWidget {
   const _StatusPill({
     required this.color,
@@ -261,9 +286,10 @@ class _StatusPill extends StatelessWidget {
 }
 
 class _MiniStatsGrid extends StatelessWidget {
-  const _MiniStatsGrid({required this.width});
+  const _MiniStatsGrid({required this.width, required this.dashboardFuture});
 
   final double width;
+  final Future<TenantDashboard> dashboardFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -277,68 +303,79 @@ class _MiniStatsGrid extends StatelessWidget {
         : width >= 900
             ? 2.0
             : 1.7;
-    return GridView.count(
-      crossAxisCount: crossAxisCount,
-      shrinkWrap: true,
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 14,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: childAspectRatio,
-      padding: EdgeInsets.zero,
-      children: const [
-        _MiniCard(
-            title: 'Bekleyen İş Emirleri',
-            value: '0',
-            caption: '0 acil, 0 normal',
-            color: Color(0xFFEFF6FF),
-            icon: Icons.receipt_long_outlined),
-        _MiniCard(
-            title: 'Tamamlanan Emirler',
-            value: '0',
-            caption: 'Toplam: 0',
-            color: Color(0xFFEFFDF4),
-            icon: Icons.check_circle_outline),
-        _MiniCard(
-            title: 'Yaklaşan Bakımlar',
-            value: '0',
-            caption: 'Önümüzdeki 7 gün',
-            color: Color(0xFFFFF7ED),
-            icon: Icons.build_outlined),
-        _MiniCard(
-            title: 'Düşük Stok',
-            value: '0',
-            caption: '0 stok yok',
-            color: Color(0xFFFFF1F2),
-            icon: Icons.inventory_2_outlined),
-        _MiniCard(
-            title: 'Firma & Kişiler',
-            value: '0',
-            caption: '0 aktif müşteri',
-            color: Color(0xFFF1F5FF),
-            icon: Icons.groups_outlined),
-        _MiniCard(
-            title: 'Cihazlar',
-            value: '1',
-            caption: '1 aktif',
-            color: Color(0xFFF0F9FF),
-            icon: Icons.devices_outlined),
-        _MiniCard(
-            title: 'Toplam Gelir',
-            value: '₺0',
-            caption: '0 teklifler',
-            color: Color(0xFFF0FDF4),
-            icon: Icons.payments_outlined),
-        _MiniCard(
-            title: 'Bekleyen Teklifler',
-            value: '0',
-            caption: '0 toplam',
-            color: Color(0xFFF1F5F9),
-            icon: Icons.request_quote_outlined),
-      ],
+
+    return FutureBuilder<TenantDashboard>(
+      future: dashboardFuture,
+      builder: (context, snapshot) {
+        final summary = snapshot.data?.summary;
+        final open = summary?.openOperations ?? 0;
+        final completed =
+            (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
+        final customers = summary?.totalCustomers ?? 0;
+
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          mainAxisSpacing: 14,
+          crossAxisSpacing: 14,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: childAspectRatio,
+          padding: EdgeInsets.zero,
+          children: [
+            _MiniCard(
+                title: 'Bekleyen Is Emirleri',
+                value: open.toString(),
+                caption: '$open acik kayit',
+                color: const Color(0xFFEFF6FF),
+                icon: Icons.receipt_long_outlined),
+            _MiniCard(
+                title: 'Tamamlanan Emirler',
+                value: completed.toString(),
+                caption: 'Toplam: $completed',
+                color: const Color(0xFFEFFDF4),
+                icon: Icons.check_circle_outline),
+            const _MiniCard(
+                title: 'Yaklasan Bakimlar',
+                value: '0',
+                caption: 'Onumuzdeki 7 gun',
+                color: Color(0xFFFFF7ED),
+                icon: Icons.build_outlined),
+            const _MiniCard(
+                title: 'Dusuk Stok',
+                value: '0',
+                caption: '0 stok yok',
+                color: Color(0xFFFFF1F2),
+                icon: Icons.inventory_2_outlined),
+            _MiniCard(
+                title: 'Firma & Kisiler',
+                value: customers.toString(),
+                caption: '$customers aktif musteri',
+                color: const Color(0xFFF1F5FF),
+                icon: Icons.groups_outlined),
+            const _MiniCard(
+                title: 'Cihazlar',
+                value: '0',
+                caption: '0 aktif',
+                color: Color(0xFFF0F9FF),
+                icon: Icons.devices_outlined),
+            const _MiniCard(
+                title: 'Toplam Gelir',
+                value: '0',
+                caption: '0 teklifler',
+                color: Color(0xFFF0FDF4),
+                icon: Icons.payments_outlined),
+            const _MiniCard(
+                title: 'Bekleyen Teklifler',
+                value: '0',
+                caption: '0 toplam',
+                color: Color(0xFFF1F5F9),
+                icon: Icons.request_quote_outlined),
+          ],
+        );
+      },
     );
   }
 }
-
 class _MiniCard extends StatelessWidget {
   const _MiniCard({
     required this.title,
@@ -407,10 +444,10 @@ class _MiniCard extends StatelessWidget {
 }
 
 class _ChartSection extends StatefulWidget {
-  const _ChartSection({required this.width, required this.operationsFuture});
+  const _ChartSection({required this.width, required this.dashboardFuture});
 
   final double width;
-  final Future<List<OperationRecord>> operationsFuture;
+  final Future<TenantDashboard> dashboardFuture;
 
   @override
   State<_ChartSection> createState() => _ChartSectionState();
@@ -422,7 +459,7 @@ class _ChartSectionState extends State<_ChartSection> {
   String get _rangeLabel {
     switch (_range) {
       case _TrendRange.daily:
-        return 'Son 7 Gün';
+        return 'Son 7 Gun';
       case _TrendRange.weekly:
         return 'Son 8 Hafta';
       case _TrendRange.monthly:
@@ -446,7 +483,7 @@ class _ChartSectionState extends State<_ChartSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Aylık Trend',
+                    const Text('Aylik Trend',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
                     const SizedBox(height: 6),
@@ -458,20 +495,22 @@ class _ChartSectionState extends State<_ChartSection> {
                       onChanged: (val) => setState(() => _range = val),
                     ),
                     const SizedBox(height: 12),
-                    FutureBuilder<List<OperationRecord>>(
-                      future: widget.operationsFuture,
+                    FutureBuilder<TenantDashboard>(
+                      future: widget.dashboardFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const _ChartPlaceholder(
-                              height: 170, caption: 'Yükleniyor...');
+                              height: 170, caption: 'Yukleniyor...');
                         }
                         if (snapshot.hasError) {
                           return const _ChartPlaceholder(
-                              height: 170, caption: 'Trend alınamadı');
+                              height: 170, caption: 'Trend alinamadi');
                         }
-                        final ops = snapshot.data ?? [];
-                        final data = _buildTrend(ops, _range);
+                        final dashboard = snapshot.data;
+                        final data = dashboard == null
+                            ? _emptyTrend(_range)
+                            : _buildTrendFromMetrics(dashboard, _range);
                         return _TrendChart(data: data);
                       },
                     ),
@@ -489,27 +528,27 @@ class _ChartSectionState extends State<_ChartSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Maliyet Özeti',
+                    Text('Maliyet Ozeti',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
-                    Text('İş emri maliyet dağılımı',
+                    Text('Is emri maliyet dagilimi',
                         style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 16),
                     _CostRow(
                         color: Color(0xFFBFDBFE),
-                        label: 'Toplam Parça Maliyeti',
-                        value: '₺0'),
+                        label: 'Toplam Parca Maliyeti',
+                        value: '0'),
                     SizedBox(height: 8),
                     _CostRow(
                         color: Color(0xFFFFEDD5),
-                        label: 'Toplam İşçilik Maliyeti',
-                        value: '₺0'),
+                        label: 'Toplam Iscilik Maliyeti',
+                        value: '0'),
                     SizedBox(height: 8),
                     _CostRow(
                         color: Color(0xFFDCFCE7),
                         label: 'Toplam Maliyet',
-                        value: '₺0'),
+                        value: '0'),
                   ],
                 ),
               ),
@@ -520,7 +559,7 @@ class _ChartSectionState extends State<_ChartSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Aylık Maliyet Trendi',
+                    Text('Aylik Maliyet Trendi',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
@@ -542,15 +581,15 @@ class _ChartSectionState extends State<_ChartSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Öncelik Dağılımı',
+                    Text('Oncelik Dagilimi',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
-                    Text('Önceliğe göre iş emirleri',
+                    Text('Oncelige gore is emirleri',
                         style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 16),
                     _ChartPlaceholder(
-                        height: 130, caption: 'düşük / normal / acil'),
+                        height: 130, caption: 'dusuk / normal / acil'),
                   ],
                 ),
               ),
@@ -561,14 +600,14 @@ class _ChartSectionState extends State<_ChartSection> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Son İş Emirleri',
+                    Text('Son Is Emirleri',
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
-                    Text('Son 5 iş emri',
+                    Text('Son 5 is emri',
                         style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 24),
-                    _EmptyState(label: 'Henüz iş emri bulunmuyor'),
+                    _EmptyState(label: 'Henuz is emri bulunmuyor'),
                   ],
                 ),
               ),
@@ -586,7 +625,7 @@ class _ChartSectionState extends State<_ChartSection> {
               Text('Aktif teknisyenler',
                   style: TextStyle(color: Color(0xFF94A3B8))),
               SizedBox(height: 24),
-              _EmptyState(label: 'Veri bulunamadı'),
+              _EmptyState(label: 'Veri bulunamadi'),
             ],
           ),
         ),
@@ -626,82 +665,90 @@ class _TrendPoint {
   final int value;
 }
 
-List<_TrendPoint> _buildTrend(List<OperationRecord> ops, _TrendRange range) {
+List<_TrendPoint> _buildTrendFromMetrics(
+    TenantDashboard dashboard, _TrendRange range) {
+  final buckets = _trendBuckets(range);
+  final labels = _trendLabels(buckets, range);
+
+  return List.generate(buckets.length, (i) {
+    final value = _trendMetricValue(dashboard, buckets[i], range);
+    return _TrendPoint(labels[i], value);
+  });
+}
+
+int _trendMetricValue(
+    TenantDashboard dashboard, DateTime bucket, _TrendRange range) {
+  if (range == _TrendRange.daily) {
+    return dashboard.metricValue('OperationCreated', 'Daily', bucket);
+  }
+
+  if (range == _TrendRange.weekly) {
+    var value = 0;
+    for (var i = 0; i < 7; i++) {
+      value += dashboard.metricValue(
+        'OperationCreated',
+        'Daily',
+        bucket.add(Duration(days: i)),
+      );
+    }
+    return value;
+  }
+
+  return dashboard.metricValue('OperationCreated', 'Monthly', bucket);
+}
+
+List<_TrendPoint> _emptyTrend(_TrendRange range) {
+  final buckets = _trendBuckets(range);
+  final labels = _trendLabels(buckets, range);
+  return List.generate(buckets.length, (i) => _TrendPoint(labels[i], 0));
+}
+
+List<DateTime> _trendBuckets(_TrendRange range) {
   final now = DateTime.now();
-  final monthLabels = const [
+  switch (range) {
+    case _TrendRange.daily:
+      return List.generate(
+          7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
+    case _TrendRange.weekly:
+      final today = DateTime(now.year, now.month, now.day);
+      final currentWeekStart = today.subtract(Duration(days: today.weekday - 1));
+      return List.generate(
+          8, (i) => currentWeekStart.subtract(Duration(days: 7 * (7 - i))));
+    case _TrendRange.monthly:
+      return List.generate(
+          12, (i) => DateTime(now.year, now.month - (11 - i), 1));
+    case _TrendRange.last6Months:
+      return List.generate(
+          6, (i) => DateTime(now.year, now.month - (5 - i), 1));
+  }
+}
+
+List<String> _trendLabels(List<DateTime> buckets, _TrendRange range) {
+  const monthLabels = [
     'Oca',
-    'Şub',
+    'Sub',
     'Mar',
     'Nis',
     'May',
     'Haz',
     'Tem',
-    'Ağu',
+    'Agu',
     'Eyl',
     'Eki',
     'Kas',
     'Ara',
   ];
 
-  List<DateTime> buckets;
-  List<String> labels;
-
-  switch (range) {
-    case _TrendRange.daily:
-      buckets = List.generate(
-          7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
-      labels = buckets
-          .map((d) => '${d.day.toString().padLeft(2, '0')}')
-          .toList();
-      break;
-    case _TrendRange.weekly:
-      buckets = List.generate(
-        8,
-        (i) => DateTime(now.year, now.month, now.day - (7 * (7 - i))),
-      );
-      labels = List.generate(8, (i) => 'H${i + 1}');
-      break;
-    case _TrendRange.monthly:
-      buckets = List.generate(12, (i) => DateTime(now.year, now.month - (11 - i), 1));
-      labels = buckets.map((d) => monthLabels[d.month - 1]).toList();
-      break;
-    case _TrendRange.last6Months:
-      buckets = List.generate(6, (i) => DateTime(now.year, now.month - (5 - i), 1));
-      labels = buckets.map((d) => monthLabels[d.month - 1]).toList();
-      break;
+  if (range == _TrendRange.daily) {
+    return buckets.map((d) => d.day.toString().padLeft(2, '0')).toList();
   }
 
-  final counts = List<int>.filled(buckets.length, 0);
-  for (final op in ops) {
-    final d = op.occurredAtUtc.toLocal();
-    for (int i = 0; i < buckets.length; i++) {
-      final b = buckets[i];
-      if (range == _TrendRange.daily) {
-        if (d.year == b.year && d.month == b.month && d.day == b.day) {
-          counts[i] += 1;
-          break;
-        }
-      } else if (range == _TrendRange.weekly) {
-        final start = b;
-        final end = start.add(const Duration(days: 7));
-        if (!d.isBefore(start) && d.isBefore(end)) {
-          counts[i] += 1;
-          break;
-        }
-      } else {
-        if (d.year == b.year && d.month == b.month) {
-          counts[i] += 1;
-          break;
-        }
-      }
-    }
+  if (range == _TrendRange.weekly) {
+    return List.generate(buckets.length, (i) => 'H${i + 1}');
   }
 
-  return List.generate(buckets.length, (i) {
-    return _TrendPoint(labels[i], counts[i]);
-  });
+  return buckets.map((d) => monthLabels[d.month - 1]).toList();
 }
-
 class _TrendRangeRow extends StatelessWidget {
   const _TrendRangeRow({required this.range, required this.onChanged});
 
@@ -715,7 +762,7 @@ class _TrendRangeRow extends StatelessWidget {
       runSpacing: 8,
       children: [
         _TrendRangePill(
-          label: 'Gün',
+          label: 'Gun',
           active: range == _TrendRange.daily,
           onTap: () => onChanged(_TrendRange.daily),
         ),

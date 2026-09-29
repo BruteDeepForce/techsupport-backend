@@ -99,3 +99,118 @@ class PagedResult<T> {
     );
   }
 }
+
+class TenantDashboard {
+  TenantDashboard({
+    required this.summary,
+    required this.metrics,
+  });
+
+  final TenantReportSummary summary;
+  final List<TenantReportMetric> metrics;
+
+  factory TenantDashboard.fromJson(Map<String, dynamic> json) {
+    final metricsJson = json['metrics'] ?? json['Metrics'];
+    return TenantDashboard(
+      summary: TenantReportSummary.fromJson(
+          (json['summary'] ?? json['Summary'] ?? {}) as Map<String, dynamic>),
+      metrics: metricsJson is List
+          ? metricsJson
+              .whereType<Map>()
+              .map((e) => TenantReportMetric.fromJson(
+                  Map<String, dynamic>.from(e)))
+              .toList()
+          : <TenantReportMetric>[],
+    );
+  }
+
+  int metricValue(String metricType, String periodType, DateTime periodStart) {
+    final normalizedDate =
+        '${periodStart.year.toString().padLeft(4, '0')}-${periodStart.month.toString().padLeft(2, '0')}-${periodStart.day.toString().padLeft(2, '0')}';
+    for (final metric in metrics) {
+      if (metric.metricType == metricType &&
+          metric.periodType == periodType &&
+          metric.periodStart == normalizedDate) {
+        return metric.value;
+      }
+    }
+    return 0;
+  }
+
+  int metricTotal(String metricType) {
+    var total = 0;
+    for (final metric in metrics) {
+      if (metric.metricType == metricType) {
+        total += metric.value;
+      }
+    }
+    return total;
+  }
+}
+
+class TenantReportSummary {
+  TenantReportSummary({
+    required this.tenantId,
+    required this.tenantName,
+    required this.totalCustomers,
+    required this.totalOperations,
+    required this.completedOperations,
+    required this.failedOperations,
+    required this.deliveredOperations,
+    required this.openOperations,
+  });
+
+  final String tenantId;
+  final String tenantName;
+  final int totalCustomers;
+  final int totalOperations;
+  final int completedOperations;
+  final int failedOperations;
+  final int deliveredOperations;
+  final int openOperations;
+
+  factory TenantReportSummary.fromJson(Map<String, dynamic> json) {
+    int asInt(String camel, String pascal) {
+      final value = json[camel] ?? json[pascal] ?? 0;
+      if (value is int) return value;
+      return int.tryParse(value.toString()) ?? 0;
+    }
+
+    return TenantReportSummary(
+      tenantId: (json['tenantId'] ?? json['TenantId'] ?? '').toString(),
+      tenantName: (json['tenantName'] ?? json['TenantName'] ?? '').toString(),
+      totalCustomers: asInt('totalCustomers', 'TotalCustomers'),
+      totalOperations: asInt('totalOperations', 'TotalOperations'),
+      completedOperations:
+          asInt('completedOperations', 'CompletedOperations'),
+      failedOperations: asInt('failedOperations', 'FailedOperations'),
+      deliveredOperations:
+          asInt('deliveredOperations', 'DeliveredOperations'),
+      openOperations: asInt('openOperations', 'OpenOperations'),
+    );
+  }
+}
+
+class TenantReportMetric {
+  TenantReportMetric({
+    required this.metricType,
+    required this.periodType,
+    required this.periodStart,
+    required this.value,
+  });
+
+  final String metricType;
+  final String periodType;
+  final String periodStart;
+  final int value;
+
+  factory TenantReportMetric.fromJson(Map<String, dynamic> json) {
+    final value = json['value'] ?? json['Value'] ?? 0;
+    return TenantReportMetric(
+      metricType: (json['metricType'] ?? json['MetricType']).toString(),
+      periodType: (json['periodType'] ?? json['PeriodType']).toString(),
+      periodStart: (json['periodStart'] ?? json['PeriodStart']).toString(),
+      value: value is int ? value : int.tryParse(value.toString()) ?? 0,
+    );
+  }
+}

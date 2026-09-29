@@ -11,6 +11,7 @@ using TechSupport.Identity.Contracts.Events;
 using MassTransit.Initializers;
 using Customer.Contracts.Events;
 using Microsoft.Extensions.Logging;
+using TechSupport.Reports.Contracts;
 
 namespace TechSupport.Customer.Services
 {
@@ -39,12 +40,14 @@ namespace TechSupport.Customer.Services
         private readonly CustomerDbContext _db;
         private readonly IBus _bus;
         private readonly ILogger<CustomerService> _logger;
+        private readonly ITenantReportWriter _reports;
 
-        public CustomerService(CustomerDbContext db, IBus bus, ILogger<CustomerService> logger)
+        public CustomerService(CustomerDbContext db, IBus bus, ILogger<CustomerService> logger, ITenantReportWriter reports)
         {
             _db = db;
             _bus = bus;
             _logger = logger;
+            _reports = reports;
         }
 
         public async Task<bool> AssignDeviceToCustomerAsync(Guid tenantId, Guid? branchId, Guid customerId, Guid? customerAppUserId, Guid deviceId,
@@ -182,6 +185,14 @@ namespace TechSupport.Customer.Services
 
             _db.Customers.Add(customer);
             await _db.SaveChangesAsync(ct);
+
+            var occurredAtUtc = DateTimeOffset.UtcNow;
+            await _reports.IncrementSummaryAsync(
+                tenantId,
+                new TenantReportSummaryDelta(TotalCustomers: 1),
+                ct);
+            await IncrementCustomerCreatedMetricsAsync(tenantId, occurredAtUtc, ct);
+
             return customer;
         }
 
@@ -319,6 +330,7 @@ namespace TechSupport.Customer.Services
             }
 
             var existingCustomer = await _db.Customers.FirstOrDefaultAsync(x => x.AppUserId == appUserId || (x.TenantId == tenantId && x.Email == email), ct);
+            var isNewCustomer = existingCustomer is null;
             if (existingCustomer is null)
             {
                 existingCustomer = new TechSupport.Customer.Domain.Entities.Customer
@@ -352,6 +364,16 @@ namespace TechSupport.Customer.Services
             await _db.SaveChangesAsync(ct);
 
             //customer create eventini report ve operation modülleri dinliyor.
+            if (isNewCustomer)
+            {
+                var occurredAtUtc = DateTimeOffset.UtcNow;
+                await _reports.IncrementSummaryAsync(
+                    tenantId,
+                    new TenantReportSummaryDelta(TotalCustomers: 1),
+                    ct);
+                await IncrementCustomerCreatedMetricsAsync(tenantId, occurredAtUtc, ct);
+            }
+
             await _bus.Publish(new CustomerCreated(existingCustomer.Id, existingCustomer.AppUserId, existingCustomer.TenantId,
             existingCustomer.BranchId, existingCustomer.Name, existingCustomer.Email, DateTimeOffset.UtcNow), ct);
             //await _bus.Publish(new CustomerIdentityLinked(existingCustomer.Id, appUserId, correlationId, DateTimeOffset.UtcNow), ct);
@@ -387,5 +409,13 @@ namespace TechSupport.Customer.Services
 
             await _db.SaveChangesAsync(ct);
         }
+
+        private async Task IncrementCustomerCreatedMetricsAsync(Guid tenantId, DateTimeOffset occurredAtUtc, CancellationToken ct)
+        {
+            await _reports.IncrementPeriodMetricAsync(tenantId, TenantReportMetricType.CustomerCreated, TenantReportPeriodType.Daily, occurredAtUtc, 1, ct);
+            await _reports.IncrementPeriodMetricAsync(tenantId, TenantReportMetricType.CustomerCreated, TenantReportPeriodType.Monthly, occurredAtUtc, 1, ct);
+            await _reports.IncrementPeriodMetricAsync(tenantId, TenantReportMetricType.CustomerCreated, TenantReportPeriodType.Yearly, occurredAtUtc, 1, ct);
+        }
     }
 }
+

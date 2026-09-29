@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using TechSupport.Reports.Contracts;
 using TechSupport.Reports.Data;
 using TechSupport.Reports.Services;
-using Reports.Services;
 
 namespace TechSupport.Reports;
 
@@ -22,13 +22,7 @@ public static class ModuleExtensions
             dbContext.Database.Migrate();
         }
 
-        services.AddScoped<ReportSetStore>();
-        services.AddScoped<ICustomerReportSetService, CustomerReportSetService>();
-        services.AddScoped<IOperationReportSetService, OperationReportSetService>();
-        services.AddScoped<ITechnicianReportSetService, TechnicianReportSetService>();
-        services.AddScoped<ITenantSetService, TenantSetService>();
-        services.AddScoped<IReportService, ReportService>();
-        services.AddScoped<IReportQueryService, ReportQueryService>();
+        services.AddScoped<ITenantReportWriter, TenantReportWriter>();
 
         return services;
     }
