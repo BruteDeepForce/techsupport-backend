@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:techsupport_mobile/core/config/app_config.dart';
 import 'package:techsupport_mobile/features/technician/data/technician_realtime_service.dart';
 
 import '../../../core/design/app_design.dart';
@@ -29,7 +30,8 @@ class _TechnicianHomePageState extends State<TechnicianHomePage> {
   final TechnicianService _technicianService = TechnicianService();
   final RealTimeTechnicianShiftService _realtimeShiftService =
       RealTimeTechnicianShiftService(
-          'http://localhost:5001/hr-notification-hub');
+    AppConfig.hubUrl('/hr-notification-hub'),
+  );
   final TokenStorage _tokenStorage = TokenStorage();
   final ImagePicker _picker = ImagePicker();
   late Future<List<OperationRecord>> _opsFuture;

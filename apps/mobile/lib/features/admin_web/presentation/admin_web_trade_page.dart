@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:techsupport_mobile/core/config/app_config.dart';
 import 'package:techsupport_mobile/features/customer/data/customer_service.dart';
 import 'package:techsupport_mobile/features/customer/models/customer_models.dart';
 import 'package:techsupport_mobile/features/device/data/device_service.dart';
@@ -60,7 +61,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   final StockService _stockService = StockService();
 
   final RealtimeTradeService _realtimeTradeService =
-      RealtimeTradeService('http://localhost:5001/trade-status-hub');
+      RealtimeTradeService(AppConfig.hubUrl('/trade-status-hub'));
 
   bool isRecordCustomer = false;
   bool isRecordDevice = false;
