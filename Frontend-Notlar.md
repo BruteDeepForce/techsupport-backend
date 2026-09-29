@@ -36,10 +36,11 @@
 
 
 - WEB İÇİN DOKPLOYA DEPLOY WHILE CHANGE WEB SIDE. [CHE]
-flutter build web --release
+flutter build web --release --dart-define=API_BASE_URL=https://lineerdestek.cyber2tech.com
 git add -f build/web 
 git commit -m "add build" 
 git push
 
+[PROD WEB BUILD ALIRKEN API_BASE_URL MUTLAKA VERİLECEK. VERİLMEZSE DEFAULT OLARAK LOCALHOST:5001'E GİDER.] []
 [ÖZELLİKLE FLUTTER CLEAN ATTIYSAK WEB RELEASE PUSH LAZIM] []
 [KRİTİK ÜRÜN MİKTARI FRONTEND YÖNETMEYECEK BACKEND GÖNDERECEK][]
