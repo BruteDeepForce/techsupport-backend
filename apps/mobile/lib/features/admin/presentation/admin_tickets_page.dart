@@ -47,7 +47,8 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 18),
+        child: const Icon(Icons.notifications_none_rounded,
+            color: Colors.white, size: 18),
       ),
       tabBar: LinearTabBar(
         items: [
@@ -68,7 +69,7 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
             active: true,
           ),
           LinearTabItem(
-            icon: Icons.assignment_rounded, 
+            icon: Icons.assignment_rounded,
             label: 'İş Emri',
             onTap: () => Navigator.of(context).pushReplacement(
               PageRouteBuilder(
@@ -78,7 +79,7 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
             ),
           ),
           LinearTabItem(
-            icon: Icons.devices_other_outlined, 
+            icon: Icons.devices_other_outlined,
             label: 'Cihaz',
             onTap: () => Navigator.of(context).pushReplacement(
               PageRouteBuilder(
@@ -98,7 +99,7 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
             ),
           ),
           LinearTabItem(
-            icon: Icons.group_outlined, 
+            icon: Icons.group_outlined,
             label: 'Ekip',
             onTap: () => Navigator.of(context).pushReplacement(
               PageRouteBuilder(
@@ -150,11 +151,9 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
               );
             }
             final tickets = snapshot.data ?? [];
-            final openCount =
-                tickets.where((t) => t.status == 'Open').length;
-            final inProgressCount = tickets
-                .where((t) => t.status == 'CreatedOperation')
-                .length;
+            final openCount = tickets.where((t) => t.status == 'Open').length;
+            final inProgressCount =
+                tickets.where((t) => t.status == 'CreatedOperation').length;
             final closedCount =
                 tickets.where((t) => t.status == 'Closed').length;
 
@@ -319,7 +318,8 @@ String _statusLabel(String status) {
 }
 
 class _TicketMetric extends StatelessWidget {
-  const _TicketMetric({required this.value, required this.label, required this.color});
+  const _TicketMetric(
+      {required this.value, required this.label, required this.color});
   final String value;
   final String label;
   final Color color;
@@ -331,9 +331,13 @@ class _TicketMetric extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Column(
           children: [
-            Text(value, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.w600)),
+            Text(value,
+                style: TextStyle(
+                    color: color, fontSize: 20, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+            Text(label,
+                style: const TextStyle(
+                    color: AppColors.textTertiary, fontSize: 11)),
           ],
         ),
       ),
