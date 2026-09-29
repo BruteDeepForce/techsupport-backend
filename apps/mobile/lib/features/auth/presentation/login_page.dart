@@ -11,6 +11,22 @@ import 'role_selection_page.dart';
 import 'register_page.dart';
 import 'forgot_password_page.dart';
 
+Future<void> _showLoginFailedDialog(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Giriş başarısız'),
+      content: const Text('E-posta veya şifre hatalı.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Tamam'),
+        ),
+      ],
+    ),
+  );
+}
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -222,10 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                                   if (context.mounted) {
                                     Navigator.of(context)
                                         .pop(); // close loading
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'Giriş başarısız: ${e.toString()}')));
+                                    await _showLoginFailedDialog(context);
                                   }
                                 }
                               },
@@ -524,11 +537,7 @@ class _LoginCard extends StatelessWidget {
                 } catch (e) {
                   if (context.mounted) {
                     Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Giriş başarısız: ${e.toString()}'),
-                      ),
-                    );
+                    await _showLoginFailedDialog(context);
                   }
                 }
               },

@@ -58,21 +58,30 @@ public class AccountController : ControllerBase
             return BadRequest("UserName is required");
 
         var user = new AppUser { UserName = dto.UserName.Trim(), Email = dto.Email };
-        var result = await _userManager.CreateAsync(user, dto.Password);
-        if (!result.Succeeded) return BadRequest(result.Errors);
+        try
+        {
+            var result = await _userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded) return BadRequest(result.Errors);
 
-        var role = await _roleManager.FindByNameAsync(dto.Role);
-        if (role == null) return BadRequest($"Role '{dto.Role}' does not exist");
+            var role = await _roleManager.FindByNameAsync(dto.Role);
+            if (role == null) return BadRequest($"Role '{dto.Role}' does not exist");
 
-        await _userManager.AddToRoleAsync(user, dto.Role);
-        var tenantId = await _tenantService.CreateTenantAsync(dto.tenantName, CancellationToken.None);
-        if (tenantId == Guid.Empty) return BadRequest("Failed to create tenant");
-        var branch = await _branchService.CreateDefaultBranchAsync(tenantId, dto.BranchName, CancellationToken.None);
-        await _userService.CreateAsync(user.Id, tenantId, branch.Id, dto.Email, dto.Role, CancellationToken.None);
+            await _userManager.AddToRoleAsync(user, dto.Role);
+            var tenantId = await _tenantService.CreateTenantAsync(dto.tenantName, CancellationToken.None);
+            if (tenantId == Guid.Empty) return BadRequest("Failed to create tenant");
+            var branch = await _branchService.CreateDefaultBranchAsync(tenantId, dto.BranchName, CancellationToken.None);
+            await _userService.CreateAsync(user.Id, tenantId, branch.Id, dto.Email, dto.Role, CancellationToken.None);
 
-        var token = await _tokenService.CreateTokenForUserAsync(user);
+            var token = await _tokenService.CreateTokenForUserAsync(user);
+            return Ok(new { token });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return BadRequest(new { error = ex.Message });
+        }
 
-        return Ok(new { token });
+
     }
 
     [HttpPost("login")]

@@ -34,7 +34,9 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final statusCode = err.response?.statusCode;
-    if (statusCode == 401 && !_isHandlingUnauthorized) {
+    final path = err.requestOptions.path.toLowerCase();
+    final isAuthRequest = path.contains('/api/identity/account/');
+    if (statusCode == 401 && !isAuthRequest && !_isHandlingUnauthorized) {
       _isHandlingUnauthorized = true;
       try {
         await _clearToken();

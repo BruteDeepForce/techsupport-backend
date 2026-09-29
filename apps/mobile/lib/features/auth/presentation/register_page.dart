@@ -2,11 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/network/api_client.dart';
-import '../../../core/network/auth_interceptor.dart';
 import '../data/auth_service.dart';
 import '../data/token_storage.dart';
 import 'role_selection_page.dart';
+
+Future<void> _showRegisterFailedDialog(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('Kayıt başarısız'),
+      content: const Text('Bilgileri kontrol edip tekrar deneyin.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: const Text('Tamam'),
+        ),
+      ],
+    ),
+  );
+}
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -64,13 +78,6 @@ class _RegisterPageState extends State<RegisterPage> {
         branchName: branchName.isEmpty ? null : branchName,
       );
       await _tokenStorage.saveToken(token);
-      ApiClient().dio.interceptors.add(AuthInterceptor(
-            tokenProvider: _tokenStorage.getToken,
-            clearToken: _tokenStorage.clear,
-            onUnauthorized: () {
-              // Handle unauthorized access if needed
-            },
-          ));
 
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -80,8 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Kayıt başarısız: ${e.toString()}')));
+        await _showRegisterFailedDialog(context);
       }
     }
   }
