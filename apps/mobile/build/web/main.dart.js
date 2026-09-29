@@ -116389,7 +116389,7 @@ n(a){var s=null
 return A.e3(A.cM(this.d,s,s,16),A.h(this.c,s,s,s,s,s,s,s),this.e,A.jU(s,s,B.l,s,s,s,s,s,s,B.Z,s,s,B.bS,s,new A.bi(A.I(10),B.t),B.T,s,s,s,s))}}
 A.u0.prototype={
 X(){var s="/trade-status-hub",r=$.an(),q=$.kh(),p=A.ahe(),o=A.ahO(),n=A.b23()
-return new A.Lu(new A.aV(new A.bM("Ad Soyad",B.at,B.a1),r),new A.aV(B.P,r),new A.aV(new A.bM("Ekran Koruyucu",B.at,B.a1),r),new A.aV(new A.bM("E-posta",B.at,B.a1),r),new A.aV(new A.bM("\u015eifre",B.at,B.a1),r),new A.aV(new A.bM("Bosch",B.at,B.a1),r),new A.aV(new A.bM("Model X",B.at,B.a1),r),new A.aV(B.P,r),new A.aV(new A.bM("1",B.at,B.a1),r),new A.aV(new A.bM("750",B.at,B.a1),r),new A.aV(new A.bM("0",B.at,B.a1),r),new A.aV(new A.bM("Barkod",B.at,B.a1),r),new A.aV(new A.bM("SKU",B.at,B.a1),r),new A.aV(new A.bM("12",B.at,B.a1),r),new A.aV(new A.bM("GG/AA/YYYY",B.at,B.a1),r),new A.aV(B.P,r),new A.aB2(q.a),p,o,n,A.bl1("https://api.lineerdestek.com"+(B.c.bA(s,"/")?s:"//trade-status-hub")),A.b([],t.ev))}}
+return new A.Lu(new A.aV(new A.bM("Ad Soyad",B.at,B.a1),r),new A.aV(B.P,r),new A.aV(new A.bM("Ekran Koruyucu",B.at,B.a1),r),new A.aV(new A.bM("E-posta",B.at,B.a1),r),new A.aV(new A.bM("\u015eifre",B.at,B.a1),r),new A.aV(new A.bM("Bosch",B.at,B.a1),r),new A.aV(new A.bM("Model X",B.at,B.a1),r),new A.aV(B.P,r),new A.aV(new A.bM("1",B.at,B.a1),r),new A.aV(new A.bM("750",B.at,B.a1),r),new A.aV(new A.bM("0",B.at,B.a1),r),new A.aV(new A.bM("Barkod",B.at,B.a1),r),new A.aV(new A.bM("SKU",B.at,B.a1),r),new A.aV(new A.bM("12",B.at,B.a1),r),new A.aV(new A.bM("GG/AA/YYYY",B.at,B.a1),r),new A.aV(B.P,r),new A.aB2(q.a),p,o,n,A.bl1("https://lineerdestek.cyber2tech.com"+(B.c.bA(s,"/")?s:"//trade-status-hub")),A.b([],t.ev))}}
 A.Lu.prototype={
 asY(a){var s,r,q,p,o,n,m=null,l=B.c.aI(a)
 if(l.length===0||l==="GG/AA/YYYY")return m
@@ -128318,7 +128318,7 @@ q=A.bh8(t.H)
 return new A.atQ(o,n,p,1000,new A.SM(q,A.aJ("SM<~>")))})
 s($,"bvL","bdu",()=>new A.Y())
 s($,"byK","b4h",()=>A.biV(null,t.uK))
-s($,"btP","kh",()=>{var q,p=A.bgn("https://api.lineerdestek.com",B.tT,B.tT),o=A.bbT(),n=new A.Wb(A.b([B.Kp],A.aJ("F<il?>")))
+s($,"btP","kh",()=>{var q,p=A.bgn("https://lineerdestek.cyber2tech.com",B.tT,B.tT),o=A.bbT(),n=new A.Wb(A.b([B.Kp],A.aJ("F<il?>")))
 n.N(n,B.X2)
 o=new A.ahU(o,n,A.bbT(),new A.ali(51200),!1)
 o.FW$=p
