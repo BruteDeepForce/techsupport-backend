@@ -20,9 +20,9 @@ class AdminWebAiChatPage extends StatefulWidget {
 class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     with SingleTickerProviderStateMixin {
   /// Harf başına hedef süre. Toplam süre metin uzunluğuna göre kırpılır.
-  static const int _msPerChar = 200;
-  static const int _minRevealMs = 5000;
-  static const int _maxRevealMs = 16000;
+  static const int _msPerChar = 100;
+  static const int _minRevealMs = 3300;
+  static const int _maxRevealMs = 12000;
 
   final AiChatService _service = AiChatService();
   final TextEditingController _controller = TextEditingController();
