@@ -8,6 +8,10 @@ class Technician {
     this.pictureUrl,
     this.specializations,
     this.isActive,
+    this.employmentStartDate,
+    this.assignedOperationCount,
+    this.completedOperationCount,
+    this.pendingOperationCount,
   });
 
   final String userId;
@@ -18,29 +22,148 @@ class Technician {
   final String? pictureUrl;
   final List<String>? specializations;
   final bool? isActive;
+  final DateTime? employmentStartDate;
+  final int? assignedOperationCount;
+  final int? completedOperationCount;
+  final int? pendingOperationCount;
 
   // Backend now uses TechnicianId == UserId. Keep a convenience alias.
   String get id => userId;
 
   factory Technician.fromJson(Map<String, dynamic> json) => Technician(
-        userId: (json['userId'] ?? json['UserId'] ?? json['id'] ?? json['Id'])
-                ?.toString() ??
-            '',
+        userId:
+            (json['userId'] ?? json['UserId'] ?? json['id'] ?? json['Id'])?.toString() ??
+                '',
         tenantId: (json['tenantId'] ?? json['TenantId'])?.toString() ?? '',
-        name: (json['name'] ?? json['Name'] ?? json['firstName'])?.toString() ??
-            '',
+        name: (json['name'] ?? json['Name'] ?? json['firstName'])?.toString() ?? '',
         email: (json['email'] ?? json['Email'])?.toString() ?? '',
         phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
         pictureUrl: (json['pictureUrl'] ?? json['PictureUrl'])?.toString(),
-        specializations:
-            (json['specializations'] ?? json['Specializations']) is List
-                ? (json['specializations'] ?? json['Specializations'])
-                    .map((e) => e.toString())
-                    .toList()
-                    .cast<String>()
-                : null,
+        specializations: (json['specializations'] ?? json['Specializations']) is List
+            ? (json['specializations'] ?? json['Specializations'])
+                .map((e) => e.toString())
+                .toList()
+                .cast<String>()
+            : null,
         isActive: json['isActive'] ?? json['IsActive'],
+        employmentStartDate: _parseNullableDate(
+          json['employmentStartDate'] ?? json['EmploymentStartDate'],
+        ),
+        assignedOperationCount:
+            (json['assignedOperationCount'] ?? json['AssignedOperationCount']) as int?,
+        completedOperationCount:
+            (json['completedOperationCount'] ?? json['CompletedOperationCount']) as int?,
+        pendingOperationCount:
+            (json['pendingOperationCount'] ?? json['PendingOperationCount']) as int?,
       );
+}
+
+class TechnicianOperationSummary {
+  TechnicianOperationSummary({
+    required this.title,
+    required this.status,
+    required this.statusLabel,
+    this.operationType,
+    this.assignedAtUtc,
+  });
+
+  final String title;
+  final String status;
+  final String statusLabel;
+  final String? operationType;
+  final DateTime? assignedAtUtc;
+
+  factory TechnicianOperationSummary.fromJson(Map<String, dynamic> json) =>
+      TechnicianOperationSummary(
+        title: (json['title'] ?? json['Title'] ?? '').toString(),
+        status: (json['status'] ?? json['Status'] ?? '').toString(),
+        statusLabel: (json['statusLabel'] ?? json['StatusLabel'] ?? '').toString(),
+        operationType: (json['operationType'] ?? json['OperationType'])?.toString(),
+        assignedAtUtc: _parseNullableDate(
+          json['assignedAtUtc'] ?? json['AssignedAtUtc'],
+        ),
+      );
+}
+
+class TechnicianDetail {
+  TechnicianDetail({
+    required this.name,
+    required this.email,
+    required this.isActive,
+    required this.statusLabel,
+    required this.specializations,
+    required this.assignedOperationCount,
+    required this.completedOperationCount,
+    required this.pendingOperationCount,
+    required this.ongoingOperationCount,
+    required this.completionRate,
+    required this.recentOperations,
+    this.phoneNumber,
+    this.pictureUrl,
+    this.employmentStartDate,
+    this.employmentMonths,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  final String name;
+  final String email;
+  final String? phoneNumber;
+  final String? pictureUrl;
+  final bool isActive;
+  final String statusLabel;
+  final DateTime? employmentStartDate;
+  final int? employmentMonths;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final List<String> specializations;
+  final int assignedOperationCount;
+  final int completedOperationCount;
+  final int pendingOperationCount;
+  final int ongoingOperationCount;
+  final double completionRate;
+  final List<TechnicianOperationSummary> recentOperations;
+
+  int get expertiseCount => specializations.length;
+
+  factory TechnicianDetail.fromJson(Map<String, dynamic> json) {
+    final rawSpecializations =
+        (json['specializations'] ?? json['Specializations']) as List<dynamic>?;
+    final rawOperations =
+        (json['recentOperations'] ?? json['RecentOperations']) as List<dynamic>? ??
+            const [];
+    return TechnicianDetail(
+      name: (json['name'] ?? json['Name'] ?? '').toString(),
+      email: (json['email'] ?? json['Email'] ?? '').toString(),
+      phoneNumber: (json['phoneNumber'] ?? json['PhoneNumber'])?.toString(),
+      pictureUrl: (json['pictureUrl'] ?? json['PictureUrl'])?.toString(),
+      isActive: (json['isActive'] ?? json['IsActive']) as bool? ?? false,
+      statusLabel: (json['statusLabel'] ?? json['StatusLabel'] ?? '').toString(),
+      employmentStartDate: _parseNullableDate(
+        json['employmentStartDate'] ?? json['EmploymentStartDate'],
+      ),
+      employmentMonths: (json['employmentMonths'] ?? json['EmploymentMonths']) as int?,
+      createdAt: _parseNullableDate(json['createdAt'] ?? json['CreatedAt']),
+      updatedAt: _parseNullableDate(json['updatedAt'] ?? json['UpdatedAt']),
+      specializations: rawSpecializations == null
+          ? const []
+          : rawSpecializations.map((e) => e.toString()).toList(),
+      assignedOperationCount:
+          (json['assignedOperationCount'] ?? json['AssignedOperationCount']) as int? ?? 0,
+      completedOperationCount:
+          (json['completedOperationCount'] ?? json['CompletedOperationCount']) as int? ??
+              0,
+      pendingOperationCount:
+          (json['pendingOperationCount'] ?? json['PendingOperationCount']) as int? ?? 0,
+      ongoingOperationCount:
+          (json['ongoingOperationCount'] ?? json['OngoingOperationCount']) as int? ?? 0,
+      completionRate:
+          ((json['completionRate'] ?? json['CompletionRate']) as num?)?.toDouble() ?? 0,
+      recentOperations: rawOperations
+          .map((e) => TechnicianOperationSummary.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 class Experts {
@@ -90,25 +213,20 @@ class ShiftTemplateModel {
   final DateTime createdAtUtc;
   final DateTime? updatedAtUtc;
 
-  factory ShiftTemplateModel.fromJson(Map<String, dynamic> json) =>
-      ShiftTemplateModel(
+  factory ShiftTemplateModel.fromJson(Map<String, dynamic> json) => ShiftTemplateModel(
         id: (json['id'] ?? json['Id']).toString(),
         tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
         branchId: (json['branchId'] ?? json['BranchId']).toString(),
         name: (json['name'] ?? json['Name']).toString(),
-        startTime:
-            _parseDuration((json['startTime'] ?? json['StartTime']).toString()),
-        endTime:
-            _parseDuration((json['endTime'] ?? json['EndTime']).toString()),
-        isNightShift:
-            (json['isNightShift'] ?? json['IsNightShift']) as bool? ?? false,
+        startTime: _parseDuration((json['startTime'] ?? json['StartTime']).toString()),
+        endTime: _parseDuration((json['endTime'] ?? json['EndTime']).toString()),
+        isNightShift: (json['isNightShift'] ?? json['IsNightShift']) as bool? ?? false,
         isActive: (json['isActive'] ?? json['IsActive']) as bool? ?? false,
         description: (json['description'] ?? json['Description'])?.toString(),
-        createdAtUtc: DateTime.parse(
-            (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+        createdAtUtc:
+            DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
         updatedAtUtc: (json['updatedAtUtc'] ?? json['UpdatedAtUtc']) != null
-            ? DateTime.parse(
-                (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString())
+            ? DateTime.parse((json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString())
             : null,
       );
 }
@@ -180,34 +298,26 @@ class ShiftAssignmentModel {
         tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
         branchId: (json['branchId'] ?? json['BranchId']).toString(),
         employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
-        shiftTemplateId:
-            (json['shiftTemplateId'] ?? json['ShiftTemplateId']).toString(),
-        shiftDate:
-            DateTime.parse((json['shiftDate'] ?? json['ShiftDate']).toString()),
+        shiftTemplateId: (json['shiftTemplateId'] ?? json['ShiftTemplateId']).toString(),
+        shiftDate: DateTime.parse((json['shiftDate'] ?? json['ShiftDate']).toString()),
         plannedStartTimeUtc: DateTime.parse(
-            (json['plannedStartTimeUtc'] ?? json['PlannedStartTimeUtc'])
-                .toString()),
+            (json['plannedStartTimeUtc'] ?? json['PlannedStartTimeUtc']).toString()),
         plannedEndTimeUtc: DateTime.parse(
-            (json['plannedEndTimeUtc'] ?? json['PlannedEndTimeUtc'])
-                .toString()),
+            (json['plannedEndTimeUtc'] ?? json['PlannedEndTimeUtc']).toString()),
         actualStartTimeUtc:
             (json['actualStartTimeUtc'] ?? json['ActualStartTimeUtc']) != null
                 ? DateTime.parse(
-                    (json['actualStartTimeUtc'] ?? json['ActualStartTimeUtc'])
-                        .toString())
+                    (json['actualStartTimeUtc'] ?? json['ActualStartTimeUtc']).toString())
                 : null,
-        actualEndTimeUtc:
-            (json['actualEndTimeUtc'] ?? json['ActualEndTimeUtc']) != null
-                ? DateTime.parse(
-                    (json['actualEndTimeUtc'] ?? json['ActualEndTimeUtc'])
-                        .toString())
-                : null,
-        status: (json['status'] ?? json['Status']).toString(),
-        createdAtUtc: DateTime.parse(
-            (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-        updatedAtUtc: (json['updatedAtUtc'] ?? json['UpdatedAtUtc']) != null
+        actualEndTimeUtc: (json['actualEndTimeUtc'] ?? json['ActualEndTimeUtc']) != null
             ? DateTime.parse(
-                (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString())
+                (json['actualEndTimeUtc'] ?? json['ActualEndTimeUtc']).toString())
+            : null,
+        status: (json['status'] ?? json['Status']).toString(),
+        createdAtUtc:
+            DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+        updatedAtUtc: (json['updatedAtUtc'] ?? json['UpdatedAtUtc']) != null
+            ? DateTime.parse((json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString())
             : null,
       );
 }
@@ -369,23 +479,19 @@ class TechnicianMyShiftModel {
         employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
         shiftAssignmentId:
             (json['shiftAssignmentId'] ?? json['ShiftAssignmentId']).toString(),
-        shiftDate:
-            DateTime.parse((json['shiftDate'] ?? json['ShiftDate']).toString()),
+        shiftDate: DateTime.parse((json['shiftDate'] ?? json['ShiftDate']).toString()),
         plannedStartTimeUtc: DateTime.parse(
-          (json['plannedStartTimeUtc'] ?? json['PlannedStartTimeUtc'])
-              .toString(),
+          (json['plannedStartTimeUtc'] ?? json['PlannedStartTimeUtc']).toString(),
         ),
         plannedEndTimeUtc: DateTime.parse(
           (json['plannedEndTimeUtc'] ?? json['PlannedEndTimeUtc']).toString(),
         ),
-        checkInTimeUtc: (json['checkInTimeUtc'] ?? json['CheckInTimeUtc']) !=
-                null
+        checkInTimeUtc: (json['checkInTimeUtc'] ?? json['CheckInTimeUtc']) != null
             ? DateTime.parse(
                 (json['checkInTimeUtc'] ?? json['CheckInTimeUtc']).toString(),
               )
             : null,
-        checkOutTimeUtc: (json['checkOutTimeUtc'] ?? json['CheckOutTimeUtc']) !=
-                null
+        checkOutTimeUtc: (json['checkOutTimeUtc'] ?? json['CheckOutTimeUtc']) != null
             ? DateTime.parse(
                 (json['checkOutTimeUtc'] ?? json['CheckOutTimeUtc']).toString(),
               )
@@ -462,16 +568,13 @@ class TechnicianEmployeeProfile {
         branchId: (json['branchId'] ?? json['BranchId']).toString(),
         employeeNo: (json['employeeNo'] ?? json['EmployeeNo']).toString(),
         fullName: (json['fullName'] ?? json['FullName']).toString(),
-        departmentId:
-            (json['departmentId'] ?? json['DepartmentId'])?.toString(),
+        departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
         positionId: (json['positionId'] ?? json['PositionId'])?.toString(),
-        positionName:
-            (json['positionName'] ?? json['PositionName'])?.toString(),
+        positionName: (json['positionName'] ?? json['PositionName'])?.toString(),
         userId: (json['userId'] ?? json['UserId'])?.toString(),
         email: (json['email'] ?? json['Email'])?.toString(),
         phone: (json['phone'] ?? json['Phone'])?.toString(),
-        profileImageUrl:
-            (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+        profileImageUrl: (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
         status: (json['status'] ?? json['Status']).toString(),
         jobsStartDateUtc: _parseNullableDate(
           json['jobsStartDateUtc'] ?? json['JobsStartDateUtc'],
@@ -488,46 +591,41 @@ class TechnicianEmployeeProfile {
         deletedAtUtc: _parseNullableDate(
           json['deletedAtUtc'] ?? json['DeletedAtUtc'],
         ),
-        employeeLeaves: ((json['employeeLeaves'] ?? json['EmployeeLeaves'])
-                    as List<dynamic>? ??
-                const [])
-            .map(
-              (e) =>
-                  TechnicianEmployeeLeave.fromJson(e as Map<String, dynamic>),
-            )
-            .toList(),
-        employeeAdvances: ((json['employeeAdvances'] ??
-                    json['EmployeeAdvances']) as List<dynamic>? ??
-                const [])
-            .map(
-              (e) =>
-                  TechnicianEmployeeAdvance.fromJson(e as Map<String, dynamic>),
-            )
-            .toList(),
+        employeeLeaves:
+            ((json['employeeLeaves'] ?? json['EmployeeLeaves']) as List<dynamic>? ??
+                    const [])
+                .map(
+                  (e) => TechnicianEmployeeLeave.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
+        employeeAdvances:
+            ((json['employeeAdvances'] ?? json['EmployeeAdvances']) as List<dynamic>? ??
+                    const [])
+                .map(
+                  (e) => TechnicianEmployeeAdvance.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
         disciplineEmployeeRecords: ((json['disciplineEmployeeRecords'] ??
                     json['DisciplineEmployeeRecords']) as List<dynamic>? ??
                 const [])
             .map(
-              (e) =>
-                  TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
+              (e) => TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
             )
             .toList(),
         rewardEmployeeRecords: ((json['rewardEmployeeRecords'] ??
                     json['RewardEmployeeRecords']) as List<dynamic>? ??
                 const [])
             .map(
-              (e) =>
-                  TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
+              (e) => TechnicianEmployeeRecord.fromJson(e as Map<String, dynamic>),
             )
             .toList(),
-        employeeSalaries: ((json['employeeSalaries'] ??
-                    json['EmployeeSalaries']) as List<dynamic>? ??
-                const [])
-            .map(
-              (e) =>
-                  TechnicianEmployeeSalary.fromJson(e as Map<String, dynamic>),
-            )
-            .toList(),
+        employeeSalaries:
+            ((json['employeeSalaries'] ?? json['EmployeeSalaries']) as List<dynamic>? ??
+                    const [])
+                .map(
+                  (e) => TechnicianEmployeeSalary.fromJson(e as Map<String, dynamic>),
+                )
+                .toList(),
       );
 }
 
@@ -553,10 +651,8 @@ class TechnicianEmployeeLeave {
   factory TechnicianEmployeeLeave.fromJson(Map<String, dynamic> json) =>
       TechnicianEmployeeLeave(
         id: (json['id'] ?? json['Id']).toString(),
-        startDate:
-            DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
-        endDate:
-            DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
+        startDate: DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+        endDate: DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
         type: (json['type'] ?? json['Type'])?.toString(),
         reason: (json['reason'] ?? json['Reason'])?.toString(),
         status: (json['status'] ?? json['Status']).toString(),
@@ -637,8 +733,7 @@ class TechnicianEmployeeSalary {
               )
             : null,
         netSalary: (json['netSalary'] ?? json['NetSalary']) != null
-            ? double.tryParse(
-                (json['netSalary'] ?? json['NetSalary']).toString())
+            ? double.tryParse((json['netSalary'] ?? json['NetSalary']).toString())
             : null,
         effectiveFrom: _parseNullableDate(
           json['effectiveFrom'] ?? json['EffectiveFrom'],

@@ -86,6 +86,17 @@ public class TechnicianController : ControllerBase
         return technician is null ? NotFound() : Ok(technician);
     }
 
+    [Authorize]
+    [HttpGet("{technicianId:guid}/detail")]
+    public async Task<IActionResult> GetDetail(Guid technicianId, CancellationToken ct)
+    {
+        var tenantId = GetTenantIdFromClaims();
+        if (tenantId is null) return Unauthorized();
+
+        var detail = await _technicians.GetDetailAsync(tenantId.Value, technicianId, ct);
+        return detail is null ? NotFound() : Ok(detail);
+    }
+
     [Authorize(Roles = "admin")]
     [HttpGet("provisioning/{correlationId:guid}")]
     public async Task<IActionResult> GetProvisioningStatus(Guid correlationId, CancellationToken ct)

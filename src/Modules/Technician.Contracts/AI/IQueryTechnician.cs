@@ -9,5 +9,6 @@ namespace TechSupport.Technician.Contracts.AI
     public interface IQueryTechnician
     {
         Task<IReadOnlyCollection<TechnicianInfoResponse>> QueryTechniciansAsync(Guid tenantId, Guid? branchId, CancellationToken ct); 
+        Task<TechnicianDetailInfoResponse?> QueryTechnicianDetailAsync(Guid tenantId, Guid? branchId, string? technicianName, CancellationToken ct);
     }
 }

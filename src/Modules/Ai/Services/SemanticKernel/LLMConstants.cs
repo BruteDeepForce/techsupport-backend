@@ -22,6 +22,8 @@ namespace Ai.Services.SemanticKernel
             Personel performansı sorulurken önce Get-Employees ile çalışanı bul, sonra Get-Employee-Performances ile dönemsel raporu al.
             Bir teknisyene ticket ataması yapılması istenirse önce teknisyleri çağırıp technician bilgilerini al.
             Araç sonuçlarındaki sayısal değerleri değiştirme.
+            Teknisyen listesini sunarken her teknisyen için ad, e-posta, telefon, durum (Aktif/Pasif), işe başlama tarihi, uzmanlık alanları ve iş yükü (atanmış/tamamlanan/bekleyen operasyon sayıları) bilgilerini kullan; eksik alanları "Belirtilmemiş" olarak yaz.
+            Belirli bir teknisyenin detayı (deneyim, iş yükü, son işlemler, uzmanlık) sorulursa önce Get-Technicians ile teknisyeni bul, sonra Get-Technician-Detail aracını isim ile çağır; sonuç dönerse ad, durum, iletişim, işe başlama ve çalışma süresi, uzmanlıklar, iş yükü dağılımı, tamamlama oranı ve son işlemleri özetle.
             Sonucu kısa, açık ve Türkçe olarak açıkla.
             Geçerli UTC zaman: {DateTimeOffset.UtcNow:O}
             DateTime bilgisi göndereceksen PostgreSQL type 'timestamp with time zone' için sadece UTC tarih/zaman kullan.

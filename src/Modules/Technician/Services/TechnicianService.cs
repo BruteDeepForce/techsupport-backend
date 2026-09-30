@@ -20,7 +20,8 @@ public interface ITechnicianService
     Task CompleteProvisioningAsync(Guid correlationId, Guid appUserId, Guid tenantId, Guid? branchId, string firstName, string email, string? phoneNumber, CancellationToken ct);
     Task FailProvisioningAsync(Guid correlationId, string reason, CancellationToken ct);
     Task<Technician.Domain.Entities.Technician?> GetByIdAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
-    Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct);
+    Task<TechnicianDetailDto?> GetDetailAsync(Guid tenantId, Guid technicianId, CancellationToken ct);
+    Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct, Guid? branchId = null);
     Task<bool> SetActiveAsync(Guid tenantId, Guid technicianId, bool isActive, CancellationToken ct);
     Task OperationAssignAsync(Guid tenantId, Guid operationId, Guid? branchId, Guid technicianId, Guid customerId, Guid deviceId, string title, string description, string operationType, DateTimeOffset occurredAtUtc, CancellationToken ct);
     Task<Technician.Domain.Entities.TechnicianOperation> UpdateOperationStatusAsync(Guid tenantId, Guid operationId, Guid technicianUserId, string technicianInfo, string status, CancellationToken ct);
@@ -294,10 +295,87 @@ public sealed class TechnicianService : ITechnicianService
         return _db.Technicians.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.AppUserId == technicianId, ct);
     }
 
-    public async Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct)
+    public async Task<TechnicianDetailDto?> GetDetailAsync(Guid tenantId, Guid technicianId, CancellationToken ct)
     {
-        return await _db.Technicians.AsNoTracking()
-            .Where(x => x.TenantId == tenantId)
+        var technician = await _db.Technicians.AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.AppUserId == technicianId)
+            .Select(t => new TechnicianDetailDto
+            {
+                Name = t.FirstName,
+                Email = t.Email,
+                PhoneNumber = t.PhoneNumber,
+                PictureUrl = t.PictureUrl,
+                IsActive = t.IsActive,
+                StatusLabel = t.IsActive ? "Aktif" : "Pasif",
+                EmploymentStartDate = t.EmploymentStartDate,
+                CreatedAt = t.CreatedAt,
+                UpdatedAt = t.UpdatedAt,
+                Specializations = t.TechnicianExpertMappings
+                    .Select(m => m.TechnicianExpert.ExpertiseName)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList()
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (technician is null)
+            return null;
+
+        var technicianRowId = await _db.Technicians.AsNoTracking()
+            .Where(x => x.TenantId == tenantId && x.AppUserId == technicianId)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(ct);
+
+        var operations = await _db.TechnicianOperations.AsNoTracking()
+            .Where(o => o.TenantId == tenantId && o.AssignedTechnicianId == technicianRowId)
+            .OrderByDescending(o => o.AssignedAtUtc ?? o.CreatedAtUtc)
+            .ToListAsync(ct);
+
+        technician.AssignedOperationCount = operations.Count;
+        technician.CompletedOperationCount = operations.Count(o => o.Status == TechnicianOperationStatus.Completed);
+        technician.PendingOperationCount = operations.Count(o => o.Status == TechnicianOperationStatus.Assigned);
+        technician.OngoingOperationCount = operations.Count(o => o.Status == TechnicianOperationStatus.Accepted);
+        technician.CompletionRate = operations.Count == 0
+            ? 0
+            : Math.Round(technician.CompletedOperationCount * 100m / operations.Count, 1);
+        technician.RecentOperations = operations
+            .Take(10)
+            .Select(o => new TechnicianOperationSummaryDto
+            {
+                Title = o.Title,
+                OperationType = string.IsNullOrWhiteSpace(o.OperationType) ? null : o.OperationType,
+                Status = o.Status.ToString(),
+                StatusLabel = OperationStatusLabel(o.Status),
+                AssignedAtUtc = o.AssignedAtUtc ?? o.CreatedAtUtc
+            })
+            .ToList();
+
+        if (technician.EmploymentStartDate.HasValue)
+        {
+            var months = (DateTimeOffset.UtcNow - technician.EmploymentStartDate.Value).Days / 30;
+            technician.EmploymentMonths = months < 0 ? 0 : months;
+        }
+
+        return technician;
+    }
+
+    private static string OperationStatusLabel(TechnicianOperationStatus status) => status switch
+    {
+        TechnicianOperationStatus.Assigned => "Yeni Atandı",
+        TechnicianOperationStatus.Accepted => "Devam Ediyor",
+        TechnicianOperationStatus.Rejected => "Reddedildi",
+        TechnicianOperationStatus.Completed => "Tamamlandı",
+        _ => status.ToString()
+    };
+
+    public async Task<IReadOnlyList<TechnicianResponseDTO>> ListAsync(Guid tenantId, CancellationToken ct, Guid? branchId = null)
+    {
+        var query = _db.Technicians.AsNoTracking()
+            .Where(x => x.TenantId == tenantId);
+
+        if (branchId.HasValue)
+            query = query.Where(x => x.BranchId == branchId.Value);
+
+        return await query
             .Select(t => new TechnicianResponseDTO
             {
                 TenantId = t.TenantId,
@@ -307,7 +385,12 @@ public sealed class TechnicianService : ITechnicianService
                 PhoneNumber = t.PhoneNumber,
                 PictureUrl = t.PictureUrl,
                 IsActive = t.IsActive,
-                Specializations = t.TechnicianExpertMappings.Select(m => m.TechnicianExpert.ExpertiseName).ToList()
+                EmploymentStartDate = t.EmploymentStartDate,
+                BranchId = t.BranchId,
+                Specializations = t.TechnicianExpertMappings.Select(m => m.TechnicianExpert.ExpertiseName).ToList(),
+                AssignedOperationCount = _db.TechnicianOperations.Count(o => o.TenantId == tenantId && o.AssignedTechnicianId == t.Id),
+                CompletedOperationCount = _db.TechnicianOperations.Count(o => o.TenantId == tenantId && o.AssignedTechnicianId == t.Id && o.Status == TechnicianOperationStatus.Completed),
+                PendingOperationCount = _db.TechnicianOperations.Count(o => o.TenantId == tenantId && o.AssignedTechnicianId == t.Id && o.Status != TechnicianOperationStatus.Completed && o.Status != TechnicianOperationStatus.Rejected)
             })
             .ToListAsync(ct);
     }

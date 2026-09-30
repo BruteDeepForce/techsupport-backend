@@ -14,6 +14,11 @@ namespace TechSupport.Technician.DTO
         public string PhoneNumber { get; set; } = null!;
         public bool IsActive { get; set; }
         public string? PictureUrl { get; set; }
+        public DateTimeOffset? EmploymentStartDate { get; set; }
+        public Guid? BranchId { get; set; }
         public List<string> Specializations { get; set; } = new List<string>();
+        public int AssignedOperationCount { get; set; }
+        public int CompletedOperationCount { get; set; }
+        public int PendingOperationCount { get; set; }
     }
 }

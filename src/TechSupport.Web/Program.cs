@@ -85,8 +85,8 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<TechSupport.Technician.Consumers.TechnicianAccountProvisionedConsumer>();
     x.AddConsumer<TechnicianAccountProvisionFailedConsumer>();
     x.AddConsumer<TechnicianOperationStatusChangedConsumer>();
-    x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
-    x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
+    // x.AddConsumer<TechSupport.Ai.Consumer.OperationCreatedConsumer>();
+    // x.AddConsumer<TechSupport.Ai.Consumer.UpdateOperationStatusConsumer>();
     x.AddConsumer<TechSupport.Customer.Consumers.DeviceCustomerMappingConsumer>();
     x.AddConsumer<TechSupport.Operation.Consumers.StockReservedConsumer>();
     x.AddConsumer<OfferAdminApprovedForInvoicingConsumer>();
