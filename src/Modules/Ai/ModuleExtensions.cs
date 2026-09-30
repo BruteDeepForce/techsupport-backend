@@ -93,12 +93,12 @@ public static class ModuleExtensions
             dbContext.Database.Migrate();
         }
 
-        services.AddScoped<IOperationCreated, OperationCreated>();
-        services.AddScoped<IEmbeddingService, EmbeddingService>();
-        services.AddScoped<IEmbeddingQueryService, EmbeddingQueryService>();
-        services.AddScoped<IAIOrchestartorService, AIOrchestratorService>();
-        services.AddScoped<IAIResponseFormatter, AIResponseFormatterService>();
-        services.AddScoped<IOperationStatusChanged, OperationStatusChanged>();
+        // services.AddScoped<IOperationCreated, OperationCreated>();
+        // services.AddScoped<IEmbeddingService, EmbeddingService>();
+        // services.AddScoped<IEmbeddingQueryService, EmbeddingQueryService>();
+        // services.AddScoped<IAIOrchestartorService, AIOrchestratorService>();
+        // services.AddScoped<IAIResponseFormatter, AIResponseFormatterService>();
+        // services.AddScoped<IOperationStatusChanged, OperationStatusChanged>();
         services.AddScoped<ISemanticKernelOrchestrator, SemanticKernelOrchestrator>();
         services.AddScoped<AiKernelRequestContext>();
         services.AddScoped<OperationActionTool>();
