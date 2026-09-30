@@ -26,36 +26,36 @@ public static class ModuleExtensions
         var endpoint = configuration["AzureSemanticKernel:OpenAI:Endpoint"];
         var apiKey = configuration["AzureSemanticKernel:OpenAI:ApiKey"];
 
-        services.AddSingleton<EmbeddingClient>(sp =>
-        {
-            const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
-            string apiKey = configuration["AzureAI:Key"];
-            const string deploymentName = "embedding-model";
+        // services.AddSingleton<EmbeddingClient>(sp =>
+        // {
+        //     const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
+        //     string apiKey = configuration["AzureAI:Key"];
+        //     const string deploymentName = "embedding-model";
 
-            OpenAIClient client = new(
-                new ApiKeyCredential(apiKey),
-                new OpenAIClientOptions()
-                {
-                    Endpoint = new Uri(endpoint)
-                });
+        //     OpenAIClient client = new(
+        //         new ApiKeyCredential(apiKey),
+        //         new OpenAIClientOptions()
+        //         {
+        //             Endpoint = new Uri(endpoint)
+        //         });
 
-            return client.GetEmbeddingClient(deploymentName);
-        });
-        services.AddSingleton<ChatClient>(sp =>
-        {
-            const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
-            string apiKey = configuration["AzureAI:Key"];
-            const string deploymentName = "gpt-model"; // Replaced with a generic gpt-model deployment name
+        //     return client.GetEmbeddingClient(deploymentName);
+        // });
+        // services.AddSingleton<ChatClient>(sp =>
+        // {
+        //     const string endpoint = "https://doksan9-rag.openai.azure.com/openai/v1/";
+        //     string apiKey = configuration["AzureAI:Key"];
+        //     const string deploymentName = "gpt-model"; // Replaced with a generic gpt-model deployment name
 
-            OpenAIClient client = new(
-                new ApiKeyCredential(apiKey),
-                new OpenAIClientOptions()
-                {
-                    Endpoint = new Uri(endpoint)
-                });
+        //     OpenAIClient client = new(
+        //         new ApiKeyCredential(apiKey),
+        //         new OpenAIClientOptions()
+        //         {
+        //             Endpoint = new Uri(endpoint)
+        //         });
 
-            return client.GetChatClient(deploymentName);
-        });
+        //     return client.GetChatClient(deploymentName);
+        // });
 
         services.AddHttpClient();
 
