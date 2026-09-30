@@ -44,15 +44,12 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.tickets),
+                child: AdminWebSidebar(
+                    compact: true, radius: 0, active: AdminNavKey.tickets),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.tickets),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.tickets),
             Expanded(
               child: Column(
                 children: [
@@ -100,10 +97,10 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
                           const SizedBox(height: 16),
                           _TicketsTableCard(
                             ticketsFuture: _ticketsFuture,
-                            onOpenTicket: (ticketId) => Navigator.of(context)
-                                .push(MaterialPageRoute<void>(
-                                    builder: (_) => AdminWebTicketDetailPage(
-                                        ticketId: ticketId))),
+                            onOpenTicket: (ticketId) => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        AdminWebTicketDetailPage(ticketId: ticketId))),
                           ),
                         ],
                       ),
@@ -118,6 +115,7 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -125,13 +123,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Talep Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Talep Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -231,41 +227,31 @@ class _TableHeader extends StatelessWidget {
             flex: 3,
             child: Text('Başlık',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 2,
             child: Text('Kullanıcı',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 1,
             child: Text('Öncelik',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 1,
             child: Text('Durum',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 1,
             child: Text('Tarih',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
         ],
       ),
@@ -336,8 +322,7 @@ class _TableRow extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Text(_formatDate(createdAtUtc),
-                  style:
-                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
             ),
           ],
         ),
@@ -361,8 +346,7 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }

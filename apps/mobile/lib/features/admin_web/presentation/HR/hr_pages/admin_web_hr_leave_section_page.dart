@@ -11,12 +11,10 @@ class AdminWebHrLeaveSectionPage extends StatefulWidget {
   final VoidCallback onOpenLeaves;
 
   @override
-  State<AdminWebHrLeaveSectionPage> createState() =>
-      _AdminWebHrLeaveSectionPageState();
+  State<AdminWebHrLeaveSectionPage> createState() => _AdminWebHrLeaveSectionPageState();
 }
 
-class _AdminWebHrLeaveSectionPageState
-    extends State<AdminWebHrLeaveSectionPage> {
+class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage> {
   final HRService _hrService = HRService();
   late final Future<HRLargeLeaveResponseList> _leavesFuture;
   late final Future<HREmployeeLargeDetailResponse> _employeesFuture;
@@ -57,8 +55,7 @@ class _AdminWebHrLeaveSectionPageState
             Text('Durum: ${_statusLabel(leave.status)}'),
             if (leave.reason.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Açıklama:',
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('Açıklama:', style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text(leave.reason),
             ],
@@ -75,8 +72,7 @@ class _AdminWebHrLeaveSectionPageState
           ElevatedButton(
             onPressed: () async {
               try {
-                final message =
-                    await _hrService.decideLeave(leave.id, 'Approved');
+                final message = await _hrService.decideLeave(leave.id, 'Approved');
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(message)),
@@ -119,14 +115,13 @@ class _AdminWebHrLeaveSectionPageState
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          final message = await _hrService.decideLeave(
-                              leave.id, 'Rejected');
+                          final message =
+                              await _hrService.decideLeave(leave.id, 'Rejected');
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(message)),
                           );
-                          Navigator.of(context)
-                              .pop(); // Nedeni girme dialogunu kapat
+                          Navigator.of(context).pop(); // Nedeni girme dialogunu kapat
                           Navigator.of(context).pop(); // Detay dialogunu kapat
                           setState(() {
                             _leavesFuture = _hrService.getLeaves();
@@ -254,8 +249,7 @@ class _AdminWebHrLeaveSectionPageState
                               const Expanded(
                                 child: _SectionTitle(
                                   title: 'Son izin talep ve durumları',
-                                  subtitle:
-                                      'Hızlı inceleme için son kayıt önizlemeleri',
+                                  subtitle: 'Hızlı inceleme için son kayıt önizlemeleri',
                                 ),
                               ),
                               Container(
@@ -264,8 +258,7 @@ class _AdminWebHrLeaveSectionPageState
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(
-                                      color: const Color(0xFFE2E8F0)),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
                                 ),
                                 child: Text(
                                   '${previewLeaves.length} kayıt',
@@ -280,8 +273,7 @@ class _AdminWebHrLeaveSectionPageState
                         ),
                         const Divider(height: 1, color: Color(0xFFE2E8F0)),
                         const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 14),
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                           child: Row(
                             children: [
                               Expanded(
@@ -540,8 +532,7 @@ class _LeavePreviewRow extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -672,8 +663,7 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
               );
             }
 
-            final employees =
-                snapshot.data?.employees ?? const <EmployeeResponse>[];
+            final employees = snapshot.data?.employees ?? const <EmployeeResponse>[];
 
             return SingleChildScrollView(
               child: Column(
@@ -723,9 +713,7 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                               Expanded(
                                 child: _DialogInfoCard(
                                   title: 'Seçilen Personel',
-                                  value: _selectedEmployeeId == null
-                                      ? 'Yok'
-                                      : 'Hazır',
+                                  value: _selectedEmployeeId == null ? 'Yok' : 'Hazır',
                                   accent: const Color(0xFF2563EB),
                                 ),
                               ),
@@ -783,23 +771,18 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                                 decoration: _inputDecoration('İzin Türü'),
                                 items: const [
                                   DropdownMenuItem(
-                                      value: 'Vacation',
-                                      child: Text('Yıllık İzin')),
+                                      value: 'Vacation', child: Text('Yıllık İzin')),
                                   DropdownMenuItem(
-                                      value: 'SickLeave',
-                                      child: Text('Hastalık')),
+                                      value: 'SickLeave', child: Text('Hastalık')),
                                   DropdownMenuItem(
-                                      value: 'PersonalLeave',
-                                      child: Text('Mazeret')),
+                                      value: 'PersonalLeave', child: Text('Mazeret')),
                                   DropdownMenuItem(
-                                      value: 'MaternityLeave',
-                                      child: Text('Doğum İzni')),
+                                      value: 'MaternityLeave', child: Text('Doğum İzni')),
                                   DropdownMenuItem(
                                       value: 'PaternityLeave',
                                       child: Text('Babalık İzni')),
                                   DropdownMenuItem(
-                                      value: 'UnpaidLeave',
-                                      child: Text('Ücretsiz İzin')),
+                                      value: 'UnpaidLeave', child: Text('Ücretsiz İzin')),
                                 ],
                                 onChanged: (value) {
                                   setState(() => _leaveType = value);
@@ -814,8 +797,7 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                             Expanded(
                               child: TextFormField(
                                 readOnly: true,
-                                decoration:
-                                    _inputDecoration('Başlangıç Tarihi'),
+                                decoration: _inputDecoration('Başlangıç Tarihi'),
                                 onTap: () async {
                                   final pickedDate = await showDatePicker(
                                     context: context,
@@ -875,9 +857,8 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: _isSubmitting
-                            ? null
-                            : () => Navigator.of(context).pop(),
+                        onPressed:
+                            _isSubmitting ? null : () => Navigator.of(context).pop(),
                         child: const Text('İptal'),
                       ),
                       const SizedBox(width: 8),
@@ -987,8 +968,7 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
       ],

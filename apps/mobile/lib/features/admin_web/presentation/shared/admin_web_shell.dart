@@ -35,15 +35,15 @@ class AdminWebShell extends StatelessWidget {
         drawer: showSidebar
             ? null
             : Drawer(
-                child: AdminWebSidebar(compact: true, active: active),
+                child: AdminWebSidebar(
+                  compact: true,
+                  active: active,
+                  radius: 0,
+                ),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: active),
-              ),
+            if (showSidebar) AdminWebSidebarPanel(active: active),
             Expanded(
               child: Column(
                 children: [
@@ -51,8 +51,7 @@ class AdminWebShell extends StatelessWidget {
                   Expanded(
                     child: scrollable
                         ? SingleChildScrollView(
-                            padding:
-                                const EdgeInsets.fromLTRB(24, 18, 24, 32),
+                            padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
                             child: body,
                           )
                         : body,

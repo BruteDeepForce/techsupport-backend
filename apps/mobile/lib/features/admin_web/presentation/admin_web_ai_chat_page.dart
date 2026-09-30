@@ -149,8 +149,8 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     setState(() {
       _revealTargetId = message.id;
       _revealedChars = 0;
-      _revealDurationMs = (message.content.length * _msPerChar)
-          .clamp(_minRevealMs, _maxRevealMs);
+      _revealDurationMs =
+          (message.content.length * _msPerChar).clamp(_minRevealMs, _maxRevealMs);
     });
 
     if (message.content.isEmpty) {
@@ -168,8 +168,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     }
 
     final total = target.content.length;
-    final progress =
-        (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
+    final progress = (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
     final chars = (total * progress).round();
 
     if (chars >= total) {
@@ -206,8 +205,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     if (message.id != _revealTargetId || message.isFailed) {
       return message.content;
     }
-    return message.content
-        .substring(0, _revealedChars.clamp(0, message.content.length));
+    return message.content.substring(0, _revealedChars.clamp(0, message.content.length));
   }
 
   void _scrollToBottom({bool animate = true}) {
@@ -303,13 +301,11 @@ class _Breadcrumb extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          Text('Yönetim',
-              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+          Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           SizedBox(width: 6),
           Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
           SizedBox(width: 6),
-          Text('AI Asistan',
-              style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+          Text('AI Asistan', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
         ],
       ),
     );
@@ -384,8 +380,7 @@ class _EmptyState extends StatelessWidget {
                   ),
                 ],
               ),
-              child:
-                  const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
+              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
             ),
             const SizedBox(height: 18),
             const Text(
@@ -465,8 +460,7 @@ class _SuggestionCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: () {
-          final state =
-              context.findAncestorStateOfType<_AdminWebAiChatPageState>();
+          final state = context.findAncestorStateOfType<_AdminWebAiChatPageState>();
           state?._send(suggestion.prompt);
         },
         child: Ink(
@@ -485,8 +479,7 @@ class _SuggestionCard extends StatelessWidget {
                   color: suggestion.iconBg,
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: Icon(suggestion.icon,
-                    color: suggestion.iconColor, size: 17),
+                child: Icon(suggestion.icon, color: suggestion.iconColor, size: 17),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -624,8 +617,7 @@ class _UserBubble extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: _AiChatColors.accent,
                     borderRadius: const BorderRadius.only(
@@ -707,8 +699,7 @@ class _AssistantBubble extends StatelessWidget {
                 GestureDetector(
                   onTap: isRevealing ? onSkipReveal : null,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 13),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: const BorderRadius.only(
@@ -1077,10 +1068,8 @@ class _ComposerState extends State<_Composer> {
                     // Enter'a karşılık gelir; Shift+Enter satır atlamaya devam eder.
                     child: CallbackShortcuts(
                       bindings: <ShortcutActivator, VoidCallback>{
-                        const SingleActivator(LogicalKeyboardKey.enter):
-                            _submit,
-                        const SingleActivator(LogicalKeyboardKey.numpadEnter):
-                            _submit,
+                        const SingleActivator(LogicalKeyboardKey.enter): _submit,
+                        const SingleActivator(LogicalKeyboardKey.numpadEnter): _submit,
                       },
                       child: TextField(
                         controller: widget.controller,
@@ -1166,8 +1155,7 @@ class _SendButton extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Icon(Icons.arrow_upward_rounded,
-                    color: Colors.white, size: 18),
+                : const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 18),
           ),
         ),
       ),

@@ -7,12 +7,10 @@ class AdminWebHrBordroSectionPage extends StatefulWidget {
   const AdminWebHrBordroSectionPage({super.key});
 
   @override
-  State<AdminWebHrBordroSectionPage> createState() =>
-      _AdminWebHrBordroSectionPageState();
+  State<AdminWebHrBordroSectionPage> createState() => _AdminWebHrBordroSectionPageState();
 }
 
-class _AdminWebHrBordroSectionPageState
-    extends State<AdminWebHrBordroSectionPage> {
+class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPage> {
   final HRService _hrService = HRService();
   late Future<List<HRBordroDonemResponse>> _donemlerFuture;
 
@@ -200,8 +198,7 @@ class _AdminWebHrBordroSectionPageState
                     )
                   else if (donemler.isEmpty)
                     const _InlineMessage(
-                      message:
-                          'Henüz bordro dönemi yok. Önce dönem oluşturmalısınız.',
+                      message: 'Henüz bordro dönemi yok. Önce dönem oluşturmalısınız.',
                     )
                   else
                     Wrap(
@@ -273,8 +270,7 @@ class _AdminWebHrBordroSectionPageState
                       child: Column(
                         children: [
                           const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 14),
+                            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                             child: Row(
                               children: [
                                 Expanded(
@@ -322,12 +318,10 @@ class _AdminWebHrBordroSectionPageState
                           for (var i = 0; i < _bordroEmployees.length; i++) ...[
                             _BordroEmployeeRow(
                               employee: _bordroEmployees[i],
-                              onViewPdf: () =>
-                                  _handleOpenPdf(_bordroEmployees[i]),
+                              onViewPdf: () => _handleOpenPdf(_bordroEmployees[i]),
                             ),
                             if (i != _bordroEmployees.length - 1)
-                              const Divider(
-                                  height: 1, color: Color(0xFFE2E8F0)),
+                              const Divider(height: 1, color: Color(0xFFE2E8F0)),
                           ],
                         ],
                       ),
@@ -348,8 +342,7 @@ class _CreateBordroDonemDialog extends StatefulWidget {
   final HRService hrService;
 
   @override
-  State<_CreateBordroDonemDialog> createState() =>
-      _CreateBordroDonemDialogState();
+  State<_CreateBordroDonemDialog> createState() => _CreateBordroDonemDialogState();
 }
 
 class _CreateBordroDonemDialogState extends State<_CreateBordroDonemDialog> {
@@ -650,8 +643,7 @@ class _HeroPanel extends StatelessWidget {
                   elevation: 0,
                   backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -743,9 +735,7 @@ class _DonemChip extends StatelessWidget {
           color: selected ? const Color(0xFF2563EB) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected
-                ? const Color(0xFF2563EB)
-                : const Color(0xFFE2E8F0),
+            color: selected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
           ),
         ),
         child: Column(
@@ -762,9 +752,8 @@ class _DonemChip extends StatelessWidget {
             Text(
               '${_formatDate(donem.baslangicTarihi)} - ${_formatDate(donem.bitisTarihi)}',
               style: TextStyle(
-                color: selected
-                    ? Colors.white.withOpacity(0.82)
-                    : const Color(0xFF64748B),
+                color:
+                    selected ? Colors.white.withOpacity(0.82) : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -965,8 +954,7 @@ class _DateField extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.calendar_today_outlined,
-                size: 18, color: Color(0xFF64748B)),
+            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
           ],
         ),
       ),

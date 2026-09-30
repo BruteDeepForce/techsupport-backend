@@ -119,18 +119,18 @@ class _AdminWebHrPerformanceSectionPageState
             .map(
               (report) => _PerformanceRowData(
                 employeeId: report.employeeId,
-                employeeName: employeeMap[report.employeeId]?.fullName ??
-                    'Personel bulunamadı',
-                positionName: employeeMap[report.employeeId]?.positionName ??
-                    'Pozisyon atanmadı',
-                status:
-                    _resolvePerformanceStatus(report.totalOverdueTasks, report.penaltyCount),
+                employeeName:
+                    employeeMap[report.employeeId]?.fullName ?? 'Personel bulunamadı',
+                positionName:
+                    employeeMap[report.employeeId]?.positionName ?? 'Pozisyon atanmadı',
+                status: _resolvePerformanceStatus(
+                    report.totalOverdueTasks, report.penaltyCount),
                 report: report,
               ),
             )
             .toList()
-          ..sort((a, b) => b.report.totalCompletedTasks
-              .compareTo(a.report.totalCompletedTasks));
+          ..sort((a, b) =>
+              b.report.totalCompletedTasks.compareTo(a.report.totalCompletedTasks));
 
         final totalCompleted = data.reports.fold<int>(
           0,
@@ -332,7 +332,8 @@ class _AdminWebHrPerformanceSectionPageState
                         width: cardWidth,
                         child: _PerformanceStatCard(
                           title: 'Bekleyen / Geciken',
-                          value: '$totalPending / ${data.reports.fold<int>(0, (sum, item) => sum + item.totalOverdueTasks)}',
+                          value:
+                              '$totalPending / ${data.reports.fold<int>(0, (sum, item) => sum + item.totalOverdueTasks)}',
                           note: 'Aksiyon gerektiren görev yoğunluğu',
                           accent: const Color(0xFFD97706),
                           icon: Icons.pending_actions_outlined,
@@ -362,18 +363,16 @@ class _AdminWebHrPerformanceSectionPageState
                         const Expanded(
                           child: _PerformanceSectionTitle(
                             title: 'Personel Performans Listesi',
-                            subtitle:
-                                'Satıra tıklayarak detay metrik görünümünü açın.',
+                            subtitle: 'Satıra tıklayarak detay metrik görünümünü açın.',
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(999),
-                            border:
-                                Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
                           child: Text(
                             '${rows.length} kayıt',
@@ -395,8 +394,7 @@ class _AdminWebHrPerformanceSectionPageState
                       child: Column(
                         children: [
                           const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 14),
+                            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                             child: Row(
                               children: [
                                 Expanded(
@@ -746,8 +744,7 @@ class _PerformanceTableRow extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),

@@ -115,8 +115,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setLocalState) {
           return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Container(
               padding: const EdgeInsets.all(20),
               constraints: const BoxConstraints(maxWidth: 560),
@@ -150,8 +149,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           selectedDeviceId = null;
                           selectedCustomerName = null; //!
                           if (v != null) {
-                            final match =
-                                customers.where((e) => e.id == v).toList();
+                            final match = customers.where((e) => e.id == v).toList();
                             if (match.isNotEmpty) {
                               selectedCustomerUserId = match.first.appUserId;
                               selectedCustomerName = match.first.name;
@@ -168,16 +166,14 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           }
                           setLocalState(() {});
                         },
-                        validator: (v) =>
-                            v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                        validator: (v) => v == null || v.isEmpty ? 'Müşteri seçin' : null,
                         decoration: InputDecoration(
                           labelText: 'Müşteri',
                           filled: true,
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                         ),
                       ),
@@ -188,8 +184,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         FutureBuilder<List<DeviceRecord>>(
                           future: devicesFuture,
                           builder: (context, snap) {
-                            if (snap.connectionState ==
-                                ConnectionState.waiting) {
+                            if (snap.connectionState == ConnectionState.waiting) {
                               return const _HintBox('Cihazlar yükleniyor...');
                             }
                             if (snap.hasError) {
@@ -197,8 +192,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             }
                             final devices = snap.data ?? [];
                             if (devices.isEmpty) {
-                              return const _HintBox(
-                                  'Müşteriye bağlı cihaz bulunamadı');
+                              return const _HintBox('Müşteriye bağlı cihaz bulunamadı');
                             }
                             return DropdownButtonFormField<String>(
                               value: selectedDeviceId,
@@ -207,8 +201,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   DropdownMenuItem(
                                     value: d.id,
                                     child: ConstrainedBox(
-                                      constraints:
-                                          const BoxConstraints(maxWidth: 420),
+                                      constraints: const BoxConstraints(maxWidth: 420),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -226,8 +219,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                               color: _isWarrantyCovered(d)
                                                   ? const Color(0xFFDCFCE7)
                                                   : const Color(0xFFFEE2E2),
-                                              borderRadius:
-                                                  BorderRadius.circular(999),
+                                              borderRadius: BorderRadius.circular(999),
                                             ),
                                             child: Text(
                                               _isWarrantyCovered(d)
@@ -259,8 +251,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 fillColor: const Color(0xFFF8FAFC),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                                 ),
                               ),
                             );
@@ -299,9 +290,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           if (v == null) {
                             selectedTechnicianName = null;
                           } else {
-                            final match = technicians
-                                .where((e) => e.userId == v)
-                                .toList();
+                            final match =
+                                technicians.where((e) => e.userId == v).toList();
                             selectedTechnicianName =
                                 match.isEmpty ? null : match.first.name;
                           }
@@ -313,8 +303,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                         ),
                       ),
@@ -322,11 +311,9 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                       DropdownButtonFormField<String>(
                         value: future,
                         items: const [
+                          DropdownMenuItem(value: 'None', child: Text('Hemen oluştur')),
                           DropdownMenuItem(
-                              value: 'None', child: Text('Hemen oluştur')),
-                          DropdownMenuItem(
-                              value: 'Scheduled',
-                              child: Text('İleri tarihli planlı')),
+                              value: 'Scheduled', child: Text('İleri tarihli planlı')),
                         ],
                         onChanged: (v) {
                           setLocalState(() {
@@ -342,8 +329,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           fillColor: const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                           ),
                         ),
                       ),
@@ -357,12 +343,10 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                               labelText: 'Plan Tarihi ve Saati',
                               filled: true,
                               fillColor: const Color(0xFFF8FAFC),
-                              suffixIcon:
-                                  const Icon(Icons.calendar_month_outlined),
+                              suffixIcon: const Icon(Icons.calendar_month_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFFE2E8F0)),
+                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
                             ),
                             child: Text(
@@ -386,14 +370,10 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             child: DropdownButtonFormField<String>(
                               value: priority,
                               items: const [
-                                DropdownMenuItem(
-                                    value: 'Low', child: Text('Düşük')),
-                                DropdownMenuItem(
-                                    value: 'Normal', child: Text('Normal')),
-                                DropdownMenuItem(
-                                    value: 'High', child: Text('Yüksek')),
-                                DropdownMenuItem(
-                                    value: 'Urgent', child: Text('Acil')),
+                                DropdownMenuItem(value: 'Low', child: Text('Düşük')),
+                                DropdownMenuItem(value: 'Normal', child: Text('Normal')),
+                                DropdownMenuItem(value: 'High', child: Text('Yüksek')),
+                                DropdownMenuItem(value: 'Urgent', child: Text('Acil')),
                               ],
                               onChanged: (v) =>
                                   setLocalState(() => priority = v ?? 'Normal'),
@@ -403,8 +383,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 fillColor: const Color(0xFFF8FAFC),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                                 ),
                               ),
                             ),
@@ -414,24 +393,20 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             child: DropdownButtonFormField<String>(
                               value: type,
                               items: const [
-                                DropdownMenuItem(
-                                    value: 'Repair', child: Text('Onarım')),
+                                DropdownMenuItem(value: 'Repair', child: Text('Onarım')),
                                 DropdownMenuItem(
                                     value: 'Maintenance', child: Text('Bakım')),
                                 DropdownMenuItem(
-                                    value: 'Installation',
-                                    child: Text('Kurulum')),
+                                    value: 'Installation', child: Text('Kurulum')),
                               ],
-                              onChanged: (v) =>
-                                  setLocalState(() => type = v ?? 'Repair'),
+                              onChanged: (v) => setLocalState(() => type = v ?? 'Repair'),
                               decoration: InputDecoration(
                                 labelText: 'Tür',
                                 filled: true,
                                 fillColor: const Color(0xFFF8FAFC),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                      color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                                 ),
                               ),
                             ),
@@ -449,19 +424,17 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () async {
-                              if (!(formKey.currentState?.validate() ??
-                                  false)) {
+                              if (!(formKey.currentState?.validate() ?? false)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text(
-                                          'Lütfen zorunlu alanları kontrol edin')),
+                                      content:
+                                          Text('Lütfen zorunlu alanları kontrol edin')),
                                 );
                                 return;
                               }
                               if (selectedCustomerId == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Müşteri seçin')),
+                                  const SnackBar(content: Text('Müşteri seçin')),
                                 );
                                 return;
                               }
@@ -476,16 +449,15 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                     selectedTechnicianId!.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text(
-                                            'Planlı iş için teknisyen seçin')),
+                                        content: Text('Planlı iş için teknisyen seçin')),
                                   );
                                   return;
                                 }
                                 if (scheduledLocal == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text(
-                                            'Planlı iş için tarih ve saat seçin')),
+                                        content:
+                                            Text('Planlı iş için tarih ve saat seçin')),
                                   );
                                   return;
                                 }
@@ -498,8 +470,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 useRootNavigator: true,
                                 builder: (ctx) {
                                   loadingCtx = ctx;
-                                  return const Center(
-                                      child: CircularProgressIndicator());
+                                  return const Center(child: CircularProgressIndicator());
                                 },
                               );
                               //! operation create try-catch
@@ -511,13 +482,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                       customerId: selectedCustomerId!,
                                       deviceId: selectedDeviceId!,
                                       title: titleController.text.trim(),
-                                      description:
-                                          descriptionController.text.trim(),
-                                      internalNote: internalNoteController.text
-                                              .trim()
-                                              .isEmpty
-                                          ? null
-                                          : internalNoteController.text.trim(),
+                                      description: descriptionController.text.trim(),
+                                      internalNote:
+                                          internalNoteController.text.trim().isEmpty
+                                              ? null
+                                              : internalNoteController.text.trim(),
                                       technicianId: selectedTechnicianId,
                                       technicianName: selectedTechnicianName,
                                       customerName: selectedCustomerName, //!
@@ -530,8 +499,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 if (mounted) {
                                   _refresh();
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text('İş emri oluşturuldu')),
+                                    const SnackBar(content: Text('İş emri oluşturuldu')),
                                   );
                                 }
                               } on TimeoutException {
@@ -546,14 +514,12 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content:
-                                            Text('İş emri oluşturulamadı')),
+                                        content: Text('İş emri oluşturulamadı')),
                                   );
                                 }
                               } finally {
                                 if (loadingCtx != null) {
-                                  Navigator.of(loadingCtx!, rootNavigator: true)
-                                      .pop();
+                                  Navigator.of(loadingCtx!, rootNavigator: true).pop();
                                 }
                               }
                             },
@@ -589,15 +555,12 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.operations),
+                child: AdminWebSidebar(
+                    compact: true, radius: 0, active: AdminNavKey.operations),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.operations),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.operations),
             Expanded(
               child: Column(
                 children: [
@@ -674,6 +637,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -681,21 +645,18 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Operasyonlar',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Operasyonlar', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
 }
 
 class _OperationsTableCard extends StatelessWidget {
-  const _OperationsTableCard(
-      {required this.opsFuture, required this.onOpenOperation});
+  const _OperationsTableCard({required this.opsFuture, required this.onOpenOperation});
 
   final Future<List<OperationRecord>> opsFuture;
   final ValueChanged<String> onOpenOperation;
@@ -726,8 +687,7 @@ class _OperationsTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
             ),
           );
         }
@@ -745,9 +705,8 @@ class _OperationsTableCard extends StatelessWidget {
                   priority: _priorityLabel(op.priority),
                   customer: _shortId(op.customerName),
                   device: _shortId(op.deviceId),
-                  technician: op.technicianName.isEmpty
-                      ? '-'
-                      : _shortId(op.technicianName),
+                  technician:
+                      op.technicianName.isEmpty ? '-' : _shortId(op.technicianName),
                   time: _formatTime(op.occurredAtUtc),
                   onTap: () => onOpenOperation(op.id),
                 ),
@@ -861,8 +820,7 @@ class _TableRow extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-                child: Text(id,
-                    style: const TextStyle(fontWeight: FontWeight.w600))),
+                child: Text(id, style: const TextStyle(fontWeight: FontWeight.w600))),
             Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
             Expanded(
               child: Row(
@@ -870,8 +828,7 @@ class _TableRow extends StatelessWidget {
                   Container(
                     width: 6,
                     height: 6,
-                    decoration: BoxDecoration(
-                        color: statusColor, shape: BoxShape.circle),
+                    decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 6),
                   Text(status),

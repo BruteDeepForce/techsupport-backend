@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AdminWebTopBar extends StatelessWidget {
-  const AdminWebTopBar(
-      {super.key, this.showMenu = false, this.actions = const []});
+  const AdminWebTopBar({super.key, this.showMenu = false, this.actions = const []});
 
   final bool showMenu;
   final List<Widget> actions;
@@ -32,10 +31,7 @@ class AdminWebTopBar extends StatelessWidget {
 
 class AdminWebActionButton extends StatelessWidget {
   const AdminWebActionButton(
-      {super.key,
-      required this.label,
-      required this.icon,
-      required this.onPressed});
+      {super.key, required this.label, required this.icon, required this.onPressed});
 
   final String label;
   final IconData icon;

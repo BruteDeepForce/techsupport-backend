@@ -27,11 +27,9 @@ class HREmployeeLargeDetailResponse {
       passiveCount: json['PassiveCount'] ?? json['passiveCount'] as int,
       employeeOnLeaveCount:
           json['EmployeesOnLeaveCount'] ?? json['employeesOnLeaveCount'] as int,
-      pendingLeavesCount:
-          json['PendingLeavesCount'] ?? json['pendingLeavesCount'] as int,
-      employeePendingAdvancesRequests:
-          json['EmployeesWithPendingAdvanceRequestsCount'] ??
-              json['employeesWithPendingAdvanceRequestsCount'] as int,
+      pendingLeavesCount: json['PendingLeavesCount'] ?? json['pendingLeavesCount'] as int,
+      employeePendingAdvancesRequests: json['EmployeesWithPendingAdvanceRequestsCount'] ??
+          json['employeesWithPendingAdvanceRequestsCount'] as int,
     );
   }
 }
@@ -78,8 +76,7 @@ class EmployeeResponse {
   });
 
   factory EmployeeResponse.fromJson(Map<String, dynamic> json) {
-    final jobsStartDateValue =
-        json['jobsStartDateUtc'] ?? json['JobsStartDateUtc'];
+    final jobsStartDateValue = json['jobsStartDateUtc'] ?? json['JobsStartDateUtc'];
 
     final jobsEndDateValue = json['jobsEndDateUtc'] ?? json['JobsEndDateUtc'];
 
@@ -100,22 +97,18 @@ class EmployeeResponse {
       positionName: (json['positionName'] ?? json['PositionName'])?.toString(),
       email: (json['email'] ?? json['Email'])?.toString(),
       phone: (json['phone'] ?? json['Phone'])?.toString(),
-      profileImageUrl:
-          (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+      profileImageUrl: (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
       status: (json['status'] ?? json['Status']).toString(),
       jobsStartDateUtc: jobsStartDateValue != null
           ? DateTime.parse(jobsStartDateValue.toString())
           : null,
-      jobsEndDateUtc: jobsEndDateValue != null
-          ? DateTime.parse(jobsEndDateValue.toString())
-          : null,
+      jobsEndDateUtc:
+          jobsEndDateValue != null ? DateTime.parse(jobsEndDateValue.toString()) : null,
       createdAtUtc: DateTime.parse(createdAtValue.toString()),
-      updatedAtUtc: updatedAtValue != null
-          ? DateTime.parse(updatedAtValue.toString())
-          : null,
-      deletedAtUtc: deletedAtValue != null
-          ? DateTime.parse(deletedAtValue.toString())
-          : null,
+      updatedAtUtc:
+          updatedAtValue != null ? DateTime.parse(updatedAtValue.toString()) : null,
+      deletedAtUtc:
+          deletedAtValue != null ? DateTime.parse(deletedAtValue.toString()) : null,
       userId: (json['userId'] ?? json['UserId'] ?? '').toString(),
     );
   }
@@ -194,10 +187,8 @@ class HRLeaveResponse {
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       departmentId: (json['departmentId'] ?? json['DepartmentId']).toString(),
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
-      employeeFullName:
-          (json['employeeFullName'] ?? json['EmployeeFullName']).toString(),
-      startDate:
-          DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+      employeeFullName: (json['employeeFullName'] ?? json['EmployeeFullName']).toString(),
+      startDate: DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
       endDate: DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
       type: (json['type'] ?? json['Type']).toString(),
       reason: (json['reason'] ?? json['Reason']).toString(),
@@ -207,8 +198,8 @@ class HRLeaveResponse {
       approvedAtUtc: json['approvedAtUtc'] != null
           ? DateTime.parse(json['approvedAtUtc'].toString())
           : null,
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
       updatedAtUtc: json['updatedAtUtc'] != null
           ? DateTime.parse(json['updatedAtUtc'].toString())
           : null,
@@ -308,8 +299,8 @@ class HRPositionResponse {
       name: (json['name'] ?? json['Name']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
       isActive: (json['isActive'] ?? json['IsActive']) as bool,
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
       updatedAtUtc: json['updatedAtUtc'] != null
           ? DateTime.parse(json['updatedAtUtc'].toString())
           : null,
@@ -379,8 +370,7 @@ class HRPerformanceReportResponse {
   });
 
   factory HRPerformanceReportResponse.fromJson(Map<String, dynamic> json) {
-    int readInt(String lower, String upper) =>
-        (json[lower] ?? json[upper] ?? 0) as int;
+    int readInt(String lower, String upper) => (json[lower] ?? json[upper] ?? 0) as int;
 
     return HRPerformanceReportResponse(
       id: (json['id'] ?? json['Id']).toString(),
@@ -389,10 +379,8 @@ class HRPerformanceReportResponse {
       branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
       year: readInt('year', 'Year'),
       month: readInt('month', 'Month'),
-      totalAssignedTasks:
-          readInt('totalAssignedTasks', 'TotalAssignedTasks'),
-      totalCompletedTasks:
-          readInt('totalCompletedTasks', 'TotalCompletedTasks'),
+      totalAssignedTasks: readInt('totalAssignedTasks', 'TotalAssignedTasks'),
+      totalCompletedTasks: readInt('totalCompletedTasks', 'TotalCompletedTasks'),
       totalPendingTasks: readInt('totalPendingTasks', 'TotalPendingTasks'),
       totalOverdueTasks: readInt('totalOverdueTasks', 'TotalOverdueTasks'),
       totalCompletedOnTime:
@@ -402,10 +390,8 @@ class HRPerformanceReportResponse {
       rewardCount: readInt('rewardCount', 'RewardCount'),
       penaltyCount: readInt('penaltyCount', 'PenaltyCount'),
       leaveCount: readInt('leaveCount', 'LeaveCount'),
-      shiftAttendanceCount:
-          readInt('shiftAttendanceCount', 'ShiftAttendanceCount'),
-      notJoinedShiftCount:
-          readInt('notJoinedShiftCount', 'NotJoinedShiftCount'),
+      shiftAttendanceCount: readInt('shiftAttendanceCount', 'ShiftAttendanceCount'),
+      notJoinedShiftCount: readInt('notJoinedShiftCount', 'NotJoinedShiftCount'),
       overtimeCount: readInt('overtimeCount', 'OvertimeCount'),
     );
   }
@@ -440,17 +426,14 @@ class HRLeaveDeductionResponse {
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      deductionType:
-          (json['deductionType'] ?? json['DeductionType'])?.toString(),
-      deductionPeriod:
-          (json['deductionPeriod'] ?? json['DeductionPeriod'])?.toString(),
+      deductionType: (json['deductionType'] ?? json['DeductionType'])?.toString(),
+      deductionPeriod: (json['deductionPeriod'] ?? json['DeductionPeriod'])?.toString(),
       deductionAmount:
-          ((json['deductionAmount'] ?? json['DeductionAmount']) as num)
-              .toDouble(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc: DateTime.parse(
-          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+          ((json['deductionAmount'] ?? json['DeductionAmount']) as num).toDouble(),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          DateTime.parse((json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
     );
   }
 }
@@ -531,16 +514,13 @@ class HRAdvanceSettingsResponse {
                   json['MaxAdvanceAmountPerPerson']) as num?)
               ?.toDouble() ??
           0,
-      maxAdvanceCountPerYear: (json['maxAdvanceCountPerYear'] ??
-              json['MaxAdvanceCountPerYear']) as int? ??
-          0,
-      allowFutureAdvances: (json['allowFutureAdvances'] ??
-              json['AllowFutureAdvances']) as bool? ??
-          false,
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc:
-          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+      maxAdvanceCountPerYear:
+          (json['maxAdvanceCountPerYear'] ?? json['MaxAdvanceCountPerYear']) as int? ?? 0,
+      allowFutureAdvances:
+          (json['allowFutureAdvances'] ?? json['AllowFutureAdvances']) as bool? ?? false,
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
     );
   }
 }
@@ -588,8 +568,7 @@ class HRUpdateAdvanceSettingsRequest {
         'maxAdvanceAmountPerPerson': maxAdvanceAmountPerPerson,
       if (maxAdvanceCountPerYear != null)
         'maxAdvanceCountPerYear': maxAdvanceCountPerYear,
-      if (allowFutureAdvances != null)
-        'allowFutureAdvances': allowFutureAdvances,
+      if (allowFutureAdvances != null) 'allowFutureAdvances': allowFutureAdvances,
     };
   }
 }
@@ -619,12 +598,11 @@ class HRDisciplineResponse {
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      penaltyAmount:
-          ((json['penaltyAmount'] ?? json['PenaltyAmount']) as num).toDouble(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc: DateTime.parse(
-          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+      penaltyAmount: ((json['penaltyAmount'] ?? json['PenaltyAmount']) as num).toDouble(),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          DateTime.parse((json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
     );
   }
 }
@@ -654,12 +632,11 @@ class HRRewardResponse {
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      rewardAmount:
-          ((json['rewardAmount'] ?? json['RewardAmount']) as num).toDouble(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc: DateTime.parse(
-          (json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
+      rewardAmount: ((json['rewardAmount'] ?? json['RewardAmount']) as num).toDouble(),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc:
+          DateTime.parse((json['updatedAtUtc'] ?? json['UpdatedAtUtc']).toString()),
     );
   }
 }
@@ -685,8 +662,7 @@ class HRDisciplineEmployeeRecordResponse {
     required this.createdAtUtc,
   });
 
-  factory HRDisciplineEmployeeRecordResponse.fromJson(
-      Map<String, dynamic> json) {
+  factory HRDisciplineEmployeeRecordResponse.fromJson(Map<String, dynamic> json) {
     return HRDisciplineEmployeeRecordResponse(
       id: (json['id'] ?? json['Id']).toString(),
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
@@ -694,10 +670,10 @@ class HRDisciplineEmployeeRecordResponse {
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
       disciplineId: (json['disciplineId'] ?? json['DisciplineId']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      incidentDate: DateTime.parse(
-          (json['incidentDate'] ?? json['IncidentDate']).toString()),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      incidentDate:
+          DateTime.parse((json['incidentDate'] ?? json['IncidentDate']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }
@@ -731,10 +707,9 @@ class HRRewardEmployeeRecordResponse {
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
       rewardId: (json['rewardId'] ?? json['RewardId']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      rewardDate:
-          DateTime.parse((json['rewardDate'] ?? json['RewardDate']).toString()),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      rewardDate: DateTime.parse((json['rewardDate'] ?? json['RewardDate']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }
@@ -845,8 +820,7 @@ class HRUpdateDisciplineEmployeeRecordRequest {
     return {
       if (disciplineId != null) 'disciplineId': disciplineId,
       if (description != null) 'description': description,
-      if (incidentDate != null)
-        'incidentDate': incidentDate!.toUtc().toIso8601String(),
+      if (incidentDate != null) 'incidentDate': incidentDate!.toUtc().toIso8601String(),
     };
   }
 }
@@ -889,8 +863,7 @@ class HRUpdateRewardEmployeeRecordRequest {
     return {
       if (rewardId != null) 'rewardId': rewardId,
       if (description != null) 'description': description,
-      if (rewardDate != null)
-        'rewardDate': rewardDate!.toUtc().toIso8601String(),
+      if (rewardDate != null) 'rewardDate': rewardDate!.toUtc().toIso8601String(),
     };
   }
 }
@@ -953,42 +926,37 @@ class HREmployeeDetailResponse {
       userId: (json['userId'] ?? json['UserId'])?.toString(),
       email: (json['email'] ?? json['Email'])?.toString(),
       phone: (json['phone'] ?? json['Phone'])?.toString(),
-      profileImageUrl:
-          (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
-      jobsStartDateUtc: _parseNullableDate(
-          json['jobsStartDateUtc'] ?? json['JobsStartDateUtc']),
+      profileImageUrl: (json['profileImageUrl'] ?? json['ProfileImageUrl'])?.toString(),
+      jobsStartDateUtc:
+          _parseNullableDate(json['jobsStartDateUtc'] ?? json['JobsStartDateUtc']),
       jobsEndDateUtc:
           _parseNullableDate(json['jobsEndDateUtc'] ?? json['JobsEndDateUtc']),
       status: (json['status'] ?? json['Status']).toString(),
-      employeeLeaves: ((json['employeeLeaves'] ?? json['EmployeeLeaves'])
-                  as List<dynamic>? ??
-              const [])
-          .map((e) => HREmployeeDetailLeave.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      employeeAdvances: ((json['employeeAdvances'] ?? json['EmployeeAdvances'])
-                  as List<dynamic>? ??
-              const [])
-          .map((e) =>
-              HREmployeeDetailAdvance.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      employeeLeaves:
+          ((json['employeeLeaves'] ?? json['EmployeeLeaves']) as List<dynamic>? ??
+                  const [])
+              .map((e) => HREmployeeDetailLeave.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      employeeAdvances:
+          ((json['employeeAdvances'] ?? json['EmployeeAdvances']) as List<dynamic>? ??
+                  const [])
+              .map((e) => HREmployeeDetailAdvance.fromJson(e as Map<String, dynamic>))
+              .toList(),
       disciplineEmployeeRecords: ((json['disciplineEmployeeRecords'] ??
                   json['DisciplineEmployeeRecords']) as List<dynamic>? ??
               const [])
-          .map(
-              (e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
+          .map((e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
           .toList(),
       rewardEmployeeRecords: ((json['rewardEmployeeRecords'] ??
                   json['RewardEmployeeRecords']) as List<dynamic>? ??
               const [])
-          .map(
-              (e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
+          .map((e) => HREmployeeDetailRecord.fromJson(e as Map<String, dynamic>))
           .toList(),
-      employeeSalaries: ((json['employeeSalaries'] ?? json['EmployeeSalaries'])
-                  as List<dynamic>? ??
-              const [])
-          .map(
-              (e) => HREmployeeDetailSalary.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      employeeSalaries:
+          ((json['employeeSalaries'] ?? json['EmployeeSalaries']) as List<dynamic>? ??
+                  const [])
+              .map((e) => HREmployeeDetailSalary.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 }
@@ -1013,14 +981,12 @@ class HREmployeeDetailLeave {
   factory HREmployeeDetailLeave.fromJson(Map<String, dynamic> json) {
     return HREmployeeDetailLeave(
       id: (json['id'] ?? json['Id']).toString(),
-      startDate:
-          DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
+      startDate: DateTime.parse((json['startDate'] ?? json['StartDate']).toString()),
       endDate: DateTime.parse((json['endDate'] ?? json['EndDate']).toString()),
       status: (json['status'] ?? json['Status']).toString(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc:
-          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
     );
   }
 }
@@ -1045,10 +1011,9 @@ class HREmployeeDetailAdvance {
       id: (json['id'] ?? json['Id']).toString(),
       amount: (json['amount'] ?? json['Amount']) as num? ?? 0,
       status: (json['status'] ?? json['Status']).toString(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
-      updatedAtUtc:
-          _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      updatedAtUtc: _parseNullableDate(json['updatedAtUtc'] ?? json['UpdatedAtUtc']),
     );
   }
 }
@@ -1124,13 +1089,13 @@ class HRBordroDonemResponse {
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       year: (json['year'] ?? json['Year']) as int,
       month: (json['month'] ?? json['Month']) as int,
-      baslangicTarihi: DateTime.parse(
-          (json['baslangicTarihi'] ?? json['BaslangicTarihi']).toString()),
-      bitisTarihi: DateTime.parse(
-          (json['bitisTarihi'] ?? json['BitisTarihi']).toString()),
+      baslangicTarihi:
+          DateTime.parse((json['baslangicTarihi'] ?? json['BaslangicTarihi']).toString()),
+      bitisTarihi:
+          DateTime.parse((json['bitisTarihi'] ?? json['BitisTarihi']).toString()),
       status: (json['status'] ?? json['Status']).toString(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }
@@ -1168,17 +1133,14 @@ class HRBordroEmployeeResponse {
       tenantId: (json['tenantId'] ?? json['TenantId']).toString(),
       branchId: (json['branchId'] ?? json['BranchId']).toString(),
       departmentId: (json['departmentId'] ?? json['DepartmentId'])?.toString(),
-      bordroDonemId:
-          (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
+      bordroDonemId: (json['bordroDonemId'] ?? json['BordroDonemId']).toString(),
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
       employeeName: (json['employeeName'] ?? json['EmployeeName']).toString(),
-      totalEarnings:
-          (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
-      totalDeductions:
-          (json['totalDeductions'] ?? json['TotalDeductions']) as num? ?? 0,
+      totalEarnings: (json['totalEarnings'] ?? json['TotalEarnings']) as num? ?? 0,
+      totalDeductions: (json['totalDeductions'] ?? json['TotalDeductions']) as num? ?? 0,
       netPay: (json['netPay'] ?? json['NetPay']) as num? ?? 0,
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }
@@ -1198,8 +1160,8 @@ class HREmployeeDetailRecord {
     return HREmployeeDetailRecord(
       id: (json['id'] ?? json['Id']).toString(),
       description: (json['description'] ?? json['Description']).toString(),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }
@@ -1235,12 +1197,11 @@ class HREmployeeDetailSalary {
       employeeId: (json['employeeId'] ?? json['EmployeeId']).toString(),
       grossSalary: (json['grossSalary'] ?? json['GrossSalary']) as num? ?? 0,
       netSalary: (json['netSalary'] ?? json['NetSalary']) as num? ?? 0,
-      effectiveFrom: DateTime.parse(
-          (json['effectiveFrom'] ?? json['EffectiveFrom']).toString()),
-      effectiveTo:
-          _parseNullableDate(json['effectiveTo'] ?? json['EffectiveTo']),
-      createdAtUtc: DateTime.parse(
-          (json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
+      effectiveFrom:
+          DateTime.parse((json['effectiveFrom'] ?? json['EffectiveFrom']).toString()),
+      effectiveTo: _parseNullableDate(json['effectiveTo'] ?? json['EffectiveTo']),
+      createdAtUtc:
+          DateTime.parse((json['createdAtUtc'] ?? json['CreatedAtUtc']).toString()),
     );
   }
 }

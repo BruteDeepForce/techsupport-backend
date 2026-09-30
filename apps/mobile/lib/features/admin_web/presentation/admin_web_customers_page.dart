@@ -41,8 +41,7 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 520),
@@ -100,27 +99,24 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                           showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (_) => const Center(
-                                  child: CircularProgressIndicator()));
+                              builder: (_) =>
+                                  const Center(child: CircularProgressIndicator()));
                           try {
-                            final correlationId =
-                                await _customerService.createCustomer(
+                            final correlationId = await _customerService.createCustomer(
                               CustomerCreateRequest(
                                 name: nameController.text.trim(),
                                 email: emailController.text.trim(),
                                 phoneNumber: phoneController.text.trim().isEmpty
                                     ? null
                                     : phoneController.text.trim(),
-                                temporaryPassword:
-                                    passwordController.text.trim(),
+                                temporaryPassword: passwordController.text.trim(),
                               ),
                             );
                             if (mounted) Navigator.of(context).pop();
                             if (correlationId == null) {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Müşteri oluşturulamadı')),
+                                const SnackBar(content: Text('Müşteri oluşturulamadı')),
                               );
                               return;
                             }
@@ -134,8 +130,7 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                             if (mounted) Navigator.of(context).pop();
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Müşteri oluşturulamadı: $e')),
+                              SnackBar(content: Text('Müşteri oluşturulamadı: $e')),
                             );
                           }
                         },
@@ -169,14 +164,11 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.customers)),
+                child: AdminWebSidebar(
+                    compact: true, radius: 0, active: AdminNavKey.customers)),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.customers),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.customers),
             Expanded(
               child: Column(
                 children: [
@@ -225,16 +217,14 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                                   _PrimaryActionButton(
                                     label: 'Müşteri Ekle',
                                     icon: Icons.add,
-                                    onPressed: () =>
-                                        _showAddCustomerDialog(context),
+                                    onPressed: () => _showAddCustomerDialog(context),
                                   ),
                                 ],
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          _CustomersTableCard(
-                              customersFuture: _customersFuture),
+                          _CustomersTableCard(customersFuture: _customersFuture),
                         ],
                       ),
                     ),
@@ -248,6 +238,7 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -255,8 +246,7 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
@@ -353,25 +343,19 @@ class _TableHeader extends StatelessWidget {
             flex: 2,
             child: Text('Ad Soyad',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 2,
             child: Text('E-posta',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
           Expanded(
             flex: 1,
             child: Text('Telefon',
                 style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569))),
+                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
           ),
         ],
       ),
@@ -380,8 +364,7 @@ class _TableHeader extends StatelessWidget {
 }
 
 class _TableRow extends StatelessWidget {
-  const _TableRow(
-      {required this.name, required this.email, required this.phone});
+  const _TableRow({required this.name, required this.email, required this.phone});
 
   final String name;
   final String email;
@@ -397,9 +380,7 @@ class _TableRow extends StatelessWidget {
             flex: 2,
             child: Text(name,
                 style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A))),
+                    fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
           ),
           Expanded(
             flex: 2,
@@ -419,9 +400,7 @@ class _TableRow extends StatelessWidget {
 
 class _DialogField extends StatelessWidget {
   const _DialogField(
-      {required this.label,
-      required this.controller,
-      this.requiredField = false});
+      {required this.label, required this.controller, this.requiredField = false});
 
   final String label;
   final TextEditingController controller;
@@ -431,9 +410,8 @@ class _DialogField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      validator: requiredField
-          ? (v) => (v == null || v.isEmpty) ? 'Gerekli' : null
-          : null,
+      validator:
+          requiredField ? (v) => (v == null || v.isEmpty) ? 'Gerekli' : null : null,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
@@ -441,8 +419,7 @@ class _DialogField extends StatelessWidget {
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }

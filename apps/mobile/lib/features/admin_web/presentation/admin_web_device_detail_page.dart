@@ -15,8 +15,7 @@ class AdminWebDeviceDetailPage extends StatefulWidget {
   final String deviceId;
 
   @override
-  State<AdminWebDeviceDetailPage> createState() =>
-      _AdminWebDeviceDetailPageState();
+  State<AdminWebDeviceDetailPage> createState() => _AdminWebDeviceDetailPageState();
 }
 
 class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
@@ -168,13 +167,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Cihaz Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Cihaz Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),

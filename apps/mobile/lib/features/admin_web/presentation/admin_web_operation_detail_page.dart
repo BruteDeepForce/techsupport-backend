@@ -13,12 +13,10 @@ class AdminWebOperationDetailPage extends StatefulWidget {
   final String operationId;
 
   @override
-  State<AdminWebOperationDetailPage> createState() =>
-      _AdminWebOperationDetailPageState();
+  State<AdminWebOperationDetailPage> createState() => _AdminWebOperationDetailPageState();
 }
 
-class _AdminWebOperationDetailPageState
-    extends State<AdminWebOperationDetailPage> {
+class _AdminWebOperationDetailPageState extends State<AdminWebOperationDetailPage> {
   final OperationService _operationService = OperationService();
   late Future<OperationRecord> _opFuture;
 
@@ -47,15 +45,12 @@ class _AdminWebOperationDetailPageState
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.operations),
+                child: AdminWebSidebar(
+                    compact: true, radius: 0, active: AdminNavKey.operations),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.operations),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.operations),
             Expanded(
               child: Column(
                 children: [
@@ -104,13 +99,11 @@ class _AdminWebOperationDetailPageState
                           FutureBuilder<OperationRecord>(
                             future: _opFuture,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const _Card(
                                   child: Padding(
                                     padding: EdgeInsets.all(20),
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
+                                    child: Center(child: CircularProgressIndicator()),
                                   ),
                                 );
                               }
@@ -133,11 +126,9 @@ class _AdminWebOperationDetailPageState
                               }
                               return Center(
                                 child: ConstrainedBox(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 1100),
+                                  constraints: const BoxConstraints(maxWidth: 1100),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       _OperationHeaderCard(op: op),
                                       const SizedBox(height: 16),
@@ -150,8 +141,7 @@ class _AdminWebOperationDetailPageState
                                             children: [
                                               _DetailTile(
                                                 label: 'Müşteri',
-                                                value: _displayText(
-                                                    op.customerName,
+                                                value: _displayText(op.customerName,
                                                     fallback: op.customerId),
                                               ),
                                               _DetailTile(
@@ -160,15 +150,13 @@ class _AdminWebOperationDetailPageState
                                               ),
                                               _DetailTile(
                                                 label: 'Teknisyen',
-                                                value: _displayText(
-                                                    op.technicianName,
-                                                    fallback:
-                                                        op.technicianUserId),
+                                                value: _displayText(op.technicianName,
+                                                    fallback: op.technicianUserId),
                                               ),
                                               _DetailTile(
                                                 label: 'Teknisyen ID',
-                                                value: _shortId(
-                                                    op.technicianUserId ?? ''),
+                                                value:
+                                                    _shortId(op.technicianUserId ?? ''),
                                               ),
                                               _DetailTile(
                                                 label: 'Cihaz ID',
@@ -176,13 +164,11 @@ class _AdminWebOperationDetailPageState
                                               ),
                                               _DetailTile(
                                                 label: 'Tür',
-                                                value: _operationTypeLabel(
-                                                    op.type),
+                                                value: _operationTypeLabel(op.type),
                                               ),
                                               _DetailTile(
                                                 label: 'Öncelik',
-                                                value:
-                                                    _priorityLabel(op.priority),
+                                                value: _priorityLabel(op.priority),
                                               ),
                                               _DetailTile(
                                                 label: 'Durum',
@@ -196,22 +182,17 @@ class _AdminWebOperationDetailPageState
                                                 label: 'Plan Tarihi',
                                                 value: op.scheduledAtUtc == null
                                                     ? '-'
-                                                    : _formatTime(
-                                                        op.scheduledAtUtc!),
+                                                    : _formatTime(op.scheduledAtUtc!),
                                               ),
                                               _DetailTile(
                                                 label: 'Oluşturulma Tarihi',
-                                                value: _formatTime(
-                                                    op.occurredAtUtc),
+                                                value: _formatTime(op.occurredAtUtc),
                                               ),
                                               _DetailTile(
                                                 label: 'Şube',
-                                                value:
-                                                    _shortId(op.branchId ?? ''),
+                                                value: _shortId(op.branchId ?? ''),
                                               ),
-                                              if (op.internalnote
-                                                  .trim()
-                                                  .isNotEmpty)
+                                              if (op.internalnote.trim().isNotEmpty)
                                                 _DetailTile(
                                                   label: 'İç Not',
                                                   value: op.internalnote,
@@ -290,8 +271,7 @@ class _OperationHeaderCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     op.description.isEmpty ? 'Açıklama yok' : op.description,
-                    style:
-                        const TextStyle(color: Color(0xFF64748B), height: 1.45),
+                    style: const TextStyle(color: Color(0xFF64748B), height: 1.45),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -300,8 +280,7 @@ class _OperationHeaderCard extends StatelessWidget {
                     children: [
                       _HeaderInfo(
                         icon: Icons.business_outlined,
-                        label: _displayText(op.customerName,
-                            fallback: op.customerId),
+                        label: _displayText(op.customerName, fallback: op.customerId),
                       ),
                       _HeaderInfo(
                         icon: Icons.engineering_outlined,
@@ -328,8 +307,7 @@ class _OperationHeaderCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _shortId(op.id),
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 12),
                 const Text('Oluşturma',
@@ -337,8 +315,7 @@ class _OperationHeaderCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _formatTime(op.occurredAtUtc),
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -372,15 +349,14 @@ class _HeaderInfo extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF334155),
-                fontWeight: FontWeight.w600),
+                fontSize: 12, color: Color(0xFF334155), fontWeight: FontWeight.w600),
           ),
         ],
       ),
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -388,13 +364,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Operasyonlar',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Operasyonlar', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
@@ -431,17 +405,13 @@ class _DetailTile extends StatelessWidget {
           children: [
             Text(label,
                 style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                    fontWeight: FontWeight.w600)),
+                    fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             Text(value,
                 maxLines: wide ? 5 : 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF0F172A),
-                    fontWeight: FontWeight.w600)),
+                    fontSize: 14, color: Color(0xFF0F172A), fontWeight: FontWeight.w600)),
           ],
         ),
       ),

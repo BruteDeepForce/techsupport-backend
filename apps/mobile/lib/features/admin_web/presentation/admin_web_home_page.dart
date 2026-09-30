@@ -88,8 +88,7 @@ class _TabStrip extends StatelessWidget {
               alignment: Alignment.center,
               child: const Text(
                 'Genel Istatistikler',
-                style: TextStyle(
-                    color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
+                style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -114,8 +113,7 @@ class _CalendarCard extends StatelessWidget {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final weekStart = today.subtract(Duration(days: today.weekday - 1));
-          final days =
-              List.generate(7, (index) => weekStart.add(Duration(days: index)));
+          final days = List.generate(7, (index) => weekStart.add(Duration(days: index)));
           final plannedOperations = snapshot.data?.plannedOperations ?? [];
 
           return Column(
@@ -123,12 +121,10 @@ class _CalendarCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.calendar_month_outlined,
-                      color: Color(0xFF3B82F6)),
+                  const Icon(Icons.calendar_month_outlined, color: Color(0xFF3B82F6)),
                   const SizedBox(width: 8),
                   const Text('Takvimim',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                   const Spacer(),
                   _Pill(label: 'Hafta', active: true),
                   const SizedBox(width: 6),
@@ -150,8 +146,7 @@ class _CalendarCard extends StatelessWidget {
                     final dayItems = plannedOperations
                         .where((item) => _sameDate(item.scheduledAtLocal, day))
                         .toList()
-                      ..sort((a, b) =>
-                          a.scheduledAtLocal.compareTo(b.scheduledAtLocal));
+                      ..sort((a, b) => a.scheduledAtLocal.compareTo(b.scheduledAtLocal));
                     return _DayCard(
                       day: _weekdayLabel(day),
                       date: day.day.toString().padLeft(2, '0'),
@@ -202,13 +197,11 @@ class _DayCard extends StatelessWidget {
             Row(
               children: [
                 Text(date,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w700, fontSize: 18)),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
                 const Spacer(),
                 if (items.isNotEmpty)
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: const Color(0xFFDBEAFE),
                       borderRadius: BorderRadius.circular(999),
@@ -236,8 +229,7 @@ class _DayCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   '+${items.length - 2} plan daha',
-                  style:
-                      const TextStyle(fontSize: 11, color: Color(0xFF2563EB)),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF2563EB)),
                 ),
               ),
           ],
@@ -257,8 +249,7 @@ class _CalendarPlanChip extends StatelessWidget {
     final local = item.scheduledAtLocal;
     final time =
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    final customer =
-        item.customerName.isEmpty ? 'Musteri yok' : item.customerName;
+    final customer = item.customerName.isEmpty ? 'Musteri yok' : item.customerName;
     final title = item.title.isEmpty ? item.description : item.title;
 
     final canOpen = item.operationId.isNotEmpty;
@@ -300,8 +291,7 @@ class _CalendarPlanChip extends StatelessWidget {
                   title.isEmpty ? 'Planli operasyon' : title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style:
-                      const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                 ),
               ],
             ),
@@ -382,8 +372,8 @@ class _StatusListCard extends StatelessWidget {
         builder: (context, snapshot) {
           final dashboard = snapshot.data;
           final summary = dashboard?.summary;
-          final completed = (summary?.completedOperations ?? 0) +
-              (summary?.deliveredOperations ?? 0);
+          final completed =
+              (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
           final failed = summary?.failedOperations ?? 0;
           final open = summary?.openOperations ?? 0;
           final cancelled = dashboard?.metricTotal('OperationCancelled') ?? 0;
@@ -403,9 +393,7 @@ class _StatusListCard extends StatelessWidget {
                       value: open.toString()),
                   const SizedBox(width: 12),
                   const _StatusPill(
-                      color: Color(0xFF3B82F6),
-                      label: 'Devam Ediyor',
-                      value: '0'),
+                      color: Color(0xFF3B82F6), label: 'Devam Ediyor', value: '0'),
                   const SizedBox(width: 12),
                   _StatusPill(
                       color: const Color(0xFF22C55E),
@@ -422,8 +410,7 @@ class _StatusListCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: Text('Toplam $total kayit',
-                    style: const TextStyle(
-                        color: Color(0xFF94A3B8), fontSize: 12)),
+                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
               ),
             ],
           );
@@ -490,8 +477,8 @@ class _MiniStatsGrid extends StatelessWidget {
       builder: (context, snapshot) {
         final summary = snapshot.data?.summary;
         final open = summary?.openOperations ?? 0;
-        final completed = (summary?.completedOperations ?? 0) +
-            (summary?.deliveredOperations ?? 0);
+        final completed =
+            (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
         final customers = summary?.totalCustomers ?? 0;
 
         return GridView.count(
@@ -608,8 +595,7 @@ class _MiniCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(value,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w700)),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text(
                 caption,
@@ -666,11 +652,9 @@ class _ChartSectionState extends State<_ChartSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Aylik Trend',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                     const SizedBox(height: 6),
-                    Text(_rangeLabel,
-                        style: const TextStyle(color: Color(0xFF94A3B8))),
+                    Text(_rangeLabel, style: const TextStyle(color: Color(0xFF94A3B8))),
                     const SizedBox(height: 12),
                     _TrendRangeRow(
                       range: _range,
@@ -680,8 +664,7 @@ class _ChartSectionState extends State<_ChartSection> {
                     FutureBuilder<TenantDashboard>(
                       future: widget.dashboardFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
                           return const _ChartPlaceholder(
                               height: 170, caption: 'Yukleniyor...');
                         }
@@ -711,8 +694,7 @@ class _ChartSectionState extends State<_ChartSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Maliyet Ozeti',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
                     Text('Is emri maliyet dagilimi',
                         style: TextStyle(color: Color(0xFF94A3B8))),
@@ -728,9 +710,7 @@ class _ChartSectionState extends State<_ChartSection> {
                         value: '0'),
                     SizedBox(height: 8),
                     _CostRow(
-                        color: Color(0xFFDCFCE7),
-                        label: 'Toplam Maliyet',
-                        value: '0'),
+                        color: Color(0xFFDCFCE7), label: 'Toplam Maliyet', value: '0'),
                   ],
                 ),
               ),
@@ -742,11 +722,9 @@ class _ChartSectionState extends State<_ChartSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Aylik Maliyet Trendi',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
-                    Text('Son 6 Ay',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                    Text('Son 6 Ay', style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 16),
                     _ChartPlaceholder(height: 150, caption: 'Chart'),
                   ],
@@ -764,14 +742,12 @@ class _ChartSectionState extends State<_ChartSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Oncelik Dagilimi',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
                     Text('Oncelige gore is emirleri',
                         style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 16),
-                    _ChartPlaceholder(
-                        height: 130, caption: 'dusuk / normal / acil'),
+                    _ChartPlaceholder(height: 130, caption: 'dusuk / normal / acil'),
                   ],
                 ),
               ),
@@ -783,11 +759,9 @@ class _ChartSectionState extends State<_ChartSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Son Is Emirleri',
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
                     SizedBox(height: 6),
-                    Text('Son 5 is emri',
-                        style: TextStyle(color: Color(0xFF94A3B8))),
+                    Text('Son 5 is emri', style: TextStyle(color: Color(0xFF94A3B8))),
                     SizedBox(height: 24),
                     _EmptyState(label: 'Henuz is emri bulunmuyor'),
                   ],
@@ -804,8 +778,7 @@ class _ChartSectionState extends State<_ChartSection> {
               Text('Teknisyen Durumu',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
               SizedBox(height: 6),
-              Text('Aktif teknisyenler',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
+              Text('Aktif teknisyenler', style: TextStyle(color: Color(0xFF94A3B8))),
               SizedBox(height: 24),
               _EmptyState(label: 'Veri bulunamadi'),
             ],
@@ -847,8 +820,7 @@ class _TrendPoint {
   final int value;
 }
 
-List<_TrendPoint> _buildTrendFromMetrics(
-    TenantDashboard dashboard, _TrendRange range) {
+List<_TrendPoint> _buildTrendFromMetrics(TenantDashboard dashboard, _TrendRange range) {
   final buckets = _trendBuckets(range);
   final labels = _trendLabels(buckets, range);
 
@@ -858,8 +830,7 @@ List<_TrendPoint> _buildTrendFromMetrics(
   });
 }
 
-int _trendMetricValue(
-    TenantDashboard dashboard, DateTime bucket, _TrendRange range) {
+int _trendMetricValue(TenantDashboard dashboard, DateTime bucket, _TrendRange range) {
   if (range == _TrendRange.daily) {
     return dashboard.metricValue('OperationCreated', 'Daily', bucket);
   }
@@ -889,20 +860,16 @@ List<DateTime> _trendBuckets(_TrendRange range) {
   final now = DateTime.now();
   switch (range) {
     case _TrendRange.daily:
-      return List.generate(
-          7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
+      return List.generate(7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
     case _TrendRange.weekly:
       final today = DateTime(now.year, now.month, now.day);
-      final currentWeekStart =
-          today.subtract(Duration(days: today.weekday - 1));
+      final currentWeekStart = today.subtract(Duration(days: today.weekday - 1));
       return List.generate(
           8, (i) => currentWeekStart.subtract(Duration(days: 7 * (7 - i))));
     case _TrendRange.monthly:
-      return List.generate(
-          12, (i) => DateTime(now.year, now.month - (11 - i), 1));
+      return List.generate(12, (i) => DateTime(now.year, now.month - (11 - i), 1));
     case _TrendRange.last6Months:
-      return List.generate(
-          6, (i) => DateTime(now.year, now.month - (5 - i), 1));
+      return List.generate(6, (i) => DateTime(now.year, now.month - (5 - i), 1));
   }
 }
 
@@ -971,8 +938,7 @@ class _TrendRangeRow extends StatelessWidget {
 }
 
 class _TrendRangePill extends StatelessWidget {
-  const _TrendRangePill(
-      {required this.label, required this.active, required this.onTap});
+  const _TrendRangePill({required this.label, required this.active, required this.onTap});
 
   final String label;
   final bool active;
@@ -1009,8 +975,7 @@ class _TrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxValue =
-        data.map((e) => e.value).fold<int>(0, (a, b) => a > b ? a : b);
+    final maxValue = data.map((e) => e.value).fold<int>(0, (a, b) => a > b ? a : b);
     final displayMax = maxValue == 0 ? 6 : maxValue;
 
     return Column(
@@ -1023,8 +988,8 @@ class _TrendChart extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               data.fold<int>(0, (sum, e) => sum + e.value).toString(),
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+              style:
+                  const TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
             ),
           ],
         ),
@@ -1045,8 +1010,7 @@ class _TrendChart extends StatelessWidget {
           children: data
               .map((e) => Text(
                     e.label,
-                    style:
-                        const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                   ))
               .toList(),
         ),
@@ -1163,15 +1127,12 @@ class _CostRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.inventory_2_outlined,
-              size: 16, color: Color(0xFF2563EB)),
+          const Icon(Icons.inventory_2_outlined, size: 16, color: Color(0xFF2563EB)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(label, style: const TextStyle(fontSize: 12)),
           ),
-          Text(value,
-              style:
-                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
         ],
       ),
     );

@@ -87,8 +87,7 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
-                    headingRowColor:
-                        const WidgetStatePropertyAll(Color(0xFFF8FAFC)),
+                    headingRowColor: const WidgetStatePropertyAll(Color(0xFFF8FAFC)),
                     columns: const [
                       DataColumn(label: Text('Personel')),
                       DataColumn(label: Text('Tür')),
@@ -100,10 +99,10 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
                     rows: [
                       _row('Batuhan Kaya', 'Yıllık İzin', '15.06 - 18.06',
                           'Aile ziyareti', 'Bekleyen'),
-                      _row('Zehra Demir', 'Hastalık', '14.06 - 14.06',
-                          'Rapor yüklenecek', 'Bekleyen'),
-                      _row('Mert Çetin', 'Ücretsiz İzin', '20.06 - 22.06',
-                          'Özel neden', 'Onaylandı'),
+                      _row('Zehra Demir', 'Hastalık', '14.06 - 14.06', 'Rapor yüklenecek',
+                          'Bekleyen'),
+                      _row('Mert Çetin', 'Ücretsiz İzin', '20.06 - 22.06', 'Özel neden',
+                          'Onaylandı'),
                     ],
                   ),
                 ),
@@ -115,8 +114,7 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
     );
   }
 
-  DataRow _row(
-      String employee, String type, String date, String reason, String status) {
+  DataRow _row(String employee, String type, String date, String reason, String status) {
     return DataRow(
       cells: [
         DataCell(Text(employee)),
@@ -163,15 +161,13 @@ class _FilterField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+          Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
           DropdownButton<String>(
             value: value,
             isExpanded: true,
             underline: const SizedBox.shrink(),
             items: [
-              for (final item in items)
-                DropdownMenuItem(value: item, child: Text(item))
+              for (final item in items) DropdownMenuItem(value: item, child: Text(item))
             ],
             onChanged: (newValue) {
               if (newValue != null) onChanged(newValue);
@@ -200,11 +196,8 @@ class _DateField extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-              child: Text(label,
-                  style: const TextStyle(color: Color(0xFF64748B)))),
-          const Icon(Icons.calendar_today_outlined,
-              size: 16, color: Color(0xFF64748B)),
+          Expanded(child: Text(label, style: const TextStyle(color: Color(0xFF64748B)))),
+          const Icon(Icons.calendar_today_outlined, size: 16, color: Color(0xFF64748B)),
         ],
       ),
     );
@@ -302,8 +295,7 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
       ],

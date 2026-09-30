@@ -126,8 +126,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       customerNameController.clear();
                     }
                   },
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                  validator: (v) => v == null || v.isEmpty ? 'Müşteri seçin' : null,
                   decoration: InputDecoration(
                     labelText: 'Müşteri',
                     filled: true,
@@ -184,12 +183,9 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   value: status,
                   items: const [
                     DropdownMenuItem(value: 'Other', child: Text('Diğer')),
-                    DropdownMenuItem(
-                        value: 'InRepair', child: Text('Onarımda')),
-                    DropdownMenuItem(
-                        value: 'InMaintenance', child: Text('Bakımda')),
-                    DropdownMenuItem(
-                        value: 'Saleable', child: Text('Satılabilir')),
+                    DropdownMenuItem(value: 'InRepair', child: Text('Onarımda')),
+                    DropdownMenuItem(value: 'InMaintenance', child: Text('Bakımda')),
+                    DropdownMenuItem(value: 'Saleable', child: Text('Satılabilir')),
                     DropdownMenuItem(value: 'Selled', child: Text('Satıldı')),
                     DropdownMenuItem(value: 'Returned', child: Text('İade')),
                   ],
@@ -218,11 +214,9 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         if (!(formKey.currentState?.validate() ?? false)) {
                           return;
                         }
-                        if (selectedCustomerId == null ||
-                            selectedCustomerId!.isEmpty) {
+                        if (selectedCustomerId == null || selectedCustomerId!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Müşteri seçmelisiniz')),
+                            const SnackBar(content: Text('Müşteri seçmelisiniz')),
                           );
                           return;
                         }
@@ -230,8 +224,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             selectedCustomerUserId!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content:
-                                    Text('Müşterinin kullanıcı bilgisi yok')),
+                                content: Text('Müşterinin kullanıcı bilgisi yok')),
                           );
                           return;
                         }
@@ -247,10 +240,9 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             brand: brandController.text.trim(),
                             model: modelController.text.trim(),
                             serialNumber: serialController.text.trim(),
-                            problemDescription:
-                                problemController.text.trim().isEmpty
-                                    ? null
-                                    : problemController.text.trim(),
+                            problemDescription: problemController.text.trim().isEmpty
+                                ? null
+                                : problemController.text.trim(),
                             guaranteePeriod:
                                 int.tryParse(guaranteeController.text.trim()),
                             warrantyStartAtUtc: warrantyStartDate,
@@ -309,8 +301,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
     final warrantyStartController = TextEditingController();
     final descriptionController = TextEditingController();
     DateTime? warrantyStartDate;
-    StockCategory? selectedCategory =
-        categories.isNotEmpty ? categories.first : null;
+    StockCategory? selectedCategory = categories.isNotEmpty ? categories.first : null;
     String productCondition = 'New';
 
     showDialog(
@@ -384,11 +375,9 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                           value: productCondition,
                           items: const [
                             DropdownMenuItem(value: 'New', child: Text('Sıfır')),
+                            DropdownMenuItem(value: 'Used', child: Text('İkinci El')),
                             DropdownMenuItem(
-                                value: 'Used', child: Text('İkinci El')),
-                            DropdownMenuItem(
-                                value: 'Refurbished',
-                                child: Text('Yenilenmiş')),
+                                value: 'Refurbished', child: Text('Yenilenmiş')),
                           ],
                           onChanged: (v) => productCondition = v ?? 'New',
                           decoration: _dialogDecoration('Ürün Durumu'),
@@ -421,8 +410,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                     label: 'Satış Fiyatı',
                     controller: salePriceController,
                     requiredField: true,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -451,8 +439,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             if (picked != null) {
                               warrantyStartDate = picked;
                               final y = picked.year.toString().padLeft(4, '0');
-                              final m =
-                                  picked.month.toString().padLeft(2, '0');
+                              final m = picked.month.toString().padLeft(2, '0');
                               final d = picked.day.toString().padLeft(2, '0');
                               warrantyStartController.text = '$y-$m-$d';
                             }
@@ -484,8 +471,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                               salePriceController.text.trim().replaceAll(',', '.'));
                           if (salePrice == null || salePrice <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Geçerli satış fiyatı girin')),
+                              const SnackBar(content: Text('Geçerli satış fiyatı girin')),
                             );
                             return;
                           }
@@ -494,8 +480,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(
-                                child: CircularProgressIndicator()),
+                            builder: (_) =>
+                                const Center(child: CircularProgressIndicator()),
                           );
                           try {
                             await _deviceService.createInventoryDevice(
@@ -510,10 +496,9 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                               guaranteePeriod:
                                   int.tryParse(guaranteeController.text.trim()),
                               warrantyStartAtUtc: warrantyStartDate,
-                              description:
-                                  descriptionController.text.trim().isEmpty
-                                      ? null
-                                      : descriptionController.text.trim(),
+                              description: descriptionController.text.trim().isEmpty
+                                  ? null
+                                  : descriptionController.text.trim(),
                               unit: 'Adet',
                               quantity: 1,
                             );
@@ -521,9 +506,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             if (mounted) {
                               _refresh();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Bayi cihazı oluşturuldu')),
+                                const SnackBar(content: Text('Bayi cihazı oluşturuldu')),
                               );
                             }
                           } catch (_) {
@@ -531,8 +514,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content:
-                                        Text('Bayi cihazı oluşturulamadı')),
+                                    content: Text('Bayi cihazı oluşturulamadı')),
                               );
                             }
                           }
@@ -597,8 +579,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         if (categories.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content:
-                                    Text('Önce stok kategorisi oluşturun')),
+                                content: Text('Önce stok kategorisi oluşturun')),
                           );
                           return;
                         }
@@ -606,8 +587,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       } catch (_) {
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Stok kategorileri yüklenemedi')),
+                          const SnackBar(content: Text('Stok kategorileri yüklenemedi')),
                         );
                       }
                     },
@@ -623,8 +603,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       } catch (_) {
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Müşteriler yüklenemedi')),
+                          const SnackBar(content: Text('Müşteriler yüklenemedi')),
                         );
                       }
                     },
@@ -648,13 +627,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Cihaz Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Cihaz Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -808,8 +785,7 @@ class _DeviceTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
             ),
           );
         }

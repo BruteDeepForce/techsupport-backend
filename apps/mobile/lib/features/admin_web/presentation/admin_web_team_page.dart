@@ -95,9 +95,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
         final technician = technicianByUserId[employee.userId];
         return _ShiftEmployeeOption(
           employeeId: employee.id,
-          label: technician?.name.isNotEmpty == true
-              ? technician!.name
-              : employee.fullName,
+          label:
+              technician?.name.isNotEmpty == true ? technician!.name : employee.fullName,
           role: employee.positionName ?? 'Teknisyen',
         );
       }).toList()
@@ -148,9 +147,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
         final technician = technicianByUserId[employee.userId];
         return _ShiftEmployeeOption(
           employeeId: employee.id,
-          label: technician?.name.isNotEmpty == true
-              ? technician!.name
-              : employee.fullName,
+          label:
+              technician?.name.isNotEmpty == true ? technician!.name : employee.fullName,
           role: employee.positionName ?? 'Teknisyen',
         );
       }).toList()
@@ -191,8 +189,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setDialogState) => Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Container(
               padding: const EdgeInsets.all(20),
               constraints: const BoxConstraints(maxWidth: 560),
@@ -249,8 +246,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                     FutureBuilder<List<Experts>>(
                       future: _technicianService.listExpertise(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
                             child: LinearProgressIndicator(minHeight: 2),
@@ -284,8 +280,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                 for (final e in experts)
                                   FilterChip(
                                     label: Text(e.name),
-                                    selected:
-                                        selectedExpertiseIds.contains(e.id),
+                                    selected: selectedExpertiseIds.contains(e.id),
                                     onSelected: (val) {
                                       setDialogState(() {
                                         if (val) {
@@ -320,8 +315,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                             showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (_) => const Center(
-                                  child: CircularProgressIndicator()),
+                              builder: (_) =>
+                                  const Center(child: CircularProgressIndicator()),
                             );
                             try {
                               await _technicianService.createTechnician(
@@ -333,29 +328,25 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                 phoneNumber: phoneController.text.trim().isEmpty
                                     ? null
                                     : phoneController.text.trim(),
-                                temporaryPassword:
-                                    tempPasswordController.text.trim(),
+                                temporaryPassword: tempPasswordController.text.trim(),
                                 expertiseIds: selectedExpertiseIds.toList(),
                               );
 
                               if (!context.mounted) return;
 
-                              Navigator.of(context)
-                                  .pop(); // loading dialog kapatır
+                              Navigator.of(context).pop(); // loading dialog kapatır
 
                               _refresh();
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content:
-                                      Text('Teknisyen oluşturma başlatıldı'),
+                                  content: Text('Teknisyen oluşturma başlatıldı'),
                                 ),
                               );
                             } catch (_) {
                               if (!context.mounted) return;
 
-                              Navigator.of(context)
-                                  .pop(); // loading dialog kapatır
+                              Navigator.of(context).pop(); // loading dialog kapatır
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -390,8 +381,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 420),
@@ -435,8 +425,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) => const Center(
-                                child: CircularProgressIndicator()),
+                            builder: (_) =>
+                                const Center(child: CircularProgressIndicator()),
                           );
                           try {
                             await _technicianService.createExpertise(name);
@@ -449,8 +439,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                             if (!mounted) return;
                             navigator.pop();
                             messenger.showSnackBar(
-                              const SnackBar(
-                                  content: Text('Uzmanlık eklenemedi')),
+                              const SnackBar(content: Text('Uzmanlık eklenemedi')),
                             );
                           }
                         },
@@ -659,10 +648,8 @@ class _ShiftManagementOverview extends StatelessWidget {
         return FutureBuilder<List<ShiftAssignmentModel>>(
           future: assignmentsFuture,
           builder: (context, assignmentSnapshot) {
-            final templates =
-                templateSnapshot.data ?? const <ShiftTemplateModel>[];
-            final assignments =
-                assignmentSnapshot.data ?? const <ShiftAssignmentModel>[];
+            final templates = templateSnapshot.data ?? const <ShiftTemplateModel>[];
+            final assignments = assignmentSnapshot.data ?? const <ShiftAssignmentModel>[];
             return Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
@@ -726,10 +713,7 @@ class _ShiftManagementOverview extends StatelessWidget {
                     children: [
                       _ShiftMetricCard(
                         title: 'Aktif Şablonlar',
-                        value: templates
-                            .where((x) => x.isActive)
-                            .length
-                            .toString(),
+                        value: templates.where((x) => x.isActive).length.toString(),
                         icon: Icons.copy_all_outlined,
                         color: const Color(0xFF3B82F6),
                       ),
@@ -768,13 +752,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Ekip Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Ekip Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -850,8 +832,7 @@ class _SegmentTab extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color:
-                    active ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                color: active ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -863,8 +844,7 @@ class _SegmentTab extends StatelessWidget {
 }
 
 class _MetricRow extends StatelessWidget {
-  const _MetricRow(
-      {required this.width, required this.total, required this.activeCount});
+  const _MetricRow({required this.width, required this.total, required this.activeCount});
 
   final double width;
   final int total;
@@ -955,8 +935,7 @@ class _MetricCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF64748B))),
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
                 const SizedBox(height: 4),
                 Text(value,
                     style: const TextStyle(
@@ -1024,8 +1003,8 @@ class _DropdownPill extends StatelessWidget {
       child: Row(
         children: [
           Text(label,
-              style: const TextStyle(
-                  color: Color(0xFF475569), fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600)),
           const SizedBox(width: 8),
           const Icon(Icons.expand_more, size: 18, color: Color(0xFF94A3B8)),
         ],
@@ -1248,14 +1227,10 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                 return FutureBuilder<List<ShiftAssignmentModel>>(
                   future: assignmentsFuture,
                   builder: (context, assignmentSnapshot) {
-                    if (technicianSnapshot.connectionState ==
-                            ConnectionState.waiting ||
-                        employeeSnapshot.connectionState ==
-                            ConnectionState.waiting ||
-                        templateSnapshot.connectionState ==
-                            ConnectionState.waiting ||
-                        assignmentSnapshot.connectionState ==
-                            ConnectionState.waiting) {
+                    if (technicianSnapshot.connectionState == ConnectionState.waiting ||
+                        employeeSnapshot.connectionState == ConnectionState.waiting ||
+                        templateSnapshot.connectionState == ConnectionState.waiting ||
+                        assignmentSnapshot.connectionState == ConnectionState.waiting) {
                       return const _TableCard(
                         child: Padding(
                           padding: EdgeInsets.all(24),
@@ -1273,8 +1248,7 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                       for (final employee in employees) employee.id: employee,
                     };
                     final technicianByUserId = {
-                      for (final technician in technicians)
-                        technician.userId: technician,
+                      for (final technician in technicians) technician.userId: technician,
                     };
                     final templateById = {
                       for (final template in templates) template.id: template,
@@ -1300,14 +1274,11 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                             _PlannedShiftRow(
                               assignment: assignment,
                               employee: employeeById[assignment.employeeId],
-                              technician:
-                                  employeeById[assignment.employeeId] == null
-                                      ? null
-                                      : technicianByUserId[
-                                          employeeById[assignment.employeeId]!
-                                              .userId],
-                              template:
-                                  templateById[assignment.shiftTemplateId],
+                              technician: employeeById[assignment.employeeId] == null
+                                  ? null
+                                  : technicianByUserId[
+                                      employeeById[assignment.employeeId]!.userId],
+                              template: templateById[assignment.shiftTemplateId],
                               templates: templates,
                               technicianService: technicianService,
                               onRefresh: onRefresh,
@@ -1387,8 +1358,7 @@ class _PlannedShiftRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final personName =
-        employee?.fullName ?? technician?.name ?? 'Personel bulunamadı';
+    final personName = employee?.fullName ?? technician?.name ?? 'Personel bulunamadı';
     final roleName = employee?.positionName ?? 'Teknisyen';
     final isCheckedIn = _isCheckedInStatus(assignment.status);
     final statusColor = _resolveShiftStatusColor(assignment.status);
@@ -1415,11 +1385,8 @@ class _PlannedShiftRow extends StatelessWidget {
             ),
           ),
           Expanded(
-              child: Text(
-                  _formatDateTime(assignment.plannedStartTimeUtc.toLocal()))),
-          Expanded(
-              child: Text(
-                  _formatDateTime(assignment.plannedEndTimeUtc.toLocal()))),
+              child: Text(_formatDateTime(assignment.plannedStartTimeUtc.toLocal()))),
+          Expanded(child: Text(_formatDateTime(assignment.plannedEndTimeUtc.toLocal()))),
           Expanded(
             child: Row(
               children: [
@@ -1666,9 +1633,7 @@ class _ShiftMetricCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style:
-                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
               const SizedBox(height: 4),
               Text(value,
                   style: const TextStyle(
@@ -1729,12 +1694,10 @@ class _CreateShiftTemplateDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_CreateShiftTemplateDialog> createState() =>
-      _CreateShiftTemplateDialogState();
+  State<_CreateShiftTemplateDialog> createState() => _CreateShiftTemplateDialogState();
 }
 
-class _CreateShiftTemplateDialogState
-    extends State<_CreateShiftTemplateDialog> {
+class _CreateShiftTemplateDialogState extends State<_CreateShiftTemplateDialog> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
@@ -1837,9 +1800,7 @@ class _CreateShiftTemplateDialogState
             ),
             const SizedBox(height: 16),
             _DialogField(
-                label: 'Template Adı',
-                controller: _nameController,
-                requiredField: true),
+                label: 'Template Adı', controller: _nameController, requiredField: true),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -1874,18 +1835,16 @@ class _CreateShiftTemplateDialogState
                   child: SwitchListTile(
                     value: _isActive,
                     title: const Text('Aktif'),
-                    onChanged: _isSubmitting
-                        ? null
-                        : (v) => setState(() => _isActive = v),
+                    onChanged:
+                        _isSubmitting ? null : (v) => setState(() => _isActive = v),
                   ),
                 ),
                 Expanded(
                   child: SwitchListTile(
                     value: _isNightShift,
                     title: const Text('Gece Vardiyası'),
-                    onChanged: _isSubmitting
-                        ? null
-                        : (v) => setState(() => _isNightShift = v),
+                    onChanged:
+                        _isSubmitting ? null : (v) => setState(() => _isNightShift = v),
                   ),
                 ),
               ],
@@ -1895,9 +1854,8 @@ class _CreateShiftTemplateDialogState
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () => Navigator.of(context).pop(false),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.of(context).pop(false),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -2055,8 +2013,8 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text(
-                  'Bu personel için seçilen tarihte zaten bir vardiya atanmış.')),
+              content:
+                  Text('Bu personel için seçilen tarihte zaten bir vardiya atanmış.')),
         );
         return;
       }
@@ -2145,16 +2103,13 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: _isSubmitting
-                      ? null
-                      : () => Navigator.of(context).pop(false),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.of(context).pop(false),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _isSubmitting || _selectedTemplate == null
-                      ? null
-                      : _submit,
+                  onPressed: _isSubmitting || _selectedTemplate == null ? null : _submit,
                   child: _isSubmitting
                       ? const SizedBox(
                           width: 16,
@@ -2183,8 +2138,7 @@ class _BulkShiftPlanningDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_BulkShiftPlanningDialog> createState() =>
-      _BulkShiftPlanningDialogState();
+  State<_BulkShiftPlanningDialog> createState() => _BulkShiftPlanningDialogState();
 }
 
 class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
@@ -2315,8 +2269,7 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      final response =
-          await widget.technicianService.createBlockShiftAssignments(
+      final response = await widget.technicianService.createBlockShiftAssignments(
         CreateBlockShiftAssignmentPayload(
           branchId: '00000000-0000-0000-0000-000000000000',
           employeeId: _selectedEmployeeId!,
@@ -2434,51 +2387,44 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
                 _WeekdayChip(
                   label: 'Pzt',
                   selected: _selectedWeekdays[DateTime.monday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.monday] =
-                          !(_selectedWeekdays[DateTime.monday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.monday] =
+                      !(_selectedWeekdays[DateTime.monday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Sal',
                   selected: _selectedWeekdays[DateTime.tuesday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.tuesday] =
-                          !(_selectedWeekdays[DateTime.tuesday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.tuesday] =
+                      !(_selectedWeekdays[DateTime.tuesday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Çar',
                   selected: _selectedWeekdays[DateTime.wednesday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.wednesday] =
-                          !(_selectedWeekdays[DateTime.wednesday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.wednesday] =
+                      !(_selectedWeekdays[DateTime.wednesday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Per',
                   selected: _selectedWeekdays[DateTime.thursday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.thursday] =
-                          !(_selectedWeekdays[DateTime.thursday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.thursday] =
+                      !(_selectedWeekdays[DateTime.thursday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Cum',
                   selected: _selectedWeekdays[DateTime.friday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.friday] =
-                          !(_selectedWeekdays[DateTime.friday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.friday] =
+                      !(_selectedWeekdays[DateTime.friday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Cmt',
                   selected: _selectedWeekdays[DateTime.saturday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.saturday] =
-                          !(_selectedWeekdays[DateTime.saturday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.saturday] =
+                      !(_selectedWeekdays[DateTime.saturday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Paz',
                   selected: _selectedWeekdays[DateTime.sunday] ?? false,
-                  onTap: () => setState(() =>
-                      _selectedWeekdays[DateTime.sunday] =
-                          !(_selectedWeekdays[DateTime.sunday] ?? false)),
+                  onTap: () => setState(() => _selectedWeekdays[DateTime.sunday] =
+                      !(_selectedWeekdays[DateTime.sunday] ?? false)),
                 ),
               ],
             ),
@@ -2504,8 +2450,7 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -2543,12 +2488,10 @@ class _SingleShiftPlanningDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_SingleShiftPlanningDialog> createState() =>
-      _SingleShiftPlanningDialogState();
+  State<_SingleShiftPlanningDialog> createState() => _SingleShiftPlanningDialogState();
 }
 
-class _SingleShiftPlanningDialogState
-    extends State<_SingleShiftPlanningDialog> {
+class _SingleShiftPlanningDialogState extends State<_SingleShiftPlanningDialog> {
   String? _selectedEmployeeId;
   ShiftTemplateModel? _selectedTemplate;
   late DateTime _plannedStart;
@@ -2647,8 +2590,7 @@ class _SingleShiftPlanningDialogState
 
     if (!_plannedEnd.isAfter(_plannedStart)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Bitiş tarihi/saatı başlangıçtan sonra olmalı.')),
+        const SnackBar(content: Text('Bitiş tarihi/saatı başlangıçtan sonra olmalı.')),
       );
       return;
     }
@@ -2775,8 +2717,7 @@ class _SingleShiftPlanningDialogState
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),

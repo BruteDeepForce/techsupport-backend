@@ -76,13 +76,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Teklifler',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Teklifler', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -205,9 +203,7 @@ class _MetricCard extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF0F172A))),
-              Text(title,
-                  style:
-                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
             ],
           ),
         ],
@@ -217,8 +213,7 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _OffersTableCard extends StatelessWidget {
-  const _OffersTableCard(
-      {required this.offersFuture, required this.onOpenOffer});
+  const _OffersTableCard({required this.offersFuture, required this.onOpenOffer});
 
   final Future<List<OfferSummary>> offersFuture;
   final ValueChanged<String> onOpenOffer;
@@ -249,8 +244,7 @@ class _OffersTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı',
-                  style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
             ),
           );
         }
@@ -369,9 +363,7 @@ class _TableRow extends StatelessWidget {
               ),
             ),
             Expanded(child: Text('$itemCount')),
-            Expanded(
-                child: Text(
-                    '${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
+            Expanded(child: Text('${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
             Expanded(child: Text(_formatTime(offer.createdAt))),
           ],
         ),

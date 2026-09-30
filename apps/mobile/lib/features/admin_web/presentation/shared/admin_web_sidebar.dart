@@ -4,94 +4,130 @@ import '../../../../core/navigation/app_navigator.dart';
 import '../../../auth/data/token_storage.dart';
 import 'admin_web_nav.dart';
 
+/// Kenara yaslı sol navigasyon paneli. Kavisli köşelerin görünmesi için
+/// çevresinde boşluk bırakır; tüm admin web sayfaları bu bileşeni kullanır.
+class AdminWebSidebarPanel extends StatelessWidget {
+  const AdminWebSidebarPanel({
+    super.key,
+    required this.active,
+    this.width = 260,
+    this.margin = const EdgeInsets.fromLTRB(7, 7, 0, 7),
+    this.radius = 20,
+  });
+
+  final AdminNavKey active;
+  final double width;
+  final EdgeInsetsGeometry margin;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: margin,
+      child: SizedBox(
+        width: width,
+        child: AdminWebSidebar(active: active, radius: radius),
+      ),
+    );
+  }
+}
+
 class AdminWebSidebar extends StatelessWidget {
   const AdminWebSidebar({
     super.key,
     required this.active,
     this.compact = false,
+    this.radius = 20,
   });
 
   final AdminNavKey active;
   final bool compact;
 
+  /// Panelin dört köşesine uygulanacak kavis yarıçapı. Tam ekran drawer
+  /// içinde 0 kullanılır, kenara yaslanan panelde 20.
+  final double radius;
+
   @override
   Widget build(BuildContext context) {
     final items = adminNavItems();
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0C1E33), Color(0xFF0A1728)],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0C1E33), Color(0xFF0A1728)],
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 18),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4F46E5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Image.asset(
-                    'assets/branding/logo.png',
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                if (!compact)
-                  const Text(
-                    'Lineer Destek',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+        child: Column(
+          children: [
+            const SizedBox(height: 18),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4F46E5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/branding/logo.png',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
                     ),
                   ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          Expanded(
-            child: Scrollbar(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                children: [
-                  for (final item in items)
-                    if (item.key == AdminNavKey.aiChat)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Color(0x1A9FB3C8),
-                        ),
-                      ),
-                  for (final item in items)
-                    _NavItem(
-                      icon: item.icon,
-                      label: item.label,
-                      active: active == item.key,
-                      highlight: item.key == AdminNavKey.aiChat,
-                      onTap: () => Navigator.of(context).pushReplacement(
-                        adminNavRoute(item.pageBuilder(context)),
+                  const SizedBox(width: 10),
+                  if (!compact)
+                    const Text(
+                      'Lineer Destek',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                 ],
               ),
             ),
-          ),
-          const _SidebarFooter(),
-        ],
+            const SizedBox(height: 18),
+            Expanded(
+              child: Scrollbar(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: [
+                    for (final item in items)
+                      if (item.key == AdminNavKey.aiChat)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Divider(
+                            height: 1,
+                            thickness: 1,
+                            color: Color(0x1A9FB3C8),
+                          ),
+                        ),
+                    for (final item in items)
+                      _NavItem(
+                        icon: item.icon,
+                        label: item.label,
+                        active: active == item.key,
+                        highlight: item.key == AdminNavKey.aiChat,
+                        onTap: () => Navigator.of(context).pushReplacement(
+                          adminNavRoute(item.pageBuilder(context)),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const _SidebarFooter(),
+          ],
+        ),
       ),
     );
   }
@@ -156,9 +192,7 @@ class _NavItem extends StatelessWidget {
                   colors: [Color(0xFF4F46E5), Color(0xFF6D5CE7)],
                 )
               : null,
-          color: active && !highlight
-              ? const Color(0xFF1B3A5C)
-              : Colors.transparent,
+          color: active && !highlight ? const Color(0xFF1B3A5C) : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           boxShadow: highlight
               ? const [
@@ -173,10 +207,7 @@ class _NavItem extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon,
-                size: 18,
-                color: highlight
-                    ? Colors.white
-                    : const Color(0xFF9FB3C8)),
+                size: 18, color: highlight ? Colors.white : const Color(0xFF9FB3C8)),
             const SizedBox(width: 10),
             Text(label,
                 style: TextStyle(

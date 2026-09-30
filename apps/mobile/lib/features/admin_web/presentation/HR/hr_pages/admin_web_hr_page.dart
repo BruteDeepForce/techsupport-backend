@@ -195,8 +195,7 @@ class _TabStrip extends StatelessWidget {
                       onTap: () => onChanged(section),
                     ),
                   ),
-                  if (section != HrSection.values.last)
-                    const SizedBox(width: 8),
+                  if (section != HrSection.values.last) const SizedBox(width: 8),
                 ],
               ],
             );
@@ -316,8 +315,7 @@ class _HrDashboardSection extends StatelessWidget {
                         child: _StatCard(
                           title: 'Toplam Personel',
                           value: data.totalEmployees.toString(),
-                          note:
-                              'Aktif ${data.activeCount} • Pasif ${data.passiveCount}',
+                          note: 'Aktif ${data.activeCount} • Pasif ${data.passiveCount}',
                           icon: Icons.groups_2_outlined,
                           accent: const Color(0xFF2563EB),
                         ),
@@ -337,8 +335,7 @@ class _HrDashboardSection extends StatelessWidget {
                         width: cardWidth,
                         child: _StatCard(
                           title: 'Avans Talepleri',
-                          value:
-                              data.employeePendingAdvancesRequests.toString(),
+                          value: data.employeePendingAdvancesRequests.toString(),
                           note: 'Bekleyen avans talebi',
                           icon: Icons.account_balance_wallet_outlined,
                           accent: const Color(0xFF7C3AED),
@@ -518,8 +515,7 @@ class _PersonnelSection extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(999),
@@ -578,8 +574,7 @@ class _PersonnelSection extends StatelessWidget {
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.search,
-                                  size: 18, color: Color(0xFF94A3B8)),
+                              Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
                               SizedBox(width: 10),
                               Text(
                                 'Personel ara',
@@ -607,8 +602,7 @@ class _PersonnelSection extends StatelessWidget {
                     child: Column(
                       children: [
                         const Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 14),
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                           child: Row(
                             children: [
                               Expanded(
@@ -681,8 +675,7 @@ class _PersonnelSection extends StatelessWidget {
                               ),
                             ),
                             if (i != employees.length - 1)
-                              const Divider(
-                                  height: 1, color: Color(0xFFE2E8F0)),
+                              const Divider(height: 1, color: Color(0xFFE2E8F0)),
                           ],
                       ],
                     ),
@@ -940,20 +933,15 @@ class _PersonnelPremiumRow extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isActive
-                        ? const Color(0xFFDCFCE7)
-                        : const Color(0xFFF1F5F9),
+                    color: isActive ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     data.status,
                     style: TextStyle(
-                      color: isActive
-                          ? const Color(0xFF166534)
-                          : const Color(0xFF475569),
+                      color: isActive ? const Color(0xFF166534) : const Color(0xFF475569),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -1012,8 +1000,7 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
       ],

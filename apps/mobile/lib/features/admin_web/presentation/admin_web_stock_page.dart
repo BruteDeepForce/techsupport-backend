@@ -54,9 +54,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
               const Text(
                 'Kategori Ekle',
                 style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A)),
+                    fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 14),
               TextField(
@@ -87,12 +85,10 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) =>
-                            const Center(child: CircularProgressIndicator()),
+                        builder: (_) => const Center(child: CircularProgressIndicator()),
                       );
                       try {
-                        await _stockService.createCategory(
-                            name: controller.text.trim());
+                        await _stockService.createCategory(name: controller.text.trim());
                         if (mounted) Navigator.of(context).pop();
                         if (mounted) {
                           _refresh();
@@ -104,8 +100,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         if (mounted) Navigator.of(context).pop();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Kategori eklenemedi')),
+                            const SnackBar(content: Text('Kategori eklenemedi')),
                           );
                         }
                       }
@@ -224,8 +219,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                   label: 'Birim Fiyat',
                   controller: unitPriceController,
                   requiredField: true,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -239,8 +233,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                     ),
                   ],
                   onChanged: (v) => selectedCategoryId = v,
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Kategori seçin' : null,
+                  validator: (v) => v == null || v.isEmpty ? 'Kategori seçin' : null,
                   decoration: InputDecoration(
                     labelText: 'Kategori',
                     filled: true,
@@ -265,8 +258,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         if (!(formKey.currentState?.validate() ?? false)) {
                           return;
                         }
-                        final qty =
-                            int.tryParse(qtyController.text.trim()) ?? 0;
+                        final qty = int.tryParse(qtyController.text.trim()) ?? 0;
                         if (qty <= 0) return;
                         final unitPrice =
                             double.tryParse(unitPriceController.text.trim());
@@ -278,8 +270,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                           builder: (_) =>
                               const Center(child: CircularProgressIndicator()),
                         );
-                        if (selectedCategoryId == null ||
-                            selectedCategoryId!.isEmpty) {
+                        if (selectedCategoryId == null || selectedCategoryId!.isEmpty) {
                           return;
                         }
                         try {
@@ -462,8 +453,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                             if (!(formKey.currentState?.validate() ?? false)) return;
                             final item = selectedItem;
                             if (item == null) return;
-                            final qty =
-                                int.tryParse(qtyController.text.trim()) ?? 0;
+                            final qty = int.tryParse(qtyController.text.trim()) ?? 0;
                             if (qty <= 0) return;
 
                             Navigator.of(ctx).pop();
@@ -532,15 +522,12 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.stock),
+                child:
+                    AdminWebSidebar(compact: true, radius: 0, active: AdminNavKey.stock),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.stock),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.stock),
             Expanded(
               child: Column(
                 children: [
@@ -562,13 +549,11 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                           FutureBuilder<List<StockCategory>>(
                             future: _categoriesFuture,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const _TableCard(
                                   child: Padding(
                                     padding: EdgeInsets.all(20),
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
+                                    child: Center(child: CircularProgressIndicator()),
                                   ),
                                 );
                               }
@@ -582,22 +567,18 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                               }
                               final categories = snapshot.data ?? [];
                               final selectedCategoryName = categories
-                                  .firstWhere(
-                                      (c) => c.id == _selectedCategoryId,
-                                      orElse: () =>
-                                          StockCategory(id: '', name: ''))
+                                  .firstWhere((c) => c.id == _selectedCategoryId,
+                                      orElse: () => StockCategory(id: '', name: ''))
                                   .name;
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: const [
                                             Text(
                                               'Stok Yönetimi',
@@ -642,8 +623,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                     onSelect: (id) {
                                       setState(() {
                                         _selectedCategoryId = id;
-                                        _itemsFuture = _stockService
-                                            .listItemsByCategory(id);
+                                        _itemsFuture =
+                                            _stockService.listItemsByCategory(id);
                                       });
                                     },
                                   ),
@@ -658,15 +639,13 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                             child: Padding(
                                               padding: EdgeInsets.all(20),
                                               child: Center(
-                                                  child:
-                                                      CircularProgressIndicator()),
+                                                  child: CircularProgressIndicator()),
                                             ),
                                           );
                                         }
                                         final allItems = itemsSnap.data ?? [];
                                         return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             _CriticalPanel(
                                               items: allItems,
@@ -679,8 +658,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                                 padding: EdgeInsets.all(20),
                                                 child: Text(
                                                   'Ürünleri görmek için kategori seçin',
-                                                  style: TextStyle(
-                                                      color: Color(0xFF94A3B8)),
+                                                  style:
+                                                      TextStyle(color: Color(0xFF94A3B8)),
                                                 ),
                                               ),
                                             ),
@@ -711,6 +690,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -718,13 +698,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Stok Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Stok Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -787,8 +765,7 @@ class _CriticalPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final criticalItems = items.where((e) => e.quantityAvailable < 5).toList();
-    criticalItems
-        .sort((a, b) => a.quantityAvailable.compareTo(b.quantityAvailable));
+    criticalItems.sort((a, b) => a.quantityAvailable.compareTo(b.quantityAvailable));
     final top = criticalItems.take(5).toList();
     return _TableCard(
       child: Padding(
@@ -836,13 +813,11 @@ class _CriticalPanel extends StatelessWidget {
                           Expanded(
                             child: Text(item.name,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600)),
+                                style: const TextStyle(fontWeight: FontWeight.w600)),
                           ),
                           Text('${item.quantityAvailable}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFFEF4444))),
+                                  fontWeight: FontWeight.w700, color: Color(0xFFEF4444))),
                         ],
                       ),
                     ),
@@ -896,9 +871,7 @@ class _MetricCard extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF0F172A))),
-              Text(title,
-                  style:
-                      const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
             ],
           ),
         ],
@@ -965,8 +938,8 @@ class _DropdownPill extends StatelessWidget {
       child: Row(
         children: [
           Text(label,
-              style: const TextStyle(
-                  color: Color(0xFF475569), fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600)),
           const SizedBox(width: 8),
           const Icon(Icons.expand_more, size: 18, color: Color(0xFF94A3B8)),
         ],
@@ -992,8 +965,7 @@ class _CategoryGrid extends StatelessWidget {
       return const _TableCard(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Text('Kategori bulunamadı',
-              style: TextStyle(color: Color(0xFF94A3B8))),
+          child: Text('Kategori bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
         ),
       );
     }
@@ -1003,9 +975,7 @@ class _CategoryGrid extends StatelessWidget {
         const Text(
           'Kategoriler',
           style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B)),
+              fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
         ),
         const SizedBox(height: 8),
         GridView.count(
@@ -1030,8 +1000,7 @@ class _CategoryGrid extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  const _CategoryCard(
-      {required this.label, required this.selected, required this.onTap});
+  const _CategoryCard({required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -1065,15 +1034,11 @@ class _CategoryCard extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFDBEAFE)
-                    : const Color(0xFFF1F5F9),
+                color: selected ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.inventory_2_outlined,
-                  color: selected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF64748B),
+                  color: selected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                   size: 18),
             ),
             const SizedBox(width: 10),
@@ -1083,14 +1048,11 @@ class _CategoryCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: selected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF0F172A),
+                  color: selected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                size: 18, color: Color(0xFF94A3B8)),
+            const Icon(Icons.chevron_right_rounded, size: 18, color: Color(0xFF94A3B8)),
           ],
         ),
       ),
@@ -1100,9 +1062,7 @@ class _CategoryCard extends StatelessWidget {
 
 class _CategoryItemsSection extends StatelessWidget {
   const _CategoryItemsSection(
-      {required this.itemsFuture,
-      required this.onRefresh,
-      required this.categoryName});
+      {required this.itemsFuture, required this.onRefresh, required this.categoryName});
 
   final Future<List<StockItem>> itemsFuture;
   final VoidCallback onRefresh;
@@ -1164,8 +1124,7 @@ class _StockTableCard extends StatelessWidget {
       return const _TableCard(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Text('Kayıt bulunamadı',
-              style: TextStyle(color: Color(0xFF94A3B8))),
+          child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
         ),
       );
     }

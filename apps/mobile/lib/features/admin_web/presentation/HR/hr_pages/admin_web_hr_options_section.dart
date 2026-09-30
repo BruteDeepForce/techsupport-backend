@@ -6,8 +6,7 @@ class AdminWebHROptionsSection extends StatefulWidget {
   const AdminWebHROptionsSection({super.key});
 
   @override
-  State<AdminWebHROptionsSection> createState() =>
-      _AdminWebHROptionsSectionState();
+  State<AdminWebHROptionsSection> createState() => _AdminWebHROptionsSectionState();
 }
 
 class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
@@ -90,8 +89,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
     }
   }
 
-  Future<void> _showLeaveDeductionDialog(
-      {HRLeaveDeductionResponse? initialValue}) async {
+  Future<void> _showLeaveDeductionDialog({HRLeaveDeductionResponse? initialValue}) async {
     final changed = await showDialog<bool>(
       context: context,
       builder: (context) => _LeaveDeductionDialog(
@@ -111,8 +109,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
     final shouldDelete = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: const Text('Kesinti Ayarını Sil'),
             content: Text(
               '${_leaveTypeLabel(item.deductionType)} kesinti ayarı silinsin mi?',
@@ -177,8 +174,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
           const SizedBox(height: 18),
           _SettingsSectionShell(
             title: 'Pozisyon Ayarları',
-            subtitle:
-                'Pozisyonları görüntüleyin, yönetin ve yeni pozisyon ekleyin.',
+            subtitle: 'Pozisyonları görüntüleyin, yönetin ve yeni pozisyon ekleyin.',
             action: OutlinedButton.icon(
               onPressed: _showCreatePositionDialog,
               icon: const Icon(Icons.add, size: 16),
@@ -215,8 +211,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                 return Column(
                   children: [
                     const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       child: Row(
                         children: [
                           Expanded(
@@ -294,13 +289,11 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                 if (snapshot.hasError) {
                   return Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text(
-                        'İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
+                    child: Text('İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
                   );
                 }
 
-                final items =
-                    snapshot.data ?? const <HRLeaveDeductionResponse>[];
+                final items = snapshot.data ?? const <HRLeaveDeductionResponse>[];
                 if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(24),
@@ -318,8 +311,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                       for (var i = 0; i < items.length; i++) ...[
                         _LeaveDeductionRow(
                           item: items[i],
-                          onEdit: () =>
-                              _showLeaveDeductionDialog(initialValue: items[i]),
+                          onEdit: () => _showLeaveDeductionDialog(initialValue: items[i]),
                           onDelete: () => _deleteLeaveDeduction(items[i]),
                         ),
                         if (i != items.length - 1) const SizedBox(height: 12),
@@ -340,9 +332,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
-                  onPressed: _isAdvanceSettingsLoading
-                      ? null
-                      : _loadCurrentAdvanceSettings,
+                  onPressed:
+                      _isAdvanceSettingsLoading ? null : _loadCurrentAdvanceSettings,
                   icon: const Icon(Icons.refresh_rounded, size: 16),
                   label: const Text('Yenile'),
                 ),
@@ -353,9 +344,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                     size: 16,
                   ),
                   label: Text(
-                    _advanceSettings == null
-                        ? 'Ayar Oluştur'
-                        : 'Ayarı Güncelle',
+                    _advanceSettings == null ? 'Ayar Oluştur' : 'Ayarı Güncelle',
                   ),
                 ),
               ],
@@ -486,9 +475,8 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                     ),
                     _MiniPill(
                       label: _isActive ? 'Aktif' : 'Pasif',
-                      color: _isActive
-                          ? const Color(0xFF16A34A)
-                          : const Color(0xFF64748B),
+                      color:
+                          _isActive ? const Color(0xFF16A34A) : const Color(0xFF64748B),
                     ),
                   ],
                 ),
@@ -515,20 +503,18 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(14),
-                              border:
-                                  Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
                             ),
                             child: Row(
                               children: [
                                 const Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Durum',
@@ -552,8 +538,7 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                                   value: _isActive,
                                   onChanged: _isSubmitting
                                       ? null
-                                      : (value) =>
-                                          setState(() => _isActive = value),
+                                      : (value) => setState(() => _isActive = value),
                                 ),
                               ],
                             ),
@@ -578,9 +563,8 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.of(context).pop(false),
+                    onPressed:
+                        _isSubmitting ? null : () => Navigator.of(context).pop(false),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),
@@ -717,9 +701,8 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isEdit
-              ? 'Kesinti ayarı güncellendi.'
-              : 'Kesinti ayarı oluşturuldu.'),
+          content:
+              Text(_isEdit ? 'Kesinti ayarı güncellendi.' : 'Kesinti ayarı oluşturuldu.'),
         ),
       );
       Navigator.of(context).pop(true);
@@ -897,9 +880,8 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.of(context).pop(false),
+                    onPressed:
+                        _isSubmitting ? null : () => Navigator.of(context).pop(false),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),
@@ -1023,9 +1005,7 @@ class _AdvanceSettingsCard extends StatelessWidget {
           Row(
             children: [
               _MiniPill(
-                label: setting!.allowFutureAdvances
-                    ? 'Taksitli Açık'
-                    : 'Taksitli Kapalı',
+                label: setting!.allowFutureAdvances ? 'Taksitli Açık' : 'Taksitli Kapalı',
                 color: setting!.allowFutureAdvances
                     ? const Color(0xFF16A34A)
                     : const Color(0xFF64748B),
@@ -1039,8 +1019,7 @@ class _AdvanceSettingsCard extends StatelessWidget {
             children: [
               _SettingsMetricPill(
                 label: 'Kişi Başı Limit',
-                value:
-                    '${setting!.maxAdvanceAmountPerPerson.toStringAsFixed(2)} ₺',
+                value: '${setting!.maxAdvanceAmountPerPerson.toStringAsFixed(2)} ₺',
               ),
               _SettingsMetricPill(
                 label: 'Yıllık Avans Hakkı',
@@ -1079,8 +1058,7 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
   void initState() {
     super.initState();
     _maxAmountController = TextEditingController(
-      text: widget.initialValue?.maxAdvanceAmountPerPerson.toStringAsFixed(2) ??
-          '',
+      text: widget.initialValue?.maxAdvanceAmountPerPerson.toStringAsFixed(2) ?? '',
     );
     _maxCountController = TextEditingController(
       text: widget.initialValue?.maxAdvanceCountPerYear.toString() ?? '',
@@ -1137,9 +1115,7 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEdit
-                ? 'Advance settings güncellendi.'
-                : 'Advance settings oluşturuldu.',
+            _isEdit ? 'Advance settings güncellendi.' : 'Advance settings oluşturuldu.',
           ),
         ),
       );
@@ -1256,8 +1232,7 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(14),
@@ -1291,15 +1266,12 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                             value: _allowFutureAdvances,
                             onChanged: _isSubmitting
                                 ? null
-                                : (value) => setState(
-                                    () => _allowFutureAdvances = value),
+                                : (value) => setState(() => _allowFutureAdvances = value),
                           ),
                         ],
                       ),
                     ),
-                    if (widget.initialValue != null) ...[
-                      const SizedBox(height: 14)
-                    ],
+                    if (widget.initialValue != null) ...[const SizedBox(height: 14)],
                   ],
                 ),
               ),
@@ -1308,9 +1280,7 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => Navigator.of(context).pop(),
+                    onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),

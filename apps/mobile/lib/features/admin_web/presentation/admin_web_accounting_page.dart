@@ -93,13 +93,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Muhasebe',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Muhasebe', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -116,9 +114,7 @@ class _Header extends StatelessWidget {
         Text(
           'Muhasebe',
           style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A)),
+              fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
         ),
         SizedBox(height: 5),
         Text(
@@ -160,8 +156,7 @@ class _ErrorPanel extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(Icons.cloud_off_outlined,
-              size: 38, color: Color(0xFF94A3B8)),
+          const Icon(Icons.cloud_off_outlined, size: 38, color: Color(0xFF94A3B8)),
           const SizedBox(height: 12),
           const Text('Muhasebe verileri yüklenemedi',
               style: TextStyle(fontWeight: FontWeight.w700)),

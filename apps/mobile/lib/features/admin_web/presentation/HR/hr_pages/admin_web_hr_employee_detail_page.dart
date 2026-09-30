@@ -21,8 +21,7 @@ class AdminWebHrEmployeeDetailPage extends StatefulWidget {
       _AdminWebHrEmployeeDetailPageState();
 }
 
-class _AdminWebHrEmployeeDetailPageState
-    extends State<AdminWebHrEmployeeDetailPage> {
+class _AdminWebHrEmployeeDetailPageState extends State<AdminWebHrEmployeeDetailPage> {
   final HRService _hrService = HRService();
   Future<HREmployeeDetailResponse>? _employeeFuture;
 
@@ -63,8 +62,7 @@ class _AdminWebHrEmployeeDetailPageState
 
                 if (snapshot.hasError) {
                   return _CardShell(
-                    child:
-                        Text('Personel detayı yüklenemedi: ${snapshot.error}'),
+                    child: Text('Personel detayı yüklenemedi: ${snapshot.error}'),
                   );
                 }
 
@@ -166,9 +164,7 @@ class _EmployeeDetailContent extends StatelessWidget {
                   ),
                 ),
                 _StatusPill(
-                  label: employee.status.toLowerCase() == 'active'
-                      ? 'Aktif'
-                      : 'Pasif',
+                  label: employee.status.toLowerCase() == 'active' ? 'Aktif' : 'Pasif',
                   color: employee.status.toLowerCase() == 'active'
                       ? const Color(0xFF16A34A)
                       : const Color(0xFF64748B),
@@ -191,8 +187,7 @@ class _EmployeeDetailContent extends StatelessWidget {
                 child: _MetricCard(
                   title: 'Bekleyen Avans',
                   value: employee.employeeAdvances
-                      .where((advance) =>
-                          advance.status.toLowerCase() == 'pending')
+                      .where((advance) => advance.status.toLowerCase() == 'pending')
                       .length
                       .toString(),
                   accent: const Color(0xFFD97706),
@@ -260,8 +255,7 @@ class _EmployeeDetailContent extends StatelessWidget {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
-                      headingRowColor:
-                          const WidgetStatePropertyAll(Color(0xFFF8FAFC)),
+                      headingRowColor: const WidgetStatePropertyAll(Color(0xFFF8FAFC)),
                       columns: const [
                         DataColumn(label: Text('Tarih')),
                         DataColumn(label: Text('Süre')),
@@ -269,9 +263,7 @@ class _EmployeeDetailContent extends StatelessWidget {
                         DataColumn(label: Text('Talep Tarihi')),
                       ],
                       rows: leaves.map((leave) {
-                        final days =
-                            leave.endDate.difference(leave.startDate).inDays +
-                                1;
+                        final days = leave.endDate.difference(leave.startDate).inDays + 1;
                         return DataRow(cells: [
                           DataCell(Text(
                             '${_formatDate(leave.startDate)} - ${_formatDate(leave.endDate)}',
@@ -311,8 +303,7 @@ class _EmployeeDetailContent extends StatelessWidget {
     }
   }
 
-  static HREmployeeDetailSalary? _currentSalary(
-      List<HREmployeeDetailSalary> salaries) {
+  static HREmployeeDetailSalary? _currentSalary(List<HREmployeeDetailSalary> salaries) {
     final now = DateTime.now();
     final active = salaries
         .where((salary) =>
@@ -324,8 +315,7 @@ class _EmployeeDetailContent extends StatelessWidget {
     return active.isEmpty ? null : active.first;
   }
 
-  static HREmployeeDetailSalary? _latestSalary(
-      List<HREmployeeDetailSalary> salaries) {
+  static HREmployeeDetailSalary? _latestSalary(List<HREmployeeDetailSalary> salaries) {
     if (salaries.isEmpty) return null;
     final sorted = [...salaries]
       ..sort((a, b) => b.effectiveFrom.compareTo(a.effectiveFrom));
@@ -346,8 +336,7 @@ class _FallbackDetail extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(employeeName,
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             const Text(
               'Bu kayıt için doğrudan employee id gelmediği için canlı detay yüklenemedi.',
@@ -373,20 +362,18 @@ class _ProfileCard extends StatelessWidget {
           CircleAvatar(
             radius: 34,
             backgroundColor: const Color(0xFFE2E8F0),
-            backgroundImage: employee.profileImageUrl != null &&
-                    employee.profileImageUrl!.isNotEmpty
-                ? NetworkImage(employee.profileImageUrl!)
-                : null,
-            child: employee.profileImageUrl == null ||
-                    employee.profileImageUrl!.isEmpty
+            backgroundImage:
+                employee.profileImageUrl != null && employee.profileImageUrl!.isNotEmpty
+                    ? NetworkImage(employee.profileImageUrl!)
+                    : null,
+            child: employee.profileImageUrl == null || employee.profileImageUrl!.isEmpty
                 ? const Icon(Icons.person_outline_rounded,
                     size: 32, color: Color(0xFF64748B))
                 : null,
           ),
           const SizedBox(height: 12),
           Text(employee.fullName,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
           Text(
             employee.positionName ?? 'Pozisyon Atanmadı',
@@ -397,9 +384,7 @@ class _ProfileCard extends StatelessWidget {
           _InfoRow(label: 'Telefon', value: employee.phone ?? '—'),
           _InfoRow(
               label: 'Durum',
-              value: employee.status.toLowerCase() == 'active'
-                  ? 'Aktif'
-                  : 'Pasif'),
+              value: employee.status.toLowerCase() == 'active' ? 'Aktif' : 'Pasif'),
         ],
       ),
     );
@@ -427,14 +412,11 @@ class _EmploymentCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _InfoRow(label: 'Şube', value: _branchLabel(employee.branchId)),
-          _InfoRow(
-              label: 'Departman',
-              value: _departmentLabel(employee.departmentId)),
+          _InfoRow(label: 'Departman', value: _departmentLabel(employee.departmentId)),
           _InfoRow(label: 'Pozisyon', value: employee.positionName ?? '—'),
           _InfoRow(
             label: 'İşe Başlama',
-            value:
-                _EmployeeDetailContent._formatDate(employee.jobsStartDateUtc),
+            value: _EmployeeDetailContent._formatDate(employee.jobsStartDateUtc),
           ),
           _InfoRow(
             label: 'Son Maaş',
@@ -448,8 +430,7 @@ class _EmploymentCard extends StatelessWidget {
   }
 
   String _branchLabel(String branchId) {
-    if (branchId.isEmpty ||
-        branchId == '00000000-0000-0000-0000-000000000000') {
+    if (branchId.isEmpty || branchId == '00000000-0000-0000-0000-000000000000') {
       return 'Merkez';
     }
     return 'Şube Tanımlı';
@@ -852,9 +833,7 @@ class _SalaryRow extends StatelessWidget {
                 Text(
                   isActive ? 'Aktif kayıt' : 'Geçmiş kayıt',
                   style: TextStyle(
-                    color: isActive
-                        ? const Color(0xFF16A34A)
-                        : const Color(0xFF64748B),
+                    color: isActive ? const Color(0xFF16A34A) : const Color(0xFF64748B),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -864,8 +843,7 @@ class _SalaryRow extends StatelessWidget {
           Expanded(child: Text(_formatMoney(salary.grossSalary))),
           Expanded(child: Text(_formatMoney(salary.netSalary))),
           Expanded(
-            child:
-                Text(_EmployeeDetailContent._formatDate(salary.createdAtUtc)),
+            child: Text(_EmployeeDetailContent._formatDate(salary.createdAtUtc)),
           ),
           SizedBox(
             width: 110,
@@ -931,8 +909,7 @@ class _SalaryFormDialogState extends State<_SalaryFormDialog> {
   }
 
   Future<void> _pickDate(bool isStart) async {
-    final initialDate =
-        isStart ? _effectiveFrom : (_effectiveTo ?? _effectiveFrom);
+    final initialDate = isStart ? _effectiveFrom : (_effectiveTo ?? _effectiveFrom);
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -1194,8 +1171,7 @@ class _DatePickerField extends StatelessWidget {
                 color: const Color(0xFF64748B),
                 tooltip: 'Tarihi temizle',
               ),
-            const Icon(Icons.calendar_today_outlined,
-                size: 18, color: Color(0xFF64748B)),
+            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
           ],
         ),
       ),
@@ -1253,8 +1229,7 @@ class _HistoryCard extends StatelessWidget {
             )
           else
             for (var i = 0; i < records.length; i++) ...[
-              _HistoryRow(
-                  title: records[i].title, subtitle: records[i].subtitle),
+              _HistoryRow(title: records[i].title, subtitle: records[i].subtitle),
               if (i != records.length - 1)
                 const Divider(height: 24, color: Color(0xFFE2E8F0)),
             ],
@@ -1345,8 +1320,7 @@ class _InfoRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 110,
-            child:
-                Text(label, style: const TextStyle(color: Color(0xFF64748B))),
+            child: Text(label, style: const TextStyle(color: Color(0xFF64748B))),
           ),
           Expanded(
             child: Text(
@@ -1400,8 +1374,7 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
       ],

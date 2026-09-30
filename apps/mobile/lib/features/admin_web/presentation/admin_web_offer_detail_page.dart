@@ -14,8 +14,7 @@ class AdminWebOfferDetailPage extends StatefulWidget {
   final String offerId;
 
   @override
-  State<AdminWebOfferDetailPage> createState() =>
-      _AdminWebOfferDetailPageState();
+  State<AdminWebOfferDetailPage> createState() => _AdminWebOfferDetailPageState();
 }
 
 class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
@@ -41,8 +40,8 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     try {
       final ok = await _offerService.approveAdmin(widget.offerId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(ok ? 'Teklif onaylandı' : 'Onay başarısız')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ok ? 'Teklif onaylandı' : 'Onay başarısız')));
       _refresh();
     } catch (_) {
       if (!mounted) return;
@@ -58,8 +57,8 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     try {
       final ok = await _offerService.rejectAdmin(widget.offerId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(ok ? 'Teklif reddedildi' : 'Reddetme başarısız')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ok ? 'Teklif reddedildi' : 'Reddetme başarısız')));
       _refresh();
     } catch (_) {
       if (!mounted) return;
@@ -107,15 +106,12 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.offers),
+                child:
+                    AdminWebSidebar(compact: true, radius: 0, active: AdminNavKey.offers),
               ),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.offers),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.offers),
             Expanded(
               child: Column(
                 children: [
@@ -165,13 +161,11 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                           FutureBuilder<OfferSummary>(
                             future: _offerFuture,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const _Card(
                                   child: Padding(
                                     padding: EdgeInsets.all(20),
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
+                                    child: Center(child: CircularProgressIndicator()),
                                   ),
                                 );
                               }
@@ -193,11 +187,10 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                 );
                               }
 
-                              final itemCount = offer.items
-                                  .fold<int>(0, (sum, i) => sum + i.quantity);
+                              final itemCount =
+                                  offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
                               final status = (offer.status ?? 'Pending');
-                              final isPending =
-                                  status.toLowerCase() == 'pending';
+                              final isPending = status.toLowerCase() == 'pending';
 
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,8 +199,7 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(20),
                                       child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Expanded(
                                             child: Column(
@@ -232,24 +224,19 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                                 Row(
                                                   children: [
                                                     _Pill(
-                                                      label:
-                                                          'Kalem: $itemCount',
-                                                      color: const Color(
-                                                          0xFF2563EB),
+                                                      label: 'Kalem: $itemCount',
+                                                      color: const Color(0xFF2563EB),
                                                     ),
                                                     const SizedBox(width: 8),
                                                     _Pill(
-                                                      label:
-                                                          _statusLabel(status),
-                                                      color:
-                                                          _statusColor(status),
+                                                      label: _statusLabel(status),
+                                                      color: _statusColor(status),
                                                     ),
                                                     const SizedBox(width: 8),
                                                     _Pill(
                                                       label:
                                                           '${offer.amount.toStringAsFixed(2)} ${offer.currency}',
-                                                      color: const Color(
-                                                          0xFFF59E0B),
+                                                      color: const Color(0xFFF59E0B),
                                                     ),
                                                   ],
                                                 ),
@@ -258,23 +245,19 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                           ),
                                           const SizedBox(width: 16),
                                           Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
+                                            crossAxisAlignment: CrossAxisAlignment.end,
                                             children: [
                                               const Text('Teknisyen',
                                                   style: TextStyle(
                                                       fontSize: 12,
-                                                      color:
-                                                          Color(0xFF64748B))),
+                                                      color: Color(0xFF64748B))),
                                               const SizedBox(height: 4),
-                                              Text(_shortId(
-                                                  offer.technicianUserId)),
+                                              Text(_shortId(offer.technicianUserId)),
                                               const SizedBox(height: 12),
                                               const Text('Müşteri',
                                                   style: TextStyle(
                                                       fontSize: 12,
-                                                      color:
-                                                          Color(0xFF64748B))),
+                                                      color: Color(0xFF64748B))),
                                               const SizedBox(height: 4),
                                               Text(offer.customerId ?? '-'),
                                               const SizedBox(height: 16),
@@ -293,21 +276,20 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                                               strokeWidth: 2,
                                                             ),
                                                           )
-                                                        : const Icon(Icons.picture_as_pdf_outlined),
+                                                        : const Icon(Icons
+                                                            .picture_as_pdf_outlined),
                                                     label: const Text('Fatura PDF'),
                                                   ),
                                                   const SizedBox(width: 10),
                                                   OutlinedButton(
-                                                    onPressed: _acting ||
-                                                            !isPending
+                                                    onPressed: _acting || !isPending
                                                         ? null
                                                         : _reject,
                                                     child: const Text('Reddet'),
                                                   ),
                                                   const SizedBox(width: 10),
                                                   FilledButton(
-                                                    onPressed: _acting ||
-                                                            !isPending
+                                                    onPressed: _acting || !isPending
                                                         ? null
                                                         : _approve,
                                                     child: const Text('Onayla'),
@@ -326,8 +308,7 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
                                       children: [
                                         const _ItemsHeader(),
                                         const Divider(
-                                            height: 1,
-                                            color: Color(0xFFE2E8F0)),
+                                            height: 1, color: Color(0xFFE2E8F0)),
                                         for (final item in offer.items)
                                           _ItemRow(item: item),
                                       ],
@@ -350,6 +331,7 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -357,13 +339,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Teklifler',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Teklifler', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),

@@ -7,4 +7,3 @@ PageRouteBuilder<void> adminWebRoute(Widget page) {
     reverseTransitionDuration: Duration.zero,
   );
 }
-

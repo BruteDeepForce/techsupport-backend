@@ -15,8 +15,7 @@ class AdminWebTicketDetailPage extends StatefulWidget {
   final String ticketId;
 
   @override
-  State<AdminWebTicketDetailPage> createState() =>
-      _AdminWebTicketDetailPageState();
+  State<AdminWebTicketDetailPage> createState() => _AdminWebTicketDetailPageState();
 }
 
 class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
@@ -42,8 +41,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
 
   Future<void> _approveTicket(Ticket ticket) async {
     if (_selectedTechnician == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Teknisyen seçin')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Teknisyen seçin')));
       return;
     }
     try {
@@ -58,14 +57,14 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
         ),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Talep iş emrine dönüştürüldü')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Talep iş emrine dönüştürüldü')));
         _refreshTicket();
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Onay işlemi başarısız')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Onay işlemi başarısız')));
       }
     }
   }
@@ -86,8 +85,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('İptal')),
+              onPressed: () => Navigator.of(ctx).pop(false), child: const Text('İptal')),
           ElevatedButton(
               onPressed: () {
                 if (reasonController.text.trim().isEmpty) return;
@@ -99,8 +97,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
     );
     if (confirmed != true) return;
     try {
-      await _ticketService.rejectTicket(
-          ticket.id, reasonController.text.trim());
+      await _ticketService.rejectTicket(ticket.id, reasonController.text.trim());
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Talep reddedildi')));
@@ -108,8 +105,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Reddetme işlemi başarısız')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Reddetme işlemi başarısız')));
       }
     }
   }
@@ -127,14 +124,11 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
         drawer: showSidebar
             ? null
             : const Drawer(
-                child: AdminWebSidebar(compact: true, active: AdminNavKey.tickets)),
+                child: AdminWebSidebar(
+                    compact: true, radius: 0, active: AdminNavKey.tickets)),
         body: Row(
           children: [
-            if (showSidebar)
-              const SizedBox(
-                width: 260,
-                child: AdminWebSidebar(active: AdminNavKey.tickets),
-              ),
+            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.tickets),
             Expanded(
               child: Column(
                 children: [
@@ -145,10 +139,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                       child: FutureBuilder<Ticket>(
                         future: _ticketFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
                           }
                           if (snapshot.hasError) {
                             return const _Card(
@@ -173,8 +165,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           ticket.title,
@@ -204,20 +195,17 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                   children: [
                                     Text(ticket.description,
                                         style: const TextStyle(
-                                            color: Color(0xFF475569),
-                                            height: 1.5)),
+                                            color: Color(0xFF475569), height: 1.5)),
                                     const SizedBox(height: 12),
                                     Row(
                                       children: [
                                         _InfoChip(
                                             label: 'Öncelik',
-                                            value:
-                                                _priorityLabel(ticket.priority)),
+                                            value: _priorityLabel(ticket.priority)),
                                         const SizedBox(width: 10),
                                         _InfoChip(
                                             label: 'Tarih',
-                                            value:
-                                                _formatDate(ticket.createdAtUtc)),
+                                            value: _formatDate(ticket.createdAtUtc)),
                                       ],
                                     ),
                                   ],
@@ -230,12 +218,11 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                   Expanded(
                                     child: _Card(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Text('Teknisyen Ata',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w600)),
+                                              style:
+                                                  TextStyle(fontWeight: FontWeight.w600)),
                                           const SizedBox(height: 10),
                                           FutureBuilder<List<Technician>>(
                                             future: _techniciansFuture,
@@ -244,8 +231,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                                   ConnectionState.waiting) {
                                                 return const LinearProgressIndicator();
                                               }
-                                              final techs =
-                                                  snapshot.data ?? [];
+                                              final techs = snapshot.data ?? [];
                                               return DropdownButtonFormField<String>(
                                                 value: _selectedTechnician?.userId,
                                                 items: [
@@ -258,13 +244,11 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                                 onChanged: (value) {
                                                   setState(() {
                                                     final found = techs
-                                                        .where(
-                                                            (t) => t.userId == value)
+                                                        .where((t) => t.userId == value)
                                                         .toList();
-                                                    _selectedTechnician =
-                                                        found.isEmpty
-                                                            ? null
-                                                            : found.first;
+                                                    _selectedTechnician = found.isEmpty
+                                                        ? null
+                                                        : found.first;
                                                   });
                                                 },
                                                 decoration: const InputDecoration(
@@ -281,8 +265,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
                                             maxLines: 3,
                                             decoration: const InputDecoration(
                                               labelText: 'İç Not',
-                                              hintText:
-                                                  'Operasyon için not ekleyin',
+                                              hintText: 'Operasyon için not ekleyin',
                                               filled: true,
                                               fillColor: Color(0xFFF8FAFC),
                                             ),
@@ -333,6 +316,7 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
     );
   }
 }
+
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 
@@ -340,13 +324,11 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim',
-            style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
         SizedBox(width: 6),
         Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
         SizedBox(width: 6),
-        Text('Talep Detayı',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Talep Detayı', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
       ],
     );
   }
@@ -392,11 +374,8 @@ class _InfoChip extends StatelessWidget {
         children: [
           Text('$label: ',
               style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF475569))),
-          Text(value,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF0F172A))),
+                  fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+          Text(value, style: const TextStyle(fontSize: 12, color: Color(0xFF0F172A))),
         ],
       ),
     );
@@ -418,8 +397,7 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
@@ -489,8 +467,7 @@ String _formatDate(DateTime dt) {
   return '$day.$month.$year';
 }
 
-String _shortId(String id) =>
-    id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+String _shortId(String id) => id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
 
 String _statusLabel(String status) {
   switch (status.toLowerCase()) {
