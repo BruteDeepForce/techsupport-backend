@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Technician.AI;
+using TechSupport.Technician.Contracts.AI;
 using TechSupport.Technician.Data;
 using TechSupport.Technician.Services;
 
@@ -22,6 +24,7 @@ public static class ModuleExtensions
         }
 
         services.AddScoped<ITechnicianService, TechnicianService>();
+        services.AddScoped<IQueryTechnician, QueryTechnician>();
         services.AddSingleton<S3Service>(sp => new S3Service(configuration));
     
         return services;

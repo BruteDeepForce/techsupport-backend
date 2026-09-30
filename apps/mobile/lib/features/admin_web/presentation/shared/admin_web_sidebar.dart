@@ -67,10 +67,21 @@ class AdminWebSidebar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
                   for (final item in items)
+                    if (item.key == AdminNavKey.aiChat)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0x1A9FB3C8),
+                        ),
+                      ),
+                  for (final item in items)
                     _NavItem(
                       icon: item.icon,
                       label: item.label,
                       active: active == item.key,
+                      highlight: item.key == AdminNavKey.aiChat,
                       onTap: () => Navigator.of(context).pushReplacement(
                         adminNavRoute(item.pageBuilder(context)),
                       ),
@@ -121,12 +132,14 @@ class _NavItem extends StatelessWidget {
     required this.icon,
     required this.label,
     this.active = false,
+    this.highlight = false,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool active;
+  final bool highlight;
   final VoidCallback? onTap;
 
   @override
@@ -138,18 +151,42 @@ class _NavItem extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF1B3A5C) : Colors.transparent,
+          gradient: highlight
+              ? const LinearGradient(
+                  colors: [Color(0xFF4F46E5), Color(0xFF6D5CE7)],
+                )
+              : null,
+          color: active && !highlight
+              ? const Color(0xFF1B3A5C)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
+          boxShadow: highlight
+              ? const [
+                  BoxShadow(
+                    color: Color(0x594F46E5),
+                    blurRadius: 14,
+                    offset: Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF9FB3C8)),
+            Icon(icon,
+                size: 18,
+                color: highlight
+                    ? Colors.white
+                    : const Color(0xFF9FB3C8)),
             const SizedBox(width: 10),
             Text(label,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                  color: active ? Colors.white : const Color(0xFF9FB3C8),
+                  fontWeight: highlight
+                      ? FontWeight.w600
+                      : (active ? FontWeight.w600 : FontWeight.w500),
+                  color: highlight
+                      ? Colors.white
+                      : (active ? Colors.white : const Color(0xFF9FB3C8)),
                 )),
           ],
         ),

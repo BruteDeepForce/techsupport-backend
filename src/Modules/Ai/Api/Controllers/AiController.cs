@@ -2,27 +2,52 @@ using Ai.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace TechSupport.Ai.Api.Controllers;
 
 [ApiController]
 [Route("api/ai")]
+[Authorize]
 public class AiController : ControllerBase
 {
     private readonly IEmbeddingService _embeddingService;
     private readonly IAIOrchestartorService _aiOrchestratorService;
 
+    private readonly ISemanticKernelOrchestrator _semanticKernelOrchestrator;
+
     private readonly IAIResponseFormatter _aiResponseFormatter;
 
-    public AiController(IEmbeddingService embeddingService, IAIOrchestartorService aiOrchestratorService, IAIResponseFormatter aiResponseFormatter)
+    public AiController(IEmbeddingService embeddingService, IAIOrchestartorService aiOrchestratorService, ISemanticKernelOrchestrator semanticKernelOrchestrator, IAIResponseFormatter aiResponseFormatter)
     {
         _embeddingService = embeddingService;
         _aiOrchestratorService = aiOrchestratorService;
+        _semanticKernelOrchestrator = semanticKernelOrchestrator;
         _aiResponseFormatter = aiResponseFormatter;
     }
+    [HttpPost("Chat-Kernel")]
+    public async Task<IActionResult> ChatKernel([FromBody] ChatKernelRequest req, CancellationToken cancellationToken)
+    {
+        var tenantId = User.FindFirstValue("tenant_id");
+        Guid.TryParse(tenantId, out var tenantGuid);
+        var branchId = User.FindFirstValue("branch_id");
+        Guid.TryParse(branchId, out var branchGuid);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Guid.TryParse(userId, out var userGuid);
 
-    [HttpPost("chat")]
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (role != "admin")
+        {
+            return Unauthorized("You must be an Admin to access this endpoint.");
+        }
+
+        var reply = await _semanticKernelOrchestrator.GetReply(tenantGuid, branchGuid, userGuid, req.ConversationId, req.Input, cancellationToken);
+        return Ok(reply);
+    }
+
+    [HttpPost("Embed-chat")]
     public async Task<IActionResult> Chat([FromBody] ChatRequest req)
     {
         var reply = await _aiOrchestratorService.ChatAsync(req.Message, req.TenantId);
@@ -83,5 +108,12 @@ public class AiController : ControllerBase
     {
         public string Text { get; set; } = null!;
         public string? Source { get; set; }
+    }
+    public class ChatKernelRequest
+    {
+        [Required]
+        public string Input { get; set; } = null!;
+        [Required]
+        public Guid ConversationId { get; set; }
     }
 }

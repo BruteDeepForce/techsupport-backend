@@ -22,6 +22,7 @@ namespace TechSupport.Customer
             }
 
             services.AddScoped<Services.ICustomerService, Services.CustomerService>();
+            services.AddScoped<TechSupport.Customer.Contracts.AI.ICustomerQueryToAI, TechSupport.Customer.AI.CustomerQueryToAI>();
 
             return services;
         }

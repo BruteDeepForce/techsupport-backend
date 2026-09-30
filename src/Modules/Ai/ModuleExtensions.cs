@@ -10,6 +10,9 @@ using System.ClientModel;
 using OpenAI.Chat;
 using Npgsql;
 using Pgvector.EntityFrameworkCore;
+using Microsoft.SemanticKernel;
+using Ai.Services.SemanticKernel;
+using Ai.Services.SemanticKernel.Tools;
 
 namespace TechSupport.Ai;
 
@@ -19,6 +22,9 @@ public static class ModuleExtensions
     public static IServiceCollection AddAiModule(this IServiceCollection services, IConfiguration configuration)
     {
         var conn = configuration.GetConnectionString("DefaultConnection") ?? configuration["ConnectionStrings:DefaultConnection"];
+        var deploymenTName = configuration["AzureSemanticKernel:OpenAI:DeploymentName"];
+        var endpoint = configuration["AzureSemanticKernel:OpenAI:Endpoint"];
+        var apiKey = configuration["AzureSemanticKernel:OpenAI:ApiKey"];
 
         services.AddSingleton<EmbeddingClient>(sp =>
         {
@@ -51,6 +57,26 @@ public static class ModuleExtensions
             return client.GetChatClient(deploymentName);
         });
 
+        services.AddHttpClient();
+
+        services.AddHttpClient("OpenAI", client =>
+        {
+            client.BaseAddress = new Uri(endpoint, UriKind.Absolute);
+        });
+
+        services.AddTransient<Kernel>((sp) =>
+        {
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+
+            var httpClient = factory.CreateClient("OpenAI");
+
+            return Kernel.CreateBuilder()
+            .AddOpenAIChatCompletion(
+                modelId: deploymenTName,
+                apiKey: apiKey,
+                httpClient: httpClient).Build();
+        });
+
         services.AddDbContext<AiDbContext>(opt =>
         {
             var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(conn);
@@ -73,6 +99,14 @@ public static class ModuleExtensions
         services.AddScoped<IAIOrchestartorService, AIOrchestratorService>();
         services.AddScoped<IAIResponseFormatter, AIResponseFormatterService>();
         services.AddScoped<IOperationStatusChanged, OperationStatusChanged>();
+        services.AddScoped<ISemanticKernelOrchestrator, SemanticKernelOrchestrator>();
+        services.AddScoped<AiKernelRequestContext>();
+        services.AddScoped<OperationActionTool>();
+        services.AddScoped<TechnicianActionTool>();
+        services.AddScoped<StockActionTool>();
+        services.AddScoped<AccountingActionTool>();
+        services.AddScoped<CustomerActionTool>();
+        services.AddScoped<HrActionTool>();
 
 
         return services;

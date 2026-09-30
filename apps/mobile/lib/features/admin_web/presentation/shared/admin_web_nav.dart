@@ -6,6 +6,7 @@ import '../admin_web_home_page.dart';
 import '../HR/hr_pages/admin_web_hr_page.dart';
 import '../admin_web_trade_page.dart';
 import '../admin_web_accounting_page.dart';
+import '../admin_web_ai_chat_page.dart';
 import '../admin_web_offers_page.dart';
 import '../admin_web_operations_page.dart';
 import '../admin_web_stock_page.dart';
@@ -24,7 +25,8 @@ enum AdminNavKey {
   customers,
   devices,
   stock,
-  accounting
+  accounting,
+  aiChat
 }
 
 class AdminNavItem {
@@ -108,6 +110,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Muhasebe',
       icon: Icons.account_balance_wallet_outlined,
       pageBuilder: (_) => const AdminWebAccountingPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.aiChat,
+      label: 'AI Asistan',
+      icon: Icons.auto_awesome_rounded,
+      pageBuilder: (_) => const AdminWebAiChatPage(),
     ),
   ];
 }

@@ -11,11 +11,16 @@ class AdminWebShell extends StatelessWidget {
     required this.active,
     required this.body,
     this.actions = const [],
+    this.scrollable = true,
   });
 
   final AdminNavKey active;
   final Widget body;
   final List<Widget> actions;
+
+  /// Chat gibi tam ekran uygulamalarda false yapılır; body kendi
+  /// kaydırmasını yönetir.
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +49,13 @@ class AdminWebShell extends StatelessWidget {
                 children: [
                   AdminWebTopBar(showMenu: false, actions: actions),
                   Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: body,
-                    ),
+                    child: scrollable
+                        ? SingleChildScrollView(
+                            padding:
+                                const EdgeInsets.fromLTRB(24, 18, 24, 32),
+                            child: body,
+                          )
+                        : body,
                   ),
                 ],
               ),

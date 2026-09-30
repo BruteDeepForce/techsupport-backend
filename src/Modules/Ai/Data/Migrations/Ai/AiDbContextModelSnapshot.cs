@@ -24,6 +24,56 @@ namespace Ai.Data.Migrations.Ai
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ai.Domain.Entities.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("chat_messages", "ai");
+                });
+
+            modelBuilder.Entity("Ai.Domain.Entities.KernelConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BranchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("kernel_chat_histories", "ai");
+                });
+
             modelBuilder.Entity("TechSupport.Ai.Domain.Entities.EmbeddingRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -59,6 +109,22 @@ namespace Ai.Data.Migrations.Ai
                     b.HasKey("Id");
 
                     b.ToTable("embeddings", "ai");
+                });
+
+            modelBuilder.Entity("Ai.Domain.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("Ai.Domain.Entities.KernelConversation", "Conversation")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("Ai.Domain.Entities.KernelConversation", b =>
+                {
+                    b.Navigation("ChatMessages");
                 });
 #pragma warning restore 612, 618
         }

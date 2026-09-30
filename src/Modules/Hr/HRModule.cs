@@ -33,6 +33,7 @@ public static class HRModule
         services.AddScoped<IEmployeeSyncService, EmployeeSyncService>();
         services.AddScoped<IEmployeePerformanceService, EmployeePerformanceService>();
         services.AddScoped<IHRNotificationHub, ShiftStatusNotifier>();
+        services.AddScoped<TechSupport.Hr.Contracts.AI.IHrQueryToAI, TechSupport.Hr.AI.HrQueryToAI>();
 
         return services;
     }

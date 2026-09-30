@@ -1,3 +1,4 @@
+using Ai.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using TechSupport.Ai.Domain.Entities;
 
@@ -10,6 +11,8 @@ public class AiDbContext : DbContext
     }
 
     public DbSet<EmbeddingRecord> Embeddings => Set<EmbeddingRecord>();
+    public DbSet<KernelConversation> KernelChatHistories => Set<KernelConversation>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +25,21 @@ public class AiDbContext : DbContext
         modelBuilder.Entity<EmbeddingRecord>(b =>
         {
             b.ToTable("embeddings");     
+        });
+
+        modelBuilder.Entity<KernelConversation>(b =>
+        {
+            b.ToTable("kernel_chat_histories");
+            b.HasMany(k => k.ChatMessages)
+             .WithOne(c => c.Conversation)
+             .HasForeignKey(c => c.ConversationId);
+        });
+        
+        modelBuilder.Entity<ChatMessage>(b =>
+        {
+            b.ToTable("chat_messages");
+
+            b.Property(c => c.ConversationId).IsRequired();
         });
 
         base.OnModelCreating(modelBuilder);

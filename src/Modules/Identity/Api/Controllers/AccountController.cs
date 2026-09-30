@@ -152,6 +152,16 @@ public class AccountController : ControllerBase
         return Ok(new { tenantId = tenant.Id });
     }
 
+    [HttpPost("create-branch")]
+    public async Task<IActionResult> CreateBranch([FromBody] Guid tenantId, string branchName, CancellationToken ct)
+    {
+        var branch = new Branch { Name = branchName, TenantId = tenantId };
+        await _dbContext.Branches.AddAsync(branch, ct);
+        await _dbContext.SaveChangesAsync(ct);
+
+        return Ok(new { branchId = branch.Id });
+    }
+
     [HttpPost("seed-role")]
     public async Task<IActionResult> SeedRole()
     {

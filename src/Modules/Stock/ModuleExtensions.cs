@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Stock.AI;
+using TechSupport.Stock.Contracts.AI;
 using TechSupport.Stock.Contracts.Services;
 using TechSupport.Stock.Data;
 
@@ -25,6 +27,7 @@ public static class ModuleExtensions
         services.AddScoped<Services.IStockReserveService, Services.StockReserveService>();
         services.AddScoped<Services.IStockTradeProcessService, Services.StockTradeProcessService>();
         services.AddScoped<IInventoryStockItemWriter, Services.InventoryStockItemWriter>();
+        services.AddScoped<IStockQueryToAI, StockQueryToAI>();
         return services;
     }
 }

@@ -13,14 +13,21 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" PrivateAssets="all" />
     <PackageReference Include="Pgvector" Version="0.3.1" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
-    <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
+    <!-- <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" /> -->
     <PackageReference Include="Google.Cloud.AIPlatform.V1" Version="3.59.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.79.0" />
+    <PackageReference Include="OpenAI" Version="2.13.0" />
 
 
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Operation.Contracts\Operation.Contracts.csproj" />
+    <ProjectReference Include="..\Technician.Contracts\Technician.Contracts.csproj" />
+    <ProjectReference Include="..\Stock.Contracts\Stock.Contracts.csproj" />
+    <ProjectReference Include="..\Accounting.Contracts\Accounting.Contracts.csproj" />
+    <ProjectReference Include="..\Customer.Contracts\Customer.Contracts.csproj" />
+    <ProjectReference Include="..\Hr.Contracts\Hr.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

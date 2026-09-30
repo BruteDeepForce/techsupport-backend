@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TechSupport.Accounting.AI;
+using TechSupport.Accounting.Contracts.AI;
 using TechSupport.Accounting.Data;
 using TechSupport.Accounting.Services;
 using StackExchange.Redis;
@@ -35,6 +37,7 @@ public static class ModuleExtensions
         services.AddScoped<IInvoicePdfService, InvoicePdfService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IRedisCacheService, RedisCacheService>();
+        services.AddScoped<IAccountingQueryToAI, AccountingQueryToAI>();
 
         return services;
     }
