@@ -5,6 +5,7 @@ import '../../stock/data/stock_service.dart';
 import '../../stock/models/stock_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
+import 'shared/admin_web_topbar.dart';
 
 class AdminWebStockPage extends StatefulWidget {
   const AdminWebStockPage({super.key});
@@ -543,7 +544,13 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
             Expanded(
               child: Column(
                 children: [
-                  _TopBar(showMenu: false, onRefresh: _refresh),
+                  AdminWebTopBar(showMenu: false, actions: [
+                    AdminWebActionButton(
+                      label: 'Yenile',
+                      icon: Icons.refresh,
+                      onPressed: _refresh,
+                    ),
+                  ]),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
@@ -704,64 +711,6 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
     );
   }
 }
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.showMenu, required this.onRefresh});
-
-  final bool showMenu;
-  final VoidCallback onRefresh;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF9FAFC),
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-      ),
-      child: Row(
-        children: [
-          if (showMenu)
-            IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: const Icon(Icons.menu_rounded),
-            ),
-          const Spacer(),
-          _SecondaryActionButton(
-            label: 'Yenile',
-            icon: Icons.refresh,
-            onPressed: onRefresh,
-          ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-            ),
-            child: Row(
-              children: const [
-                Text('TR', style: TextStyle(fontWeight: FontWeight.w600)),
-                SizedBox(width: 6),
-                Icon(Icons.expand_more, size: 16),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Icon(Icons.wb_sunny_outlined, color: Color(0xFF64748B)),
-          const SizedBox(width: 10),
-          const CircleAvatar(
-            radius: 16,
-            backgroundColor: Color(0xFFE2E8F0),
-            child: Text('ST', style: TextStyle(fontSize: 11)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _Breadcrumb extends StatelessWidget {
   const _Breadcrumb();
 

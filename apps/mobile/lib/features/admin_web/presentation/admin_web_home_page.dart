@@ -29,13 +29,6 @@ class _AdminWebHomePageState extends State<AdminWebHomePage> {
     final width = MediaQuery.of(context).size.width;
     return AdminWebShell(
       active: AdminNavKey.home,
-      actions: [
-        AdminWebActionButton(
-          label: 'Is Emri',
-          icon: Icons.add,
-          onPressed: () {},
-        ),
-      ],
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -121,8 +114,8 @@ class _CalendarCard extends StatelessWidget {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final weekStart = today.subtract(Duration(days: today.weekday - 1));
-          final days = List.generate(
-              7, (index) => weekStart.add(Duration(days: index)));
+          final days =
+              List.generate(7, (index) => weekStart.add(Duration(days: index)));
           final plannedOperations = snapshot.data?.plannedOperations ?? [];
 
           return Column(
@@ -264,7 +257,8 @@ class _CalendarPlanChip extends StatelessWidget {
     final local = item.scheduledAtLocal;
     final time =
         '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-    final customer = item.customerName.isEmpty ? 'Musteri yok' : item.customerName;
+    final customer =
+        item.customerName.isEmpty ? 'Musteri yok' : item.customerName;
     final title = item.title.isEmpty ? item.description : item.title;
 
     final canOpen = item.operationId.isNotEmpty;
@@ -388,8 +382,8 @@ class _StatusListCard extends StatelessWidget {
         builder: (context, snapshot) {
           final dashboard = snapshot.data;
           final summary = dashboard?.summary;
-          final completed =
-              (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
+          final completed = (summary?.completedOperations ?? 0) +
+              (summary?.deliveredOperations ?? 0);
           final failed = summary?.failedOperations ?? 0;
           final open = summary?.openOperations ?? 0;
           final cancelled = dashboard?.metricTotal('OperationCancelled') ?? 0;
@@ -438,6 +432,7 @@ class _StatusListCard extends StatelessWidget {
     );
   }
 }
+
 class _StatusPill extends StatelessWidget {
   const _StatusPill({
     required this.color,
@@ -495,8 +490,8 @@ class _MiniStatsGrid extends StatelessWidget {
       builder: (context, snapshot) {
         final summary = snapshot.data?.summary;
         final open = summary?.openOperations ?? 0;
-        final completed =
-            (summary?.completedOperations ?? 0) + (summary?.deliveredOperations ?? 0);
+        final completed = (summary?.completedOperations ?? 0) +
+            (summary?.deliveredOperations ?? 0);
         final customers = summary?.totalCustomers ?? 0;
 
         return GridView.count(
@@ -562,6 +557,7 @@ class _MiniStatsGrid extends StatelessWidget {
     );
   }
 }
+
 class _MiniCard extends StatelessWidget {
   const _MiniCard({
     required this.title,
@@ -897,7 +893,8 @@ List<DateTime> _trendBuckets(_TrendRange range) {
           7, (i) => DateTime(now.year, now.month, now.day - (6 - i)));
     case _TrendRange.weekly:
       final today = DateTime(now.year, now.month, now.day);
-      final currentWeekStart = today.subtract(Duration(days: today.weekday - 1));
+      final currentWeekStart =
+          today.subtract(Duration(days: today.weekday - 1));
       return List.generate(
           8, (i) => currentWeekStart.subtract(Duration(days: 7 * (7 - i))));
     case _TrendRange.monthly:
@@ -935,6 +932,7 @@ List<String> _trendLabels(List<DateTime> buckets, _TrendRange range) {
 
   return buckets.map((d) => monthLabels[d.month - 1]).toList();
 }
+
 class _TrendRangeRow extends StatelessWidget {
   const _TrendRangeRow({required this.range, required this.onChanged});
 
@@ -1047,8 +1045,8 @@ class _TrendChart extends StatelessWidget {
           children: data
               .map((e) => Text(
                     e.label,
-                    style: const TextStyle(
-                        fontSize: 11, color: Color(0xFF94A3B8)),
+                    style:
+                        const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                   ))
               .toList(),
         ),
@@ -1118,8 +1116,7 @@ class _TrendPainter extends CustomPainter {
     final dotPaint = Paint()..color = const Color(0xFF4F46E5);
     for (final p in points) {
       canvas.drawCircle(p, 3.6, dotPaint);
-      canvas.drawCircle(
-          p, 6, dotPaint..color = const Color(0x204F46E5));
+      canvas.drawCircle(p, 6, dotPaint..color = const Color(0x204F46E5));
       dotPaint.color = const Color(0xFF4F46E5);
     }
   }

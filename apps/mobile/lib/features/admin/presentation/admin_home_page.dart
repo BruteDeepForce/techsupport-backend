@@ -246,9 +246,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             ],
                             onChanged: (v) =>
                                 setLocalState(() => selectedDeviceId = v),
-                            validator: (v) => v == null || v.isEmpty
-                                ? 'Cihaz seçin'
-                                : null,
+                            validator: (v) =>
+                                v == null || v.isEmpty ? 'Cihaz seçin' : null,
                             decoration:
                                 const InputDecoration(labelText: 'Cihaz'),
                           );
@@ -289,8 +288,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               match.isEmpty ? null : match.first.name;
                         });
                       },
-                      decoration:
-                          const InputDecoration(labelText: 'Teknisyen'),
+                      decoration: const InputDecoration(labelText: 'Teknisyen'),
                     ),
                     const SizedBox(height: 10),
                     Row(
@@ -308,8 +306,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               DropdownMenuItem(
                                   value: 'Urgent', child: Text('Acil')),
                             ],
-                            onChanged: (v) => setLocalState(
-                                () => priority = v ?? 'Normal'),
+                            onChanged: (v) =>
+                                setLocalState(() => priority = v ?? 'Normal'),
                             decoration:
                                 const InputDecoration(labelText: 'Öncelik'),
                           ),
@@ -465,43 +463,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
       children: [
         // Period selector for metrics (Günlük / Aylık / Tümü)
-        Row(
-          children: [
-            const Expanded(child: SizedBox()),
-            ChoiceChip(
-              label: const Text('Günlük'),
-              selected: _selectedPeriod == 'Daily',
-              onSelected: (v) {
-                if (v) {
-                  setState(() => _selectedPeriod = 'Daily');
-                  _loadReportsData();
-                }
-              },
-            ),
-            const SizedBox(width: 8),
-            ChoiceChip(
-              label: const Text('Aylık'),
-              selected: _selectedPeriod == 'Monthly',
-              onSelected: (v) {
-                if (v) {
-                  setState(() => _selectedPeriod = 'Monthly');
-                  _loadReportsData();
-                }
-              },
-            ),
-            const SizedBox(width: 8),
-            ChoiceChip(
-              label: const Text('Tümü'),
-              selected: _selectedPeriod == 'AllTime',
-              onSelected: (v) {
-                if (v) {
-                  setState(() => _selectedPeriod = 'AllTime');
-                  _loadReportsData();
-                }
-              },
-            ),
-          ],
-        ),
+
         const SizedBox(height: 12),
         // ── AI Autonomous Mode Card (Corporate Blue Edition) ───────────────
         GestureDetector(
