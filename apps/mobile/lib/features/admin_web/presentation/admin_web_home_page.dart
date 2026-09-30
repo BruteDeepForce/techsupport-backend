@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 import 'shared/admin_web_topbar.dart';
+import 'admin_web_operation_detail_page.dart';
+import 'admin_web_route.dart';
 import '../../reports/data/reports_service.dart';
 import '../../reports/models/report_models.dart';
 
@@ -41,7 +43,7 @@ class _AdminWebHomePageState extends State<AdminWebHomePage> {
           const SizedBox(height: 16),
           const _TabStrip(),
           const SizedBox(height: 16),
-          const _CalendarCard(),
+          _CalendarCard(dashboardFuture: _dashboardFuture),
           const SizedBox(height: 16),
           _StatusListCard(dashboardFuture: _dashboardFuture),
           const SizedBox(height: 20),
@@ -106,54 +108,84 @@ class _TabStrip extends StatelessWidget {
 }
 
 class _CalendarCard extends StatelessWidget {
-  const _CalendarCard();
+  const _CalendarCard({required this.dashboardFuture});
+
+  final Future<TenantDashboard> dashboardFuture;
 
   @override
   Widget build(BuildContext context) {
     return _CardShell(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: FutureBuilder<TenantDashboard>(
+        future: dashboardFuture,
+        builder: (context, snapshot) {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final weekStart = today.subtract(Duration(days: today.weekday - 1));
+          final days = List.generate(
+              7, (index) => weekStart.add(Duration(days: index)));
+          final plannedOperations = snapshot.data?.plannedOperations ?? [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.calendar_month_outlined,
-                  color: Color(0xFF3B82F6)),
-              const SizedBox(width: 8),
-              const Text('Takvimim',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-              const Spacer(),
-              _Pill(label: 'Hafta', active: true),
-              const SizedBox(width: 6),
-              const _Pill(label: 'Ay'),
-              const SizedBox(width: 6),
-              const _Pill(label: 'Bugun'),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_month_outlined,
+                      color: Color(0xFF3B82F6)),
+                  const SizedBox(width: 8),
+                  const Text('Takvimim',
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                  const Spacer(),
+                  _Pill(label: 'Hafta', active: true),
+                  const SizedBox(width: 6),
+                  const _Pill(label: 'Reports'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(_monthYearLabel(weekStart),
+                  style: const TextStyle(color: Color(0xFF64748B))),
+              const SizedBox(height: 12),
+              if (snapshot.connectionState == ConnectionState.waiting)
+                const _CalendarLoading()
+              else if (snapshot.hasError)
+                const _CalendarMessage(label: 'Plan takvimi alinamadi')
+              else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: days.map((day) {
+                    final dayItems = plannedOperations
+                        .where((item) => _sameDate(item.scheduledAtLocal, day))
+                        .toList()
+                      ..sort((a, b) =>
+                          a.scheduledAtLocal.compareTo(b.scheduledAtLocal));
+                    return _DayCard(
+                      day: _weekdayLabel(day),
+                      date: day.day.toString().padLeft(2, '0'),
+                      active: _sameDate(day, today),
+                      items: dayItems,
+                    );
+                  }).toList(),
+                ),
             ],
-          ),
-          const SizedBox(height: 12),
-          const Text('Mart 2026', style: TextStyle(color: Color(0xFF64748B))),
-          const SizedBox(height: 12),
-          Row(
-            children: const [
-              _DayCard(day: 'Pzt', date: '23'),
-              _DayCard(day: 'Sal', date: '24'),
-              _DayCard(day: 'Car', date: '25'),
-              _DayCard(day: 'Per', date: '26'),
-              _DayCard(day: 'Cum', date: '27'),
-              _DayCard(day: 'Cts', date: '28'),
-              _DayCard(day: 'Paz', date: '29', active: true),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
 class _DayCard extends StatelessWidget {
-  const _DayCard({required this.day, required this.date, this.active = false});
+  const _DayCard({
+    required this.day,
+    required this.date,
+    required this.items,
+    this.active = false,
+  });
 
   final String day;
   final String date;
+  final List<PlannedOperationSnapshot> items;
   final bool active;
 
   @override
@@ -162,7 +194,7 @@ class _DayCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.all(10),
-        height: 86,
+        constraints: const BoxConstraints(minHeight: 150),
         decoration: BoxDecoration(
           color: active ? const Color(0xFFF0F7FF) : const Color(0xFFF8FAFC),
           borderRadius: BorderRadius.circular(12),
@@ -174,19 +206,173 @@ class _DayCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(day, style: const TextStyle(color: Color(0xFF64748B))),
-            const Spacer(),
             Row(
               children: [
-                Text(date, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(date,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 18)),
                 const Spacer(),
-                const Text('+', style: TextStyle(color: Color(0xFF94A3B8))),
+                if (items.isNotEmpty)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDBEAFE),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      items.length.toString(),
+                      style: const TextStyle(
+                          color: Color(0xFF2563EB),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ),
               ],
             ),
+            const SizedBox(height: 8),
+            if (items.isEmpty)
+              const Text(
+                'Plan yok',
+                style: TextStyle(fontSize: 11, color: Color(0xFFCBD5E1)),
+              )
+            else
+              ...items.take(2).map((item) => _CalendarPlanChip(item: item)),
+            if (items.length > 2)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  '+${items.length - 2} plan daha',
+                  style:
+                      const TextStyle(fontSize: 11, color: Color(0xFF2563EB)),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+class _CalendarPlanChip extends StatelessWidget {
+  const _CalendarPlanChip({required this.item});
+
+  final PlannedOperationSnapshot item;
+
+  @override
+  Widget build(BuildContext context) {
+    final local = item.scheduledAtLocal;
+    final time =
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    final customer = item.customerName.isEmpty ? 'Musteri yok' : item.customerName;
+    final title = item.title.isEmpty ? item.description : item.title;
+
+    final canOpen = item.operationId.isNotEmpty;
+
+    return InkWell(
+      onTap: canOpen
+          ? () => Navigator.of(context).push(
+                adminWebRoute(
+                  AdminWebOperationDetailPage(operationId: item.operationId),
+                ),
+              )
+          : null,
+      borderRadius: BorderRadius.circular(10),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$time • $customer',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A)),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  title.isEmpty ? 'Planli operasyon' : title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CalendarLoading extends StatelessWidget {
+  const _CalendarLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _CalendarMessage(label: 'Plan takvimi yukleniyor...');
+  }
+}
+
+class _CalendarMessage extends StatelessWidget {
+  const _CalendarMessage({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 110,
+      width: double.infinity,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Text(label, style: const TextStyle(color: Color(0xFF94A3B8))),
+    );
+  }
+}
+
+bool _sameDate(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+String _weekdayLabel(DateTime day) {
+  const labels = ['Pzt', 'Sal', 'Car', 'Per', 'Cum', 'Cts', 'Paz'];
+  return labels[day.weekday - 1];
+}
+
+String _monthYearLabel(DateTime day) {
+  const months = [
+    'Ocak',
+    'Subat',
+    'Mart',
+    'Nisan',
+    'Mayis',
+    'Haziran',
+    'Temmuz',
+    'Agustos',
+    'Eylul',
+    'Ekim',
+    'Kasim',
+    'Aralik',
+  ];
+  return '${months[day.month - 1]} ${day.year}';
 }
 
 class _StatusListCard extends StatelessWidget {

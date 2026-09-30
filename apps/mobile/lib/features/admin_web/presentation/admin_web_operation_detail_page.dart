@@ -138,97 +138,7 @@ class _AdminWebOperationDetailPageState
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      _Card(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      op.title,
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color:
-                                                            Color(0xFF0F172A),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Text(
-                                                      op.description,
-                                                      style: const TextStyle(
-                                                          color:
-                                                              Color(0xFF64748B),
-                                                          height: 1.4),
-                                                    ),
-                                                    const SizedBox(height: 12),
-                                                    Row(
-                                                      children: [
-                                                        _StatusPill(
-                                                          label: _statusLabel(
-                                                              op.status),
-                                                          color: _statusColor(
-                                                              op.status),
-                                                        ),
-                                                        const SizedBox(
-                                                            width: 8),
-                                                        _StatusPill(
-                                                          label: _priorityLabel(
-                                                              op.priority),
-                                                          color: const Color(
-                                                              0xFF2563EB),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(width: 16),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  const Text('İş Emri',
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Color(
-                                                              0xFF64748B))),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    _shortId(op.id),
-                                                    style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w600),
-                                                  ),
-                                                  const SizedBox(height: 12),
-                                                  const Text('Tarih',
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Color(
-                                                              0xFF64748B))),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    _formatTime(
-                                                        op.occurredAtUtc),
-                                                    style: const TextStyle(
-                                                        fontSize: 13,
-                                                        fontWeight:
-                                                            FontWeight.w500),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                      _OperationHeaderCard(op: op),
                                       const SizedBox(height: 16),
                                       _Card(
                                         child: Padding(
@@ -239,23 +149,34 @@ class _AdminWebOperationDetailPageState
                                             children: [
                                               _DetailTile(
                                                 label: 'Müşteri',
-                                                value:
-                                                    _shortId(op.customerName),
+                                                value: _displayText(
+                                                    op.customerName,
+                                                    fallback: op.customerId),
                                               ),
                                               _DetailTile(
-                                                label: 'Cihaz',
-                                                value: _shortId(op.deviceId),
+                                                label: 'Müşteri ID',
+                                                value: _shortId(op.customerId),
                                               ),
                                               _DetailTile(
                                                 label: 'Teknisyen',
-                                                value: op.technicianName.isEmpty
-                                                    ? '-'
-                                                    : _shortId(
-                                                        op.technicianName),
+                                                value: _displayText(
+                                                    op.technicianName,
+                                                    fallback:
+                                                        op.technicianUserId),
+                                              ),
+                                              _DetailTile(
+                                                label: 'Teknisyen ID',
+                                                value: _shortId(
+                                                    op.technicianUserId ?? ''),
+                                              ),
+                                              _DetailTile(
+                                                label: 'Cihaz ID',
+                                                value: _shortId(op.deviceId),
                                               ),
                                               _DetailTile(
                                                 label: 'Tür',
-                                                value: op.type,
+                                                value: _operationTypeLabel(
+                                                    op.type),
                                               ),
                                               _DetailTile(
                                                 label: 'Öncelik',
@@ -266,6 +187,35 @@ class _AdminWebOperationDetailPageState
                                                 label: 'Durum',
                                                 value: _statusLabel(op.status),
                                               ),
+                                              _DetailTile(
+                                                label: 'Plan Durumu',
+                                                value: _futureLabel(op.future),
+                                              ),
+                                              _DetailTile(
+                                                label: 'Plan Tarihi',
+                                                value: op.scheduledAtUtc == null
+                                                    ? '-'
+                                                    : _formatTime(
+                                                        op.scheduledAtUtc!),
+                                              ),
+                                              _DetailTile(
+                                                label: 'Oluşturulma Tarihi',
+                                                value: _formatTime(
+                                                    op.occurredAtUtc),
+                                              ),
+                                              _DetailTile(
+                                                label: 'Şube',
+                                                value:
+                                                    _shortId(op.branchId ?? ''),
+                                              ),
+                                              if (op.internalnote
+                                                  .trim()
+                                                  .isNotEmpty)
+                                                _DetailTile(
+                                                  label: 'İç Not',
+                                                  value: op.internalnote,
+                                                  wide: true,
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -285,6 +235,147 @@ class _AdminWebOperationDetailPageState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _OperationHeaderCard extends StatelessWidget {
+  const _OperationHeaderCard({required this.op});
+
+  final OperationRecord op;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _StatusPill(
+                        label: _statusLabel(op.status),
+                        color: _statusColor(op.status),
+                      ),
+                      _StatusPill(
+                        label: _priorityLabel(op.priority),
+                        color: const Color(0xFF2563EB),
+                      ),
+                      _StatusPill(
+                        label: _futureLabel(op.future),
+                        color: op.scheduledAtUtc == null
+                            ? const Color(0xFF64748B)
+                            : const Color(0xFF7C3AED),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    op.title.isEmpty ? 'Başlıksız iş emri' : op.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    op.description.isEmpty ? 'Açıklama yok' : op.description,
+                    style:
+                        const TextStyle(color: Color(0xFF64748B), height: 1.45),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      _HeaderInfo(
+                        icon: Icons.business_outlined,
+                        label: _displayText(op.customerName,
+                            fallback: op.customerId),
+                      ),
+                      _HeaderInfo(
+                        icon: Icons.engineering_outlined,
+                        label: _displayText(op.technicianName,
+                            fallback: op.technicianUserId),
+                      ),
+                      _HeaderInfo(
+                        icon: Icons.calendar_month_outlined,
+                        label: op.scheduledAtUtc == null
+                            ? 'Plan tarihi yok'
+                            : 'Plan: ${_formatTime(op.scheduledAtUtc!)}',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const Text('İş Emri',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                const SizedBox(height: 4),
+                Text(
+                  _shortId(op.id),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 12),
+                const Text('Oluşturma',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                const SizedBox(height: 4),
+                Text(
+                  _formatTime(op.occurredAtUtc),
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderInfo extends StatelessWidget {
+  const _HeaderInfo({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: const Color(0xFF64748B)),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF334155),
+                fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }
@@ -370,15 +461,20 @@ class _Breadcrumb extends StatelessWidget {
 }
 
 class _DetailTile extends StatelessWidget {
-  const _DetailTile({required this.label, required this.value});
+  const _DetailTile({
+    required this.label,
+    required this.value,
+    this.wide = false,
+  });
 
   final String label;
   final String value;
+  final bool wide;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 320,
+      width: wide ? 656 : 320,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -396,6 +492,8 @@ class _DetailTile extends StatelessWidget {
                     fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             Text(value,
+                maxLines: wide ? 5 : 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF0F172A),
@@ -536,6 +634,36 @@ String _priorityLabel(String priority) {
     default:
       return 'Normal';
   }
+}
+
+String _operationTypeLabel(String type) {
+  switch (type.toLowerCase()) {
+    case 'repair':
+      return 'Onarım';
+    case 'maintenance':
+      return 'Bakım';
+    case 'installation':
+      return 'Kurulum';
+    default:
+      return type.isEmpty ? '-' : type;
+  }
+}
+
+String _futureLabel(String future) {
+  switch (future.toLowerCase()) {
+    case 'scheduled':
+      return 'Planlı';
+    default:
+      return 'Anlık';
+  }
+}
+
+String _displayText(String? value, {String? fallback}) {
+  final normalized = value?.trim() ?? '';
+  if (normalized.isNotEmpty) return normalized;
+  final fallbackValue = fallback?.trim() ?? '';
+  if (fallbackValue.isNotEmpty) return _shortId(fallbackValue);
+  return '-';
 }
 
 String _formatTime(DateTime dt) {

@@ -15,6 +15,7 @@ class OperationRecord {
     required this.technicianName,
     required this.occurredAtUtc,
     required this.type,
+    required this.future,
     this.maintenanceTemplateId,
     this.scheduledAtUtc,
   });
@@ -34,6 +35,7 @@ class OperationRecord {
   final String technicianName;
   final DateTime occurredAtUtc;
   final String type;
+  final String future;
   final String? maintenanceTemplateId;
   final DateTime? scheduledAtUtc;
 
@@ -58,6 +60,7 @@ class OperationRecord {
       priority: (json['priority'] ?? json['Priority']).toString(),
       occurredAtUtc: DateTime.parse(occurred.toString()),
       type: (json['type'] ?? json['Type']).toString(),
+      future: (json['future'] ?? json['Future'] ?? 'None').toString(),
       maintenanceTemplateId:
           (json['maintenanceTemplateId'] ?? json['MaintenanceTemplateId'])
               ?.toString(),

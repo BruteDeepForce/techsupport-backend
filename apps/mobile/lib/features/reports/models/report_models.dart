@@ -104,13 +104,17 @@ class TenantDashboard {
   TenantDashboard({
     required this.summary,
     required this.metrics,
+    required this.plannedOperations,
   });
 
   final TenantReportSummary summary;
   final List<TenantReportMetric> metrics;
+  final List<PlannedOperationSnapshot> plannedOperations;
 
   factory TenantDashboard.fromJson(Map<String, dynamic> json) {
     final metricsJson = json['metrics'] ?? json['Metrics'];
+    final plannedOperationsJson =
+        json['plannedOperations'] ?? json['PlannedOperations'];
     return TenantDashboard(
       summary: TenantReportSummary.fromJson(
           (json['summary'] ?? json['Summary'] ?? {}) as Map<String, dynamic>),
@@ -121,6 +125,13 @@ class TenantDashboard {
                   Map<String, dynamic>.from(e)))
               .toList()
           : <TenantReportMetric>[],
+      plannedOperations: plannedOperationsJson is List
+          ? plannedOperationsJson
+              .whereType<Map>()
+              .map((e) => PlannedOperationSnapshot.fromJson(
+                  Map<String, dynamic>.from(e)))
+              .toList()
+          : <PlannedOperationSnapshot>[],
     );
   }
 
@@ -145,6 +156,59 @@ class TenantDashboard {
       }
     }
     return total;
+  }
+}
+
+class PlannedOperationSnapshot {
+  PlannedOperationSnapshot({
+    required this.id,
+    required this.tenantId,
+    this.branchId,
+    required this.scheduledAtUtc,
+    required this.toTechnicianUserId,
+    required this.technicianFullName,
+    this.customerId,
+    required this.customerName,
+    required this.title,
+    required this.description,
+    required this.operationId,
+  });
+
+  final String id;
+  final String tenantId;
+  final String? branchId;
+  final DateTime scheduledAtUtc;
+  final String toTechnicianUserId;
+  final String technicianFullName;
+  final String? customerId;
+  final String customerName;
+  final String title;
+  final String description;
+  final String operationId;
+
+  DateTime get scheduledAtLocal => scheduledAtUtc.toLocal();
+
+  factory PlannedOperationSnapshot.fromJson(Map<String, dynamic> json) {
+    return PlannedOperationSnapshot(
+      id: (json['id'] ?? json['Id'] ?? '').toString(),
+      tenantId: (json['tenantId'] ?? json['TenantId'] ?? '').toString(),
+      branchId: (json['branchId'] ?? json['BranchId'])?.toString(),
+      scheduledAtUtc: DateTime.parse(
+          (json['scheduledAtUtc'] ?? json['ScheduledAtUtc']).toString()),
+      toTechnicianUserId:
+          (json['toTechnicianUserId'] ?? json['ToTechnicianUserId'] ?? '')
+              .toString(),
+      technicianFullName:
+          (json['technicianFullName'] ?? json['TechnicianFullName'] ?? '')
+              .toString(),
+      customerId: (json['customerId'] ?? json['CustomerId'])?.toString(),
+      customerName:
+          (json['customerName'] ?? json['CustomerName'] ?? '').toString(),
+      title: (json['title'] ?? json['Title'] ?? '').toString(),
+      description:
+          (json['description'] ?? json['Description'] ?? '').toString(),
+      operationId: (json['operationId'] ?? json['OperationId'] ?? '').toString(),
+    );
   }
 }
 

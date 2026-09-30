@@ -20,6 +20,7 @@ namespace TechSupport.Operation.DTO
         DateTimeOffset OccurredAtUtc,
         OperationType Type,
         Guid? MaintenanceTemplateId,
+        OperationFuture Future,
         DateTimeOffset? ScheduledAtUtc);
 
     public sealed record CreateOperationDto(
@@ -33,6 +34,7 @@ namespace TechSupport.Operation.DTO
         string? customerName,
         OperationType? Type,
         Guid? MaintenanceTemplateId,
+        OperationFuture? Future,
         DateTimeOffset? ScheduledAtUtc);
 
     public sealed record UpdateOperationDto(string Title, string Description, Guid? ToTechnician, string? InternalNote);

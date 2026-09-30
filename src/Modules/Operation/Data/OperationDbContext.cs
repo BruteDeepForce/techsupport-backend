@@ -22,6 +22,8 @@ public sealed class OperationDbContext : DbContext
     public DbSet<OfferRecord> OfferRecords => Set<OfferRecord>();
     public DbSet<OfferRecordItem> OfferRecordItems => Set<OfferRecordItem>();
 
+    public DbSet<PlannedOperation> PlannedOperations => Set<PlannedOperation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("operations");
@@ -108,6 +110,7 @@ public sealed class OperationDbContext : DbContext
             b.Property(x => x.InternalNote).HasMaxLength(4000);
             b.Property(x => x.Priority).HasConversion<string>().HasMaxLength(50).IsRequired();
             b.Property(x => x.Type).HasConversion<string>().HasMaxLength(50).IsRequired();
+            b.Property(x => x.Future).HasConversion<string>().HasMaxLength(50).IsRequired();
 
             b.HasOne(x => x.MaintenanceTemplate)
                 .WithMany()
@@ -118,6 +121,12 @@ public sealed class OperationDbContext : DbContext
                 .WithOne(t => t.Operation)
                 .HasForeignKey<OperationRecord>(o => o.TicketId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasOne(x => x.PlannedOperation)
+                .WithOne(po => po.OperationRecord)
+                .HasForeignKey<PlannedOperation>(po => po.OperationRecordId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             b.HasIndex(x => new { x.TenantId, x.CreatedByUserId });
             b.HasIndex(x => new { x.TenantId, x.CustomerId });
             b.HasIndex(x => new { x.TenantId, x.DeviceId });
@@ -175,7 +184,27 @@ public sealed class OperationDbContext : DbContext
             b.Property(x => x.StockItemId).HasMaxLength(256).IsRequired();
             b.Property(x => x.OfferRecordId).IsRequired();
         });
+        modelBuilder.Entity<PlannedOperation>(b =>
+        {
+            b.ToTable("planned_operations");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.TenantId).IsRequired();
+            b.Property(x => x.BranchId);
+            b.Property(x => x.ScheduledAtUtc).IsRequired();
+            b.Property(x => x.ToTechnicianUserId).IsRequired();
+            b.Property(x => x.TechnicianFullName).HasMaxLength(256).IsRequired();
+            b.Property(x => x.CustomerId);
+            b.Property(x => x.CustomerName).HasMaxLength(256);
+            b.Property(x => x.Title).HasMaxLength(256).IsRequired();
+            b.Property(x => x.Description).HasMaxLength(4000).IsRequired();
+            b.Property(x => x.OperationRecordId).IsRequired();
+            b.HasIndex(x => new { x.TenantId, x.BranchId });
+            b.HasIndex(x => new { x.TenantId, x.ToTechnicianUserId });
+            b.HasIndex(x => new { x.TenantId, x.CustomerId });
+        });
 
         base.OnModelCreating(modelBuilder);
+
+
     }
 }

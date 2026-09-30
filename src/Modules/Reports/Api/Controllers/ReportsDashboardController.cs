@@ -62,7 +62,27 @@ public sealed class ReportsDashboardController : ControllerBase
                 x.UpdatedAtUtc))
             .ToListAsync(ct);
 
-        return Ok(new TenantDashboardResponse(summary, metrics));
+        var plannedOperations = await _db.PlannedOperationSnapshots
+            .AsNoTracking()
+            .Where(x => x.TenantId == tenantId.Value && x.ScheduledAtUtc > DateTimeOffset.UtcNow)
+            .OrderBy(x => x.ScheduledAtUtc)
+            .Select(x => new PlannedOperationSnapshot
+            {
+                Id = x.Id,
+                TenantId = x.TenantId,
+                BranchId = x.BranchId,
+                ScheduledAtUtc = x.ScheduledAtUtc,
+                ToTechnicianUserId = x.ToTechnicianUserId,
+                TechnicianFullName = x.TechnicianFullName,
+                CustomerId = x.CustomerId,
+                CustomerName = x.CustomerName,
+                Title = x.Title,
+                Description = x.Description,
+                OperationId = x.OperationId
+            })
+            .ToListAsync(ct);
+
+        return Ok(new TenantDashboardResponse(summary, metrics, plannedOperations));
     }
 
     private Guid? GetTenantIdFromClaims()
@@ -76,7 +96,8 @@ public sealed class ReportsDashboardController : ControllerBase
 
 public sealed record TenantDashboardResponse(
     TenantReportSummaryResponse Summary,
-    IReadOnlyCollection<TenantReportMetricResponse> Metrics);
+    IReadOnlyCollection<TenantReportMetricResponse> Metrics,
+    IReadOnlyCollection<PlannedOperationSnapshot> PlannedOperations);
 
 public sealed record TenantReportSummaryResponse(
     Guid TenantId,

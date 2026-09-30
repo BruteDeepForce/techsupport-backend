@@ -44,6 +44,7 @@ public sealed class OperationsController : ControllerBase
             dto.Type ?? OperationType.Repair,
             dto.MaintenanceTemplateId ?? null,
             dto.ScheduledAtUtc,
+            dto.Future ?? OperationFuture.None,
             ct);
         return Ok(ToResponse(op));
     }
@@ -160,6 +161,7 @@ public sealed class OperationsController : ControllerBase
             op.CreatedAtUtc,
             op.Type,
             op.MaintenanceTemplateId,
-            op.ScheduledAtUtc);
+            op.Future,
+            op.PlannedOperation?.ScheduledAtUtc);
     }
 }

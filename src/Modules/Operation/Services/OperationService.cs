@@ -26,6 +26,7 @@ public interface IOperationService
         OperationType type,
         Guid? maintenanceTemplateId,
         DateTimeOffset? scheduledAtUtc,
+        OperationFuture future,
         CancellationToken ct);
     Task<OperationRecord?> GetAsync(Guid tenantId, Guid operationId, CancellationToken ct);
     Task<IEnumerable<OperationRecord>> AdminGetAllAsync(Guid tenantId, CancellationToken ct);
@@ -45,11 +46,14 @@ public sealed class OperationService : IOperationService
     private readonly IBus _bus;
     private readonly ITenantReportWriter _reports;
 
-    public OperationService(OperationDbContext db, IBus bus, ITenantReportWriter reports)
+    private readonly IOperationPlanService _operationPlanService;
+
+    public OperationService(OperationDbContext db, IBus bus, ITenantReportWriter reports, IOperationPlanService operationPlanService)
     {
         _db = db;
         _bus = bus;
         _reports = reports;
+        _operationPlanService = operationPlanService;
     }
 
     public async Task<OperationRecord> CreateAsync(
@@ -69,41 +73,91 @@ public sealed class OperationService : IOperationService
         OperationType type,
         Guid? maintenanceTemplateId,
         DateTimeOffset? scheduledAtUtc,
+        OperationFuture future,
         CancellationToken ct)
     {
+        var opId = Guid.NewGuid();
         var op = new OperationRecord
         {
-            Id = Guid.NewGuid(),
+            Id = opId,
             TenantId = tenantId,
             BranchId = branchId,
             CustomerId = customerId,
             DeviceId = deviceId,
             CreatedByUserId = createdBy,
             FieldTechnicianUserId = toTechnician,
+            TechnicianFullName = TechnicianfuLLname,
             TicketId = ticketId,
             CustomerFullName = customerName ?? string.Empty,
             Type = type,
             MaintenanceTemplateId = type == OperationType.Maintenance ? maintenanceTemplateId : null,
-            ScheduledAtUtc = type == OperationType.Maintenance ? scheduledAtUtc : null,
             Title = title,
             Description = description,
             Priority = priority,
             InternalNote = internalNote,
+            Future = future,
             CreatedAtUtc = DateTimeOffset.UtcNow,
             AssignedAtUtc = toTechnician.HasValue ? DateTimeOffset.UtcNow : null,
             LastStatusChangedAtUtc = DateTimeOffset.UtcNow
         };
 
+        if (future == OperationFuture.Scheduled)
+        {
+            if (!scheduledAtUtc.HasValue)
+                throw new InvalidOperationException("Scheduled operation requires a scheduled date.");
+
+            if (!toTechnician.HasValue)
+                throw new InvalidOperationException("Scheduled operation requires a technician.");
+
+            var planOpGuid = Guid.NewGuid();
+            op.PlannedOperation = new PlannedOperation
+            {
+                Id = planOpGuid,
+                TenantId = tenantId,
+                BranchId = branchId,
+                OperationRecordId = opId,
+                ScheduledAtUtc = scheduledAtUtc.Value,
+                ToTechnicianUserId = toTechnician.Value,
+                TechnicianFullName = TechnicianfuLLname,
+                CustomerId = customerId,
+                CustomerName = customerName ?? string.Empty,
+                Title = title,
+                Description = description
+            };
+        }
+
         await _db.Operations.AddAsync(op);
         await _db.SaveChangesAsync(ct);
 
+        if (op.PlannedOperation is not null)
+        {
+            var plan = op.PlannedOperation;
+            var result = await _operationPlanService.WritePlannedOperationSnapshotAsync(
+                tenantId,
+                branchId,
+                plan.Id,
+                plan.ScheduledAtUtc,
+                plan.ToTechnicianUserId,
+                plan.TechnicianFullName,
+                plan.CustomerId,
+                plan.CustomerName,
+                plan.Title,
+                plan.Description,
+                opId,
+                ct);
+            if (!result)
+            {
+                _db.Operations.Remove(op);
+                await _db.SaveChangesAsync(ct);
+                throw new InvalidOperationException("Planned operation report snapshot could not be written.");
+            }
+        }
+
         var now = DateTimeOffset.UtcNow;
-        await _reports.IncrementSummaryAsync(
-            tenantId,
-            new TenantReportSummaryDelta(TotalOperations: 1, OpenOperations: 1),
-            ct);
+        await _reports.IncrementSummaryAsync(tenantId,new TenantReportSummaryDelta(TotalOperations: 1, OpenOperations: 1), ct);
         await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OperationCreated, now, 1, ct);
         await IncrementOperationMetricSetAsync(tenantId, TenantReportMetricType.OpenOperation, now, 1, ct);
+
 
         /// koşul teknisyenid var mı ??? 
         /// varsa teknisyen modülüne teknisyen operation assign et.
@@ -159,26 +213,42 @@ public sealed class OperationService : IOperationService
 
     public async Task<OperationRecord?> GetAsync(Guid tenantId, Guid operationId, CancellationToken ct)
     {
-        return await _db.Operations.AsNoTracking().FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId, ct);
+        return await _db.Operations.AsNoTracking()
+            .Include(x => x.PlannedOperation)
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId, ct);
     }
     public async Task<IEnumerable<OperationRecord>> AdminGetAllAsync(Guid tenantId, CancellationToken ct)
     {
-        return await _db.Operations.AsNoTracking().Where(x => x.TenantId == tenantId).OrderByDescending(x => x.CreatedAtUtc).ToListAsync(ct);
+        return await _db.Operations.AsNoTracking()
+            .Include(x => x.PlannedOperation)
+            .Where(x => x.TenantId == tenantId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToListAsync(ct);
     }
 
     public async Task<IEnumerable<OperationRecord>> CustomerGetAllAsync(Guid tenantId, Guid customerId, CancellationToken ct)
     {
-        return await _db.Operations.AsNoTracking().Where(x => x.TenantId == tenantId && x.CustomerId == customerId).OrderByDescending(x => x.CreatedAtUtc).ToListAsync(ct);
+        return await _db.Operations.AsNoTracking()
+            .Include(x => x.PlannedOperation)
+            .Where(x => x.TenantId == tenantId && x.CustomerId == customerId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToListAsync(ct);
     }
 
     public async Task<IEnumerable<OperationRecord>> TechnicianGetAllAsync(Guid tenantId, Guid technicianId, CancellationToken ct)
     {
-        return await _db.Operations.AsNoTracking().Where(x => x.TenantId == tenantId && x.FieldTechnicianUserId == technicianId).OrderByDescending(x => x.CreatedAtUtc).ToListAsync(ct);
+        return await _db.Operations.AsNoTracking()
+            .Include(x => x.PlannedOperation)
+            .Where(x => x.TenantId == tenantId && x.FieldTechnicianUserId == technicianId)
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .ToListAsync(ct);
     }
 
     public async Task<OperationRecord> UpdateAsync(Guid tenantId, Guid operationId, Guid updatedBy, string title, string description, Guid? toTechnician, string? internalNote, CancellationToken ct)
     {
-        var op = await _db.Operations.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId, ct);
+        var op = await _db.Operations
+            .Include(x => x.PlannedOperation)
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId, ct);
         if (op == null) throw new InvalidOperationException("Operation not found");
         op.Title = title;
         op.Description = description;
@@ -199,7 +269,9 @@ public sealed class OperationService : IOperationService
     }
     public async Task<OperationRecord> UpdateStatusAsync(Guid tenantId, Guid operationId, Guid updatedBy, string TechnicianInfo, string status, CancellationToken ct)
     {
-        var op = await _db.Operations.FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId && x.Status != OperationStatus.Completed, ct);
+        var op = await _db.Operations
+            .Include(x => x.PlannedOperation)
+            .FirstOrDefaultAsync(x => x.TenantId == tenantId && x.Id == operationId && x.Status != OperationStatus.Completed, ct);
         if (op == null) throw new InvalidOperationException("Operation not found");
 
         if (!Enum.TryParse<OperationStatus>(status, true, out var newStatus))
@@ -255,5 +327,5 @@ public sealed class OperationService : IOperationService
         await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, ct);
     }
 
-}
 
+}

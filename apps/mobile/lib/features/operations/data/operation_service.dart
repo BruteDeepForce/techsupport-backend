@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/network/api_client.dart';
 import '../models/operation_models.dart';
 
@@ -37,26 +38,31 @@ class OperationService {
     String? customerName,
     required String priority,
     required String type,
+    String future = 'None',
     DateTime? scheduledAtUtc,
   }) async {
-    final res = await _dio.post('/api/operations',
-        data: {
-          'CustomerId': customerId,
-          'DeviceId': deviceId,
-          'TechnicianInfo': technicianId == null
-              ? null
-              : {
-                  'TechnicianId': technicianId,
-                  'Name': technicianName ?? '',
-                },
-          'Title': title,
-          'Description': description,
-          'InternalNote': internalNote,
-          'Priority': priority,
-          'Type': type,
-          'CustomerName': customerName,
-          'ScheduledAtUtc': scheduledAtUtc?.toUtc().toIso8601String(),
-        }..removeWhere((k, v) => v == null || (v is String && v.isEmpty)));
+    final payload = {
+      'CustomerId': customerId,
+      'DeviceId': deviceId,
+      'TechnicianInfo': technicianId == null
+          ? null
+          : {
+              'TechnicianId': technicianId,
+              'Name': technicianName ?? '',
+            },
+      'Title': title,
+      'Description': description,
+      'InternalNote': internalNote,
+      'Priority': priority,
+      'Type': type,
+      'CustomerName': customerName,
+      'Future': future,
+      'ScheduledAtUtc': scheduledAtUtc?.toUtc().toIso8601String(),
+    }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
+
+    debugPrint('OperationService.createOperation POST /api/operations $payload');
+
+    final res = await _dio.post('/api/operations', data: payload);
     if (res.statusCode == 200) {
       return OperationRecord.fromJson(res.data as Map<String, dynamic>);
     }

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/design/app_design.dart';
+import '../../customer/data/customer_service.dart';
+import '../../device/data/device_service.dart';
+import '../../device/model/device_model.dart';
+import '../../operations/data/operation_service.dart';
+import '../../operations/models/operation_models.dart';
 import '../../reports/data/reports_service.dart';
 import '../../reports/models/report_models.dart';
+import '../../stock/data/stock_service.dart';
+import '../../stock/models/stock_models.dart';
+import '../../technician/data/technician_service.dart';
+import '../../technician/models/technician_models.dart';
 import 'admin_tickets_page.dart';
 import 'admin_devices_page.dart';
 import 'admin_team_page.dart';
@@ -20,6 +29,11 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> {
   final ReportsService _reportsService = ReportsService();
+  final OperationService _operationService = OperationService();
+  final StockService _stockService = StockService();
+  final CustomerService _customerService = CustomerService();
+  final DeviceService _deviceService = DeviceService();
+  final TechnicianService _technicianService = TechnicianService();
 
   // Metrics we map into the UI. Default values keep UI identical until data loads.
   String totalValue = '0';
@@ -30,14 +44,17 @@ class _AdminHomePageState extends State<AdminHomePage> {
   String inProgressCount = '0';
   String resolvedCount = '0';
 
-  String devicesCount = '0';
   String maintenanceCount = '0';
   String personnelCount = '0';
+  String stockTotalCount = '0';
+  String stockCriticalCount = '0';
+  String stockReservedCount = '0';
 
   // Selected period for metrics display. Options: 'Daily', 'Monthly', 'AllTime'
   String _selectedPeriod = 'AllTime';
 
-  List<ReportSummary> recentReports = [];
+  List<OperationRecord> recentOperations = [];
+  bool _loadingDashboard = true;
 
   @override
   void initState() {
@@ -47,83 +64,43 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   Future<void> _loadReportsData() async {
     try {
-      final metrics = await _reportsService.getMetrics();
+      setState(() => _loadingDashboard = true);
+      final results = await Future.wait<dynamic>([
+        _reportsService.getDashboard(),
+        _operationService.listOperations(),
+        _stockService.listItems(),
+        _technicianService.listTechnicians(),
+      ]);
 
-      // Group metrics by metricType (case-insensitive) for easier lookup.
-      final Map<String, List<ReportMetric>> byType = {};
-      for (final m in metrics) {
-        final key = m.metricType.toLowerCase();
-        byType.putIfAbsent(key, () => []).add(m);
-      }
+      final dashboard = results[0] as TenantDashboard;
+      final operations = (results[1] as List<OperationRecord>)
+        ..sort((a, b) => b.occurredAtUtc.compareTo(a.occurredAtUtc));
+      final stockItems = results[2] as List<StockItem>;
+      final technicians = results[3] as List<Technician>;
+      final summary = dashboard.summary;
 
-      // Helper to pick the most relevant value for a metricType based on
-      // the currently selected period: Daily, Monthly or AllTime.
-      int? pickValue(String metricType) {
-        final list = byType[metricType.toLowerCase()];
-        if (list == null || list.isEmpty) return null;
-
-        // If user selected AllTime, prefer periodType == AllTime
-        if (_selectedPeriod == 'AllTime') {
-          for (final e in list) {
-            if (e.periodType.toLowerCase() == 'alltime') return e.value;
-          }
-          // fallback to most recent daily or any
-        }
-
-        // If user selected Monthly, try to find a Monthly periodType first.
-        if (_selectedPeriod == 'Monthly') {
-          for (final e in list) {
-            if (e.periodType.toLowerCase() == 'monthly') return e.value;
-          }
-          // As a fallback, choose the latest daily within this month
-          final now = DateTime.now().toUtc();
-          final monthMatches = list.where((e) {
-            if (e.periodDate == null) return false;
-            try {
-              final d = DateTime.parse(e.periodDate!);
-              return d.year == now.year && d.month == now.month;
-            } catch (_) {
-              return false;
-            }
-          }).toList();
-          if (monthMatches.isNotEmpty) {
-            monthMatches.sort(
-                (a, b) => (b.periodDate ?? '').compareTo(a.periodDate ?? ''));
-            return monthMatches.first.value;
-          }
-          // otherwise fall back to AllTime or any
-        }
-
-        // If user selected Daily, prefer the latest daily entry.
-        if (_selectedPeriod == 'Daily') {
-          final daily =
-              list.where((e) => e.periodType.toLowerCase() == 'daily').toList();
-          if (daily.isNotEmpty) {
-            daily.sort(
-                (a, b) => (b.periodDate ?? '').compareTo(a.periodDate ?? ''));
-            return daily.first.value;
-          }
-        }
-
-        // Generic fallback order: AllTime -> latest daily -> any
-        for (final e in list) {
-          if (e.periodType.toLowerCase() == 'alltime') return e.value;
-        }
-        list.sort((a, b) => (b.periodDate ?? '').compareTo(a.periodDate ?? ''));
-        return list.first.value;
-      }
-
-      // Map specific backend metric types to the UI fields.
-      final createdAll =
-          pickValue('operationcreatedcount') ?? pickValue('operationcreated');
-      final completedAll = pickValue('operationcompletedcount') ??
-          pickValue('operationcompleted');
-      final openAll =
-          pickValue('openoperationcount') ?? pickValue('openoperation');
-      final assignedAll = pickValue('operationassignedtotechniciancount') ??
-          pickValue('operationassignedtotechnician');
-      final customerCreatedAll =
-          pickValue('customercreatedcount') ?? pickValue('customercreated');
+      final completed =
+          summary.completedOperations + summary.deliveredOperations;
+      final total = summary.totalOperations;
+      final resolution =
+          total > 0 ? '${((completed / total) * 100).round()}%' : '0%';
+      final inProgress = operations
+          .where((op) =>
+              op.status.toLowerCase() == 'repairing' ||
+              op.status.toLowerCase() == 'diagnosing' ||
+              op.status.toLowerCase() == 'testing')
+          .length;
+      final critical = operations
+          .where((op) =>
+              op.priority.toLowerCase() == 'urgent' ||
+              op.priority.toLowerCase() == 'high')
+          .length;
+      final stockTotal =
+          stockItems.fold<int>(0, (sum, item) => sum + item.quantityAvailable);
+      final stockCritical =
+          stockItems.where((item) => item.quantityAvailable <= 3).length;
+      final stockReserved =
+          stockItems.fold<int>(0, (sum, item) => sum + item.quantityReserved);
 
       var nextTotalValue = totalValue;
       var nextResolutionRate = resolutionRate;
@@ -131,50 +108,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
       var nextOpenCount = openCount;
       var nextInProgressCount = inProgressCount;
       var nextResolvedCount = resolvedCount;
-      var nextDevicesCount = devicesCount;
       var nextMaintenanceCount = maintenanceCount;
       var nextPersonnelCount = personnelCount;
-
-      // Total: prefer total operations created (AllTime)
-      if (createdAll != null) nextTotalValue = createdAll.toString();
-
-      // Resolution rate: completed / created (AllTime) -> percentage
-      if (createdAll != null && completedAll != null && createdAll > 0) {
-        final pct = ((completedAll / createdAll) * 100).round();
-        nextResolutionRate = '$pct%';
-      }
-
-      // Critical: no dedicated metric in sample -> leave default unless present
-      final critical =
-          pickValue('criticalcount') ?? pickValue('operationcriticalcount');
-      if (critical != null) nextCriticalCount = critical.toString();
-
-      // Second row
-      if (openAll != null) nextOpenCount = openAll.toString();
-      if (assignedAll != null) nextInProgressCount = assignedAll.toString();
-      if (completedAll != null) nextResolvedCount = completedAll.toString();
-
-      // Third row (best-effort mapping)
-      final deviceCount = pickValue('devicecount') ?? pickValue('devicescount');
-      if (deviceCount != null) nextDevicesCount = deviceCount.toString();
-
-      final maintenance = pickValue('maintenancecount') ??
-          pickValue('operationmaintenancecount');
-      if (maintenance != null) nextMaintenanceCount = maintenance.toString();
-
-      // Personnel: prefer a dedicated personnel/technician count, otherwise use assigned-to-technician
-      final personnel =
-          pickValue('personnelcount') ?? pickValue('techniciancount');
-      if (personnel != null) {
-        nextPersonnelCount = personnel.toString();
-      } else if (assignedAll != null) {
-        nextPersonnelCount = assignedAll.toString();
-      } else if (customerCreatedAll != null) {
-        // fallback: show customers created as a small informative stat
-        nextPersonnelCount = customerCreatedAll.toString();
-      }
-
-      final page = await _reportsService.listReports(page: 1, pageSize: 5);
+      nextTotalValue = total.toString();
+      nextResolutionRate = resolution;
+      nextCriticalCount = critical.toString();
+      nextOpenCount = summary.openOperations.toString();
+      nextInProgressCount = inProgress.toString();
+      nextResolvedCount = completed.toString();
+      nextMaintenanceCount = dashboard.plannedOperations.length.toString();
+      nextPersonnelCount = technicians.length.toString();
       if (!mounted) return;
       setState(() {
         totalValue = nextTotalValue;
@@ -183,14 +126,252 @@ class _AdminHomePageState extends State<AdminHomePage> {
         openCount = nextOpenCount;
         inProgressCount = nextInProgressCount;
         resolvedCount = nextResolvedCount;
-        devicesCount = nextDevicesCount;
         maintenanceCount = nextMaintenanceCount;
         personnelCount = nextPersonnelCount;
-        recentReports = page.items;
+        stockTotalCount = stockTotal.toString();
+        stockCriticalCount = stockCritical.toString();
+        stockReservedCount = stockReserved.toString();
+        recentOperations = operations.take(5).toList();
+        _loadingDashboard = false;
       });
     } catch (e) {
-      // Swallow errors for now; UI will show default values. Could add SnackBar or error state.
+      if (!mounted) return;
+      setState(() => _loadingDashboard = false);
     }
+  }
+
+  Future<void> _showQuickOperationForm() async {
+    final formKey = GlobalKey<FormState>();
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    String? selectedCustomerId;
+    String? selectedCustomerUserId;
+    String? selectedCustomerName;
+    String? selectedDeviceId;
+    String? selectedTechnicianId;
+    String? selectedTechnicianName;
+    Future<List<DeviceRecord>>? devicesFuture;
+    String priority = 'Normal';
+    String type = 'Repair';
+
+    final customers = await _customerService.listCustomers();
+    final technicians = await _technicianService.listTechnicians();
+    if (!mounted) return;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.bgSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setLocalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 18,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 18,
+            ),
+            child: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Hızlı İş Emri',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 14),
+                    DropdownButtonFormField<String>(
+                      value: selectedCustomerId,
+                      items: [
+                        for (final c in customers)
+                          DropdownMenuItem(value: c.id, child: Text(c.name)),
+                      ],
+                      onChanged: (v) {
+                        final match =
+                            customers.where((c) => c.id == v).toList();
+                        setLocalState(() {
+                          selectedCustomerId = v;
+                          selectedCustomerUserId =
+                              match.isEmpty ? null : match.first.appUserId;
+                          selectedCustomerName =
+                              match.isEmpty ? null : match.first.name;
+                          selectedDeviceId = null;
+                          if (selectedCustomerUserId != null &&
+                              selectedCustomerUserId!.isNotEmpty) {
+                            devicesFuture = _deviceService
+                                .getCustomerDevices(selectedCustomerUserId);
+                          } else {
+                            devicesFuture = Future.value([]);
+                          }
+                        });
+                      },
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                      decoration: const InputDecoration(labelText: 'Müşteri'),
+                    ),
+                    const SizedBox(height: 10),
+                    if (devicesFuture == null)
+                      const _QuickFormHint('Önce müşteri seçin')
+                    else
+                      FutureBuilder<List<DeviceRecord>>(
+                        future: devicesFuture,
+                        builder: (context, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const _QuickFormHint(
+                                'Cihazlar yükleniyor...');
+                          }
+                          if (snap.hasError) {
+                            return const _QuickFormHint('Cihazlar yüklenemedi');
+                          }
+                          final devices = snap.data ?? [];
+                          if (devices.isEmpty) {
+                            return const _QuickFormHint(
+                                'Müşteriye bağlı cihaz bulunamadı');
+                          }
+                          return DropdownButtonFormField<String>(
+                            value: selectedDeviceId,
+                            items: [
+                              for (final d in devices)
+                                DropdownMenuItem(
+                                  value: d.id,
+                                  child: Text('${d.brand} ${d.model}'),
+                                ),
+                            ],
+                            onChanged: (v) =>
+                                setLocalState(() => selectedDeviceId = v),
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'Cihaz seçin'
+                                : null,
+                            decoration:
+                                const InputDecoration(labelText: 'Cihaz'),
+                          );
+                        },
+                      ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: titleController,
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Başlık girin' : null,
+                      decoration: const InputDecoration(labelText: 'Başlık'),
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: descriptionController,
+                      minLines: 2,
+                      maxLines: 4,
+                      validator: (v) => v == null || v.trim().isEmpty
+                          ? 'Açıklama girin'
+                          : null,
+                      decoration: const InputDecoration(labelText: 'Açıklama'),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String?>(
+                      value: selectedTechnicianId,
+                      hint: const Text('Teknisyen seçme'),
+                      items: [
+                        for (final t in technicians)
+                          DropdownMenuItem<String?>(
+                              value: t.userId, child: Text(t.name)),
+                      ],
+                      onChanged: (v) {
+                        final match =
+                            technicians.where((t) => t.userId == v).toList();
+                        setLocalState(() {
+                          selectedTechnicianId = v;
+                          selectedTechnicianName =
+                              match.isEmpty ? null : match.first.name;
+                        });
+                      },
+                      decoration:
+                          const InputDecoration(labelText: 'Teknisyen'),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: priority,
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 'Low', child: Text('Düşük')),
+                              DropdownMenuItem(
+                                  value: 'Normal', child: Text('Normal')),
+                              DropdownMenuItem(
+                                  value: 'High', child: Text('Yüksek')),
+                              DropdownMenuItem(
+                                  value: 'Urgent', child: Text('Acil')),
+                            ],
+                            onChanged: (v) => setLocalState(
+                                () => priority = v ?? 'Normal'),
+                            decoration:
+                                const InputDecoration(labelText: 'Öncelik'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: type,
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 'Repair', child: Text('Onarım')),
+                              DropdownMenuItem(
+                                  value: 'Maintenance', child: Text('Bakım')),
+                              DropdownMenuItem(
+                                  value: 'Installation',
+                                  child: Text('Kurulum')),
+                            ],
+                            onChanged: (v) =>
+                                setLocalState(() => type = v ?? 'Repair'),
+                            decoration: const InputDecoration(labelText: 'Tür'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (!(formKey.currentState?.validate() ?? false)) {
+                            return;
+                          }
+                          await _operationService.createOperation(
+                            customerId: selectedCustomerId!,
+                            deviceId: selectedDeviceId!,
+                            title: titleController.text.trim(),
+                            description: descriptionController.text.trim(),
+                            technicianId: selectedTechnicianId,
+                            technicianName: selectedTechnicianName,
+                            customerName: selectedCustomerName,
+                            priority: priority,
+                            type: type,
+                          );
+                          if (!mounted) return;
+                          Navigator.of(ctx).pop();
+                          _loadReportsData();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('İş emri oluşturuldu')),
+                          );
+                        },
+                        child: const Text('İş Emri Oluştur'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -384,6 +565,46 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
         const SizedBox(height: 16),
 
+        GestureDetector(
+          onTap: _showQuickOperationForm,
+          child: LinearCard(
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppRadius.xs),
+                  ),
+                  child: const Icon(Icons.add_task_rounded,
+                      color: AppColors.accent, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Hızlı İş Emri',
+                          style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700)),
+                      SizedBox(height: 3),
+                      Text('Müşteri, cihaz ve açıklama ile hızlı kayıt aç',
+                          style: TextStyle(
+                              color: AppColors.textTertiary, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    color: AppColors.textTertiary, size: 14),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
         // ── Unified metrics strip (Separated Cards) ────────────────
         LinearCard(
           padding: EdgeInsets.zero,
@@ -436,38 +657,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        LinearCard(
-          padding: EdgeInsets.zero,
-          child: IntrinsicHeight(
-            child: Row(
-              children: [
-                _MetricCell(
-                    value: devicesCount,
-                    label: 'Cihaz',
-                    color: AppColors.textPrimary),
-                const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
-                _MetricCell(
-                    value: maintenanceCount,
-                    label: 'Bakımda',
-                    color: AppColors.statusOrange),
-                const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
-                _MetricCell(
-                    value: personnelCount,
-                    label: 'Personel',
-                    color: AppColors.textPrimary),
-              ],
-            ),
-          ),
-        ),
-
         const SizedBox(height: 16),
 
-        // ── Recent issues ────────────────────────────────────────
+        // ── Recent operations ─────────────────────────────────────
         LinearSection(
-          title: 'Son Talepler',
+          title: 'Son İş Emirleri',
           trailing: GestureDetector(
             child: Text('Tümü',
                 style: theme.textTheme.bodySmall
@@ -478,56 +672,34 @@ class _AdminHomePageState extends State<AdminHomePage> {
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              for (var i = 0; i < recentReports.length; i++)
+              for (var i = 0; i < recentOperations.length; i++)
                 LinearIssueRow(
-                  id: recentReports[i].id.split('-').last.toUpperCase(),
-                  title: recentReports[i].name,
-                  priority: AppColors.statusBlue,
-                  statusColor: AppColors.statusBlue,
-                  label: '',
+                  id: _shortId(recentOperations[i].id),
+                  title: recentOperations[i].title,
+                  priority: _priorityColor(recentOperations[i].priority),
+                  statusColor: _statusColor(recentOperations[i].status),
+                  label: _statusLabel(recentOperations[i].status),
                   labelColor: AppColors.textTertiary,
-                  assignee: null,
-                  showDivider: i != recentReports.length - 1,
+                  assignee: recentOperations[i].technicianName.isEmpty
+                      ? null
+                      : recentOperations[i].technicianName,
+                  showDivider: i != recentOperations.length - 1,
                   onTap: () => Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => const AdminTicketsPage(),
+                      pageBuilder: (_, __, ___) => const AdminWorkOrdersPage(),
                       transitionDuration: Duration.zero,
                     ),
                   ),
                 ),
-              if (recentReports.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(child: Text('Yükleniyor...')),
+              if (recentOperations.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Text(_loadingDashboard
+                        ? 'Yükleniyor...'
+                        : 'Henüz iş emri bulunmuyor'),
+                  ),
                 ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // ── Device status ────────────────────────────────────────
-        const LinearSection(title: 'Cihaz Durumu'),
-        LinearCard(
-          child: Column(
-            children: const [
-              _ProgressRow(
-                  label: 'Aktif',
-                  count: '2',
-                  color: AppColors.statusGreen,
-                  pct: 0.5),
-              SizedBox(height: 12),
-              _ProgressRow(
-                  label: 'Bakımda',
-                  count: '1',
-                  color: AppColors.statusYellow,
-                  pct: 0.25),
-              SizedBox(height: 12),
-              _ProgressRow(
-                  label: 'Pasif',
-                  count: '1',
-                  color: AppColors.statusGray,
-                  pct: 0.25),
             ],
           ),
         ),
@@ -538,24 +710,24 @@ class _AdminHomePageState extends State<AdminHomePage> {
         const LinearSection(title: 'Stok Yönetimi'),
         LinearCard(
           child: Column(
-            children: const [
+            children: [
               _ProgressRow(
-                  label: 'Yedek Parça',
-                  count: '142',
+                  label: 'Toplam Stok',
+                  count: stockTotalCount,
                   color: AppColors.accent,
-                  pct: 0.75),
-              SizedBox(height: 12),
+                  pct: _stockPct(stockTotalCount, stockTotalCount)),
+              const SizedBox(height: 12),
               _ProgressRow(
                   label: 'Kritik Seviye',
-                  count: '3',
+                  count: stockCriticalCount,
                   color: AppColors.statusRed,
-                  pct: 0.1),
-              SizedBox(height: 12),
+                  pct: _stockPct(stockCriticalCount, stockTotalCount)),
+              const SizedBox(height: 12),
               _ProgressRow(
-                  label: 'Yolda',
-                  count: '12',
+                  label: 'Rezerve',
+                  count: stockReservedCount,
                   color: AppColors.statusBlue,
-                  pct: 0.15),
+                  pct: _stockPct(stockReservedCount, stockTotalCount)),
             ],
           ),
         ),
@@ -608,6 +780,91 @@ class _ProgressRow extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _QuickFormHint extends StatelessWidget {
+  const _QuickFormHint(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.bgElevated,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(color: AppColors.borderSubtle),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+      ),
+    );
+  }
+}
+
+String _shortId(String id) {
+  if (id.isEmpty) return '-';
+  return id.length > 8 ? id.substring(0, 8).toUpperCase() : id.toUpperCase();
+}
+
+double _stockPct(String value, String total) {
+  final current = int.tryParse(value) ?? 0;
+  final max = int.tryParse(total) ?? 0;
+  if (max <= 0) return 0;
+  final pct = current / max;
+  if (pct < 0) return 0;
+  if (pct > 1) return 1;
+  return pct;
+}
+
+String _statusLabel(String status) {
+  switch (status.toLowerCase()) {
+    case 'diagnosing':
+      return 'Teşhis';
+    case 'waitingforapproval':
+      return 'Onay';
+    case 'repairing':
+      return 'Onarım';
+    case 'testing':
+      return 'Test';
+    case 'completed':
+      return 'Tamamlandı';
+    case 'delivered':
+      return 'Teslim';
+    default:
+      return 'Yeni';
+  }
+}
+
+Color _statusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'completed':
+    case 'delivered':
+      return AppColors.statusGreen;
+    case 'waitingforapproval':
+    case 'repairing':
+    case 'testing':
+      return AppColors.statusYellow;
+    case 'diagnosing':
+      return AppColors.statusBlue;
+    default:
+      return AppColors.statusGray;
+  }
+}
+
+Color _priorityColor(String priority) {
+  switch (priority.toLowerCase()) {
+    case 'urgent':
+    case 'high':
+      return AppColors.statusRed;
+    case 'low':
+      return AppColors.statusGray;
+    default:
+      return AppColors.statusBlue;
   }
 }
 

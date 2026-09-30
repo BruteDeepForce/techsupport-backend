@@ -3,6 +3,8 @@ using Npgsql;
 using TechSupport.Reports.Contracts;
 using TechSupport.Reports.Data;
 using TechSupport.Reports.Domain.Entities;
+using ContractPlannedOperationSnapshot = TechSupport.Reports.Contracts.PlannedOperationSnapshot;
+using DomainPlannedOperationSnapshot = TechSupport.Reports.Domain.Entities.PlannedOperationSnapshot;
 
 namespace TechSupport.Reports.Services;
 
@@ -228,4 +230,33 @@ public sealed class TenantReportWriter : ITenantReportWriter
 
     private static bool IsUniqueViolation(DbUpdateException ex)
         => ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
+
+    public async Task<bool> WritePlannedOperationAsync(ContractPlannedOperationSnapshot plannedOperation, CancellationToken ct)
+    {
+        if (plannedOperation.TenantId == Guid.Empty ||
+            plannedOperation.OperationId == Guid.Empty ||
+            plannedOperation.ToTechnicianUserId == Guid.Empty)
+        {
+            return false;
+        }
+
+        var entity = new DomainPlannedOperationSnapshot
+        {
+            Id = plannedOperation.Id,
+            TenantId = plannedOperation.TenantId,
+            BranchId = plannedOperation.BranchId,
+            ScheduledAtUtc = plannedOperation.ScheduledAtUtc,
+            ToTechnicianUserId = plannedOperation.ToTechnicianUserId,
+            TechnicianFullName = plannedOperation.TechnicianFullName,
+            CustomerId = plannedOperation.CustomerId,
+            CustomerName = plannedOperation.CustomerName,
+            Title = plannedOperation.Title,
+            Description = plannedOperation.Description,
+            OperationId = plannedOperation.OperationId
+        };
+
+        await _db.PlannedOperationSnapshots.AddAsync(entity, ct);
+        var result = await _db.SaveChangesAsync(ct);
+        return result > 0;
+    }
 }

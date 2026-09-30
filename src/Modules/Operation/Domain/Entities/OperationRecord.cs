@@ -23,10 +23,11 @@ public sealed class OperationRecord
 
     public OperationType Type { get; set; } = OperationType.Repair;
 
+    public OperationFuture Future { get; set; } = OperationFuture.None;
+
     // Maintenance (preventive) only
     public Guid? MaintenanceTemplateId { get; set; }
     public MaintenanceTemplate? MaintenanceTemplate { get; set; }
-    public DateTimeOffset? ScheduledAtUtc { get; set; }
 
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -39,6 +40,7 @@ public sealed class OperationRecord
     public DateTimeOffset? UpdatedAtUtc { get; set; }
     public DateTimeOffset? ClosedAtUtc { get; set; }
     public bool IsClosed { get; set; }
+    public PlannedOperation? PlannedOperation { get; set; }
 }
 
 public enum OperationType
@@ -64,9 +66,8 @@ public enum OperationPriority
     Urgent
 }
 
-// public class OperationType
-// {
-//     public Guid Id { get; set; }
-//     public Guid TenantId { get; set; }
-//     public string Name { get; set; } = string.Empty;
-// }
+public enum OperationFuture
+{
+    None,
+    Scheduled
+}

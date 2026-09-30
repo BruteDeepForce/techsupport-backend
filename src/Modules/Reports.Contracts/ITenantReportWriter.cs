@@ -20,4 +20,8 @@ public interface ITenantReportWriter
         DateTimeOffset occurredAtUtc,
         long delta = 1,
         CancellationToken ct = default);
+
+    Task<bool> WritePlannedOperationAsync(
+        PlannedOperationSnapshot plannedOperation,
+        CancellationToken ct = default);
 }

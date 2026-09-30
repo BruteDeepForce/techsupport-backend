@@ -21,6 +21,7 @@ public static class ModuleExtensions
         }
 
         services.AddScoped<IOperationService, OperationService>();
+        services.AddScoped<IOperationPlanService, OperationPlanService>();
         services.AddScoped<ITicketService, TicketService>();
         services.AddScoped<IOfferService, OfferService>();
 

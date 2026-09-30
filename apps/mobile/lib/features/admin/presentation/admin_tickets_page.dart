@@ -21,6 +21,8 @@ class AdminTicketsPage extends StatefulWidget {
 class _AdminTicketsPageState extends State<AdminTicketsPage> {
   final TicketService _ticketService = TicketService();
   late Future<List<Ticket>> _ticketsFuture;
+  int _selectedFilterIndex = 0;
+  static const List<String> _filterLabels = ['Hepsi', 'Acil', 'Kritik', 'Normal'];
 
   @override
   void initState() {
@@ -151,11 +153,12 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
               );
             }
             final tickets = snapshot.data ?? [];
-            final openCount = tickets.where((t) => t.status == 'Open').length;
+            final filteredTickets = _filterTickets(tickets);
+            final openCount = tickets.where((t) => _isOpen(t.status)).length;
             final inProgressCount =
-                tickets.where((t) => t.status == 'CreatedOperation').length;
+                tickets.where((t) => _isInProgress(t.status)).length;
             final closedCount =
-                tickets.where((t) => t.status == 'Closed').length;
+                tickets.where((t) => _isClosed(t.status)).length;
 
             return Column(
               children: [
@@ -233,36 +236,42 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const LinearFilterTabs(
-                  labels: ['Hepsi', 'Acil', 'Kritik', 'Düşük'],
-                  selectedIndex: 0,
+                _TicketFilterTabs(
+                  labels: _filterLabels,
+                  selectedIndex: _selectedFilterIndex,
+                  onChanged: (index) =>
+                      setState(() => _selectedFilterIndex = index),
                 ),
                 const SizedBox(height: 16),
-                LinearSection(title: 'Aktif Talepler', count: tickets.length),
+                LinearSection(
+                    title: 'Aktif Talepler', count: filteredTickets.length),
                 LinearCard(
                   padding: EdgeInsets.zero,
-                  child: tickets.isEmpty
+                  child: filteredTickets.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.all(16),
                           child: Text('Talep bulunamadı'),
                         )
                       : Column(
                           children: [
-                            for (int i = 0; i < tickets.length; i++)
+                            for (int i = 0; i < filteredTickets.length; i++)
                               LinearIssueRow(
-                                id: _shortId(tickets[i].id),
-                                title: tickets[i].title,
-                                priority: _priorityColor(tickets[i].priority),
-                                statusColor: _statusColor(tickets[i].status),
-                                label: _statusLabel(tickets[i].status),
-                                labelColor: _statusColor(tickets[i].status),
+                                id: _shortId(filteredTickets[i].id),
+                                title: filteredTickets[i].title,
+                                priority:
+                                    _priorityColor(filteredTickets[i].priority),
+                                statusColor:
+                                    _statusColor(filteredTickets[i].status),
+                                label: _statusLabel(filteredTickets[i].status),
+                                labelColor:
+                                    _statusColor(filteredTickets[i].status),
                                 assignee: null,
-                                showDivider: i != tickets.length - 1,
+                                showDivider: i != filteredTickets.length - 1,
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (_) => AdminTicketDetailPage(
-                                          ticketId: tickets[i].id)),
+                                          ticketId: filteredTickets[i].id)),
                                 ),
                               ),
                           ],
@@ -275,10 +284,95 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
       ],
     );
   }
+
+  List<Ticket> _filterTickets(List<Ticket> tickets) {
+    switch (_selectedFilterIndex) {
+      case 1:
+        return tickets
+            .where((ticket) => ticket.priority.toLowerCase() == 'urgent')
+            .toList();
+      case 2:
+        return tickets
+            .where((ticket) => ticket.priority.toLowerCase() == 'high')
+            .toList();
+      case 3:
+        return tickets
+            .where((ticket) => ticket.priority.toLowerCase() == 'normal')
+            .toList();
+      default:
+        return tickets;
+    }
+  }
+}
+
+class _TicketFilterTabs extends StatelessWidget {
+  const _TicketFilterTabs({
+    required this.labels,
+    required this.selectedIndex,
+    required this.onChanged,
+  });
+
+  final List<String> labels;
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: AppColors.bgSurface,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        border: Border.all(color: AppColors.border, width: 0.5),
+      ),
+      child: Row(
+        children: List.generate(labels.length, (i) {
+          final selected = i == selectedIndex;
+          return Expanded(
+            child: InkWell(
+              onTap: () => onChanged(i),
+              borderRadius: BorderRadius.circular(AppRadius.xs),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 7),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.bgElevated : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  labels[i],
+                  style: TextStyle(
+                    color: selected
+                        ? AppColors.textPrimary
+                        : AppColors.textTertiary,
+                    fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
 }
 
 String _shortId(String id) =>
     id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+
+bool _isOpen(String status) {
+  return status.toLowerCase() == 'open';
+}
+
+bool _isInProgress(String status) {
+  final normalized = status.toLowerCase();
+  return normalized == 'createdoperation' || normalized == 'repairing';
+}
+
+bool _isClosed(String status) {
+  return status.toLowerCase() == 'closed';
+}
 
 Color _priorityColor(String priority) {
   switch (priority.toLowerCase()) {

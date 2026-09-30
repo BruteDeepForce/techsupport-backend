@@ -98,6 +98,7 @@ public sealed class TicketService : ITicketService
             operationType,
             null,
             null,
+            OperationFuture.None,
             ct);
             
         // update ticket
@@ -150,4 +151,3 @@ public sealed class TicketService : ITicketService
         await _reports.IncrementPeriodMetricAsync(tenantId, metricType, TenantReportPeriodType.Yearly, occurredAtUtc, delta, ct);
     }
 }
-

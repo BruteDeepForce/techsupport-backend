@@ -74,6 +74,40 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
     Future<List<DeviceRecord>>? devicesFuture;
     String priority = 'Normal';
     String type = 'Repair';
+    String future = 'None';
+    DateTime? scheduledLocal;
+
+    String formatScheduled(DateTime? value) {
+      if (value == null) return 'Tarih ve saat seçilmedi';
+      return '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year} ${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
+    }
+
+    Future<void> pickScheduledDateTime(
+        void Function(void Function()) setLocalState) async {
+      final now = DateTime.now();
+      final base = scheduledLocal ?? now.add(const Duration(hours: 1));
+      final date = await showDatePicker(
+        context: context,
+        initialDate: base,
+        firstDate: DateTime(now.year, now.month, now.day),
+        lastDate: DateTime(now.year + 2),
+      );
+      if (date == null) return;
+      final time = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(base),
+      );
+      if (time == null) return;
+      setLocalState(() {
+        scheduledLocal = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          time.hour,
+          time.minute,
+        );
+      });
+    }
 
     await showDialog(
       context: context,
@@ -284,6 +318,67 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: future,
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'None', child: Text('Hemen oluştur')),
+                          DropdownMenuItem(
+                              value: 'Scheduled',
+                              child: Text('İleri tarihli planlı')),
+                        ],
+                        onChanged: (v) {
+                          setLocalState(() {
+                            future = v ?? 'None';
+                            if (future == 'None') {
+                              scheduledLocal = null;
+                            }
+                          });
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Plan Durumu',
+                          filled: true,
+                          fillColor: const Color(0xFFF8FAFC),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:
+                                const BorderSide(color: Color(0xFFE2E8F0)),
+                          ),
+                        ),
+                      ),
+                      if (future == 'Scheduled') ...[
+                        const SizedBox(height: 10),
+                        InkWell(
+                          onTap: () => pickScheduledDateTime(setLocalState),
+                          borderRadius: BorderRadius.circular(12),
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: 'Plan Tarihi ve Saati',
+                              filled: true,
+                              fillColor: const Color(0xFFF8FAFC),
+                              suffixIcon:
+                                  const Icon(Icons.calendar_month_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                    color: Color(0xFFE2E8F0)),
+                              ),
+                            ),
+                            child: Text(
+                              formatScheduled(scheduledLocal),
+                              style: TextStyle(
+                                color: scheduledLocal == null
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const _HintBox(
+                            'Planlı işlerde teknisyen ve tarih/saat zorunludur.'),
+                      ],
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Expanded(
@@ -355,21 +450,44 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             onPressed: () async {
                               if (!(formKey.currentState?.validate() ??
                                   false)) {
-                                return;
-                              }
-                              if (selectedCustomerId == null ||
-                                  selectedDeviceId == null) {
-                                return;
-                              }
-                              if (selectedCustomerUserId == null ||
-                                  selectedCustomerUserId!.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text(
-                                        'Seçilen müşteride appUserId bulunamadı'),
-                                  ),
+                                      content: Text(
+                                          'Lütfen zorunlu alanları kontrol edin')),
                                 );
                                 return;
+                              }
+                              if (selectedCustomerId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Müşteri seçin')),
+                                );
+                                return;
+                              }
+                              if (selectedDeviceId == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Cihaz seçin')),
+                                );
+                                return;
+                              }
+                              if (future == 'Scheduled') {
+                                if (selectedTechnicianId == null ||
+                                    selectedTechnicianId!.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Planlı iş için teknisyen seçin')),
+                                  );
+                                  return;
+                                }
+                                if (scheduledLocal == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Planlı iş için tarih ve saat seçin')),
+                                  );
+                                  return;
+                                }
                               }
                               Navigator.of(ctx).pop();
                               BuildContext? loadingCtx;
@@ -385,9 +503,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                               );
                               //! operation create try-catch
                               try {
+                                debugPrint(
+                                    'AdminWebOperationsPage submit create operation: customerId=$selectedCustomerId deviceId=$selectedDeviceId future=$future scheduledLocal=$scheduledLocal technicianId=$selectedTechnicianId');
                                 await _operationService
                                     .createOperation(
-                                      customerId: selectedCustomerUserId!,
+                                      customerId: selectedCustomerId!,
                                       deviceId: selectedDeviceId!,
                                       title: titleController.text.trim(),
                                       description:
@@ -402,6 +522,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                       customerName: selectedCustomerName, //!
                                       priority: priority,
                                       type: type,
+                                      future: future,
+                                      scheduledAtUtc: scheduledLocal,
                                     )
                                     .timeout(const Duration(seconds: 20));
                                 if (mounted) {
@@ -429,7 +551,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 }
                               } finally {
                                 if (loadingCtx != null) {
-                                  Navigator.of(loadingCtx!).pop();
+                                  Navigator.of(loadingCtx!, rootNavigator: true)
+                                      .pop();
                                 }
                               }
                             },
