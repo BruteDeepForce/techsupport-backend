@@ -13,7 +13,6 @@ using Pgvector.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Ai.Services.SemanticKernel;
 using Ai.Services.SemanticKernel.Tools;
-using TechSupport.Ai.Services.SemanticKernel.S3;
 
 namespace TechSupport.Ai;
 
@@ -26,6 +25,8 @@ public static class ModuleExtensions
         var deploymenTName = configuration["AzureSemanticKernel:OpenAI:DeploymentName"];
         var endpoint = configuration["AzureSemanticKernel:OpenAI:Endpoint"];
         var apiKey = configuration["AzureSemanticKernel:OpenAI:ApiKey"];
+
+        QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
         // services.AddSingleton<EmbeddingClient>(sp =>
         // {
@@ -109,7 +110,7 @@ public static class ModuleExtensions
         services.AddScoped<CustomerActionTool>();
         services.AddScoped<HrActionTool>();
         services.AddScoped<PdfGeneratorTool>();
-        services.AddScoped<S3Service>();
+        services.AddScoped<Services.SemanticKernel.S3.S3Service>(c => new Services.SemanticKernel.S3.S3Service(configuration));
 
 
         return services;

@@ -27,11 +27,13 @@ namespace TechSupport.Ai.Services.SemanticKernel.S3
         {
             var bucketName = _configuration["AWS:S3BucketName"];
             using var fileStream = file.OpenReadStream();
+
+            var s3Key = $"lineer-ai-pdf/{key}"; 
             
             var putRequest = new PutObjectRequest
             {
                 BucketName = bucketName,
-                Key = key,
+                Key = s3Key,
                 InputStream = fileStream,
                 ContentType = "application/pdf"
             };
@@ -39,7 +41,7 @@ namespace TechSupport.Ai.Services.SemanticKernel.S3
             var response = await _s3Client.PutObjectAsync(putRequest, ct);
             if (response.HttpStatusCode == System.Net.HttpStatusCode.OK)
             {
-                return $"https://{bucketName}.s3.amazonaws.com/{key}";
+                return $"https://{bucketName}.s3.amazonaws.com/{s3Key}";
             }
             else
             {

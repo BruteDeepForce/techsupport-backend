@@ -1,22 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
+using System.Threading;
 using System.Threading.Tasks;
-using Azure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.SemanticKernel;
-using QuestPDF;
-using QuestPDF.Fluent;
-using QuestPDF.Helpers;
-using QuestPDF.Infrastructure;
 using TechSupport.Ai.Services.SemanticKernel.S3;
 
 namespace Ai.Services.SemanticKernel.Tools
 {
     public class PdfGeneratorTool
     {
+        private const string DocumentName = "Yapay Zekâ Analiz Raporu";
+
         private readonly S3Service _s3Service;
         private readonly AiKernelRequestContext _aiKernelRequestContext;
 
@@ -25,43 +23,33 @@ namespace Ai.Services.SemanticKernel.Tools
             _s3Service = s3Service;
             _aiKernelRequestContext = aiKernelRequestContext;
         }
+
         [KernelFunction("Generate-Pdf")]
-        [Description("Generate a PDF document from the provided content.")]
+        [Description("Generate a corporate-styled PDF report from the provided content. Also uploads the generated PDF to S3 and returns the file link path.")]
         public async Task<string> GeneratePdf(IReadOnlyCollection<PdfReport> report)
         {
+            var sections = (report ?? Array.Empty<PdfReport>())
+                .Where(x => x is not null)
+                .OrderBy(x => x.Time)
+                .ToList();
 
-            await using (var stream = new MemoryStream())
-            {
-                QuestPDF.Fluent.Document.Create(container =>
-                {
-                  container.Page(page =>
-                  {
-                      page.Size(PageSizes.A4);
-                      page.Margin(2, Unit.Centimetre);
-                      page.Header().Text("Lineer AI Report");
+            var generatedAt = DateTime.UtcNow;
+            var tenantId = _aiKernelRequestContext?.TenantId;
+            var userId = _aiKernelRequestContext?.UserId;
 
-                      page.Content().Column(column =>
-                      {
-                          foreach (var item in report)
-                          {
-                              column.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-                              column.Item().PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Grey.Lighten2);
-                              column.Item().Text(item.Title).FontSize(20).Bold();
-                              column.Item().Text(item.Content).FontSize(12);
-                              column.Item().Text(item.Time.ToString("yyyy-MM-dd HH:mm:ss")).FontSize(10).Italic();
-                          }
-                      });
+            var bytes = PdfReportLayout.Generate(sections, generatedAt, tenantId, userId);
 
-                  });
-                }).GeneratePdf(stream);
+            await using var stream = new MemoryStream(bytes);
 
-                stream.Position = 0;
+            var fileName =
+                $"Report_{userId}_{tenantId}_{generatedAt:yyyyMMddHHmmss}.pdf";
 
-                 var filePath = await _s3Service.UploadPdfFileAsync(new FormFile(stream, 0, stream.Length, 
-                 "file", "Rapor.pdf"), $"Report_{_aiKernelRequestContext.UserId}_{_aiKernelRequestContext.TenantId}_{DateTime.UtcNow:yyyyMMddHHmmss}.pdf"
-                 , CancellationToken.None);
-                 return $"PDF Create Success FilePath: {filePath}";
-            }
+            var filePath = await _s3Service.UploadPdfFileAsync(
+                new FormFile(stream, 0, stream.Length, "file", $"{DocumentName}.pdf"),
+                fileName,
+                CancellationToken.None);
+
+            return $"PDF Create Success FilePath: {filePath}";
         }
     }
 
