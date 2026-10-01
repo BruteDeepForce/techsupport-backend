@@ -119524,7 +119524,7 @@ m(a){var s=null
 return A.ef(A.cv(this.d,s,s,16),A.h(this.c,s,s,s,s,s,s,s),this.e,A.ki(s,s,B.l,s,s,s,s,s,s,B.W,s,s,B.ck,s,new A.bk(A.F(10),B.t),B.T,s,s,s,s))}}
 A.uJ.prototype={
 X(){var s="/trade-status-hub",r=$.al(),q=$.j2(),p=A.ajq(),o=A.ak2(),n=A.b6D()
-return new A.MF(new A.aR(new A.bT("Ad Soyad",B.az,B.a9),r),new A.aR(B.L,r),new A.aR(new A.bT("Ekran Koruyucu",B.az,B.a9),r),new A.aR(new A.bT("E-posta",B.az,B.a9),r),new A.aR(new A.bT("\u015eifre",B.az,B.a9),r),new A.aR(new A.bT("Bosch",B.az,B.a9),r),new A.aR(new A.bT("Model X",B.az,B.a9),r),new A.aR(B.L,r),new A.aR(new A.bT("1",B.az,B.a9),r),new A.aR(new A.bT("750",B.az,B.a9),r),new A.aR(new A.bT("0",B.az,B.a9),r),new A.aR(new A.bT("Barkod",B.az,B.a9),r),new A.aR(new A.bT("SKU",B.az,B.a9),r),new A.aR(new A.bT("12",B.az,B.a9),r),new A.aR(new A.bT("GG/AA/YYYY",B.az,B.a9),r),new A.aR(B.L,r),new A.aE2(q.a),p,o,n,A.bqh("http://localhost:5001"+(B.c.bJ(s,"/")?s:"//trade-status-hub")),A.a([],t.ev))}}
+return new A.MF(new A.aR(new A.bT("Ad Soyad",B.az,B.a9),r),new A.aR(B.L,r),new A.aR(new A.bT("Ekran Koruyucu",B.az,B.a9),r),new A.aR(new A.bT("E-posta",B.az,B.a9),r),new A.aR(new A.bT("\u015eifre",B.az,B.a9),r),new A.aR(new A.bT("Bosch",B.az,B.a9),r),new A.aR(new A.bT("Model X",B.az,B.a9),r),new A.aR(B.L,r),new A.aR(new A.bT("1",B.az,B.a9),r),new A.aR(new A.bT("750",B.az,B.a9),r),new A.aR(new A.bT("0",B.az,B.a9),r),new A.aR(new A.bT("Barkod",B.az,B.a9),r),new A.aR(new A.bT("SKU",B.az,B.a9),r),new A.aR(new A.bT("12",B.az,B.a9),r),new A.aR(new A.bT("GG/AA/YYYY",B.az,B.a9),r),new A.aR(B.L,r),new A.aE2(q.a),p,o,n,A.bqh("https://lineerdestek.cyber2tech.com"+(B.c.bJ(s,"/")?s:"//trade-status-hub")),A.a([],t.ev))}}
 A.MF.prototype={
 avh(a){var s,r,q,p,o,n,m=null,l=B.c.aq(a)
 if(l.length===0||l==="GG/AA/YYYY")return m
@@ -132279,7 +132279,7 @@ q=A.bmb(t.H)
 return new A.awu(o,n,p,1000,new A.Ud(q,A.aI("Ud<~>")))})
 s($,"bBd","biI",()=>new A.W())
 s($,"bEg","b90",()=>A.bo6(null,t.uK))
-s($,"bze","j2",()=>{var q,p=A.blr("http://localhost:5001",B.uN,B.uN),o=A.bh_(),n=new A.XD(A.a([B.M1],A.aI("G<iv?>")))
+s($,"bze","j2",()=>{var q,p=A.blr("https://lineerdestek.cyber2tech.com",B.uN,B.uN),o=A.bh_(),n=new A.XD(A.a([B.M1],A.aI("G<iv?>")))
 n.N(n,B.a_m)
 o=new A.akb(o,n,A.bh_(),new A.anO(51200),!1)
 o.GB$=p
