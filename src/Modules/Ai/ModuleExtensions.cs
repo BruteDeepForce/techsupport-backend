@@ -13,6 +13,7 @@ using Pgvector.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Ai.Services.SemanticKernel;
 using Ai.Services.SemanticKernel.Tools;
+using TechSupport.Ai.Services.SemanticKernel.S3;
 
 namespace TechSupport.Ai;
 
@@ -108,6 +109,7 @@ public static class ModuleExtensions
         services.AddScoped<CustomerActionTool>();
         services.AddScoped<HrActionTool>();
         services.AddScoped<PdfGeneratorTool>();
+        services.AddScoped<S3Service>();
 
 
         return services;
