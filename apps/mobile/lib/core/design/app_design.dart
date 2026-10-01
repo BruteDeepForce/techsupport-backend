@@ -1,6 +1,9 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'admin_design.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SaaS Design System — Light, Clean, Professional
@@ -64,6 +67,66 @@ class AppRadius {
   static const full = 99.0;
 }
 
+/// Yüzey rengini temadan okur.
+///
+/// Müşteri uygulaması açık temada çalışır ve beyaz yüzey kullanır. Admin
+/// paneli ise koyu lacivert tema uygular; ortak bileşenler de o temada koyu
+/// yüzeye geçsin diye parlaklık kontrolü yapılır.
+Color adminAwareSurface(
+  BuildContext context, [
+  Color light = AppColors.bgSurface,
+]) {
+  final theme = Theme.of(context);
+  if (theme.brightness == Brightness.dark) return theme.colorScheme.surface;
+  return light;
+}
+
+/// [adminAwareSurface] gibi zemin rengini çözer; yükseltilmiş yüzeyler için.
+Color adminAwareElevated(BuildContext context) =>
+    adminAwareSurface(context, AppColors.bgElevated);
+
+/// Kenarlık rengini temadan okur; koyu temada açık gri kenarlıklar kaybolur.
+Color adminAwareBorder(
+  BuildContext context, [
+  Color light = AppColors.border,
+]) {
+  final theme = Theme.of(context);
+  if (theme.brightness == Brightness.dark) {
+    return theme.colorScheme.outlineVariant;
+  }
+  return light;
+}
+
+/// Birincil metin rengini temadan okur.
+///
+/// [AppColors] açık tema için tanımlanmış koyu grilerdir. Koyu zeminde
+/// kullanılırsa harfler siyaha yakın kalıp okunmaz olur.
+Color adminAwareTextPrimary(BuildContext context) {
+  final theme = Theme.of(context);
+  return theme.brightness == Brightness.dark
+      ? theme.colorScheme.onSurface
+      : AppColors.textPrimary;
+}
+
+/// İkincil metin rengini temadan okur.
+Color adminAwareTextSecondary(BuildContext context) {
+  final theme = Theme.of(context);
+  return theme.brightness == Brightness.dark
+      ? theme.colorScheme.onSurfaceVariant
+      : AppColors.textSecondary;
+}
+
+/// Üçüncül metin rengini temadan okur.
+///
+/// `colorScheme.outline` bir kenarlık rengidir; metin olarak kullanıldığında
+/// çok silik kalır. Koyu temada açık bir üçüncül metin tonu tercih edilir.
+Color adminAwareTextTertiary(BuildContext context) {
+  final theme = Theme.of(context);
+  return theme.brightness == Brightness.dark
+      ? AdminTechColors.textTertiary
+      : AppColors.textTertiary;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Linear Card — dark surface with subtle border
 // ─────────────────────────────────────────────────────────────────────────────
@@ -86,9 +149,9 @@ class LinearCard extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: color ?? AppColors.bgSurface,
+        color: color ?? adminAwareSurface(context),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: adminAwareBorder(context), width: 0.8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -118,7 +181,7 @@ class LinearBadge extends StatelessWidget {
   final Color color;
   final Color? bgColor;
 
-  Color get _bg {
+  Color _bg(BuildContext context) {
     if (bgColor != null) return bgColor!;
     if (color == AppColors.statusGreen) return AppColors.statusGreenBg;
     if (color == AppColors.statusYellow) return AppColors.statusYellowBg;
@@ -126,7 +189,7 @@ class LinearBadge extends StatelessWidget {
     if (color == AppColors.statusRed) return AppColors.statusRedBg;
     if (color == AppColors.statusBlue) return AppColors.statusBlueBg;
     if (color == AppColors.statusPurple) return AppColors.statusPurpleBg;
-    return AppColors.bgElevated;
+    return adminAwareElevated(context);
   }
 
   @override
@@ -134,7 +197,7 @@ class LinearBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: _bg,
+        color: _bg(context),
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
@@ -197,8 +260,8 @@ class LinearSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: adminAwareTextSecondary(context),
               fontSize: 12,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.3,
@@ -208,8 +271,8 @@ class LinearSection extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               '$count',
-              style: const TextStyle(
-                color: AppColors.textTertiary,
+              style: TextStyle(
+                color: adminAwareTextTertiary(context),
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -259,8 +322,10 @@ class LinearIssueRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           border: showDivider
-              ? const Border(
-                  bottom: BorderSide(color: AppColors.borderSubtle, width: 0.5))
+              ? Border(
+                  bottom: BorderSide(
+                      color: adminAwareBorder(context, AppColors.borderSubtle),
+                      width: 0.5))
               : null,
         ),
         child: Row(
@@ -275,8 +340,8 @@ class LinearIssueRow extends StatelessWidget {
             ],
             Text(
               id,
-              style: const TextStyle(
-                color: AppColors.textTertiary,
+              style: TextStyle(
+                color: adminAwareTextTertiary(context),
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
@@ -287,8 +352,8 @@ class LinearIssueRow extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: adminAwareTextPrimary(context),
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),
@@ -304,15 +369,16 @@ class LinearIssueRow extends StatelessWidget {
                 width: 22,
                 height: 22,
                 decoration: BoxDecoration(
-                  color: AppColors.bgElevated,
+                  color: adminAwareElevated(context),
                   borderRadius: BorderRadius.circular(AppRadius.xs),
-                  border: Border.all(color: AppColors.border, width: 0.5),
+                  border:
+                      Border.all(color: adminAwareBorder(context), width: 0.5),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   assignee!,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: adminAwareTextSecondary(context),
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
                   ),
@@ -375,9 +441,9 @@ class LinearStatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: adminAwareSurface(context),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: adminAwareBorder(context), width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,7 +452,7 @@ class LinearStatPill extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              color: color ?? AppColors.textPrimary,
+              color: color ?? adminAwareTextPrimary(context),
               fontSize: 20,
               fontWeight: FontWeight.w600,
             ),
@@ -396,8 +462,8 @@ class LinearStatPill extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.textTertiary,
+            style: TextStyle(
+              color: adminAwareTextTertiary(context),
               fontSize: 11,
               fontWeight: FontWeight.w400,
             ),
@@ -439,10 +505,10 @@ class LinearTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.bgSurface,
-        border: Border(
-            top: BorderSide(color: AppColors.border, width: 1)),
+      decoration: BoxDecoration(
+        color: adminAwareSurface(context),
+        border:
+            Border(top: BorderSide(color: adminAwareBorder(context), width: 1)),
       ),
       child: SafeArea(
         top: false,
@@ -450,8 +516,11 @@ class LinearTabBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: items.map((item) {
-              final color =
-                  item.active ? AppColors.accent : AppColors.textTertiary;
+              // Sekmeler sert gri yerine yumuşak metalik geçiş kullanır:
+              // pasif olan gümüş, aktif olan gümüşün cyan'e yaslanmış hâli.
+              final gradient = item.active
+                  ? AdminTechColors.metalActiveGradient
+                  : AdminTechColors.metalGradient;
               return Expanded(
                 child: GestureDetector(
                   onTap: item.onTap,
@@ -460,43 +529,49 @@ class LinearTabBar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(item.icon, color: color, size: 20),
-                        if (item.count != null)
-                          Positioned(
-                            right: -6,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text('${item.count}',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w600)),
-                            ),
+                        clipBehavior: Clip.none,
+                        children: [
+                          ShaderMask(
+                            shaderCallback: (rect) =>
+                                gradient.createShader(rect),
+                            child: Icon(item.icon, size: 20),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.label,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 9,
-                        fontWeight:
-                            item.active ? FontWeight.w600 : FontWeight.w500,
+                          if (item.count != null)
+                            Positioned(
+                              right: -6,
+                              top: -4,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: AdminTechColors.cyan,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text('${item.count}',
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      ShaderMask(
+                        shaderCallback: (rect) => gradient.createShader(rect),
+                        child: Text(
+                          item.label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight:
+                                item.active ? FontWeight.w600 : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               );
             }).toList(),
           ),
@@ -520,7 +595,21 @@ class LinearPageShell extends StatelessWidget {
     this.showBack = false,
     this.trailing,
     this.scrollPhysics,
+    this.dark = false,
   });
+
+  /// Aynı iskeleti koyu lacivert admin paletiyle kurar. Mobil admin paneli
+  /// web paneliyle aynı görünüm dilini paylaşır.
+  const LinearPageShell.dark({
+    super.key,
+    required this.title,
+    required this.children,
+    required this.tabBar,
+    this.subtitle,
+    this.showBack = false,
+    this.trailing,
+    this.scrollPhysics,
+  }) : dark = true;
 
   final String title;
   final String? subtitle;
@@ -529,10 +618,17 @@ class LinearPageShell extends StatelessWidget {
   final bool showBack;
   final Widget? trailing;
   final ScrollPhysics? scrollPhysics;
+  final bool dark;
 
   @override
   Widget build(BuildContext context) {
-    const deepBlue = Color(0xFF1E3A8A); // SaaS Deep Blue / Indigo 900
+    if (!dark) return _build(context);
+    return AdminDarkScope(child: Builder(builder: _build));
+  }
+
+  Widget _build(BuildContext context) {
+    // Koyu modda koyu lacivert zemin; açık modda eski canlı mavi başlık.
+    final deepBlue = dark ? AdminTechColors.canvas : const Color(0xFF1E3A8A);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -578,8 +674,7 @@ class LinearPageShell extends StatelessWidget {
                             letterSpacing: -0.5,
                           ),
                         ),
-                        if (subtitle != null)
-                          const SizedBox(height: 2),
+                        if (subtitle != null) const SizedBox(height: 2),
                         if (subtitle != null)
                           Text(
                             subtitle!,
@@ -598,14 +693,16 @@ class LinearPageShell extends StatelessWidget {
             // ── Content Area ─────────────────────────────────────────
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.bg,
+                decoration: BoxDecoration(
+                  color: adminAwareSurface(context, AppColors.bg),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(32)),
                   child: ListView(
-                    padding: const EdgeInsets.only(top: 24, left: 16, right: 16, bottom: 24),
+                    padding: const EdgeInsets.only(
+                        top: 24, left: 16, right: 16, bottom: 24),
                     physics: scrollPhysics,
                     children: children,
                   ),
@@ -639,9 +736,9 @@ class LinearFilterTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: adminAwareSurface(context),
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: adminAwareBorder(context), width: 0.5),
       ),
       child: Row(
         children: List.generate(labels.length, (i) {
@@ -650,7 +747,8 @@ class LinearFilterTabs extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 7),
               decoration: BoxDecoration(
-                color: selected ? AppColors.bgElevated : Colors.transparent,
+                color:
+                    selected ? adminAwareElevated(context) : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppRadius.xs),
               ),
               alignment: Alignment.center,
@@ -658,8 +756,8 @@ class LinearFilterTabs extends StatelessWidget {
                 labels[i],
                 style: TextStyle(
                   color: selected
-                      ? AppColors.textPrimary
-                      : AppColors.textTertiary,
+                      ? adminAwareTextPrimary(context)
+                      : adminAwareTextTertiary(context),
                   fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                   fontSize: 12,
                 ),
@@ -696,26 +794,26 @@ class LinearCommand extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.bgSurface,
+          color: adminAwareSurface(context),
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.border, width: 0.5),
+          border: Border.all(color: adminAwareBorder(context), width: 0.5),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textTertiary, size: 16),
+            Icon(icon, color: adminAwareTextTertiary(context), size: 16),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: adminAwareTextSecondary(context),
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.textTertiary, size: 16),
+            Icon(Icons.chevron_right_rounded,
+                color: adminAwareTextTertiary(context), size: 16),
           ],
         ),
       ),
@@ -734,7 +832,7 @@ class VercelBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.bg,
+      color: adminAwareSurface(context, AppColors.bg),
       child: child,
     );
   }
@@ -762,5 +860,3 @@ class LinearLogo extends StatelessWidget {
     );
   }
 }
-
-

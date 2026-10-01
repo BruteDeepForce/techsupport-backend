@@ -75,7 +75,9 @@ void main() {
     for (final item in adminNavItems()) item.label: item.pageBuilder,
   };
 
-  const widths = <double>[420, 1280];
+  // Admin paneli masaüstü içindir; 1100px altında sidebar çekmeceye düşer.
+  // 1280 masaüstü ve 1600 geniş masaüstü hedeflenir.
+  const widths = <double>[1280, 1600];
 
   for (final width in widths) {
     for (final entry in pages.entries) {
@@ -85,9 +87,11 @@ void main() {
         tester.view.devicePixelRatio = 2.0;
         addTearDown(tester.view.reset);
 
+        // Sayfa, MaterialApp'in altında kurulmalı; aksi halde
+        // Navigator.of(context) güvenli olmayan bir ancestor arar.
         await tester.pumpWidget(
-          Builder(
-            builder: (context) => MaterialApp(home: entry.value(context)),
+          MaterialApp(
+            home: Builder(builder: (context) => entry.value(context)),
           ),
         );
         // İlk kare + veri gelen sonraki kareler.
@@ -95,40 +99,84 @@ void main() {
         await tester.pump(const Duration(milliseconds: 800));
 
         expect(tester.takeException(), isNull);
+
+        // Ağaç sökülmeden önce sayfayı boşalt ve kareleri ilerlet; aksi
+        // halde sayfadaki sonsuz animasyonlar (canlı göstergesi, caret)
+        // söküm sırasında TickerMode'a deaktive edilmiş bir ağaca erişip
+        // sonraki testin durumunu bozuyor.
+        await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
       });
     }
   }
 }
 
+/// Doğrudan liste bekleyen uç noktalar.
+const _listPaths = <String>[
+  '/api/operations/tickets',
+  '/api/operations/Get-all',
+  '/api/stock/categories',
+  '/api/stock/items',
+  '/api/technicians',
+  '/api/technicians/experts',
+  '/api/customers',
+  '/api/offer/offers/admin',
+  '/api/offer/offers/customer',
+  '/api/reports/metrics',
+  '/api/reports/technicians/summary',
+  '/api/hr/positions',
+  '/api/hr/shifts/templates',
+  '/api/hr/shifts/assignments',
+  '/api/hr/rewards/records',
+  '/api/hr/disciplines/records',
+  '/api/hr/rewards',
+  '/api/hr/disciplines',
+  '/api/hr/settings/leave-deductions',
+];
+
+/// HR uç noktalarının beklediği özel boş gövdeler. Sayfa kendi boş durum
+/// ekranını çizsin diye modelin zorunlu alanları doldurulur.
+final Map<String, dynamic Function()> _customPayloads = {
+  '/api/hr/employees': () => {
+        'employees': <dynamic>[],
+        'TotalCount': 0,
+        'ActiveCount': 0,
+        'PassiveCount': 0,
+        'EmployeesOnLeaveCount': 0,
+        'PendingLeavesCount': 0,
+        'EmployeesWithPendingAdvanceRequestsCount': 0,
+      },
+  '/api/hr/leaves': () => {
+        'allLeaves': <dynamic>[],
+        'pendingLeaves': <dynamic>[],
+        'approvedLeaves': <dynamic>[],
+        'rejectedLeaves': <dynamic>[],
+      },
+  '/api/hr/settings/advance-settings/current': () => {
+        'id': '',
+        'title': '',
+        'isActive': false,
+        'advanceLimit': 0,
+        'advanceDay': 0,
+        'advanceMaturityDay': 0,
+        'isMaturityAutomatic': false,
+      },
+};
+
 /// Uç noktaya göre beklenen boş yanıt gövdesi.
+///
+/// Yanlış şema verildiğinde servis `as List` / `as Map` dönüşümünde patlar ve
+/// sayfa hata durumuna düşer; yerleşim testi o zaman anlamsızlaşır.
 dynamic _emptyPayload(String path) {
-  if (path.contains('/technicians/summary')) {
-    return <dynamic>[];
+  for (final entry in _customPayloads.entries) {
+    if (path.startsWith(entry.key)) return entry.value();
   }
-  if (path.contains('/metrics')) {
-    return <dynamic>[];
+
+  for (final listPath in _listPaths) {
+    if (path.startsWith(listPath)) return <dynamic>[];
   }
-  if (path.contains('/operations') && !path.contains('summary')) {
-    return {
-      'items': <dynamic>[],
-      'page': 1,
-      'pageSize': 20,
-      'total': 0,
-    };
-  }
-  if (path.contains('/tickets') ||
-      path.contains('/customers') ||
-      path.contains('/devices') ||
-      path.contains('/offers') ||
-      path.contains('/stock') ||
-      path.contains('/trade')) {
-    return {
-      'items': <dynamic>[],
-      'page': 1,
-      'pageSize': 20,
-      'total': 0,
-    };
-  }
+
   return {
     'items': <dynamic>[],
     'page': 1,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 class AdminWebHrDisciplineRewardSectionPage extends StatefulWidget {
   const AdminWebHrDisciplineRewardSectionPage({super.key});
@@ -16,7 +17,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
 
   late Future<List<HRDisciplineResponse>> _disciplinesFuture;
   late Future<List<HRRewardResponse>> _rewardsFuture;
-  late Future<List<HRDisciplineEmployeeRecordResponse>> _disciplineRecordsFuture;
+  late Future<List<HRDisciplineEmployeeRecordResponse>>
+      _disciplineRecordsFuture;
   late Future<List<HRRewardEmployeeRecordResponse>> _rewardRecordsFuture;
   late Future<HREmployeeLargeDetailResponse> _employeesFuture;
 
@@ -169,7 +171,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
     return FutureBuilder<HREmployeeLargeDetailResponse>(
       future: _employeesFuture,
       builder: (context, employeeSnapshot) {
-        final employees = employeeSnapshot.data?.employees ?? const <EmployeeResponse>[];
+        final employees =
+            employeeSnapshot.data?.employees ?? const <EmployeeResponse>[];
 
         return SingleChildScrollView(
           child: Column(
@@ -182,14 +185,17 @@ class _AdminWebHrDisciplineRewardSectionPageState
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                    colors: [
+                      AdminTechColors.surface,
+                      AdminTechColors.surfaceAlt
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: const Text(
                   'Disiplin ve ödül süreçlerini tanımlayın, ardından bu tanımları personele kayıt olarak uygulayın.',
-                  style: TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(color: AdminTechColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 18),
@@ -201,7 +207,7 @@ class _AdminWebHrDisciplineRewardSectionPageState
                       builder: (context, snapshot) => _OverviewCard(
                         title: 'Disiplin Tanımları',
                         value: '${snapshot.data?.length ?? 0}',
-                        accent: const Color(0xFFDC2626),
+                        accent: AdminTechColors.red,
                       ),
                     ),
                   ),
@@ -212,18 +218,19 @@ class _AdminWebHrDisciplineRewardSectionPageState
                       builder: (context, snapshot) => _OverviewCard(
                         title: 'Ödül Tanımları',
                         value: '${snapshot.data?.length ?? 0}',
-                        accent: const Color(0xFF7C3AED),
+                        accent: AdminTechColors.violet,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: FutureBuilder<List<HRDisciplineEmployeeRecordResponse>>(
+                    child:
+                        FutureBuilder<List<HRDisciplineEmployeeRecordResponse>>(
                       future: _disciplineRecordsFuture,
                       builder: (context, snapshot) => _OverviewCard(
                         title: 'Disiplin Kayıtları',
                         value: '${snapshot.data?.length ?? 0}',
-                        accent: const Color(0xFFB91C1C),
+                        accent: AdminTechColors.red,
                       ),
                     ),
                   ),
@@ -234,7 +241,7 @@ class _AdminWebHrDisciplineRewardSectionPageState
                       builder: (context, snapshot) => _OverviewCard(
                         title: 'Ödül Kayıtları',
                         value: '${snapshot.data?.length ?? 0}',
-                        accent: const Color(0xFF6D28D9),
+                        accent: AdminTechColors.violet,
                       ),
                     ),
                   ),
@@ -256,8 +263,10 @@ class _AdminWebHrDisciplineRewardSectionPageState
                       child: FutureBuilder<List<HRDisciplineResponse>>(
                         future: _disciplinesFuture,
                         builder: (context, snapshot) {
-                          final items = snapshot.data ?? const <HRDisciplineResponse>[];
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          final items =
+                              snapshot.data ?? const <HRDisciplineResponse>[];
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const Padding(
                               padding: EdgeInsets.all(24),
                               child: Center(child: CircularProgressIndicator()),
@@ -271,15 +280,17 @@ class _AdminWebHrDisciplineRewardSectionPageState
                           return Column(
                             children: items
                                 .map((item) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
                                       child: _CatalogRow(
                                         title: item.description,
                                         amount: item.penaltyAmount,
-                                        accent: const Color(0xFFDC2626),
+                                        accent: AdminTechColors.red,
                                         caption:
                                             'Ceza tutarı ${_currency(item.penaltyAmount)}',
                                         updatedAt: item.updatedAtUtc,
-                                        onEdit: () => _showEditDisciplineDialog(item),
+                                        onEdit: () =>
+                                            _showEditDisciplineDialog(item),
                                       ),
                                     ))
                                 .toList(),
@@ -301,8 +312,10 @@ class _AdminWebHrDisciplineRewardSectionPageState
                       child: FutureBuilder<List<HRRewardResponse>>(
                         future: _rewardsFuture,
                         builder: (context, snapshot) {
-                          final items = snapshot.data ?? const <HRRewardResponse>[];
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          final items =
+                              snapshot.data ?? const <HRRewardResponse>[];
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const Padding(
                               padding: EdgeInsets.all(24),
                               child: Center(child: CircularProgressIndicator()),
@@ -316,15 +329,17 @@ class _AdminWebHrDisciplineRewardSectionPageState
                           return Column(
                             children: items
                                 .map((item) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 12),
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
                                       child: _CatalogRow(
                                         title: item.description,
                                         amount: item.rewardAmount,
-                                        accent: const Color(0xFF7C3AED),
+                                        accent: AdminTechColors.violet,
                                         caption:
                                             'Ödül tutarı ${_currency(item.rewardAmount)}',
                                         updatedAt: item.updatedAtUtc,
-                                        onEdit: () => _showEditRewardDialog(item),
+                                        onEdit: () =>
+                                            _showEditRewardDialog(item),
                                       ),
                                     ))
                                 .toList(),
@@ -338,7 +353,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
               const SizedBox(height: 18),
               _SectionCard(
                 title: 'Personele Tesis Edilen Disiplin İşlemleri',
-                subtitle: 'Personel bazlı disiplin kayıtlarını oluşturun ve izleyin.',
+                subtitle:
+                    'Personel bazlı disiplin kayıtlarını oluşturun ve izleyin.',
                 action: OutlinedButton.icon(
                   onPressed: employees.isEmpty
                       ? null
@@ -366,14 +382,16 @@ class _AdminWebHrDisciplineRewardSectionPageState
                 child: FutureBuilder<List<HRDisciplineResponse>>(
                   future: _disciplinesFuture,
                   builder: (context, disciplineSnapshot) {
-                    final disciplines =
-                        disciplineSnapshot.data ?? const <HRDisciplineResponse>[];
-                    return FutureBuilder<List<HRDisciplineEmployeeRecordResponse>>(
+                    final disciplines = disciplineSnapshot.data ??
+                        const <HRDisciplineResponse>[];
+                    return FutureBuilder<
+                        List<HRDisciplineEmployeeRecordResponse>>(
                       future: _disciplineRecordsFuture,
                       builder: (context, snapshot) {
-                        final items =
-                            snapshot.data ?? const <HRDisciplineEmployeeRecordResponse>[];
-                        if (snapshot.connectionState == ConnectionState.waiting ||
+                        final items = snapshot.data ??
+                            const <HRDisciplineEmployeeRecordResponse>[];
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting ||
                             disciplineSnapshot.connectionState ==
                                 ConnectionState.waiting) {
                           return const Padding(
@@ -383,7 +401,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
                         }
                         if (items.isEmpty) {
                           return const _EmptyState(
-                            message: 'Henüz personele uygulanmış disiplin kaydı yok.',
+                            message:
+                                'Henüz personele uygulanmış disiplin kaydı yok.',
                           );
                         }
                         return Column(
@@ -391,15 +410,17 @@ class _AdminWebHrDisciplineRewardSectionPageState
                               .map((item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: _RecordRow(
-                                      title: _employeeName(employees, item.employeeId),
+                                      title: _employeeName(
+                                          employees, item.employeeId),
                                       tag: _disciplineName(
                                         disciplines,
                                         item.disciplineId,
                                       ),
                                       description: item.description,
                                       date: item.incidentDate,
-                                      accent: const Color(0xFFDC2626),
-                                      onEdit: () => _showEditDisciplineRecordDialog(
+                                      accent: AdminTechColors.red,
+                                      onEdit: () =>
+                                          _showEditDisciplineRecordDialog(
                                         item,
                                         employees,
                                         disciplines,
@@ -416,7 +437,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
               const SizedBox(height: 18),
               _SectionCard(
                 title: 'Personele Uygulanan Ödüller',
-                subtitle: 'Personel bazlı ödül kayıtlarını oluşturun ve izleyin.',
+                subtitle:
+                    'Personel bazlı ödül kayıtlarını oluşturun ve izleyin.',
                 action: OutlinedButton.icon(
                   onPressed: employees.isEmpty
                       ? null
@@ -441,14 +463,17 @@ class _AdminWebHrDisciplineRewardSectionPageState
                 child: FutureBuilder<List<HRRewardResponse>>(
                   future: _rewardsFuture,
                   builder: (context, rewardSnapshot) {
-                    final rewards = rewardSnapshot.data ?? const <HRRewardResponse>[];
+                    final rewards =
+                        rewardSnapshot.data ?? const <HRRewardResponse>[];
                     return FutureBuilder<List<HRRewardEmployeeRecordResponse>>(
                       future: _rewardRecordsFuture,
                       builder: (context, snapshot) {
-                        final items =
-                            snapshot.data ?? const <HRRewardEmployeeRecordResponse>[];
-                        if (snapshot.connectionState == ConnectionState.waiting ||
-                            rewardSnapshot.connectionState == ConnectionState.waiting) {
+                        final items = snapshot.data ??
+                            const <HRRewardEmployeeRecordResponse>[];
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting ||
+                            rewardSnapshot.connectionState ==
+                                ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.all(24),
                             child: Center(child: CircularProgressIndicator()),
@@ -456,7 +481,8 @@ class _AdminWebHrDisciplineRewardSectionPageState
                         }
                         if (items.isEmpty) {
                           return const _EmptyState(
-                            message: 'Henüz personele uygulanmış ödül kaydı yok.',
+                            message:
+                                'Henüz personele uygulanmış ödül kaydı yok.',
                           );
                         }
                         return Column(
@@ -464,11 +490,12 @@ class _AdminWebHrDisciplineRewardSectionPageState
                               .map((item) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: _RecordRow(
-                                      title: _employeeName(employees, item.employeeId),
+                                      title: _employeeName(
+                                          employees, item.employeeId),
                                       tag: _rewardName(rewards, item.rewardId),
                                       description: item.description,
                                       date: item.rewardDate,
-                                      accent: const Color(0xFF7C3AED),
+                                      accent: AdminTechColors.violet,
                                       onEdit: () => _showEditRewardRecordDialog(
                                         item,
                                         employees,
@@ -507,14 +534,15 @@ class _OverviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: Color(0xFF64748B))),
+          Text(title,
+              style: const TextStyle(color: AdminTechColors.textSecondary)),
           const SizedBox(height: 10),
           Text(
             value,
@@ -549,9 +577,9 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -567,13 +595,14 @@ class _SectionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: Color(0xFF64748B)),
+                      style:
+                          const TextStyle(color: AdminTechColors.textSecondary),
                     ),
                   ],
                 ),
@@ -611,9 +640,9 @@ class _CatalogRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -634,21 +663,21 @@ class _CatalogRow extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   caption,
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: const TextStyle(color: AdminTechColors.textSecondary),
                 ),
               ],
             ),
           ),
           Text(
             _formatDate(updatedAt),
-            style: const TextStyle(color: Color(0xFF64748B)),
+            style: const TextStyle(color: AdminTechColors.textSecondary),
           ),
           if (onEdit != null) ...[
             const SizedBox(width: 8),
@@ -657,7 +686,7 @@ class _CatalogRow extends StatelessWidget {
               onPressed: onEdit,
               icon: const Icon(
                 Icons.edit_outlined,
-                color: Color(0xFF334155),
+                color: AdminTechColors.textPrimary,
                 size: 20,
               ),
             ),
@@ -690,9 +719,9 @@ class _RecordRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -706,7 +735,7 @@ class _RecordRow extends StatelessWidget {
                       child: Text(
                         title,
                         style: const TextStyle(
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -718,7 +747,7 @@ class _RecordRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   description,
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: const TextStyle(color: AdminTechColors.textSecondary),
                 ),
               ],
             ),
@@ -726,7 +755,7 @@ class _RecordRow extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             _formatDate(date),
-            style: const TextStyle(color: Color(0xFF64748B)),
+            style: const TextStyle(color: AdminTechColors.textSecondary),
           ),
           if (onEdit != null) ...[
             const SizedBox(width: 8),
@@ -735,7 +764,7 @@ class _RecordRow extends StatelessWidget {
               onPressed: onEdit,
               icon: const Icon(
                 Icons.edit_outlined,
-                color: Color(0xFF334155),
+                color: AdminTechColors.textPrimary,
                 size: 20,
               ),
             ),
@@ -779,7 +808,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Text(
         message,
-        style: const TextStyle(color: Color(0xFF64748B)),
+        style: const TextStyle(color: AdminTechColors.textSecondary),
       ),
     );
   }
@@ -795,7 +824,8 @@ class _CreateDisciplineDialog extends StatefulWidget {
   final HRDisciplineResponse? initialValue;
 
   @override
-  State<_CreateDisciplineDialog> createState() => _CreateDisciplineDialogState();
+  State<_CreateDisciplineDialog> createState() =>
+      _CreateDisciplineDialogState();
 }
 
 class _CreateDisciplineDialogState extends State<_CreateDisciplineDialog> {
@@ -860,7 +890,8 @@ class _CreateDisciplineDialogState extends State<_CreateDisciplineDialog> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -953,7 +984,8 @@ class _CreateRewardDialogState extends State<_CreateRewardDialog> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -1004,9 +1036,11 @@ class _SimpleAmountDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+            Text(subtitle,
+                style: const TextStyle(color: AdminTechColors.textSecondary)),
             const SizedBox(height: 18),
             TextField(
               controller: descriptionController,
@@ -1015,7 +1049,8 @@ class _SimpleAmountDialog extends StatelessWidget {
             const SizedBox(height: 16),
             TextField(
               controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: _inputDecoration(amountLabel, 'Örn. 500.00'),
             ),
             const SizedBox(height: 20),
@@ -1023,7 +1058,8 @@ class _SimpleAmountDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -1067,7 +1103,8 @@ class _CreateDisciplineRecordDialog extends StatefulWidget {
       _CreateDisciplineRecordDialogState();
 }
 
-class _CreateDisciplineRecordDialogState extends State<_CreateDisciplineRecordDialog> {
+class _CreateDisciplineRecordDialogState
+    extends State<_CreateDisciplineRecordDialog> {
   final TextEditingController _descriptionController = TextEditingController();
   late String _selectedEmployeeId;
   late String _selectedDisciplineId;
@@ -1079,7 +1116,8 @@ class _CreateDisciplineRecordDialogState extends State<_CreateDisciplineRecordDi
   @override
   void initState() {
     super.initState();
-    _selectedEmployeeId = widget.initialValue?.employeeId ?? widget.employees.first.id;
+    _selectedEmployeeId =
+        widget.initialValue?.employeeId ?? widget.employees.first.id;
     _selectedDisciplineId =
         widget.initialValue?.disciplineId ?? widget.disciplines.first.id;
     _selectedDate = widget.initialValue?.incidentDate ?? DateTime.now();
@@ -1141,7 +1179,8 @@ class _CreateDisciplineRecordDialogState extends State<_CreateDisciplineRecordDi
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -1152,8 +1191,9 @@ class _CreateDisciplineRecordDialogState extends State<_CreateDisciplineRecordDi
             : 'Seçilen personele disiplin kaydı tesis edin.',
         employees: widget.employees,
         selectedEmployeeId: _selectedEmployeeId,
-        onEmployeeChanged:
-            _isEdit ? null : (value) => setState(() => _selectedEmployeeId = value!),
+        onEmployeeChanged: _isEdit
+            ? null
+            : (value) => setState(() => _selectedEmployeeId = value!),
         catalogItems: widget.disciplines
             .map((item) => DropdownMenuItem<String>(
                   value: item.id,
@@ -1161,7 +1201,8 @@ class _CreateDisciplineRecordDialogState extends State<_CreateDisciplineRecordDi
                 ))
             .toList(),
         selectedCatalogId: _selectedDisciplineId,
-        onCatalogChanged: (value) => setState(() => _selectedDisciplineId = value!),
+        onCatalogChanged: (value) =>
+            setState(() => _selectedDisciplineId = value!),
         catalogLabel: 'Disiplin',
         descriptionController: _descriptionController,
         selectedDate: _selectedDate,
@@ -1186,7 +1227,8 @@ class _CreateRewardRecordDialog extends StatefulWidget {
   final HRRewardEmployeeRecordResponse? initialValue;
 
   @override
-  State<_CreateRewardRecordDialog> createState() => _CreateRewardRecordDialogState();
+  State<_CreateRewardRecordDialog> createState() =>
+      _CreateRewardRecordDialogState();
 }
 
 class _CreateRewardRecordDialogState extends State<_CreateRewardRecordDialog> {
@@ -1201,8 +1243,10 @@ class _CreateRewardRecordDialogState extends State<_CreateRewardRecordDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedEmployeeId = widget.initialValue?.employeeId ?? widget.employees.first.id;
-    _selectedRewardId = widget.initialValue?.rewardId ?? widget.rewards.first.id;
+    _selectedEmployeeId =
+        widget.initialValue?.employeeId ?? widget.employees.first.id;
+    _selectedRewardId =
+        widget.initialValue?.rewardId ?? widget.rewards.first.id;
     _selectedDate = widget.initialValue?.rewardDate ?? DateTime.now();
     _descriptionController.text = widget.initialValue?.description ?? '';
   }
@@ -1262,7 +1306,8 @@ class _CreateRewardRecordDialogState extends State<_CreateRewardRecordDialog> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -1273,8 +1318,9 @@ class _CreateRewardRecordDialogState extends State<_CreateRewardRecordDialog> {
             : 'Seçilen personele ödül kaydı tesis edin.',
         employees: widget.employees,
         selectedEmployeeId: _selectedEmployeeId,
-        onEmployeeChanged:
-            _isEdit ? null : (value) => setState(() => _selectedEmployeeId = value!),
+        onEmployeeChanged: _isEdit
+            ? null
+            : (value) => setState(() => _selectedEmployeeId = value!),
         catalogItems: widget.rewards
             .map((item) => DropdownMenuItem<String>(
                   value: item.id,
@@ -1340,9 +1386,11 @@ class _RecordDialogShell extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(title,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+            Text(subtitle,
+                style: const TextStyle(color: AdminTechColors.textSecondary)),
             const SizedBox(height: 18),
             Row(
               children: [
@@ -1373,7 +1421,8 @@ class _RecordDialogShell extends StatelessWidget {
             const SizedBox(height: 16),
             TextField(
               controller: descriptionController,
-              decoration: _inputDecoration('Açıklama', 'Olay veya işlem açıklaması'),
+              decoration:
+                  _inputDecoration('Açıklama', 'Olay veya işlem açıklaması'),
             ),
             const SizedBox(height: 16),
             InkWell(
@@ -1391,7 +1440,8 @@ class _RecordDialogShell extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -1425,11 +1475,11 @@ InputDecoration _inputDecoration(String label, String hint) {
     fillColor: Colors.white,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
   );
 }
@@ -1453,7 +1503,8 @@ Widget _dropdownField({
   );
 }
 
-String _currency(double value) => '₺${value.toStringAsFixed(2).replaceAll('.', ',')}';
+String _currency(double value) =>
+    '₺${value.toStringAsFixed(2).replaceAll('.', ',')}';
 
 String _formatDate(DateTime value) {
   final day = value.day.toString().padLeft(2, '0');

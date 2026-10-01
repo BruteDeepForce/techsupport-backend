@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/admin_web_design.dart';
 
 import '../../shared/admin_web_nav.dart';
 import '../../shared/admin_web_shell.dart';
@@ -25,6 +26,7 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.hr,
       actions: [
         AdminWebActionButton(
@@ -43,7 +45,7 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
           const SizedBox(height: 6),
           const Text(
             'İzin taleplerini filtreleyin, inceleyin ve onaylayın.',
-            style: TextStyle(color: Color(0xFF64748B)),
+            style: TextStyle(color: AdminTechColors.textSecondary),
           ),
           const SizedBox(height: 16),
           _CardShell(
@@ -87,7 +89,8 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
-                    headingRowColor: const WidgetStatePropertyAll(Color(0xFFF8FAFC)),
+                    headingRowColor:
+                        const WidgetStatePropertyAll(AdminTechColors.surface),
                     columns: const [
                       DataColumn(label: Text('Personel')),
                       DataColumn(label: Text('Tür')),
@@ -99,10 +102,10 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
                     rows: [
                       _row('Batuhan Kaya', 'Yıllık İzin', '15.06 - 18.06',
                           'Aile ziyareti', 'Bekleyen'),
-                      _row('Zehra Demir', 'Hastalık', '14.06 - 14.06', 'Rapor yüklenecek',
-                          'Bekleyen'),
-                      _row('Mert Çetin', 'Ücretsiz İzin', '20.06 - 22.06', 'Özel neden',
-                          'Onaylandı'),
+                      _row('Zehra Demir', 'Hastalık', '14.06 - 14.06',
+                          'Rapor yüklenecek', 'Bekleyen'),
+                      _row('Mert Çetin', 'Ücretsiz İzin', '20.06 - 22.06',
+                          'Özel neden', 'Onaylandı'),
                     ],
                   ),
                 ),
@@ -114,7 +117,8 @@ class _AdminWebHrLeavesPageState extends State<AdminWebHrLeavesPage> {
     );
   }
 
-  DataRow _row(String employee, String type, String date, String reason, String status) {
+  DataRow _row(
+      String employee, String type, String date, String reason, String status) {
     return DataRow(
       cells: [
         DataCell(Text(employee)),
@@ -154,20 +158,23 @@ class _FilterField extends StatelessWidget {
       width: 220,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12, color: AdminTechColors.textSecondary)),
           DropdownButton<String>(
             value: value,
             isExpanded: true,
             underline: const SizedBox.shrink(),
             items: [
-              for (final item in items) DropdownMenuItem(value: item, child: Text(item))
+              for (final item in items)
+                DropdownMenuItem(value: item, child: Text(item))
             ],
             onChanged: (newValue) {
               if (newValue != null) onChanged(newValue);
@@ -190,14 +197,18 @@ class _DateField extends StatelessWidget {
       width: 220,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(color: Color(0xFF64748B)))),
-          const Icon(Icons.calendar_today_outlined, size: 16, color: Color(0xFF64748B)),
+          Expanded(
+              child: Text(label,
+                  style:
+                      const TextStyle(color: AdminTechColors.textSecondary))),
+          const Icon(Icons.calendar_today_outlined,
+              size: 16, color: AdminTechColors.textSecondary),
         ],
       ),
     );
@@ -267,14 +278,14 @@ class _DialogField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
     );
@@ -295,9 +306,11 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+        Text(subtitle,
+            style: const TextStyle(color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -313,7 +326,7 @@ class _CardShell extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(

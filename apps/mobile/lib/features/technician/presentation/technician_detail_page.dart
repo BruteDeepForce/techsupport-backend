@@ -67,8 +67,7 @@ class _TechnicianDetailPageState extends State<TechnicianDetailPage> {
                 const SizedBox(height: 8),
                 if (_tech!.specializations != null &&
                     _tech!.specializations!.isNotEmpty)
-                  Text(
-                      'Uzmanlık: ${_tech!.specializations!.join(', ')}'),
+                  Text('Uzmanlık: ${_tech!.specializations!.join(', ')}'),
                 if (_tech!.isActive != null) ...[
                   const SizedBox(height: 6),
                   Text('Durum: ${_tech!.isActive! ? 'Aktif' : 'Pasif'}'),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/hr_pages/admin_web_hr_options_section.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 import 'admin_web_hr_employee_detail_page.dart';
 import 'admin_web_hr_bordro_section_page.dart';
@@ -31,7 +32,8 @@ class _AdminWebHrPageState extends State<AdminWebHrPage> {
     _employeesDetailLargeFuture = _hrService.getLargeDetailEmployees();
   }
 
-  void _openEmployeeDetail([String? employeeId, String employeeName = 'Batuhan Kaya']) {
+  void _openEmployeeDetail(
+      [String? employeeId, String employeeName = 'Batuhan Kaya']) {
     Navigator.of(context).push(
       adminNavRoute(AdminWebHrEmployeeDetailPage(
         employeeId: employeeId,
@@ -89,6 +91,7 @@ class _AdminWebHrPageState extends State<AdminWebHrPage> {
     }
 
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.hr,
       actions: [
         AdminWebActionButton(
@@ -142,7 +145,7 @@ class _Header extends StatelessWidget {
         SizedBox(height: 6),
         Text(
           'Personel, izin ve özlük süreçlerini bu modülden yönetin.',
-          style: TextStyle(color: Color(0xFF64748B)),
+          style: TextStyle(color: AdminTechColors.textSecondary),
         ),
       ],
     );
@@ -166,12 +169,12 @@ class _TabStrip extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFFF8FBFF),
-            Color(0xFFF1F5F9),
+            AdminTechColors.surface,
+            AdminTechColors.surfaceAlt,
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0A0F172A),
@@ -195,7 +198,8 @@ class _TabStrip extends StatelessWidget {
                       onTap: () => onChanged(section),
                     ),
                   ),
-                  if (section != HrSection.values.last) const SizedBox(width: 8),
+                  if (section != HrSection.values.last)
+                    const SizedBox(width: 8),
                 ],
               ],
             );
@@ -240,10 +244,10 @@ class _TabItem extends StatelessWidget {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
+          color: active ? AdminTechColors.surface : Colors.transparent,
           borderRadius: BorderRadius.circular(14),
           border: active
-              ? Border.all(color: const Color(0xFFE2E8F0))
+              ? Border.all(color: AdminTechColors.border)
               : Border.all(color: Colors.transparent),
           boxShadow: active
               ? const [
@@ -261,7 +265,9 @@ class _TabItem extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: active ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+            color: active
+                ? AdminTechColors.primary
+                : AdminTechColors.textSecondary,
             fontSize: 15,
             fontWeight: active ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: -0.2,
@@ -315,9 +321,10 @@ class _HrDashboardSection extends StatelessWidget {
                         child: _StatCard(
                           title: 'Toplam Personel',
                           value: data.totalEmployees.toString(),
-                          note: 'Aktif ${data.activeCount} • Pasif ${data.passiveCount}',
+                          note:
+                              'Aktif ${data.activeCount} • Pasif ${data.passiveCount}',
                           icon: Icons.groups_2_outlined,
-                          accent: const Color(0xFF2563EB),
+                          accent: AdminTechColors.primary,
                         ),
                       ),
                       SizedBox(
@@ -328,17 +335,18 @@ class _HrDashboardSection extends StatelessWidget {
                           note:
                               'İzinde bulunan personel sayısı ${data.employeeOnLeaveCount}',
                           icon: Icons.event_available_outlined,
-                          accent: const Color(0xFF0F766E),
+                          accent: AdminTechColors.teal,
                         ),
                       ),
                       SizedBox(
                         width: cardWidth,
                         child: _StatCard(
                           title: 'Avans Talepleri',
-                          value: data.employeePendingAdvancesRequests.toString(),
+                          value:
+                              data.employeePendingAdvancesRequests.toString(),
                           note: 'Bekleyen avans talebi',
                           icon: Icons.account_balance_wallet_outlined,
-                          accent: const Color(0xFF7C3AED),
+                          accent: AdminTechColors.violet,
                         ),
                       ),
                       SizedBox(
@@ -348,7 +356,7 @@ class _HrDashboardSection extends StatelessWidget {
                           value: data.pendingLeavesCount.toString(),
                           note: 'İzin onayı bekleyen personel sayısı',
                           icon: Icons.pending_actions_outlined,
-                          accent: const Color(0xFF334155),
+                          accent: AdminTechColors.textPrimary,
                         ),
                       )
                     ],
@@ -382,14 +390,14 @@ class _HrDashboardSection extends StatelessWidget {
                       actionLabel: 'İncele',
                       onTap: onOpenLeaves,
                     ),
-                    const Divider(height: 24, color: Color(0xFFE2E8F0)),
+                    const Divider(height: 24, color: AdminTechColors.border),
                     _ListItem(
                       title: 'Zehra Demir - Avans talebi',
                       subtitle: '12.500 TL • Haziran kesintisi',
                       actionLabel: 'Görüntüle',
                       onTap: () {},
                     ),
-                    const Divider(height: 24, color: Color(0xFFE2E8F0)),
+                    const Divider(height: 24, color: AdminTechColors.border),
                     _ListItem(
                       title: 'Can Arslan - Eksik profil',
                       subtitle: 'Departman ve pozisyon bilgisi bekleniyor',
@@ -495,12 +503,12 @@ class _PersonnelSection extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFFF8FBFF),
-                    Color(0xFFF1F5F9),
+                    AdminTechColors.surface,
+                    AdminTechColors.surfaceAlt,
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: AdminTechColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -515,16 +523,17 @@ class _PersonnelSection extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AdminTechColors.surface,
                           borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AdminTechColors.border),
                         ),
                         child: Text(
                           '${data.totalEmployees} kayıt',
                           style: const TextStyle(
-                            color: Color(0xFF475569),
+                            color: AdminTechColors.textSecondary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -539,17 +548,17 @@ class _PersonnelSection extends StatelessWidget {
                       _MiniInfoCard(
                         title: 'Aktif Personel',
                         value: data.activeCount.toString(),
-                        accent: const Color(0xFF16A34A),
+                        accent: AdminTechColors.statusGreen,
                       ),
                       _MiniInfoCard(
                         title: 'Pasif Kayıt',
                         value: data.passiveCount.toString(),
-                        accent: const Color(0xFF64748B),
+                        accent: AdminTechColors.textSecondary,
                       ),
                       _MiniInfoCard(
                         title: 'Eksik Profil',
                         value: incompleteProfiles.toString(),
-                        accent: const Color(0xFFD97706),
+                        accent: AdminTechColors.amber,
                       ),
                     ],
                   ),
@@ -568,17 +577,20 @@ class _PersonnelSection extends StatelessWidget {
                           height: 46,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
+                            color: AdminTechColors.surface,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: AdminTechColors.border),
                           ),
                           child: const Row(
                             children: [
-                              Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                              Icon(Icons.search,
+                                  size: 18,
+                                  color: AdminTechColors.textTertiary),
                               SizedBox(width: 10),
                               Text(
                                 'Personel ara',
-                                style: TextStyle(color: Color(0xFF94A3B8)),
+                                style: TextStyle(
+                                    color: AdminTechColors.textTertiary),
                               ),
                             ],
                           ),
@@ -595,14 +607,15 @@ class _PersonnelSection extends StatelessWidget {
                   const SizedBox(height: 18),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: AdminTechColors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AdminTechColors.border),
                     ),
                     child: Column(
                       children: [
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 14),
                           child: Row(
                             children: [
                               Expanded(
@@ -610,7 +623,7 @@ class _PersonnelSection extends StatelessWidget {
                                 child: Text(
                                   'Personel',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -620,7 +633,7 @@ class _PersonnelSection extends StatelessWidget {
                                 child: Text(
                                   'Pozisyon',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -629,7 +642,7 @@ class _PersonnelSection extends StatelessWidget {
                                 child: Text(
                                   'Şube',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -638,7 +651,7 @@ class _PersonnelSection extends StatelessWidget {
                                 child: Text(
                                   'Durum',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -647,7 +660,7 @@ class _PersonnelSection extends StatelessWidget {
                                 child: Text(
                                   'İşe Başlama',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -656,13 +669,14 @@ class _PersonnelSection extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                        const Divider(height: 1, color: AdminTechColors.border),
                         if (employees.isEmpty)
                           const Padding(
                             padding: EdgeInsets.all(20),
                             child: Text(
                               'Gösterilecek personel kaydı bulunamadı.',
-                              style: TextStyle(color: Color(0xFF64748B)),
+                              style: TextStyle(
+                                  color: AdminTechColors.textSecondary),
                             ),
                           )
                         else
@@ -675,7 +689,8 @@ class _PersonnelSection extends StatelessWidget {
                               ),
                             ),
                             if (i != employees.length - 1)
-                              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                              const Divider(
+                                  height: 1, color: AdminTechColors.border),
                           ],
                       ],
                     ),
@@ -770,9 +785,9 @@ class _MiniInfoCard extends StatelessWidget {
       width: 180,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -792,7 +807,7 @@ class _MiniInfoCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -801,7 +816,7 @@ class _MiniInfoCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                   ),
                 ),
               ],
@@ -824,21 +839,22 @@ class _FilterChip extends StatelessWidget {
       height: 46,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF334155),
+              color: AdminTechColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(Icons.expand_more, size: 16, color: Color(0xFF64748B)),
+          const Icon(Icons.expand_more,
+              size: 16, color: AdminTechColors.textSecondary),
         ],
       ),
     );
@@ -873,7 +889,10 @@ class _PersonnelPremiumRow extends StatelessWidget {
                     height: 42,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFFE0EAFF), Color(0xFFF1F5F9)],
+                        colors: [
+                          AdminTechColors.surfaceAlt,
+                          AdminTechColors.surfaceAlt
+                        ],
                       ),
                       shape: BoxShape.circle,
                     ),
@@ -882,7 +901,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
                       data.name.substring(0, 1),
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF2563EB),
+                        color: AdminTechColors.primary,
                       ),
                     ),
                   ),
@@ -895,7 +914,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
                           data.name,
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A),
+                            color: AdminTechColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -904,7 +923,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF64748B),
+                            color: AdminTechColors.textSecondary,
                           ),
                         ),
                       ],
@@ -918,7 +937,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
               child: Text(
                 data.role,
                 style: const TextStyle(
-                  color: Color(0xFF334155),
+                  color: AdminTechColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -926,22 +945,27 @@ class _PersonnelPremiumRow extends StatelessWidget {
             Expanded(
               child: Text(
                 data.branch,
-                style: const TextStyle(color: Color(0xFF475569)),
+                style: const TextStyle(color: AdminTechColors.textSecondary),
               ),
             ),
             Expanded(
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isActive ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                    color: isActive
+                        ? AdminTechColors.surfaceAlt
+                        : AdminTechColors.surfaceAlt,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     data.status,
                     style: TextStyle(
-                      color: isActive ? const Color(0xFF166534) : const Color(0xFF475569),
+                      color: isActive
+                          ? AdminTechColors.statusGreen
+                          : AdminTechColors.textSecondary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -951,7 +975,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
             Expanded(
               child: Text(
                 data.startDate,
-                style: const TextStyle(color: Color(0xFF475569)),
+                style: const TextStyle(color: AdminTechColors.textSecondary),
               ),
             ),
             SizedBox(
@@ -959,7 +983,7 @@ class _PersonnelPremiumRow extends StatelessWidget {
               child: IconButton(
                 onPressed: onTap,
                 icon: const Icon(Icons.chevron_right_rounded),
-                color: const Color(0xFF94A3B8),
+                color: AdminTechColors.textTertiary,
               ),
             ),
           ],
@@ -1000,9 +1024,11 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+        Text(subtitle,
+            style: const TextStyle(color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -1051,7 +1077,7 @@ class _StatCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF475569),
+                      color: AdminTechColors.textSecondary,
                     ),
                   ),
                 ),
@@ -1066,7 +1092,7 @@ class _StatCard extends StatelessWidget {
                 fontSize: 18,
                 height: 1,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A),
+                color: AdminTechColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -1076,7 +1102,7 @@ class _StatCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 12,
-                color: Color(0xFF64748B),
+                color: AdminTechColors.textSecondary,
               ),
             ),
           ],
@@ -1109,7 +1135,8 @@ class _ListItem extends StatelessWidget {
             children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+              Text(subtitle,
+                  style: const TextStyle(color: AdminTechColors.textSecondary)),
             ],
           ),
         ),
@@ -1133,11 +1160,11 @@ class _QuickButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
       child: Align(
         alignment: Alignment.centerLeft,
@@ -1157,9 +1184,9 @@ class _CardShell extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: child,
     );

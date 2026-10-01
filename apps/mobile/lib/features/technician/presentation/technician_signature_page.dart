@@ -6,7 +6,8 @@ class TechnicianSignaturePage extends StatefulWidget {
   final String workOrderId;
 
   @override
-  State<TechnicianSignaturePage> createState() => _TechnicianSignaturePageState();
+  State<TechnicianSignaturePage> createState() =>
+      _TechnicianSignaturePageState();
 }
 
 class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
@@ -30,7 +31,8 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Icon(Icons.check_circle_rounded, color: AppColors.statusGreen, size: 60),
+        title: const Icon(Icons.check_circle_rounded,
+            color: AppColors.statusGreen, size: 60),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -39,7 +41,8 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            Text('${widget.workOrderId} numaralı cihazın teslimat imzası alındı ve iş bitirildi.'),
+            Text(
+                '${widget.workOrderId} numaralı cihazın teslimat imzası alındı ve iş bitirildi.'),
           ],
         ),
         actions: [
@@ -62,13 +65,19 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
       subtitle: 'Müşteri İmzası',
       showBack: true,
       tabBar: const SizedBox.shrink(),
-      scrollPhysics: _isDrawing ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+      scrollPhysics: _isDrawing
+          ? const NeverScrollableScrollPhysics()
+          : const BouncingScrollPhysics(),
       children: [
         // ── Customer Info & Agreement ────────────────────────────────
         const SizedBox(height: 20),
         const Text(
           'MÜŞTERİ BEYANI',
-          style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+          style: TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0),
         ),
         const SizedBox(height: 12),
         Container(
@@ -80,7 +89,8 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
           ),
           child: const Text(
             'Cihazımı tam çalışır durumda ve eksiksiz olarak teslim aldım. Teknik servis hizmetinden memnun kaldığımı ve işlemi onayladığımı beyan ederim.',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 13, height: 1.5),
+            style: TextStyle(
+                color: AppColors.textPrimary, fontSize: 13, height: 1.5),
           ),
         ),
 
@@ -89,7 +99,11 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
         // ── Signature Board (White Canvas) ───────────────────────────
         const Text(
           'DİJİTAL İMZA',
-          style: TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+          style: TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0),
         ),
         const SizedBox(height: 12),
         Container(
@@ -98,7 +112,8 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.accent.withValues(alpha: 0.3), width: 2),
+            border: Border.all(
+                color: AppColors.accent.withValues(alpha: 0.3), width: 2),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -111,10 +126,14 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Listener(
               onPointerDown: (event) {
-                final box = _signatureKey.currentContext?.findRenderObject() as RenderBox?;
+                final box = _signatureKey.currentContext?.findRenderObject()
+                    as RenderBox?;
                 if (box != null) {
                   Offset localPos = box.globalToLocal(event.position);
-                  if (localPos.dx >= 0 && localPos.dy >= 0 && localPos.dx <= box.size.width && localPos.dy <= box.size.height) {
+                  if (localPos.dx >= 0 &&
+                      localPos.dy >= 0 &&
+                      localPos.dx <= box.size.width &&
+                      localPos.dy <= box.size.height) {
                     setState(() {
                       _isDrawing = true;
                       _points.add(localPos);
@@ -123,7 +142,8 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
                 }
               },
               onPointerMove: (event) {
-                final box = _signatureKey.currentContext?.findRenderObject() as RenderBox?;
+                final box = _signatureKey.currentContext?.findRenderObject()
+                    as RenderBox?;
                 if (box != null) {
                   Offset localPos = box.globalToLocal(event.position);
                   setState(() => _points.add(localPos));
@@ -159,9 +179,12 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: AppColors.accent),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xs)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xs)),
                 ),
-                child: const Text('TEMİZLE', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
+                child: const Text('TEMİZLE',
+                    style: TextStyle(
+                        color: AppColors.accent, fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(width: 16),
@@ -173,9 +196,11 @@ class _TechnicianSignaturePageState extends State<TechnicianSignaturePage> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xs)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xs)),
                 ),
-                child: const Text('İMZALAT VE BİTİR', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('İMZALAT VE BİTİR',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -208,5 +233,6 @@ class SignaturePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SignaturePainter oldDelegate) => true; // Always repaint when points change
+  bool shouldRepaint(SignaturePainter oldDelegate) =>
+      true; // Always repaint when points change
 }

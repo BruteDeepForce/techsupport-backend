@@ -7,6 +7,8 @@ import '../../offers/models/offer_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebOfferDetailPage extends StatefulWidget {
   const AdminWebOfferDetailPage({super.key, required this.offerId});
@@ -14,7 +16,8 @@ class AdminWebOfferDetailPage extends StatefulWidget {
   final String offerId;
 
   @override
-  State<AdminWebOfferDetailPage> createState() => _AdminWebOfferDetailPageState();
+  State<AdminWebOfferDetailPage> createState() =>
+      _AdminWebOfferDetailPageState();
 }
 
 class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
@@ -57,8 +60,8 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     try {
       final ok = await _offerService.rejectAdmin(widget.offerId);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ok ? 'Teklif reddedildi' : 'Reddetme başarısız')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ok ? 'Teklif reddedildi' : 'Reddetme başarısız')));
       _refresh();
     } catch (_) {
       if (!mounted) return;
@@ -80,7 +83,8 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
       );
       if (!opened) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF bu platformda yeni sekmede acilamadi')),
+          const SnackBar(
+              content: Text('PDF bu platformda yeni sekmede acilamadi')),
         );
       }
     } catch (e) {
@@ -99,234 +103,198 @@ class _AdminWebOfferDetailPageState extends State<AdminWebOfferDetailPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child:
-                    AdminWebSidebar(compact: true, radius: 0, active: AdminNavKey.offers),
-              ),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.offers),
-            Expanded(
-              child: Column(
-                children: [
-                  AdminWebTopBar(showMenu: false, actions: [
-                    AdminWebActionButton(
-                      label: 'Yenile',
-                      icon: Icons.refresh,
-                      onPressed: _refresh,
+    return AdminWebShell(
+      active: AdminNavKey.offers,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Teklif Detayı',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTechColors.textPrimary,
+                      ),
                     ),
-                  ]),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
+                    SizedBox(height: 6),
+                    Text(
+                      'Teklife ait kalemleri ve toplam tutarı inceleyin',
+                      style: TextStyle(
+                        color: AdminTechColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          FutureBuilder<OfferSummary>(
+            future: _offerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('Teklif yüklenemedi'),
+                  ),
+                );
+              }
+              final offer = snapshot.data;
+              if (offer == null) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('Kayıt bulunamadı'),
+                  ),
+                );
+              }
+
+              final itemCount =
+                  offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
+              final status = (offer.status ?? 'Pending');
+              final isPending = status.toLowerCase() == 'pending';
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Teklif Detayı',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A),
-                                      ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Teklif ${_shortId(offer.id)}',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: AdminTechColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Operasyon: ${_shortId(offer.operationId)}',
+                                  style: const TextStyle(
+                                      color: AdminTechColors.textSecondary),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    _Pill(
+                                      label: 'Kalem: $itemCount',
+                                      color: AdminTechColors.primary,
                                     ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Teklife ait kalemleri ve toplam tutarı inceleyin',
-                                      style: TextStyle(
-                                        color: Color(0xFF64748B),
-                                      ),
+                                    const SizedBox(width: 8),
+                                    _Pill(
+                                      label: _statusLabel(status),
+                                      color: _statusColor(status),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _Pill(
+                                      label:
+                                          '${offer.amount.toStringAsFixed(2)} ${offer.currency}',
+                                      color: AdminTechColors.statusAmber,
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 16),
-                          FutureBuilder<OfferSummary>(
-                            future: _offerFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Center(child: CircularProgressIndicator()),
-                                  ),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('Teklif yüklenemedi'),
-                                  ),
-                                );
-                              }
-                              final offer = snapshot.data;
-                              if (offer == null) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('Kayıt bulunamadı'),
-                                  ),
-                                );
-                              }
-
-                              final itemCount =
-                                  offer.items.fold<int>(0, (sum, i) => sum + i.quantity);
-                              final status = (offer.status ?? 'Pending');
-                              final isPending = status.toLowerCase() == 'pending';
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text('Teknisyen',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: AdminTechColors.textSecondary)),
+                              const SizedBox(height: 4),
+                              Text(_shortId(offer.technicianUserId)),
+                              const SizedBox(height: 12),
+                              const Text('Müşteri',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: AdminTechColors.textSecondary)),
+                              const SizedBox(height: 4),
+                              Text(offer.customerId ?? '-'),
+                              const SizedBox(height: 16),
+                              Row(
                                 children: [
-                                  _Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(20),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Teklif ${_shortId(offer.id)}',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Color(0xFF0F172A),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  'Operasyon: ${_shortId(offer.operationId)}',
-                                                  style: const TextStyle(
-                                                      color: Color(0xFF64748B)),
-                                                ),
-                                                const SizedBox(height: 12),
-                                                Row(
-                                                  children: [
-                                                    _Pill(
-                                                      label: 'Kalem: $itemCount',
-                                                      color: const Color(0xFF2563EB),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    _Pill(
-                                                      label: _statusLabel(status),
-                                                      color: _statusColor(status),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    _Pill(
-                                                      label:
-                                                          '${offer.amount.toStringAsFixed(2)} ${offer.currency}',
-                                                      color: const Color(0xFFF59E0B),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
+                                  OutlinedButton.icon(
+                                    onPressed: _openingPdf
+                                        ? null
+                                        : _openInvoicePdfWebModal,
+                                    icon: _openingPdf
+                                        ? const SizedBox(
+                                            width: 14,
+                                            height: 14,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
                                             ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              const Text('Teknisyen',
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Color(0xFF64748B))),
-                                              const SizedBox(height: 4),
-                                              Text(_shortId(offer.technicianUserId)),
-                                              const SizedBox(height: 12),
-                                              const Text('Müşteri',
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Color(0xFF64748B))),
-                                              const SizedBox(height: 4),
-                                              Text(offer.customerId ?? '-'),
-                                              const SizedBox(height: 16),
-                                              Row(
-                                                children: [
-                                                  OutlinedButton.icon(
-                                                    onPressed: _openingPdf
-                                                        ? null
-                                                        : _openInvoicePdfWebModal,
-                                                    icon: _openingPdf
-                                                        ? const SizedBox(
-                                                            width: 14,
-                                                            height: 14,
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              strokeWidth: 2,
-                                                            ),
-                                                          )
-                                                        : const Icon(Icons
-                                                            .picture_as_pdf_outlined),
-                                                    label: const Text('Fatura PDF'),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  OutlinedButton(
-                                                    onPressed: _acting || !isPending
-                                                        ? null
-                                                        : _reject,
-                                                    child: const Text('Reddet'),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  FilledButton(
-                                                    onPressed: _acting || !isPending
-                                                        ? null
-                                                        : _approve,
-                                                    child: const Text('Onayla'),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                          )
+                                        : const Icon(
+                                            Icons.picture_as_pdf_outlined),
+                                    label: const Text('Fatura PDF'),
                                   ),
-                                  const SizedBox(height: 16),
-                                  _Card(
-                                    child: Column(
-                                      children: [
-                                        const _ItemsHeader(),
-                                        const Divider(
-                                            height: 1, color: Color(0xFFE2E8F0)),
-                                        for (final item in offer.items)
-                                          _ItemRow(item: item),
-                                      ],
-                                    ),
+                                  const SizedBox(width: 10),
+                                  OutlinedButton(
+                                    onPressed:
+                                        _acting || !isPending ? null : _reject,
+                                    child: const Text('Reddet'),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  FilledButton(
+                                    onPressed:
+                                        _acting || !isPending ? null : _approve,
+                                    child: const Text('Onayla'),
                                   ),
                                 ],
-                              );
-                            },
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  _Card(
+                    child: Column(
+                      children: [
+                        const _ItemsHeader(),
+                        const Divider(height: 1, color: AdminTechColors.border),
+                        for (final item in offer.items) _ItemRow(item: item),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -339,15 +307,23 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Teklifler', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Teklifler',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Detay', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Detay',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -362,9 +338,9 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -424,12 +400,12 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'adminapproved':
     case 'customerapproved':
-      return const Color(0xFF22C55E);
+      return AdminTechColors.green;
     case 'adminrejected':
     case 'customerrejected':
-      return const Color(0xFFEF4444);
+      return AdminTechColors.statusRed;
     default:
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
   }
 }
 
@@ -448,11 +424,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }
@@ -467,7 +443,7 @@ class _ItemsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -477,7 +453,7 @@ class _ItemsHeader extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: AdminTechColors.textSecondary,
                     ),
                   ),
                 ))
@@ -497,7 +473,7 @@ class _ItemRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
       ),
       child: Row(
         children: [

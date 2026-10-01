@@ -19,8 +19,8 @@ class AuthService {
     throw Exception('Login failed: ${res.statusCode}');
   }
 
-  Future<String> register(
-      String email, String userName, String password, String role, String tenantName,
+  Future<String> register(String email, String userName, String password,
+      String role, String tenantName,
       {String? branchName}) async {
     final data = {
       'Email': email,

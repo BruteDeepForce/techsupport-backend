@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/design/app_design.dart';
 import 'admin_ai_chat_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminAIAutonomousPage extends StatefulWidget {
   const AdminAIAutonomousPage({super.key});
@@ -21,7 +22,7 @@ class _AdminAIAutonomousPageState extends State<AdminAIAutonomousPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'AI Otonom Mod',
       subtitle: 'Sistem Yönetimi',
       showBack: true,
@@ -33,7 +34,8 @@ class _AdminAIAutonomousPageState extends State<AdminAIAutonomousPage> {
           color: Colors.white.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: const Icon(Icons.settings_outlined, color: Colors.white, size: 18),
+        child:
+            const Icon(Icons.settings_outlined, color: Colors.white, size: 18),
       ),
       children: [
         // ── AI Business Assistant (Chat Trigger) ────────────────────
@@ -132,15 +134,16 @@ class _AdminAIAutonomousPageState extends State<AdminAIAutonomousPage> {
             children: const [
               _ChatSummaryRow(
                 customer: 'Fatma Kardaş',
-                summary: 'Klavye sorunu için cihazını yarın getireceğini belirtti.',
+                summary:
+                    'Klavye sorunu için cihazını yarın getireceğini belirtti.',
                 mood: 'Pozitif',
-                moodColor: AppColors.statusGreen,
+                moodColor: AdminTechColors.statusGreen,
               ),
               _ChatSummaryRow(
                 customer: 'Selim Akarsu',
                 summary: 'Acil VPN erişimi bekliyor, işleri yarım kalmış.',
                 mood: 'Endişeli',
-                moodColor: AppColors.statusOrange,
+                moodColor: AdminTechColors.orange,
                 showDivider: false,
               ),
             ],
@@ -165,16 +168,26 @@ class _AIStat extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white38, size: 20),
         const SizedBox(height: 8),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+        Text(label,
+            style: const TextStyle(color: Colors.white54, fontSize: 10)),
       ],
     );
   }
 }
 
 class _ControlRow extends StatelessWidget {
-  const _ControlRow({required this.title, required this.subtitle, required this.value, required this.onChanged, this.showDivider = true});
+  const _ControlRow(
+      {required this.title,
+      required this.subtitle,
+      required this.value,
+      required this.onChanged,
+      this.showDivider = true});
   final String title;
   final String subtitle;
   final bool value;
@@ -186,7 +199,11 @@ class _ControlRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: showDivider ? const Border(bottom: BorderSide(color: AppColors.borderSubtle, width: 1)) : null,
+        border: showDivider
+            ? const Border(
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
+            : null,
       ),
       child: Row(
         children: [
@@ -194,16 +211,22 @@ class _ControlRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(
+                        color: AdminTechColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                Text(subtitle,
+                    style: const TextStyle(
+                        color: AdminTechColors.textTertiary, fontSize: 11)),
               ],
             ),
           ),
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.accent,
+            activeColor: const Color.fromARGB(255, 46, 42, 255),
           ),
         ],
       ),
@@ -212,7 +235,11 @@ class _ControlRow extends StatelessWidget {
 }
 
 class _AILogRow extends StatelessWidget {
-  const _AILogRow({required this.action, required this.target, required this.time, this.showDivider = true});
+  const _AILogRow(
+      {required this.action,
+      required this.target,
+      required this.time,
+      this.showDivider = true});
   final String action;
   final String target;
   final String time;
@@ -223,23 +250,36 @@ class _AILogRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: showDivider ? const Border(bottom: BorderSide(color: AppColors.borderSubtle, width: 1)) : null,
+        border: showDivider
+            ? const Border(
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
+            : null,
       ),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_outline_rounded, color: Colors.cyanAccent, size: 16),
+          const Icon(Icons.check_circle_outline_rounded,
+              color: Color.fromARGB(255, 91, 0, 124), size: 16),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(action, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(action,
+                    style: const TextStyle(
+                        color: AdminTechColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
-                Text(target, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                Text(target,
+                    style: const TextStyle(
+                        color: AdminTechColors.textTertiary, fontSize: 11)),
               ],
             ),
           ),
-          Text(time, style: const TextStyle(color: AppColors.textTertiary, fontSize: 10)),
+          Text(time,
+              style: const TextStyle(
+                  color: AdminTechColors.textTertiary, fontSize: 10)),
         ],
       ),
     );
@@ -247,7 +287,12 @@ class _AILogRow extends StatelessWidget {
 }
 
 class _ChatSummaryRow extends StatelessWidget {
-  const _ChatSummaryRow({required this.customer, required this.summary, required this.mood, required this.moodColor, this.showDivider = true});
+  const _ChatSummaryRow(
+      {required this.customer,
+      required this.summary,
+      required this.mood,
+      required this.moodColor,
+      this.showDivider = true});
   final String customer;
   final String summary;
   final String mood;
@@ -259,7 +304,11 @@ class _ChatSummaryRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: showDivider ? const Border(bottom: BorderSide(color: AppColors.borderSubtle, width: 1)) : null,
+        border: showDivider
+            ? const Border(
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,14 +316,21 @@ class _ChatSummaryRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(customer, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+              Text(customer,
+                  style: const TextStyle(
+                      color: AdminTechColors.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold)),
               LinearBadge(label: mood, color: moodColor),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             summary,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.4),
+            style: const TextStyle(
+                color: AdminTechColors.textSecondary,
+                fontSize: 12,
+                height: 1.4),
           ),
         ],
       ),
@@ -292,21 +348,25 @@ class _AIBusinessAssistant extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.accent,
-            const Color(0xFF3730A3), // Indigo 800
+            const Color.fromARGB(255, 8, 0, 168),
+            AdminTechColors.primary.withValues(alpha: 0.7)
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+        border: Border.all(
+            color:
+                const Color.fromARGB(255, 250, 251, 252).withValues(alpha: 0.1),
+            width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.forum_rounded, color: Colors.white, size: 24),
+              const Icon(Icons.forum_rounded,
+                  color: Color.fromARGB(255, 255, 254, 254), size: 24),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -327,7 +387,10 @@ class _AIBusinessAssistant extends StatelessWidget {
                 ),
                 child: const Text(
                   '7/24 DESTEK',
-                  style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -335,7 +398,7 @@ class _AIBusinessAssistant extends StatelessWidget {
           const SizedBox(height: 16),
           const Text(
             'Firmanız hakkındaki her şeyi yapay zekaya sorun. Stok durumu, ekip verimliliği veya müşteri analizi hakkında anında yanıt alın.',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+            style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
           ),
           const SizedBox(height: 20),
           GestureDetector(
@@ -355,12 +418,13 @@ class _AIBusinessAssistant extends StatelessWidget {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.auto_awesome, color: AppColors.accent, size: 18),
+                  Icon(Icons.auto_awesome,
+                      color: Color.fromARGB(255, 0, 12, 123), size: 18),
                   SizedBox(width: 8),
                   Text(
                     'AI DANIŞMANIYLA KONUŞ',
                     style: TextStyle(
-                      color: AppColors.accent,
+                      color: Color.fromARGB(255, 0, 6, 86),
                       fontSize: 13,
                       fontWeight: FontWeight.w900,
                     ),

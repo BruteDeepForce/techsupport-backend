@@ -117,22 +117,26 @@ class _DemoRequestDialogState extends State<DemoRequestDialog> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _field(_fullNameController, 'Ad Soyad', Icons.person_outline_rounded,
+                _field(_fullNameController, 'Ad Soyad',
+                    Icons.person_outline_rounded,
                     requiredField: true),
                 const SizedBox(height: 12),
-                _field(_companyController, 'Firma Ünvanı', Icons.business_outlined,
+                _field(
+                    _companyController, 'Firma Ünvanı', Icons.business_outlined,
                     requiredField: true),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
-                      child: _field(
-                          _emailController, 'E-posta', Icons.alternate_email_rounded,
-                          requiredField: true, keyboardType: TextInputType.emailAddress),
+                      child: _field(_emailController, 'E-posta',
+                          Icons.alternate_email_rounded,
+                          requiredField: true,
+                          keyboardType: TextInputType.emailAddress),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _field(_phoneController, 'Telefon', Icons.phone_rounded,
+                      child: _field(
+                          _phoneController, 'Telefon', Icons.phone_rounded,
                           keyboardType: TextInputType.phone),
                     ),
                   ],
@@ -160,7 +164,8 @@ class _DemoRequestDialogState extends State<DemoRequestDialog> {
                   },
                 ),
                 const SizedBox(height: 12),
-                _field(_noteController, 'Eksik notunuz varsa yazın', Icons.notes_rounded,
+                _field(_noteController, 'Eksik notunuz varsa yazın',
+                    Icons.notes_rounded,
                     maxLines: 3),
                 const SizedBox(height: 20),
                 Row(
@@ -177,7 +182,8 @@ class _DemoRequestDialogState extends State<DemoRequestDialog> {
                     ),
                     const SizedBox(width: 12),
                     TextButton(
-                      onPressed: _sending ? null : () => Navigator.of(context).pop(),
+                      onPressed:
+                          _sending ? null : () => Navigator.of(context).pop(),
                       child: const Text('Vazgeç'),
                     ),
                     const SizedBox(width: 8),
@@ -292,7 +298,8 @@ class LandingActions {
     if (launched || !context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('E-posta uygulaması açılamadı: ${SiteContact.salesEmail}'),
+        content:
+            Text('E-posta uygulaması açılamadı: ${SiteContact.salesEmail}'),
       ),
     );
   }

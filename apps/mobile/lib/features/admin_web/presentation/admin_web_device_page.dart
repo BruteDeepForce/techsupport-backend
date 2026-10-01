@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './shared/admin_web_design.dart';
 
 import '../../customer/data/customer_service.dart';
 import '../../customer/models/customer_models.dart';
@@ -68,7 +69,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A)),
+                      color: AdminTechColors.textPrimary),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -126,14 +127,16 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       customerNameController.clear();
                     }
                   },
-                  validator: (v) => v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                  validator: (v) =>
+                      v == null || v.isEmpty ? 'Müşteri seçin' : null,
                   decoration: InputDecoration(
                     labelText: 'Müşteri',
                     filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
+                    fillColor: AdminTechColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.border),
                     ),
                   ),
                 ),
@@ -183,9 +186,12 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   value: status,
                   items: const [
                     DropdownMenuItem(value: 'Other', child: Text('Diğer')),
-                    DropdownMenuItem(value: 'InRepair', child: Text('Onarımda')),
-                    DropdownMenuItem(value: 'InMaintenance', child: Text('Bakımda')),
-                    DropdownMenuItem(value: 'Saleable', child: Text('Satılabilir')),
+                    DropdownMenuItem(
+                        value: 'InRepair', child: Text('Onarımda')),
+                    DropdownMenuItem(
+                        value: 'InMaintenance', child: Text('Bakımda')),
+                    DropdownMenuItem(
+                        value: 'Saleable', child: Text('Satılabilir')),
                     DropdownMenuItem(value: 'Selled', child: Text('Satıldı')),
                     DropdownMenuItem(value: 'Returned', child: Text('İade')),
                   ],
@@ -193,10 +199,11 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                   decoration: InputDecoration(
                     labelText: 'Durum',
                     filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
+                    fillColor: AdminTechColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.border),
                     ),
                   ),
                 ),
@@ -214,9 +221,11 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         if (!(formKey.currentState?.validate() ?? false)) {
                           return;
                         }
-                        if (selectedCustomerId == null || selectedCustomerId!.isEmpty) {
+                        if (selectedCustomerId == null ||
+                            selectedCustomerId!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Müşteri seçmelisiniz')),
+                            const SnackBar(
+                                content: Text('Müşteri seçmelisiniz')),
                           );
                           return;
                         }
@@ -224,7 +233,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             selectedCustomerUserId!.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Müşterinin kullanıcı bilgisi yok')),
+                                content:
+                                    Text('Müşterinin kullanıcı bilgisi yok')),
                           );
                           return;
                         }
@@ -240,9 +250,10 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             brand: brandController.text.trim(),
                             model: modelController.text.trim(),
                             serialNumber: serialController.text.trim(),
-                            problemDescription: problemController.text.trim().isEmpty
-                                ? null
-                                : problemController.text.trim(),
+                            problemDescription:
+                                problemController.text.trim().isEmpty
+                                    ? null
+                                    : problemController.text.trim(),
                             guaranteePeriod:
                                 int.tryParse(guaranteeController.text.trim()),
                             warrantyStartAtUtc: warrantyStartDate,
@@ -274,7 +285,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6),
+                        backgroundColor: AdminTechColors.statusBlue,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Kaydet'),
@@ -301,7 +312,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
     final warrantyStartController = TextEditingController();
     final descriptionController = TextEditingController();
     DateTime? warrantyStartDate;
-    StockCategory? selectedCategory = categories.isNotEmpty ? categories.first : null;
+    StockCategory? selectedCategory =
+        categories.isNotEmpty ? categories.first : null;
     String productCondition = 'New';
 
     showDialog(
@@ -323,7 +335,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A)),
+                        color: AdminTechColors.textPrimary),
                   ),
                   const SizedBox(height: 14),
                   DropdownButtonFormField<StockCategory>(
@@ -374,10 +386,13 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         child: DropdownButtonFormField<String>(
                           value: productCondition,
                           items: const [
-                            DropdownMenuItem(value: 'New', child: Text('Sıfır')),
-                            DropdownMenuItem(value: 'Used', child: Text('İkinci El')),
                             DropdownMenuItem(
-                                value: 'Refurbished', child: Text('Yenilenmiş')),
+                                value: 'New', child: Text('Sıfır')),
+                            DropdownMenuItem(
+                                value: 'Used', child: Text('İkinci El')),
+                            DropdownMenuItem(
+                                value: 'Refurbished',
+                                child: Text('Yenilenmiş')),
                           ],
                           onChanged: (v) => productCondition = v ?? 'New',
                           decoration: _dialogDecoration('Ürün Durumu'),
@@ -410,7 +425,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                     label: 'Satış Fiyatı',
                     controller: salePriceController,
                     requiredField: true,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -467,11 +483,14 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                           if (!(formKey.currentState?.validate() ?? false)) {
                             return;
                           }
-                          final salePrice = double.tryParse(
-                              salePriceController.text.trim().replaceAll(',', '.'));
+                          final salePrice = double.tryParse(salePriceController
+                              .text
+                              .trim()
+                              .replaceAll(',', '.'));
                           if (salePrice == null || salePrice <= 0) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Geçerli satış fiyatı girin')),
+                              const SnackBar(
+                                  content: Text('Geçerli satış fiyatı girin')),
                             );
                             return;
                           }
@@ -480,8 +499,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) =>
-                                const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()),
                           );
                           try {
                             await _deviceService.createInventoryDevice(
@@ -496,9 +515,10 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                               guaranteePeriod:
                                   int.tryParse(guaranteeController.text.trim()),
                               warrantyStartAtUtc: warrantyStartDate,
-                              description: descriptionController.text.trim().isEmpty
-                                  ? null
-                                  : descriptionController.text.trim(),
+                              description:
+                                  descriptionController.text.trim().isEmpty
+                                      ? null
+                                      : descriptionController.text.trim(),
                               unit: 'Adet',
                               quantity: 1,
                             );
@@ -506,7 +526,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             if (mounted) {
                               _refresh();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Bayi cihazı oluşturuldu')),
+                                const SnackBar(
+                                    content: Text('Bayi cihazı oluşturuldu')),
                               );
                             }
                           } catch (_) {
@@ -514,13 +535,14 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text('Bayi cihazı oluşturulamadı')),
+                                    content:
+                                        Text('Bayi cihazı oluşturulamadı')),
                               );
                             }
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3B82F6),
+                          backgroundColor: AdminTechColors.statusBlue,
                           foregroundColor: Colors.white,
                         ),
                         child: const Text('Oluştur'),
@@ -547,6 +569,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.devices,
       actions: [
         AdminWebActionButton(
@@ -569,7 +592,7 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                 runSpacing: 8,
                 alignment: WrapAlignment.end,
                 children: [
-                  _PrimaryActionButton(
+                  AdminTechPrimaryButton(
                     label: 'Bayi Cihazı Oluştur',
                     icon: Icons.storefront_outlined,
                     onPressed: () async {
@@ -579,7 +602,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                         if (categories.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Önce stok kategorisi oluşturun')),
+                                content:
+                                    Text('Önce stok kategorisi oluşturun')),
                           );
                           return;
                         }
@@ -587,12 +611,13 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       } catch (_) {
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Stok kategorileri yüklenemedi')),
+                          const SnackBar(
+                              content: Text('Stok kategorileri yüklenemedi')),
                         );
                       }
                     },
                   ),
-                  _PrimaryActionButton(
+                  AdminTechPrimaryButton(
                     label: 'Cihaz Ekle',
                     icon: Icons.add,
                     onPressed: () async {
@@ -603,7 +628,8 @@ class _AdminWebDevicePageState extends State<AdminWebDevicePage> {
                       } catch (_) {
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Müşteriler yüklenemedi')),
+                          const SnackBar(
+                              content: Text('Müşteriler yüklenemedi')),
                         );
                       }
                     },
@@ -627,11 +653,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Cihaz Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Cihaz Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -654,14 +685,14 @@ class _Header extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               SizedBox(height: 6),
               Text(
                 'Kayıtlı cihazları görüntüleyin',
                 style: TextStyle(
-                  color: Color(0xFF64748B),
+                  color: AdminTechColors.textSecondary,
                 ),
               ),
             ],
@@ -702,14 +733,14 @@ class _DialogField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
     );
@@ -720,38 +751,16 @@ InputDecoration _dialogDecoration(String label) {
   return InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: const Color(0xFFF8FAFC),
+    fillColor: AdminTechColors.surface,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
   );
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton(
-      {required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
 }
 
 class _DeviceTableCard extends StatelessWidget {
@@ -785,7 +794,8 @@ class _DeviceTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı',
+                  style: TextStyle(color: AdminTechColors.textTertiary)),
             ),
           );
         }
@@ -793,7 +803,7 @@ class _DeviceTableCard extends StatelessWidget {
           child: Column(
             children: [
               const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              const Divider(height: 1, color: AdminTechColors.border),
               for (final device in devices)
                 _TableRow(
                   device: device,
@@ -822,9 +832,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -856,7 +866,7 @@ class _TableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -867,7 +877,7 @@ class _TableHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -891,7 +901,7 @@ class _TableRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
         ),
         child: Row(
           children: [

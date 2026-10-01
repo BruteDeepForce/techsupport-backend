@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import './shared/admin_web_design.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../technician/data/technician_service.dart';
@@ -8,13 +9,13 @@ import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_shell.dart';
 import 'shared/admin_web_topbar.dart';
 
-const Color _primary = Color(0xFF2563EB);
-const Color _success = Color(0xFF16A34A);
-const Color _warning = Color(0xFFD97706);
-const Color _danger = Color(0xFFDC2626);
-const Color _info = Color(0xFF0EA5E9);
-const Color _violet = Color(0xFF7C3AED);
-const Color _teal = Color(0xFF0F766E);
+const Color _primary = AdminTechColors.primary;
+const Color _success = AdminTechColors.statusGreen;
+const Color _warning = AdminTechColors.amber;
+const Color _danger = AdminTechColors.red;
+const Color _info = AdminTechColors.cyan;
+const Color _violet = AdminTechColors.violet;
+const Color _teal = AdminTechColors.teal;
 
 class AdminWebTechnicianDetailPage extends StatefulWidget {
   const AdminWebTechnicianDetailPage({super.key, required this.technicianId});
@@ -26,7 +27,8 @@ class AdminWebTechnicianDetailPage extends StatefulWidget {
       _AdminWebTechnicianDetailPageState();
 }
 
-class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailPage> {
+class _AdminWebTechnicianDetailPageState
+    extends State<AdminWebTechnicianDetailPage> {
   final TechnicianService _technicianService = TechnicianService();
   late Future<TechnicianDetail> _detailFuture;
 
@@ -38,7 +40,8 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
 
   void _refresh() {
     setState(() {
-      _detailFuture = _technicianService.getTechnicianDetail(widget.technicianId);
+      _detailFuture =
+          _technicianService.getTechnicianDetail(widget.technicianId);
     });
   }
 
@@ -66,12 +69,12 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
                 child: Container(
                   width: double.infinity,
                   height: 420,
-                  color: const Color(0xFFF1F5F9),
+                  color: AdminTechColors.surfaceAlt,
                   child: imageUrl == null
                       ? const Icon(
                           Icons.person_outline_rounded,
                           size: 90,
-                          color: Color(0xFF64748B),
+                          color: AdminTechColors.textSecondary,
                         )
                       : Image.network(
                           imageUrl,
@@ -79,7 +82,7 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
                           errorBuilder: (_, __, ___) => const Icon(
                             Icons.person_outline_rounded,
                             size: 90,
-                            color: Color(0xFF64748B),
+                            color: AdminTechColors.textSecondary,
                           ),
                         ),
                 ),
@@ -110,6 +113,7 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.team,
       actions: [
         AdminWebActionButton(
@@ -141,13 +145,14 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     const Text(
                       'Teknisyen bilgilerine ulaşılamadı. Lütfen sayfayı yenileyin veya daha sonra tekrar deneyin.',
-                      style: TextStyle(color: Color(0xFF64748B), height: 1.4),
+                      style: TextStyle(
+                          color: AdminTechColors.textSecondary, height: 1.4),
                     ),
                     const SizedBox(height: 14),
                     OutlinedButton.icon(
@@ -155,8 +160,8 @@ class _AdminWebTechnicianDetailPageState extends State<AdminWebTechnicianDetailP
                       icon: const Icon(Icons.refresh, size: 16),
                       label: const Text('Yeniden Dene'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF0F172A),
-                        side: const BorderSide(color: Color(0xFFE2E8F0)),
+                        foregroundColor: AdminTechColors.textPrimary,
+                        side: const BorderSide(color: AdminTechColors.border),
                       ),
                     ),
                   ],
@@ -262,14 +267,14 @@ class _ProfileHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(999),
             child: CircleAvatar(
               radius: 40,
-              backgroundColor: const Color(0xFFE2E8F0),
+              backgroundColor: AdminTechColors.border,
               child: imageUrl == null
                   ? const Text(
                       'T',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF64748B),
+                        color: AdminTechColors.textSecondary,
                       ),
                     )
                   : ClipOval(
@@ -283,7 +288,7 @@ class _ProfileHeader extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF64748B),
+                            color: AdminTechColors.textSecondary,
                           ),
                         ),
                       ),
@@ -305,7 +310,7 @@ class _ProfileHeader extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
                     _StatusBadge(
@@ -318,7 +323,7 @@ class _ProfileHeader extends StatelessWidget {
                 const Text(
                   'Saha Teknik Servis Teknisyeni',
                   style: TextStyle(
-                    color: Color(0xFF475569),
+                    color: AdminTechColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -329,8 +334,9 @@ class _ProfileHeader extends StatelessWidget {
                   children: [
                     _HeaderFact(
                       icon: Icons.alternate_email_rounded,
-                      value:
-                          detail.email.isEmpty ? 'E-posta belirtilmemiş' : detail.email,
+                      value: detail.email.isEmpty
+                          ? 'E-posta belirtilmemiş'
+                          : detail.email,
                     ),
                     _HeaderFact(
                       icon: Icons.phone_rounded,
@@ -364,11 +370,12 @@ class _HeaderFact extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: const Color(0xFF94A3B8)),
+        Icon(icon, size: 15, color: AdminTechColors.textTertiary),
         const SizedBox(width: 6),
         Text(
           value,
-          style: const TextStyle(color: Color(0xFF475569), fontSize: 13),
+          style: const TextStyle(
+              color: AdminTechColors.textSecondary, fontSize: 13),
         ),
       ],
     );
@@ -446,9 +453,9 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -471,7 +478,7 @@ class _MetricCard extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -481,7 +488,7 @@ class _MetricCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                   ),
                 ),
               ],
@@ -584,7 +591,8 @@ class _ExpertiseCard extends StatelessWidget {
           if (detail.specializations.isEmpty)
             const Text(
               'Bu teknisyen için henüz uzmanlık alanı tanımlanmamış.',
-              style: TextStyle(color: Color(0xFF94A3B8), height: 1.4),
+              style:
+                  TextStyle(color: AdminTechColors.textTertiary, height: 1.4),
             )
           else
             Wrap(
@@ -593,22 +601,23 @@ class _ExpertiseCard extends StatelessWidget {
               children: [
                 for (final specialization in detail.specializations)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: AdminTechColors.surfaceAlt,
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AdminTechColors.border),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.check_circle_rounded,
-                            size: 14, color: Color(0xFF2563EB)),
+                            size: 14, color: AdminTechColors.primary),
                         const SizedBox(width: 6),
                         Text(
                           specialization,
                           style: const TextStyle(
-                            color: Color(0xFF334155),
+                            color: AdminTechColors.textPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -665,13 +674,14 @@ class _WorkloadCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: AdminTechColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: Row(
               children: [
-                const Icon(Icons.verified_rounded, size: 18, color: Color(0xFF2563EB)),
+                const Icon(Icons.verified_rounded,
+                    size: 18, color: AdminTechColors.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -679,7 +689,7 @@ class _WorkloadCard extends StatelessWidget {
                         ? 'Bu teknisyene henüz atanmış bir iş kaydı bulunmuyor.'
                         : 'Atanan $total işin %${_formatRate(detail.completionRate)} kadarı tamamlanmış durumda.',
                     style: const TextStyle(
-                      color: Color(0xFF475569),
+                      color: AdminTechColors.textSecondary,
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -721,7 +731,7 @@ class _ProgressRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF334155),
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
             ),
@@ -730,7 +740,7 @@ class _ProgressRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF475569),
+                color: AdminTechColors.textSecondary,
               ),
             ),
           ],
@@ -741,7 +751,7 @@ class _ProgressRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: ratio.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: const Color(0xFFF1F5F9),
+            backgroundColor: AdminTechColors.surfaceAlt,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -772,7 +782,8 @@ class _RecentOperationsCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Text(
                 'Bu teknisyene atanmış iş kaydı bulunmuyor.',
-                style: TextStyle(color: Color(0xFF94A3B8), height: 1.4),
+                style:
+                    TextStyle(color: AdminTechColors.textTertiary, height: 1.4),
               ),
             )
           else
@@ -807,7 +818,7 @@ class _OperationRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -830,7 +841,7 @@ class _OperationRow extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -843,7 +854,7 @@ class _OperationRow extends StatelessWidget {
                   ].join(' • '),
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF94A3B8),
+                    color: AdminTechColors.textTertiary,
                   ),
                 ),
               ],
@@ -851,7 +862,9 @@ class _OperationRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           _StatusBadge(
-            label: operation.statusLabel.isEmpty ? 'Bilinmiyor' : operation.statusLabel,
+            label: operation.statusLabel.isEmpty
+                ? 'Bilinmiyor'
+                : operation.statusLabel,
             color: _statusColor(),
           ),
         ],
@@ -876,13 +889,14 @@ class _SectionTitle extends StatelessWidget {
           style: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF0F172A),
+            color: AdminTechColors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+          style: const TextStyle(
+              fontSize: 12, color: AdminTechColors.textTertiary),
         ),
       ],
     );
@@ -914,19 +928,19 @@ class _InfoRow extends StatelessWidget {
         border: isLast
             ? null
             : const Border(
-                bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                bottom: BorderSide(color: AdminTechColors.surfaceAlt),
               ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: const Color(0xFF94A3B8)),
+          Icon(icon, size: 16, color: AdminTechColors.textTertiary),
           const SizedBox(width: 10),
           SizedBox(
             width: 170,
             child: Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF64748B),
+                color: AdminTechColors.textSecondary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -936,7 +950,7 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               style: const TextStyle(
-                color: Color(0xFF0F172A),
+                color: AdminTechColors.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -949,7 +963,7 @@ class _InfoRow extends StatelessWidget {
               icon: const Icon(
                 Icons.copy_rounded,
                 size: 15,
-                color: Color(0xFF94A3B8),
+                color: AdminTechColors.textTertiary,
               ),
               visualDensity: VisualDensity.compact,
             ),
@@ -997,9 +1011,9 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -1020,16 +1034,23 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Ekip Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Ekip Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
         Text('Teknisyen Detayı',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }

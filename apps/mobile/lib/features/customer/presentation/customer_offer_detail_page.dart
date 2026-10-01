@@ -81,7 +81,8 @@ class _CustomerOfferDetailPageState extends State<CustomerOfferDetailPage> {
         );
         if (!opened) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('PDF bu platformda yeni sekmede acilamadi')),
+            const SnackBar(
+                content: Text('PDF bu platformda yeni sekmede acilamadi')),
           );
         }
         return;
@@ -94,8 +95,8 @@ class _CustomerOfferDetailPageState extends State<CustomerOfferDetailPage> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', ''))));
     } finally {
       if (mounted) setState(() => _openingPdf = false);
     }

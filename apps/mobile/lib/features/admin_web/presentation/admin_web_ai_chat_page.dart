@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import './shared/admin_web_design.dart';
 
 import '../../../core/utils/guid_generator.dart';
 import '../../ai/data/ai_chat_service.dart';
@@ -36,7 +37,10 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
 
   bool _sending = false;
 
-  late final Ticker _revealTicker = createTicker(_onRevealTick);
+  /// Ticker ilk kullanıldığında oluşturulur. `late final` alan `dispose`
+  /// içinde ilk erişimde yaratılabiliyor ve o sırada ağaç sökülmüş olduğu
+  /// için TickerMode araması güvenli olmuyordu.
+  Ticker? _revealTicker;
 
   String? _revealTargetId;
   int _revealedChars = 0;
@@ -44,9 +48,13 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
 
   bool get _isRevealing => _revealTargetId != null;
 
+  /// Ticker'ı ilk kullanımda oluşturur; sonraki çağrılar mevcut olanı döner.
+  Ticker get _reveal => _revealTicker ??= createTicker(_onRevealTick);
+
   @override
   void dispose() {
-    _revealTicker.dispose();
+    _revealTicker?.dispose();
+    _revealTicker = null;
     _controller.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
@@ -133,7 +141,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
 
   void _startNewConversation() {
     if (_sending) return;
-    _revealTicker.stop();
+    _reveal.stop();
     setState(() {
       _messages.clear();
       _revealTargetId = null;
@@ -145,30 +153,31 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
 
   /// Yanıtı harf harf ekrana yazar.
   void _startReveal(AiChatMessage message) {
-    _revealTicker.stop();
+    _reveal.stop();
     setState(() {
       _revealTargetId = message.id;
       _revealedChars = 0;
-      _revealDurationMs =
-          (message.content.length * _msPerChar).clamp(_minRevealMs, _maxRevealMs);
+      _revealDurationMs = (message.content.length * _msPerChar)
+          .clamp(_minRevealMs, _maxRevealMs);
     });
 
     if (message.content.isEmpty) {
       _finishReveal();
       return;
     }
-    _revealTicker.start();
+    _reveal.start();
   }
 
   void _onRevealTick(Duration elapsed) {
     final target = _revealingMessage;
     if (target == null) {
-      _revealTicker.stop();
+      _reveal.stop();
       return;
     }
 
     final total = target.content.length;
-    final progress = (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
+    final progress =
+        (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
     final chars = (total * progress).round();
 
     if (chars >= total) {
@@ -182,7 +191,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
 
   /// Yazma animasyonunu anında tamamlar (balona dokununca).
   void _finishReveal() {
-    _revealTicker.stop();
+    _reveal.stop();
     if (_revealTargetId == null) return;
     setState(() {
       _revealedChars = _revealingMessage?.content.length ?? 0;
@@ -205,7 +214,8 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     if (message.id != _revealTargetId || message.isFailed) {
       return message.content;
     }
-    return message.content.substring(0, _revealedChars.clamp(0, message.content.length));
+    return message.content
+        .substring(0, _revealedChars.clamp(0, message.content.length));
   }
 
   void _scrollToBottom({bool animate = true}) {
@@ -237,6 +247,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.aiChat,
       scrollable: false,
       actions: [
@@ -301,11 +312,16 @@ class _Breadcrumb extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Row(
         children: [
-          Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+          Text('Yönetim',
+              style:
+                  TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
           SizedBox(width: 6),
-          Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+          Icon(Icons.chevron_right,
+              size: 14, color: AdminTechColors.textTertiary),
           SizedBox(width: 6),
-          Text('AI Asistan', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+          Text('AI Asistan',
+              style: TextStyle(
+                  fontSize: 12, color: AdminTechColors.textSecondary)),
         ],
       ),
     );
@@ -318,32 +334,32 @@ class _EmptyState extends StatelessWidget {
   static const List<_Suggestion> _suggestions = [
     _Suggestion(
       icon: Icons.inventory_2_outlined,
-      iconColor: Color(0xFF4F46E5),
-      iconBg: Color(0xFFEEF2FF),
+      iconColor: AdminTechColors.indigo,
+      iconBg: AdminTechColors.surfaceAlt,
       title: 'Stok durumu',
       subtitle: 'Kritik seviyedeki ürünleri ve mevcut miktarları göster',
       prompt: 'Stokta kritik seviyeye düşen ürünler var mı?',
     ),
     _Suggestion(
       icon: Icons.account_balance_wallet_outlined,
-      iconColor: Color(0xFF10B981),
-      iconBg: Color(0xFFECFDF5),
+      iconColor: AdminTechColors.green,
+      iconBg: AdminTechColors.surfaceAlt,
       title: 'Muhasebe özeti',
       subtitle: 'Toplam alacak, vadesi geçen faturalar ve tahsilat durumu',
       prompt: 'Muhasebe özetini ve vadesi geçen faturaları göster.',
     ),
     _Suggestion(
       icon: Icons.receipt_long_outlined,
-      iconColor: Color(0xFF3B82F6),
-      iconBg: Color(0xFFEFF6FF),
+      iconColor: AdminTechColors.statusBlue,
+      iconBg: AdminTechColors.surfaceAlt,
       title: 'Operasyon analizi',
       subtitle: 'Son 30 günün operasyonlarını durumlarına göre incele',
       prompt: 'Son 30 günün operasyonlarını durumlarına göre özetle.',
     ),
     _Suggestion(
       icon: Icons.group_outlined,
-      iconColor: Color(0xFFF97316),
-      iconBg: Color(0xFFFFF7ED),
+      iconColor: AdminTechColors.orange,
+      iconBg: AdminTechColors.surfaceAlt,
       title: 'Teknisyen performansı',
       subtitle: 'Uzmanlık alanları ve iş emirlerini listele',
       prompt: 'Teknisyenleri ve uzmanlık alanlarını listele.',
@@ -367,7 +383,7 @@ class _EmptyState extends StatelessWidget {
               height: 60,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF4F46E5), Color(0xFF3730A3)],
+                  colors: [AdminTechColors.indigo, AdminTechColors.indigo],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -380,7 +396,8 @@ class _EmptyState extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
+              child:
+                  const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
             ),
             const SizedBox(height: 18),
             const Text(
@@ -398,7 +415,7 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF64748B),
+                color: AdminTechColors.textSecondary,
                 height: 1.6,
               ),
             ),
@@ -455,12 +472,13 @@ class _SuggestionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AdminTechColors.surface,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: () {
-          final state = context.findAncestorStateOfType<_AdminWebAiChatPageState>();
+          final state =
+              context.findAncestorStateOfType<_AdminWebAiChatPageState>();
           state?._send(suggestion.prompt);
         },
         child: Ink(
@@ -479,7 +497,8 @@ class _SuggestionCard extends StatelessWidget {
                   color: suggestion.iconBg,
                   borderRadius: BorderRadius.circular(9),
                 ),
-                child: Icon(suggestion.icon, color: suggestion.iconColor, size: 17),
+                child: Icon(suggestion.icon,
+                    color: suggestion.iconColor, size: 17),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -533,7 +552,7 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: _AiChatColors.border),
       ),
@@ -544,7 +563,8 @@ class _InfoChip extends StatelessWidget {
           const SizedBox(width: 7),
           Text(
             label,
-            style: const TextStyle(fontSize: 12.5, color: Color(0xFF334155)),
+            style: const TextStyle(
+                fontSize: 12.5, color: AdminTechColors.textPrimary),
           ),
         ],
       ),
@@ -617,7 +637,8 @@ class _UserBubble extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: _AiChatColors.accent,
                     borderRadius: const BorderRadius.only(
@@ -699,9 +720,10 @@ class _AssistantBubble extends StatelessWidget {
                 GestureDetector(
                   onTap: isRevealing ? onSkipReveal : null,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 13),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AdminTechColors.surface,
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(4),
                         topRight: Radius.circular(14),
@@ -722,13 +744,13 @@ class _AssistantBubble extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.error_outline,
-                                  color: Color(0xFFEF4444), size: 16),
+                                  color: AdminTechColors.statusRed, size: 16),
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
                                   message.content,
                                   style: const TextStyle(
-                                    color: Color(0xFFEF4444),
+                                    color: AdminTechColors.statusRed,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -852,7 +874,7 @@ class _AnimatedTextState extends State<_AnimatedText>
           TextSpan(
             text: widget.text,
             style: const TextStyle(
-              color: Color(0xFF1E293B),
+              color: AdminTechColors.textPrimary,
               fontSize: 13.5,
               height: 1.65,
             ),
@@ -889,7 +911,7 @@ class _ThinkingBubble extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AdminTechColors.surface,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(4),
                 topRight: Radius.circular(14),
@@ -1049,7 +1071,7 @@ class _ComposerState extends State<_Composer> {
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AdminTechColors.surface,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _AiChatColors.border),
                 boxShadow: [
@@ -1068,8 +1090,10 @@ class _ComposerState extends State<_Composer> {
                     // Enter'a karşılık gelir; Shift+Enter satır atlamaya devam eder.
                     child: CallbackShortcuts(
                       bindings: <ShortcutActivator, VoidCallback>{
-                        const SingleActivator(LogicalKeyboardKey.enter): _submit,
-                        const SingleActivator(LogicalKeyboardKey.numpadEnter): _submit,
+                        const SingleActivator(LogicalKeyboardKey.enter):
+                            _submit,
+                        const SingleActivator(LogicalKeyboardKey.numpadEnter):
+                            _submit,
                       },
                       child: TextField(
                         controller: widget.controller,
@@ -1155,7 +1179,8 @@ class _SendButton extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                : const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 18),
+                : const Icon(Icons.arrow_upward_rounded,
+                    color: Colors.white, size: 18),
           ),
         ),
       ),
@@ -1164,9 +1189,9 @@ class _SendButton extends StatelessWidget {
 }
 
 abstract class _AiChatColors {
-  static const accent = Color(0xFF4F46E5);
-  static const accentDark = Color(0xFF3730A3);
-  static const border = Color(0xFFE2E8F0);
-  static const textPrimary = Color(0xFF0F172A);
-  static const textTertiary = Color(0xFF94A3B8);
+  static const accent = AdminTechColors.indigo;
+  static const accentDark = AdminTechColors.indigo;
+  static const border = AdminTechColors.border;
+  static const textPrimary = AdminTechColors.textPrimary;
+  static const textTertiary = AdminTechColors.textTertiary;
 }

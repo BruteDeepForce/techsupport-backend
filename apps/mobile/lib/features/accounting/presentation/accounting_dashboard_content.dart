@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:techsupport_mobile/core/design/app_design.dart';
+
 import '../models/accounting_models.dart';
 
 enum AccountingSection { overview, invoices, payments, movements }
@@ -144,9 +146,9 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: adminAwareSurface(context),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: adminAwareBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,8 +166,8 @@ class _MetricCard extends StatelessWidget {
               const SizedBox(width: 9),
               Expanded(
                 child: Text(label,
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF64748B))),
+                    style: TextStyle(
+                        fontSize: 12, color: adminAwareTextSecondary(context))),
               ),
             ],
           ),
@@ -173,15 +175,16 @@ class _MetricCard extends StatelessWidget {
           Text(value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 21,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A))),
+                  color: adminAwareTextPrimary(context))),
           const SizedBox(height: 5),
           Text(caption,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+              style: TextStyle(
+                  fontSize: 11, color: adminAwareTextTertiary(context))),
         ],
       ),
     );
@@ -216,15 +219,19 @@ class _SectionSelector extends StatelessWidget {
                 selected: selected == entry.key,
                 onSelected: (_) => onChanged(entry.key),
                 showCheckmark: false,
-                selectedColor: const Color(0xFF0F172A),
-                backgroundColor: Colors.white,
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                selectedColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E3A5F)
+                    : const Color(0xFF0F172A),
+                backgroundColor: adminAwareSurface(context),
+                side: BorderSide(color: adminAwareBorder(context)),
                 labelStyle: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: selected == entry.key
                       ? Colors.white
-                      : const Color(0xFF475569),
+                      : (Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF475569)),
                 ),
               ),
             ),
@@ -402,8 +409,8 @@ class _InvoiceTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${formatDate(invoice.issueDate)} · Kalan ${formatMoney(invoice.remainingAmount)}',
-                    style:
-                        const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                    style: TextStyle(
+                        fontSize: 11, color: adminAwareTextSecondary(context)),
                   ),
                 ],
               ),
@@ -495,8 +502,9 @@ class _PaymentList extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                                 '${paymentMethodLabel(payments[index].method)} · ${formatDate(payments[index].paymentDate)}',
-                                style: const TextStyle(
-                                    fontSize: 11, color: Color(0xFF64748B))),
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: adminAwareTextSecondary(context))),
                           ],
                         ),
                       ),
@@ -610,8 +618,9 @@ class _MovementList extends StatelessWidget {
                                     fontSize: 13, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 4),
                             Text(formatDate(movements[index].transactionDate),
-                                style: const TextStyle(
-                                    fontSize: 11, color: Color(0xFF64748B))),
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: adminAwareTextSecondary(context))),
                           ],
                         ),
                       ),
@@ -654,18 +663,18 @@ class _Panel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: adminAwareSurface(context),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: adminAwareBorder(context)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A))),
+                  color: adminAwareTextPrimary(context))),
           const SizedBox(height: 10),
           child,
         ],
@@ -734,7 +743,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 10),
             Text(message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Color(0xFF64748B))),
+                style: TextStyle(color: adminAwareTextSecondary(context))),
           ],
         ),
       ),

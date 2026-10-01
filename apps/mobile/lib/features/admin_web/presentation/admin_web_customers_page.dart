@@ -6,6 +6,8 @@ import '../../customer/models/customer_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebCustomersPage extends StatefulWidget {
   const AdminWebCustomersPage({super.key});
@@ -41,7 +43,8 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 520),
@@ -56,7 +59,7 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A)),
+                        color: AdminTechColors.textPrimary),
                   ),
                   const SizedBox(height: 14),
                   _DialogField(
@@ -99,24 +102,27 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                           showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (_) =>
-                                  const Center(child: CircularProgressIndicator()));
+                              builder: (_) => const Center(
+                                  child: CircularProgressIndicator()));
                           try {
-                            final correlationId = await _customerService.createCustomer(
+                            final correlationId =
+                                await _customerService.createCustomer(
                               CustomerCreateRequest(
                                 name: nameController.text.trim(),
                                 email: emailController.text.trim(),
                                 phoneNumber: phoneController.text.trim().isEmpty
                                     ? null
                                     : phoneController.text.trim(),
-                                temporaryPassword: passwordController.text.trim(),
+                                temporaryPassword:
+                                    passwordController.text.trim(),
                               ),
                             );
                             if (mounted) Navigator.of(context).pop();
                             if (correlationId == null) {
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Müşteri oluşturulamadı')),
+                                const SnackBar(
+                                    content: Text('Müşteri oluşturulamadı')),
                               );
                               return;
                             }
@@ -130,12 +136,13 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
                             if (mounted) Navigator.of(context).pop();
                             if (!mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Müşteri oluşturulamadı: $e')),
+                              SnackBar(
+                                  content: Text('Müşteri oluşturulamadı: $e')),
                             );
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3B82F6),
+                          backgroundColor: AdminTechColors.statusBlue,
                           foregroundColor: Colors.white,
                         ),
                         child: const Text('Kaydet'),
@@ -157,83 +164,60 @@ class _AdminWebCustomersPageState extends State<AdminWebCustomersPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child: AdminWebSidebar(
-                    compact: true, radius: 0, active: AdminNavKey.customers)),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.customers),
-            Expanded(
-              child: Column(
-                children: [
-                  const AdminWebTopBar(showMenu: false),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Müşteri Yönetimi',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Müşterileri yönetin ve yeni müşteri ekleyin',
-                                      style: TextStyle(
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  _SecondaryActionButton(
-                                    label: 'Yenile',
-                                    icon: Icons.refresh,
-                                    onPressed: _refreshCustomers,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  _PrimaryActionButton(
-                                    label: 'Müşteri Ekle',
-                                    icon: Icons.add,
-                                    onPressed: () => _showAddCustomerDialog(context),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _CustomersTableCard(customersFuture: _customersFuture),
-                        ],
+    return AdminWebShell(
+      active: AdminNavKey.customers,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Müşteri Yönetimi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Müşterileri yönetin ve yeni müşteri ekleyin',
+                      style: TextStyle(
+                        color: AdminTechColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  _SecondaryActionButton(
+                    label: 'Yenile',
+                    icon: Icons.refresh,
+                    onPressed: _refreshCustomers,
+                  ),
+                  const SizedBox(width: 10),
+                  _PrimaryActionButton(
+                    label: 'Müşteri Ekle',
+                    icon: Icons.add,
+                    onPressed: () => _showAddCustomerDialog(context),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _CustomersTableCard(customersFuture: _customersFuture),
+        ],
       ),
     );
   }
@@ -246,12 +230,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
         Text('Müşteri Yönetimi',
-            style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -297,7 +285,7 @@ class _CustomersTableCard extends StatelessWidget {
           child: Column(
             children: [
               const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              const Divider(height: 1, color: AdminTechColors.border),
               for (final customer in customers)
                 _TableRow(
                   name: customer.name,
@@ -321,9 +309,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: child,
     );
@@ -343,19 +331,25 @@ class _TableHeader extends StatelessWidget {
             flex: 2,
             child: Text('Ad Soyad',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 2,
             child: Text('E-posta',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 1,
             child: Text('Telefon',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
         ],
       ),
@@ -364,7 +358,8 @@ class _TableHeader extends StatelessWidget {
 }
 
 class _TableRow extends StatelessWidget {
-  const _TableRow({required this.name, required this.email, required this.phone});
+  const _TableRow(
+      {required this.name, required this.email, required this.phone});
 
   final String name;
   final String email;
@@ -380,17 +375,21 @@ class _TableRow extends StatelessWidget {
             flex: 2,
             child: Text(name,
                 style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textPrimary)),
           ),
           Expanded(
             flex: 2,
             child: Text(email,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
+                style: const TextStyle(
+                    fontSize: 13, color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 1,
             child: Text(phone,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
+                style: const TextStyle(
+                    fontSize: 13, color: AdminTechColors.textSecondary)),
           ),
         ],
       ),
@@ -400,7 +399,9 @@ class _TableRow extends StatelessWidget {
 
 class _DialogField extends StatelessWidget {
   const _DialogField(
-      {required this.label, required this.controller, this.requiredField = false});
+      {required this.label,
+      required this.controller,
+      this.requiredField = false});
 
   final String label;
   final TextEditingController controller;
@@ -410,16 +411,18 @@ class _DialogField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      validator:
-          requiredField ? (v) => (v == null || v.isEmpty) ? 'Gerekli' : null : null,
+      validator: requiredField
+          ? (v) => (v == null || v.isEmpty) ? 'Gerekli' : null
+          : null,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            borderSide: const BorderSide(color: AdminTechColors.border)),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       ),
     );
   }
@@ -440,7 +443,7 @@ class _PrimaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
+        backgroundColor: AdminTechColors.statusBlue,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -464,11 +467,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }

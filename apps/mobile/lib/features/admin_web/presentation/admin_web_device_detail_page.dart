@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './shared/admin_web_design.dart';
 
 import '../../device/data/device_service.dart';
 import '../../device/model/device_model.dart';
@@ -15,7 +16,8 @@ class AdminWebDeviceDetailPage extends StatefulWidget {
   final String deviceId;
 
   @override
-  State<AdminWebDeviceDetailPage> createState() => _AdminWebDeviceDetailPageState();
+  State<AdminWebDeviceDetailPage> createState() =>
+      _AdminWebDeviceDetailPageState();
 }
 
 class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
@@ -41,6 +43,7 @@ class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.devices,
       actions: [
         AdminWebActionButton(
@@ -121,7 +124,8 @@ class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
                             ? '-'
                             : _formatDate(device.updatedAtUtc!)),
                     if (device.deactivatedAtUtc != null)
-                      _InfoRow('Deaktif', _formatDate(device.deactivatedAtUtc!)),
+                      _InfoRow(
+                          'Deaktif', _formatDate(device.deactivatedAtUtc!)),
                   ],
                 ),
               ),
@@ -136,7 +140,7 @@ class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF64748B),
+                          color: AdminTechColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -144,7 +148,7 @@ class _AdminWebDeviceDetailPageState extends State<AdminWebDeviceDetailPage> {
                         device.problemDescription!,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                           height: 1.4,
                         ),
                       ),
@@ -167,15 +171,23 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Cihaz Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Cihaz Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Detay', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Detay',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -200,14 +212,14 @@ class _Header extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 'Seri: ${device.serialNumber}',
                 style: const TextStyle(
-                  color: Color(0xFF64748B),
+                  color: AdminTechColors.textSecondary,
                 ),
               ),
             ],
@@ -230,9 +242,9 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -264,7 +276,7 @@ class _InfoRow extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 12,
-                color: Color(0xFF94A3B8),
+                color: AdminTechColors.textTertiary,
               ),
             ),
           ),
@@ -275,7 +287,7 @@ class _InfoRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0F172A),
+                color: AdminTechColors.textPrimary,
               ),
             ),
           ),
@@ -295,16 +307,16 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: AdminTechColors.surfaceAlt,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFF3B82F6)),
+        border: Border.all(color: AdminTechColors.statusBlue),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF2563EB),
+          color: AdminTechColors.primary,
         ),
       ),
     );

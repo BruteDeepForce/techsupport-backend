@@ -6,6 +6,8 @@ import '../../operations/models/operation_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebOperationDetailPage extends StatefulWidget {
   const AdminWebOperationDetailPage({super.key, required this.operationId});
@@ -13,10 +15,12 @@ class AdminWebOperationDetailPage extends StatefulWidget {
   final String operationId;
 
   @override
-  State<AdminWebOperationDetailPage> createState() => _AdminWebOperationDetailPageState();
+  State<AdminWebOperationDetailPage> createState() =>
+      _AdminWebOperationDetailPageState();
 }
 
-class _AdminWebOperationDetailPageState extends State<AdminWebOperationDetailPage> {
+class _AdminWebOperationDetailPageState
+    extends State<AdminWebOperationDetailPage> {
   final OperationService _operationService = OperationService();
   late Future<OperationRecord> _opFuture;
 
@@ -38,185 +42,160 @@ class _AdminWebOperationDetailPageState extends State<AdminWebOperationDetailPag
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child: AdminWebSidebar(
-                    compact: true, radius: 0, active: AdminNavKey.operations),
-              ),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.operations),
-            Expanded(
-              child: Column(
-                children: [
-                  const AdminWebTopBar(showMenu: false),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'İş Emri Detayı',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Seçilen iş emrinin ayrıntıları',
-                                      style: TextStyle(
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _SecondaryActionButton(
-                                label: 'Yenile',
-                                icon: Icons.refresh,
-                                onPressed: _refresh,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          FutureBuilder<OperationRecord>(
-                            future: _opFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Center(child: CircularProgressIndicator()),
-                                  ),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('İş emri yüklenemedi'),
-                                  ),
-                                );
-                              }
-                              final op = snapshot.data;
-                              if (op == null) {
-                                return const _Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('Kayıt bulunamadı'),
-                                  ),
-                                );
-                              }
-                              return Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(maxWidth: 1100),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _OperationHeaderCard(op: op),
-                                      const SizedBox(height: 16),
-                                      _Card(
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: Wrap(
-                                            spacing: 16,
-                                            runSpacing: 16,
-                                            children: [
-                                              _DetailTile(
-                                                label: 'Müşteri',
-                                                value: _displayText(op.customerName,
-                                                    fallback: op.customerId),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Müşteri ID',
-                                                value: _shortId(op.customerId),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Teknisyen',
-                                                value: _displayText(op.technicianName,
-                                                    fallback: op.technicianUserId),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Teknisyen ID',
-                                                value:
-                                                    _shortId(op.technicianUserId ?? ''),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Cihaz ID',
-                                                value: _shortId(op.deviceId),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Tür',
-                                                value: _operationTypeLabel(op.type),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Öncelik',
-                                                value: _priorityLabel(op.priority),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Durum',
-                                                value: _statusLabel(op.status),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Plan Durumu',
-                                                value: _futureLabel(op.future),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Plan Tarihi',
-                                                value: op.scheduledAtUtc == null
-                                                    ? '-'
-                                                    : _formatTime(op.scheduledAtUtc!),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Oluşturulma Tarihi',
-                                                value: _formatTime(op.occurredAtUtc),
-                                              ),
-                                              _DetailTile(
-                                                label: 'Şube',
-                                                value: _shortId(op.branchId ?? ''),
-                                              ),
-                                              if (op.internalnote.trim().isNotEmpty)
-                                                _DetailTile(
-                                                  label: 'İç Not',
-                                                  value: op.internalnote,
-                                                  wide: true,
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
+    return AdminWebShell(
+      active: AdminNavKey.operations,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'İş Emri Detayı',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 6),
+                    Text(
+                      'Seçilen iş emrinin ayrıntıları',
+                      style: TextStyle(
+                        color: AdminTechColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+              _SecondaryActionButton(
+                label: 'Yenile',
+                icon: Icons.refresh,
+                onPressed: _refresh,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          FutureBuilder<OperationRecord>(
+            future: _opFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('İş emri yüklenemedi'),
+                  ),
+                );
+              }
+              final op = snapshot.data;
+              if (op == null) {
+                return const _Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('Kayıt bulunamadı'),
+                  ),
+                );
+              }
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _OperationHeaderCard(op: op),
+                      const SizedBox(height: 16),
+                      _Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            children: [
+                              _DetailTile(
+                                label: 'Müşteri',
+                                value: _displayText(op.customerName,
+                                    fallback: op.customerId),
+                              ),
+                              _DetailTile(
+                                label: 'Müşteri ID',
+                                value: _shortId(op.customerId),
+                              ),
+                              _DetailTile(
+                                label: 'Teknisyen',
+                                value: _displayText(op.technicianName,
+                                    fallback: op.technicianUserId),
+                              ),
+                              _DetailTile(
+                                label: 'Teknisyen ID',
+                                value: _shortId(op.technicianUserId ?? ''),
+                              ),
+                              _DetailTile(
+                                label: 'Cihaz ID',
+                                value: _shortId(op.deviceId),
+                              ),
+                              _DetailTile(
+                                label: 'Tür',
+                                value: _operationTypeLabel(op.type),
+                              ),
+                              _DetailTile(
+                                label: 'Öncelik',
+                                value: _priorityLabel(op.priority),
+                              ),
+                              _DetailTile(
+                                label: 'Durum',
+                                value: _statusLabel(op.status),
+                              ),
+                              _DetailTile(
+                                label: 'Plan Durumu',
+                                value: _futureLabel(op.future),
+                              ),
+                              _DetailTile(
+                                label: 'Plan Tarihi',
+                                value: op.scheduledAtUtc == null
+                                    ? '-'
+                                    : _formatTime(op.scheduledAtUtc!),
+                              ),
+                              _DetailTile(
+                                label: 'Oluşturulma Tarihi',
+                                value: _formatTime(op.occurredAtUtc),
+                              ),
+                              _DetailTile(
+                                label: 'Şube',
+                                value: _shortId(op.branchId ?? ''),
+                              ),
+                              if (op.internalnote.trim().isNotEmpty)
+                                _DetailTile(
+                                  label: 'İç Not',
+                                  value: op.internalnote,
+                                  wide: true,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -249,13 +228,13 @@ class _OperationHeaderCard extends StatelessWidget {
                       ),
                       _StatusPill(
                         label: _priorityLabel(op.priority),
-                        color: const Color(0xFF2563EB),
+                        color: AdminTechColors.primary,
                       ),
                       _StatusPill(
                         label: _futureLabel(op.future),
                         color: op.scheduledAtUtc == null
-                            ? const Color(0xFF64748B)
-                            : const Color(0xFF7C3AED),
+                            ? AdminTechColors.textSecondary
+                            : AdminTechColors.violet,
                       ),
                     ],
                   ),
@@ -265,13 +244,14 @@ class _OperationHeaderCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: AdminTechColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     op.description.isEmpty ? 'Açıklama yok' : op.description,
-                    style: const TextStyle(color: Color(0xFF64748B), height: 1.45),
+                    style: const TextStyle(
+                        color: AdminTechColors.textSecondary, height: 1.45),
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -280,7 +260,8 @@ class _OperationHeaderCard extends StatelessWidget {
                     children: [
                       _HeaderInfo(
                         icon: Icons.business_outlined,
-                        label: _displayText(op.customerName, fallback: op.customerId),
+                        label: _displayText(op.customerName,
+                            fallback: op.customerId),
                       ),
                       _HeaderInfo(
                         icon: Icons.engineering_outlined,
@@ -303,19 +284,23 @@ class _OperationHeaderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 const Text('İş Emri',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    style: TextStyle(
+                        fontSize: 12, color: AdminTechColors.textSecondary)),
                 const SizedBox(height: 4),
                 Text(
                   _shortId(op.id),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 12),
                 const Text('Oluşturma',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    style: TextStyle(
+                        fontSize: 12, color: AdminTechColors.textSecondary)),
                 const SizedBox(height: 4),
                 Text(
                   _formatTime(op.occurredAtUtc),
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -337,19 +322,21 @@ class _HeaderInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 15, color: const Color(0xFF64748B)),
+          Icon(icon, size: 15, color: AdminTechColors.textSecondary),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
-                fontSize: 12, color: Color(0xFF334155), fontWeight: FontWeight.w600),
+                fontSize: 12,
+                color: AdminTechColors.textPrimary,
+                fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -364,15 +351,23 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Operasyonlar', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Operasyonlar',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Detay', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Detay',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -396,22 +391,26 @@ class _DetailTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: AdminTechColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
                 style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                    fontSize: 12,
+                    color: AdminTechColors.textSecondary,
+                    fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             Text(value,
                 maxLines: wide ? 5 : 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    fontSize: 14, color: Color(0xFF0F172A), fontWeight: FontWeight.w600)),
+                    fontSize: 14,
+                    color: AdminTechColors.textPrimary,
+                    fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -455,9 +454,9 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -486,11 +485,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }
@@ -524,16 +523,16 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'completed':
     case 'delivered':
-      return const Color(0xFF22C55E);
+      return AdminTechColors.green;
     case 'waitingforapproval':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'repairing':
     case 'testing':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'diagnosing':
-      return const Color(0xFF3B82F6);
+      return AdminTechColors.statusBlue;
     default:
-      return const Color(0xFF64748B);
+      return AdminTechColors.textSecondary;
   }
 }
 

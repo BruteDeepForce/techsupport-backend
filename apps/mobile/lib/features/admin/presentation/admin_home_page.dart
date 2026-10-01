@@ -19,6 +19,7 @@ import 'admin_work_orders_page.dart';
 import 'admin_ai_autonomous_page.dart';
 import 'inventory_management_page.dart';
 import 'admin_accounting_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
@@ -161,7 +162,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.bgSurface,
+      backgroundColor: AdminTechColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -183,7 +184,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   children: [
                     const Text('Hızlı İş Emri',
                         style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AdminTechColors.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.w700)),
                     const SizedBox(height: 14),
@@ -376,21 +377,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'Genel Bakış',
       subtitle: 'Admin Portal',
       trailing: Container(
         width: 26,
         height: 26,
         decoration: BoxDecoration(
-          color: AppColors.bgElevated,
+          color: AdminTechColors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: AppColors.border, width: 0.5),
+          border: Border.all(color: AdminTechColors.border, width: 0.5),
         ),
         alignment: Alignment.center,
         child: const Text('AU',
             style: TextStyle(
-                color: AppColors.textSecondary,
+                color: AdminTechColors.textSecondary,
                 fontSize: 9,
                 fontWeight: FontWeight.w600)),
       ),
@@ -474,8 +475,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.accent,
-                  AppColors.accent.withValues(alpha: 0.8)
+                  const Color.fromARGB(255, 8, 0, 168),
+                  AdminTechColors.primary.withValues(alpha: 0.8)
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -483,7 +484,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               borderRadius: BorderRadius.circular(AppRadius.md),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accent.withValues(alpha: 0.2),
+                  color: AdminTechColors.primary.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -535,11 +536,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.12),
+                    color: AdminTechColors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                   child: const Icon(Icons.add_task_rounded,
-                      color: AppColors.accent, size: 24),
+                      color: AdminTechColors.primary, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -548,18 +549,19 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     children: const [
                       Text('Hızlı İş Emri',
                           style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: AdminTechColors.textPrimary,
                               fontSize: 15,
                               fontWeight: FontWeight.w700)),
                       SizedBox(height: 3),
                       Text('Müşteri, cihaz ve açıklama ile hızlı kayıt aç',
                           style: TextStyle(
-                              color: AppColors.textTertiary, fontSize: 12)),
+                              color: AdminTechColors.textTertiary,
+                              fontSize: 12)),
                     ],
                   ),
                 ),
                 const Icon(Icons.arrow_forward_ios_rounded,
-                    color: AppColors.textTertiary, size: 14),
+                    color: AdminTechColors.textTertiary, size: 14),
               ],
             ),
           ),
@@ -576,19 +578,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 _MetricCell(
                     value: totalValue,
                     label: 'Toplam',
-                    color: AppColors.accent),
+                    color: AdminTechColors.primary),
                 const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
+                    width: 1,
+                    thickness: 1,
+                    color: AdminTechColors.borderSubtle),
                 _MetricCell(
                     value: resolutionRate,
                     label: 'Çözüm Oranı',
-                    color: AppColors.textPrimary),
+                    color: AdminTechColors.textPrimary),
                 const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
+                    width: 1,
+                    thickness: 1,
+                    color: AdminTechColors.borderSubtle),
                 _MetricCell(
                     value: criticalCount,
                     label: 'Kritik',
-                    color: AppColors.statusGreen),
+                    color: AdminTechColors.statusGreen),
               ],
             ),
           ),
@@ -602,19 +608,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 _MetricCell(
                     value: openCount,
                     label: 'Açık',
-                    color: AppColors.statusYellow),
+                    color: AdminTechColors.statusAmber),
                 const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
+                    width: 1,
+                    thickness: 1,
+                    color: AdminTechColors.borderSubtle),
                 _MetricCell(
                     value: inProgressCount,
                     label: 'Devam',
-                    color: AppColors.statusBlue),
+                    color: AdminTechColors.statusBlue),
                 const VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.borderSubtle),
+                    width: 1,
+                    thickness: 1,
+                    color: AdminTechColors.borderSubtle),
                 _MetricCell(
                     value: resolvedCount,
                     label: 'Çözüldü',
-                    color: AppColors.statusGreen),
+                    color: AdminTechColors.statusGreen),
               ],
             ),
           ),
@@ -627,7 +637,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
           trailing: GestureDetector(
             child: Text('Tümü',
                 style: theme.textTheme.bodySmall
-                    ?.copyWith(color: AppColors.accent)),
+                    ?.copyWith(color: AdminTechColors.primary)),
           ),
         ),
         LinearCard(
@@ -641,7 +651,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   priority: _priorityColor(recentOperations[i].priority),
                   statusColor: _statusColor(recentOperations[i].status),
                   label: _statusLabel(recentOperations[i].status),
-                  labelColor: AppColors.textTertiary,
+                  labelColor: AdminTechColors.textTertiary,
                   assignee: recentOperations[i].technicianName.isEmpty
                       ? null
                       : recentOperations[i].technicianName,
@@ -676,19 +686,19 @@ class _AdminHomePageState extends State<AdminHomePage> {
               _ProgressRow(
                   label: 'Toplam Stok',
                   count: stockTotalCount,
-                  color: AppColors.accent,
+                  color: AdminTechColors.primary,
                   pct: _stockPct(stockTotalCount, stockTotalCount)),
               const SizedBox(height: 12),
               _ProgressRow(
                   label: 'Kritik Seviye',
                   count: stockCriticalCount,
-                  color: AppColors.statusRed,
+                  color: AdminTechColors.statusRed,
                   pct: _stockPct(stockCriticalCount, stockTotalCount)),
               const SizedBox(height: 12),
               _ProgressRow(
                   label: 'Rezerve',
                   count: stockReservedCount,
-                  color: AppColors.statusBlue,
+                  color: AdminTechColors.statusBlue,
                   pct: _stockPct(stockReservedCount, stockTotalCount)),
             ],
           ),
@@ -736,7 +746,7 @@ class _ProgressRow extends StatelessWidget {
           child: LinearProgressIndicator(
             value: pct,
             minHeight: 4,
-            backgroundColor: AppColors.bgElevated,
+            backgroundColor: AdminTechColors.surfaceRaised,
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
@@ -756,13 +766,14 @@ class _QuickFormHint extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.bgElevated,
+        color: AdminTechColors.surfaceRaised,
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: AdminTechColors.borderSubtle),
       ),
       child: Text(
         label,
-        style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+        style:
+            const TextStyle(color: AdminTechColors.textTertiary, fontSize: 12),
       ),
     );
   }
@@ -806,15 +817,15 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'completed':
     case 'delivered':
-      return AppColors.statusGreen;
+      return AdminTechColors.statusGreen;
     case 'waitingforapproval':
     case 'repairing':
     case 'testing':
-      return AppColors.statusYellow;
+      return AdminTechColors.statusAmber;
     case 'diagnosing':
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
     default:
-      return AppColors.statusGray;
+      return AdminTechColors.statusGray;
   }
 }
 
@@ -822,11 +833,11 @@ Color _priorityColor(String priority) {
   switch (priority.toLowerCase()) {
     case 'urgent':
     case 'high':
-      return AppColors.statusRed;
+      return AdminTechColors.statusRed;
     case 'low':
-      return AppColors.statusGray;
+      return AdminTechColors.statusGray;
     default:
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -862,7 +873,7 @@ class _MetricCell extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: AppColors.textTertiary,
+                color: AdminTechColors.textTertiary,
                 fontSize: 10,
               ),
             ),

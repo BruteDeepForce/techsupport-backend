@@ -84,7 +84,8 @@ class StockService {
     required int quantity,
     String? reference,
   }) async {
-    final res = await _dio.post('/api/stock/items/$stockItemId/stock-in', data: {
+    final res =
+        await _dio.post('/api/stock/items/$stockItemId/stock-in', data: {
       'quantity': quantity,
       'reference': reference,
     });

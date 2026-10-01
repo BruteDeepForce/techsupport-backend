@@ -6,6 +6,8 @@ import '../../stock/models/stock_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebStockPage extends StatefulWidget {
   const AdminWebStockPage({super.key});
@@ -54,7 +56,9 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
               const Text(
                 'Kategori Ekle',
                 style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AdminTechColors.textPrimary),
               ),
               const SizedBox(height: 14),
               TextField(
@@ -62,10 +66,10 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                 decoration: InputDecoration(
                   labelText: 'Kategori Adı',
                   filled: true,
-                  fillColor: const Color(0xFFF8FAFC),
+                  fillColor: AdminTechColors.surface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    borderSide: const BorderSide(color: AdminTechColors.border),
                   ),
                 ),
               ),
@@ -85,10 +89,12 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (_) => const Center(child: CircularProgressIndicator()),
+                        builder: (_) =>
+                            const Center(child: CircularProgressIndicator()),
                       );
                       try {
-                        await _stockService.createCategory(name: controller.text.trim());
+                        await _stockService.createCategory(
+                            name: controller.text.trim());
                         if (mounted) Navigator.of(context).pop();
                         if (mounted) {
                           _refresh();
@@ -100,13 +106,14 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         if (mounted) Navigator.of(context).pop();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Kategori eklenemedi')),
+                            const SnackBar(
+                                content: Text('Kategori eklenemedi')),
                           );
                         }
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF3B82F6),
+                      backgroundColor: AdminTechColors.statusBlue,
                       foregroundColor: Colors.white,
                     ),
                     child: const Text('Kaydet'),
@@ -161,7 +168,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A)),
+                      color: AdminTechColors.textPrimary),
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -219,7 +226,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                   label: 'Birim Fiyat',
                   controller: unitPriceController,
                   requiredField: true,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                 ),
                 const SizedBox(height: 10),
                 DropdownButtonFormField<String>(
@@ -233,14 +241,16 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                     ),
                   ],
                   onChanged: (v) => selectedCategoryId = v,
-                  validator: (v) => v == null || v.isEmpty ? 'Kategori seçin' : null,
+                  validator: (v) =>
+                      v == null || v.isEmpty ? 'Kategori seçin' : null,
                   decoration: InputDecoration(
                     labelText: 'Kategori',
                     filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
+                    fillColor: AdminTechColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.border),
                     ),
                   ),
                 ),
@@ -258,7 +268,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         if (!(formKey.currentState?.validate() ?? false)) {
                           return;
                         }
-                        final qty = int.tryParse(qtyController.text.trim()) ?? 0;
+                        final qty =
+                            int.tryParse(qtyController.text.trim()) ?? 0;
                         if (qty <= 0) return;
                         final unitPrice =
                             double.tryParse(unitPriceController.text.trim());
@@ -270,7 +281,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                           builder: (_) =>
                               const Center(child: CircularProgressIndicator()),
                         );
-                        if (selectedCategoryId == null || selectedCategoryId!.isEmpty) {
+                        if (selectedCategoryId == null ||
+                            selectedCategoryId!.isEmpty) {
                           return;
                         }
                         try {
@@ -305,7 +317,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6),
+                        backgroundColor: AdminTechColors.statusBlue,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Kaydet'),
@@ -333,7 +345,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 560),
@@ -349,13 +362,13 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     const Text(
                       'Kategori ve ürün seçerek mevcut stok adedini artırın. SKU ve barkod seçilen üründen gelir.',
-                      style: TextStyle(color: Color(0xFF64748B)),
+                      style: TextStyle(color: AdminTechColors.textSecondary),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
@@ -376,8 +389,9 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                               : _stockService.listItemsByCategory(value);
                         });
                       },
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Kategori seçin' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Kategori seçin'
+                          : null,
                       decoration: _dialogDecoration('Kategori'),
                     ),
                     const SizedBox(height: 12),
@@ -385,7 +399,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                       FutureBuilder<List<StockItem>>(
                         future: itemsFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return const Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
                               child: Center(child: CircularProgressIndicator()),
@@ -397,7 +412,8 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                               padding: EdgeInsets.symmetric(vertical: 12),
                               child: Text(
                                 'Bu kategoride ürün bulunamadı.',
-                                style: TextStyle(color: Color(0xFF94A3B8)),
+                                style: TextStyle(
+                                    color: AdminTechColors.textTertiary),
                               ),
                             );
                           }
@@ -417,8 +433,9 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                                 );
                               });
                             },
-                            validator: (value) =>
-                                value == null || value.isEmpty ? 'Ürün seçin' : null,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Ürün seçin'
+                                : null,
                             decoration: _dialogDecoration('Ürün'),
                           );
                         },
@@ -450,26 +467,29 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () async {
-                            if (!(formKey.currentState?.validate() ?? false)) return;
+                            if (!(formKey.currentState?.validate() ?? false))
+                              return;
                             final item = selectedItem;
                             if (item == null) return;
-                            final qty = int.tryParse(qtyController.text.trim()) ?? 0;
+                            final qty =
+                                int.tryParse(qtyController.text.trim()) ?? 0;
                             if (qty <= 0) return;
 
                             Navigator.of(ctx).pop();
                             showDialog(
                               context: pageContext,
                               barrierDismissible: false,
-                              builder: (_) =>
-                                  const Center(child: CircularProgressIndicator()),
+                              builder: (_) => const Center(
+                                  child: CircularProgressIndicator()),
                             );
                             try {
                               await _stockService.stockIn(
                                 stockItemId: item.id,
                                 quantity: qty,
-                                reference: referenceController.text.trim().isEmpty
-                                    ? null
-                                    : referenceController.text.trim(),
+                                reference:
+                                    referenceController.text.trim().isEmpty
+                                        ? null
+                                        : referenceController.text.trim(),
                               );
                               if (mounted) Navigator.of(pageContext).pop();
                               if (mounted) {
@@ -492,7 +512,7 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
+                            backgroundColor: AdminTechColors.statusBlue,
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('Stok Girişi Yap'),
@@ -515,177 +535,144 @@ class _AdminWebStockPageState extends State<AdminWebStockPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child:
-                    AdminWebSidebar(compact: true, radius: 0, active: AdminNavKey.stock),
-              ),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.stock),
-            Expanded(
-              child: Column(
+    return AdminWebShell(
+      active: AdminNavKey.stock,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          FutureBuilder<List<StockCategory>>(
+            future: _categoriesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const _TableCard(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return const _TableCard(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text('Kategoriler yüklenemedi'),
+                  ),
+                );
+              }
+              final categories = snapshot.data ?? [];
+              final selectedCategoryName = categories
+                  .firstWhere((c) => c.id == _selectedCategoryId,
+                      orElse: () => StockCategory(id: '', name: ''))
+                  .name;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AdminWebTopBar(showMenu: false, actions: [
-                    AdminWebActionButton(
-                      label: 'Yenile',
-                      icon: Icons.refresh,
-                      onPressed: _refresh,
-                    ),
-                  ]),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Stok Yönetimi',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w700,
+                                color: AdminTechColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              'Stok kalemlerini yönetin ve izleyin',
+                              style: TextStyle(
+                                color: AdminTechColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
                         children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          FutureBuilder<List<StockCategory>>(
-                            future: _categoriesFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const _TableCard(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Center(child: CircularProgressIndicator()),
-                                  ),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return const _TableCard(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Text('Kategoriler yüklenemedi'),
-                                  ),
-                                );
-                              }
-                              final categories = snapshot.data ?? [];
-                              final selectedCategoryName = categories
-                                  .firstWhere((c) => c.id == _selectedCategoryId,
-                                      orElse: () => StockCategory(id: '', name: ''))
-                                  .name;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: const [
-                                            Text(
-                                              'Stok Yönetimi',
-                                              style: TextStyle(
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF0F172A),
-                                              ),
-                                            ),
-                                            SizedBox(height: 6),
-                                            Text(
-                                              'Stok kalemlerini yönetin ve izleyin',
-                                              style: TextStyle(
-                                                color: Color(0xFF64748B),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          _SecondaryActionButton(
-                                            label: 'Kategori Ekle',
-                                            icon: Icons.add_circle_outline,
-                                            onPressed: _showAddCategoryDialog,
-                                          ),
-                                          const SizedBox(width: 10),
-                                          _PrimaryActionButton(
-                                            label: 'Stok Ekle',
-                                            icon: Icons.add,
-                                            onPressed: () =>
-                                                _showAddItemDialog(categories),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _CategoryGrid(
-                                    categories: categories,
-                                    selectedCategoryId: _selectedCategoryId,
-                                    onSelect: (id) {
-                                      setState(() {
-                                        _selectedCategoryId = id;
-                                        _itemsFuture =
-                                            _stockService.listItemsByCategory(id);
-                                      });
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  if (_selectedCategoryId == null)
-                                    FutureBuilder<List<StockItem>>(
-                                      future: _allItemsFuture,
-                                      builder: (context, itemsSnap) {
-                                        if (itemsSnap.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const _TableCard(
-                                            child: Padding(
-                                              padding: EdgeInsets.all(20),
-                                              child: Center(
-                                                  child: CircularProgressIndicator()),
-                                            ),
-                                          );
-                                        }
-                                        final allItems = itemsSnap.data ?? [];
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            _CriticalPanel(
-                                              items: allItems,
-                                              title: 'Kritik Ürünler',
-                                              onShowAll: () {},
-                                            ),
-                                            const SizedBox(height: 12),
-                                            const _TableCard(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(20),
-                                                child: Text(
-                                                  'Ürünleri görmek için kategori seçin',
-                                                  style:
-                                                      TextStyle(color: Color(0xFF94A3B8)),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    )
-                                  else
-                                    _CategoryItemsSection(
-                                      itemsFuture: _itemsFuture!,
-                                      onRefresh: _refresh,
-                                      categoryName: selectedCategoryName,
-                                    ),
-                                ],
-                              );
-                            },
+                          _SecondaryActionButton(
+                            label: 'Kategori Ekle',
+                            icon: Icons.add_circle_outline,
+                            onPressed: _showAddCategoryDialog,
+                          ),
+                          const SizedBox(width: 10),
+                          _PrimaryActionButton(
+                            label: 'Stok Ekle',
+                            icon: Icons.add,
+                            onPressed: () => _showAddItemDialog(categories),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
+                  const SizedBox(height: 16),
+                  _CategoryGrid(
+                    categories: categories,
+                    selectedCategoryId: _selectedCategoryId,
+                    onSelect: (id) {
+                      setState(() {
+                        _selectedCategoryId = id;
+                        _itemsFuture = _stockService.listItemsByCategory(id);
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (_selectedCategoryId == null)
+                    FutureBuilder<List<StockItem>>(
+                      future: _allItemsFuture,
+                      builder: (context, itemsSnap) {
+                        if (itemsSnap.connectionState ==
+                            ConnectionState.waiting) {
+                          return const _TableCard(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                          );
+                        }
+                        final allItems = itemsSnap.data ?? [];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _CriticalPanel(
+                              items: allItems,
+                              title: 'Kritik Ürünler',
+                              onShowAll: () {},
+                            ),
+                            const SizedBox(height: 12),
+                            const _TableCard(
+                              child: Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Text(
+                                  'Ürünleri görmek için kategori seçin',
+                                  style: TextStyle(
+                                      color: AdminTechColors.textTertiary),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                  else
+                    _CategoryItemsSection(
+                      itemsFuture: _itemsFuture!,
+                      onRefresh: _refresh,
+                      categoryName: selectedCategoryName,
+                    ),
                 ],
-              ),
-            ),
-          ],
-        ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -698,11 +685,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Stok Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Stok Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -733,22 +725,22 @@ class _MetricRow extends StatelessWidget {
             title: 'Toplam Ürün',
             value: total.toString(),
             icon: Icons.inventory_2_outlined,
-            color: const Color(0xFF3B82F6)),
+            color: AdminTechColors.statusBlue),
         _MetricCard(
             title: 'Toplam Stok',
             value: available.toString(),
             icon: Icons.layers_outlined,
-            color: const Color(0xFF22C55E)),
+            color: AdminTechColors.green),
         _MetricCard(
             title: 'Rezerve',
             value: reserved.toString(),
             icon: Icons.bookmark_border,
-            color: const Color(0xFFF59E0B)),
+            color: AdminTechColors.statusAmber),
         _MetricCard(
             title: 'Kritik Seviye',
             value: lowStock.toString(),
             icon: Icons.warning_amber_rounded,
-            color: const Color(0xFFEF4444)),
+            color: AdminTechColors.statusRed),
       ],
     );
   }
@@ -765,7 +757,8 @@ class _CriticalPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final criticalItems = items.where((e) => e.quantityAvailable < 5).toList();
-    criticalItems.sort((a, b) => a.quantityAvailable.compareTo(b.quantityAvailable));
+    criticalItems
+        .sort((a, b) => a.quantityAvailable.compareTo(b.quantityAvailable));
     final top = criticalItems.take(5).toList();
     return _TableCard(
       child: Padding(
@@ -779,7 +772,7 @@ class _CriticalPanel extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
+                        color: AdminTechColors.textPrimary)),
                 const Spacer(),
                 TextButton(
                   onPressed: onShowAll,
@@ -790,7 +783,7 @@ class _CriticalPanel extends StatelessWidget {
             const SizedBox(height: 10),
             if (top.isEmpty)
               const Text('Kritik seviyede ürün yok',
-                  style: TextStyle(color: Color(0xFF94A3B8)))
+                  style: TextStyle(color: AdminTechColors.textTertiary))
             else
               Column(
                 children: [
@@ -803,21 +796,23 @@ class _CriticalPanel extends StatelessWidget {
                             width: 28,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFEE2E2),
+                              color: AdminTechColors.redBg,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(Icons.warning_amber_rounded,
-                                size: 16, color: Color(0xFFEF4444)),
+                                size: 16, color: AdminTechColors.statusRed),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(item.name,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600)),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
                           ),
                           Text('${item.quantityAvailable}',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w700, color: Color(0xFFEF4444))),
+                                  fontWeight: FontWeight.w700,
+                                  color: AdminTechColors.statusRed)),
                         ],
                       ),
                     ),
@@ -847,9 +842,9 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -870,8 +865,10 @@ class _MetricCard extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A))),
-              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                      color: AdminTechColors.textPrimary)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 12, color: AdminTechColors.textSecondary)),
             ],
           ),
         ],
@@ -894,15 +891,17 @@ class _FilterRow extends StatelessWidget {
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AdminTechColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: Row(
               children: const [
-                Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                Icon(Icons.search,
+                    size: 18, color: AdminTechColors.textTertiary),
                 SizedBox(width: 8),
-                Text('Ara', style: TextStyle(color: Color(0xFF94A3B8))),
+                Text('Ara',
+                    style: TextStyle(color: AdminTechColors.textTertiary)),
               ],
             ),
           ),
@@ -931,17 +930,19 @@ class _DropdownPill extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
           Text(label,
-              style:
-                  const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600)),
+              style: const TextStyle(
+                  color: AdminTechColors.textSecondary,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(width: 8),
-          const Icon(Icons.expand_more, size: 18, color: Color(0xFF94A3B8)),
+          const Icon(Icons.expand_more,
+              size: 18, color: AdminTechColors.textTertiary),
         ],
       ),
     );
@@ -965,7 +966,8 @@ class _CategoryGrid extends StatelessWidget {
       return const _TableCard(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Text('Kategori bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+          child: Text('Kategori bulunamadı',
+              style: TextStyle(color: AdminTechColors.textTertiary)),
         ),
       );
     }
@@ -975,7 +977,9 @@ class _CategoryGrid extends StatelessWidget {
         const Text(
           'Kategoriler',
           style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AdminTechColors.textSecondary),
         ),
         const SizedBox(height: 8),
         GridView.count(
@@ -1000,7 +1004,8 @@ class _CategoryGrid extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  const _CategoryCard({required this.label, required this.selected, required this.onTap});
+  const _CategoryCard(
+      {required this.label, required this.selected, required this.onTap});
 
   final String label;
   final bool selected;
@@ -1014,10 +1019,12 @@ class _CategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEFF6FF) : Colors.white,
+          color:
+              selected ? AdminTechColors.surfaceAlt : AdminTechColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+            color:
+                selected ? AdminTechColors.statusBlue : AdminTechColors.border,
             width: selected ? 1.5 : 1,
           ),
           boxShadow: const [
@@ -1034,11 +1041,15 @@ class _CategoryCard extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: selected ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
+                color: selected
+                    ? AdminTechColors.surfaceAlt
+                    : AdminTechColors.surfaceAlt,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(Icons.inventory_2_outlined,
-                  color: selected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                  color: selected
+                      ? AdminTechColors.primary
+                      : AdminTechColors.textSecondary,
                   size: 18),
             ),
             const SizedBox(width: 10),
@@ -1048,11 +1059,14 @@ class _CategoryCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: selected ? const Color(0xFF2563EB) : const Color(0xFF0F172A),
+                  color: selected
+                      ? AdminTechColors.primary
+                      : AdminTechColors.textPrimary,
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, size: 18, color: Color(0xFF94A3B8)),
+            const Icon(Icons.chevron_right_rounded,
+                size: 18, color: AdminTechColors.textTertiary),
           ],
         ),
       ),
@@ -1062,7 +1076,9 @@ class _CategoryCard extends StatelessWidget {
 
 class _CategoryItemsSection extends StatelessWidget {
   const _CategoryItemsSection(
-      {required this.itemsFuture, required this.onRefresh, required this.categoryName});
+      {required this.itemsFuture,
+      required this.onRefresh,
+      required this.categoryName});
 
   final Future<List<StockItem>> itemsFuture;
   final VoidCallback onRefresh;
@@ -1124,7 +1140,8 @@ class _StockTableCard extends StatelessWidget {
       return const _TableCard(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+          child: Text('Kayıt bulunamadı',
+              style: TextStyle(color: AdminTechColors.textTertiary)),
         ),
       );
     }
@@ -1132,7 +1149,7 @@ class _StockTableCard extends StatelessWidget {
       child: Column(
         children: [
           const _TableHeader(),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1, color: AdminTechColors.border),
           for (final item in items) _TableRow(item: item),
         ],
       ),
@@ -1149,9 +1166,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -1183,7 +1200,7 @@ class _TableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -1194,7 +1211,7 @@ class _TableHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -1215,7 +1232,7 @@ class _TableRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -1244,14 +1261,14 @@ InputDecoration _dialogDecoration(String label) {
   return InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: const Color(0xFFF8FAFC),
+    fillColor: AdminTechColors.surface,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
   );
 }
@@ -1266,9 +1283,9 @@ class _SelectedStockItemSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1277,7 +1294,7 @@ class _SelectedStockItemSummary extends StatelessWidget {
             item.name,
             style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -1314,13 +1331,14 @@ class _SummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Text(
         '$label: $value',
-        style: const TextStyle(fontSize: 12, color: Color(0xFF475569)),
+        style:
+            const TextStyle(fontSize: 12, color: AdminTechColors.textSecondary),
       ),
     );
   }
@@ -1350,14 +1368,14 @@ class _DialogField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
     );
@@ -1379,7 +1397,7 @@ class _PrimaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
+        backgroundColor: AdminTechColors.statusBlue,
         foregroundColor: Colors.white,
       ),
     );
@@ -1401,11 +1419,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }

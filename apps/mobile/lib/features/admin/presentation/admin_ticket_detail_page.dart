@@ -5,6 +5,7 @@ import '../../tickets/data/ticket_service.dart';
 import '../../tickets/models/ticket_models.dart';
 import '../../technician/data/technician_service.dart';
 import '../../technician/models/technician_models.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminTicketDetailPage extends StatefulWidget {
   const AdminTicketDetailPage({super.key, required this.ticketId});
@@ -78,9 +79,8 @@ class _AdminTicketDetailPageState extends State<AdminTicketDetailPage> {
                               ),
                           ],
                           onChanged: (value) {
-                            final tech = techs
-                                .where((t) => t.userId == value)
-                                .toList();
+                            final tech =
+                                techs.where((t) => t.userId == value).toList();
                             setDialogState(() {
                               selectedTechnician =
                                   tech.isEmpty ? null : tech.first;
@@ -235,7 +235,7 @@ class _AdminTicketDetailPageState extends State<AdminTicketDetailPage> {
         final canApprove = ticket.status == 'Open';
         final canReject = ticket.status == 'Open';
 
-        return LinearPageShell(
+        return LinearPageShell.dark(
           title: 'Talep Detayı',
           subtitle: _shortId(ticket.id),
           showBack: true,
@@ -262,19 +262,20 @@ class _AdminTicketDetailPageState extends State<AdminTicketDetailPage> {
                       LinearBadge(label: statusLabel, color: statusColor),
                       Text(_formatDate(ticket.createdAtUtc),
                           style: const TextStyle(
-                              color: AppColors.textTertiary, fontSize: 11)),
+                              color: AdminTechColors.textTertiary,
+                              fontSize: 11)),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Text(ticket.title,
                       style: const TextStyle(
-                          color: AppColors.textPrimary,
+                          color: AdminTechColors.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   Text(ticket.description,
                       style: const TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AdminTechColors.textSecondary,
                           fontSize: 14,
                           height: 1.5)),
                 ],
@@ -311,7 +312,7 @@ class _AdminTicketDetailPageState extends State<AdminTicketDetailPage> {
                   child: ElevatedButton(
                     onPressed: canApprove ? () => _approveTicket(ticket) : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AdminTechColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -329,8 +330,8 @@ class _AdminTicketDetailPageState extends State<AdminTicketDetailPage> {
                   child: OutlinedButton(
                     onPressed: canReject ? () => _rejectTicket(ticket) : null,
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.statusRed),
-                      foregroundColor: AppColors.statusRed,
+                      side: const BorderSide(color: AdminTechColors.statusRed),
+                      foregroundColor: AdminTechColors.statusRed,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppRadius.sm)),
                     ),
@@ -402,13 +403,13 @@ String _statusLabel(String status) {
 Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return AppColors.statusYellow;
+      return AdminTechColors.statusAmber;
     case 'closed':
-      return AppColors.statusGreen;
+      return AdminTechColors.statusGreen;
     case 'rejected':
-      return AppColors.statusRed;
+      return AdminTechColors.statusRed;
     default:
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -441,23 +442,24 @@ class _DetailRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? const Border(
-                bottom: BorderSide(color: AppColors.borderSubtle, width: 1))
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
             : null,
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.textTertiary, size: 20),
+          Icon(icon, color: AdminTechColors.textTertiary, size: 20),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
                   style: const TextStyle(
-                      color: AppColors.textTertiary, fontSize: 11)),
+                      color: AdminTechColors.textTertiary, fontSize: 11)),
               const SizedBox(height: 4),
               Text(value,
                   style: const TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AdminTechColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500)),
             ],
@@ -489,11 +491,13 @@ class _HistoryItem extends StatelessWidget {
               width: 10,
               height: 10,
               decoration: BoxDecoration(
-                  color: isFirst ? AppColors.accent : AppColors.border,
+                  color: isFirst
+                      ? AdminTechColors.primary
+                      : AdminTechColors.border,
                   shape: BoxShape.circle),
             ),
             if (!isLast)
-              Container(width: 2, height: 20, color: AppColors.border),
+              Container(width: 2, height: 20, color: AdminTechColors.border),
           ],
         ),
         const SizedBox(width: 12),
@@ -503,13 +507,13 @@ class _HistoryItem extends StatelessWidget {
             children: [
               Text(label,
                   style: const TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AdminTechColors.textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
               Text(time,
                   style: const TextStyle(
-                      color: AppColors.textTertiary, fontSize: 11)),
+                      color: AdminTechColors.textTertiary, fontSize: 11)),
             ],
           ),
         ),

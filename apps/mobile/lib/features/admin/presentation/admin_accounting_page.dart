@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-import '../../../core/design/app_design.dart';
 import '../../accounting/data/accounting_service.dart';
 import '../../accounting/models/accounting_models.dart';
 import '../../accounting/presentation/accounting_dashboard_content.dart';
@@ -13,6 +12,8 @@ import 'admin_work_orders_page.dart';
 import 'admin_devices_page.dart';
 import 'inventory_management_page.dart';
 import 'admin_team_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
+import 'package:techsupport_mobile/core/design/app_design.dart';
 
 class AdminAccountingPage extends StatefulWidget {
   const AdminAccountingPage({super.key});
@@ -57,7 +58,7 @@ class _AdminAccountingPageState extends State<AdminAccountingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'Muhasebe',
       subtitle: 'Admin Portal',
       trailing: IconButton(
@@ -151,7 +152,7 @@ class _AdminAccountingPageState extends State<AdminAccountingPage> {
                 child: Column(
                   children: [
                     const Icon(Icons.cloud_off_outlined,
-                        size: 36, color: AppColors.textTertiary),
+                        size: 36, color: AdminTechColors.textTertiary),
                     const SizedBox(height: 10),
                     const Text('Muhasebe verileri yüklenemedi',
                         style: TextStyle(fontWeight: FontWeight.w700)),
@@ -161,7 +162,8 @@ class _AdminAccountingPageState extends State<AdminAccountingPage> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary)),
+                            fontSize: 12,
+                            color: AdminTechColors.textSecondary)),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: _refresh,

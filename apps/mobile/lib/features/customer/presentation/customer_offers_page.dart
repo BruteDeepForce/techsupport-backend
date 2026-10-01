@@ -122,8 +122,8 @@ class _CustomerOffersPageState extends State<CustomerOffersPage> {
                           showDivider: i != offers.length - 1,
                           onTap: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  CustomerOfferDetailPage(offerId: offers[i].id),
+                              builder: (_) => CustomerOfferDetailPage(
+                                  offerId: offers[i].id),
                             ),
                           ),
                         ),

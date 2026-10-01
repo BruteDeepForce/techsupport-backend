@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import './shared/admin_web_design.dart';
 
 import '../../tickets/data/ticket_service.dart';
 import '../../tickets/models/ticket_models.dart';
@@ -8,6 +9,7 @@ import '../../technician/models/technician_models.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebTicketDetailPage extends StatefulWidget {
   const AdminWebTicketDetailPage({super.key, required this.ticketId});
@@ -15,7 +17,8 @@ class AdminWebTicketDetailPage extends StatefulWidget {
   final String ticketId;
 
   @override
-  State<AdminWebTicketDetailPage> createState() => _AdminWebTicketDetailPageState();
+  State<AdminWebTicketDetailPage> createState() =>
+      _AdminWebTicketDetailPageState();
 }
 
 class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
@@ -57,14 +60,14 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
         ),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Talep iş emrine dönüştürüldü')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Talep iş emrine dönüştürüldü')));
         _refreshTicket();
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Onay işlemi başarısız')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Onay işlemi başarısız')));
       }
     }
   }
@@ -85,7 +88,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false), child: const Text('İptal')),
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('İptal')),
           ElevatedButton(
               onPressed: () {
                 if (reasonController.text.trim().isEmpty) return;
@@ -97,7 +101,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
     );
     if (confirmed != true) return;
     try {
-      await _ticketService.rejectTicket(ticket.id, reasonController.text.trim());
+      await _ticketService.rejectTicket(
+          ticket.id, reasonController.text.trim());
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Talep reddedildi')));
@@ -105,8 +110,8 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Reddetme işlemi başarısız')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Reddetme işlemi başarısız')));
       }
     }
   }
@@ -117,201 +122,173 @@ class _AdminWebTicketDetailPageState extends State<AdminWebTicketDetailPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child: AdminWebSidebar(
-                    compact: true, radius: 0, active: AdminNavKey.tickets)),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.tickets),
-            Expanded(
-              child: Column(
-                children: [
-                  const AdminWebTopBar(showMenu: false),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: FutureBuilder<Ticket>(
-                        future: _ticketFuture,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return const _Card(
-                              child: Padding(
-                                padding: EdgeInsets.all(20),
-                                child: Text('Talep yüklenemedi'),
-                              ),
-                            );
-                          }
-                          final ticket = snapshot.data!;
-                          final statusLabel = _statusLabel(ticket.status);
-                          final statusColor = _statusColor(ticket.status);
-                          final canApprove = ticket.status == 'Open';
+    return AdminWebShell(
+      active: AdminNavKey.tickets,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: FutureBuilder<Ticket>(
+        future: _ticketFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const _Card(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Text('Talep yüklenemedi'),
+              ),
+            );
+          }
+          final ticket = snapshot.data!;
+          final statusLabel = _statusLabel(ticket.status);
+          final statusColor = _statusColor(ticket.status);
+          final canApprove = ticket.status == 'Open';
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const _Breadcrumb(),
-                              const SizedBox(height: 12),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          ticket.title,
-                                          style: const TextStyle(
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          'Talep #${_shortId(ticket.id)}',
-                                          style: const TextStyle(
-                                            color: Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  _Pill(label: statusLabel, color: statusColor),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _Breadcrumb(),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ticket.title,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: AdminTechColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Talep #${_shortId(ticket.id)}',
+                          style: const TextStyle(
+                            color: AdminTechColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _Pill(label: statusLabel, color: statusColor),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _Card(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(ticket.description,
+                        style: const TextStyle(
+                            color: AdminTechColors.textSecondary, height: 1.5)),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _InfoChip(
+                            label: 'Öncelik',
+                            value: _priorityLabel(ticket.priority)),
+                        const SizedBox(width: 10),
+                        _InfoChip(
+                            label: 'Tarih',
+                            value: _formatDate(ticket.createdAtUtc)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _Card(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Teknisyen Ata',
+                              style: TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 10),
+                          FutureBuilder<List<Technician>>(
+                            future: _techniciansFuture,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const LinearProgressIndicator();
+                              }
+                              final techs = snapshot.data ?? [];
+                              return DropdownButtonFormField<String>(
+                                value: _selectedTechnician?.userId,
+                                items: [
+                                  for (final tech in techs)
+                                    DropdownMenuItem(
+                                      value: tech.userId,
+                                      child: Text(tech.name),
+                                    )
                                 ],
-                              ),
-                              const SizedBox(height: 16),
-                              _Card(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(ticket.description,
-                                        style: const TextStyle(
-                                            color: Color(0xFF475569), height: 1.5)),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      children: [
-                                        _InfoChip(
-                                            label: 'Öncelik',
-                                            value: _priorityLabel(ticket.priority)),
-                                        const SizedBox(width: 10),
-                                        _InfoChip(
-                                            label: 'Tarih',
-                                            value: _formatDate(ticket.createdAtUtc)),
-                                      ],
-                                    ),
-                                  ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    final found = techs
+                                        .where((t) => t.userId == value)
+                                        .toList();
+                                    _selectedTechnician =
+                                        found.isEmpty ? null : found.first;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: 'Teknisyen',
+                                  filled: true,
+                                  fillColor: AdminTechColors.surface,
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: _Card(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text('Teknisyen Ata',
-                                              style:
-                                                  TextStyle(fontWeight: FontWeight.w600)),
-                                          const SizedBox(height: 10),
-                                          FutureBuilder<List<Technician>>(
-                                            future: _techniciansFuture,
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
-                                                return const LinearProgressIndicator();
-                                              }
-                                              final techs = snapshot.data ?? [];
-                                              return DropdownButtonFormField<String>(
-                                                value: _selectedTechnician?.userId,
-                                                items: [
-                                                  for (final tech in techs)
-                                                    DropdownMenuItem(
-                                                      value: tech.userId,
-                                                      child: Text(tech.name),
-                                                    )
-                                                ],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    final found = techs
-                                                        .where((t) => t.userId == value)
-                                                        .toList();
-                                                    _selectedTechnician = found.isEmpty
-                                                        ? null
-                                                        : found.first;
-                                                  });
-                                                },
-                                                decoration: const InputDecoration(
-                                                  labelText: 'Teknisyen',
-                                                  filled: true,
-                                                  fillColor: Color(0xFFF8FAFC),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          const SizedBox(height: 12),
-                                          TextField(
-                                            controller: _noteController,
-                                            maxLines: 3,
-                                            decoration: const InputDecoration(
-                                              labelText: 'İç Not',
-                                              hintText: 'Operasyon için not ekleyin',
-                                              filled: true,
-                                              fillColor: Color(0xFFF8FAFC),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  SizedBox(
-                                    width: 220,
-                                    child: Column(
-                                      children: [
-                                        _PrimaryActionButton(
-                                          label: 'Onayla / İş Emri',
-                                          icon: Icons.check,
-                                          onPressed: canApprove
-                                              ? () => _approveTicket(ticket)
-                                              : () {},
-                                          enabled: canApprove,
-                                        ),
-                                        const SizedBox(height: 10),
-                                        _DangerActionButton(
-                                          label: 'Reddet',
-                                          icon: Icons.close,
-                                          onPressed: canApprove
-                                              ? () => _rejectTicket(ticket)
-                                              : () {},
-                                          enabled: canApprove,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _noteController,
+                            maxLines: 3,
+                            decoration: const InputDecoration(
+                              labelText: 'İç Not',
+                              hintText: 'Operasyon için not ekleyin',
+                              filled: true,
+                              fillColor: AdminTechColors.surface,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 220,
+                    child: Column(
+                      children: [
+                        AdminTechPrimaryButton(
+                          label: 'Onayla / İş Emri',
+                          icon: Icons.check,
+                          onPressed:
+                              canApprove ? () => _approveTicket(ticket) : () {},
+                        ),
+                        const SizedBox(height: 10),
+                        _DangerActionButton(
+                          label: 'Reddet',
+                          icon: Icons.close,
+                          onPressed:
+                              canApprove ? () => _rejectTicket(ticket) : () {},
+                          enabled: canApprove,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -324,11 +301,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Talep Detayı', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Talep Detayı',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -344,9 +326,9 @@ class _Card extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       padding: const EdgeInsets.all(16),
       child: child,
@@ -365,17 +347,21 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('$label: ',
               style: const TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
-          Text(value, style: const TextStyle(fontSize: 12, color: Color(0xFF0F172A))),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AdminTechColors.textSecondary)),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 12, color: AdminTechColors.textPrimary)),
         ],
       ),
     );
@@ -397,35 +383,8 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(label,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton(
-      {required this.label,
-      required this.icon,
-      required this.onPressed,
-      this.enabled = true});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: enabled ? onPressed : null,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
@@ -449,11 +408,11 @@ class _DangerActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFFB91C1C),
-        side: const BorderSide(color: Color(0xFFFECACA)),
+        foregroundColor: AdminTechColors.red,
+        side: BorderSide(color: AdminTechColors.redBg),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: const Color(0xFFFEF2F2),
+        backgroundColor: AdminTechColors.redBg,
       ),
     );
   }
@@ -467,7 +426,8 @@ String _formatDate(DateTime dt) {
   return '$day.$month.$year';
 }
 
-String _shortId(String id) => id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+String _shortId(String id) =>
+    id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
 
 String _statusLabel(String status) {
   switch (status.toLowerCase()) {
@@ -485,13 +445,13 @@ String _statusLabel(String status) {
 Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'closed':
-      return const Color(0xFF10B981);
+      return AdminTechColors.green;
     case 'rejected':
-      return const Color(0xFFEF4444);
+      return AdminTechColors.statusRed;
     default:
-      return const Color(0xFF3B82F6);
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -514,30 +474,5 @@ String _operationPriorityFromTicket(String priority) {
       return 'High';
     default:
       return 'Normal';
-  }
-}
-
-class _SecondaryActionButton extends StatelessWidget {
-  const _SecondaryActionButton(
-      {required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
-      ),
-    );
   }
 }

@@ -44,64 +44,65 @@ class RoleSelectionPage extends StatelessWidget {
                         color: AppColors.textPrimary, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  Text('Demo Merkezi', style: theme.textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  )),
+                  Text('Demo Merkezi',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      )),
                 ],
               ),
             ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(14),
-              children: [
-                const LinearSection(title: 'Rol seçin', count: 3),
-                _RoleTile(
-                  icon: Icons.dashboard_customize_outlined,
-                  color: AppColors.statusPurple,
-                  title: 'Admin',
-                  subtitle:
-                      'KPI özetleri, operasyon akışı, ekip yükü',
-                  metric: '6 talep',
-                  onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) =>
-                              kIsWeb ? const AdminWebHomePage() : const AdminHomePage())),
-                ),
-                const SizedBox(height: 8),
-                _RoleTile(
-                  icon: Icons.person_outline_rounded,
-                  color: AppColors.statusGreen,
-                  title: 'Müşteri',
-                  subtitle:
-                      'Operasyon özeti, cihaz bilgisi, teslim görünürlüğü',
-                  metric: '3 açık',
-                  onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) => kIsWeb
-                              ? const CustomerWebTicketPage()
-                              : const CustomerHomePage())),
-                ),
-                const SizedBox(height: 8),
-                _RoleTile(
-                  icon: Icons.engineering_outlined,
-                  color: AppColors.statusOrange,
-                  title: 'Teknisyen',
-                  subtitle:
-                      'Görev listesi, hazırlık görünümü, saha aksiyonları',
-                  metric: '2 aktif',
-                  onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) => kIsWeb
-                              ? const TechnicianWebHomePage()
-                              : const TechnicianHomePage())),
-                ),
-              ],
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(14),
+                children: [
+                  const LinearSection(title: 'Rol seçin', count: 3),
+                  _RoleTile(
+                    icon: Icons.dashboard_customize_outlined,
+                    color: AppColors.statusPurple,
+                    title: 'Admin',
+                    subtitle: 'KPI özetleri, operasyon akışı, ekip yükü',
+                    metric: '6 talep',
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                            builder: (_) => kIsWeb
+                                ? const AdminWebHomePage()
+                                : const AdminHomePage())),
+                  ),
+                  const SizedBox(height: 8),
+                  _RoleTile(
+                    icon: Icons.person_outline_rounded,
+                    color: AppColors.statusGreen,
+                    title: 'Müşteri',
+                    subtitle:
+                        'Operasyon özeti, cihaz bilgisi, teslim görünürlüğü',
+                    metric: '3 açık',
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                            builder: (_) => kIsWeb
+                                ? const CustomerWebTicketPage()
+                                : const CustomerHomePage())),
+                  ),
+                  const SizedBox(height: 8),
+                  _RoleTile(
+                    icon: Icons.engineering_outlined,
+                    color: AppColors.statusOrange,
+                    title: 'Teknisyen',
+                    subtitle:
+                        'Görev listesi, hazırlık görünümü, saha aksiyonları',
+                    metric: '2 aktif',
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                            builder: (_) => kIsWeb
+                                ? const TechnicianWebHomePage()
+                                : const TechnicianHomePage())),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -150,15 +151,13 @@ class _RoleTile extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                          child: Text(title,
-                              style: theme.textTheme.titleMedium)),
+                          child:
+                              Text(title, style: theme.textTheme.titleMedium)),
                       LinearBadge(label: metric, color: color),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(subtitle,
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 2),
+                  Text(subtitle, style: theme.textTheme.bodySmall, maxLines: 2),
                 ],
               ),
             ),

@@ -94,7 +94,8 @@ class OfferService {
       throw Exception('Fatura bulunamadı: ${invoiceRes.statusCode}');
     }
 
-    final invoiceId = (invoiceRes.data['id'] ?? invoiceRes.data['Id'])?.toString();
+    final invoiceId =
+        (invoiceRes.data['id'] ?? invoiceRes.data['Id'])?.toString();
     if (invoiceId == null || invoiceId.isEmpty) {
       throw Exception('Fatura kimliği alınamadı');
     }

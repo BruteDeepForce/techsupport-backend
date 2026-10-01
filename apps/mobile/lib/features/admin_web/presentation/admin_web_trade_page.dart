@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/core/config/app_config.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
 import 'package:techsupport_mobile/features/customer/data/customer_service.dart';
 import 'package:techsupport_mobile/features/customer/models/customer_models.dart';
 import 'package:techsupport_mobile/features/device/data/device_service.dart';
@@ -30,16 +31,25 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _productController =
       TextEditingController(text: 'Ekran Koruyucu');
-  final TextEditingController _emailController = TextEditingController(text: 'E-posta');
-  final TextEditingController _passwordController = TextEditingController(text: 'Şifre');
-  final TextEditingController _brandController = TextEditingController(text: 'Bosch');
-  final TextEditingController _modelController = TextEditingController(text: 'Model X');
+  final TextEditingController _emailController =
+      TextEditingController(text: 'E-posta');
+  final TextEditingController _passwordController =
+      TextEditingController(text: 'Şifre');
+  final TextEditingController _brandController =
+      TextEditingController(text: 'Bosch');
+  final TextEditingController _modelController =
+      TextEditingController(text: 'Model X');
   final TextEditingController _serialController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '1');
-  final TextEditingController _unitPriceController = TextEditingController(text: '750');
-  final TextEditingController _discountController = TextEditingController(text: '0');
-  final TextEditingController _barcodeController = TextEditingController(text: 'Barkod');
-  final TextEditingController _skuController = TextEditingController(text: 'SKU');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1');
+  final TextEditingController _unitPriceController =
+      TextEditingController(text: '750');
+  final TextEditingController _discountController =
+      TextEditingController(text: '0');
+  final TextEditingController _barcodeController =
+      TextEditingController(text: 'Barkod');
+  final TextEditingController _skuController =
+      TextEditingController(text: 'SKU');
   final TextEditingController _warrantyMonthsController =
       TextEditingController(text: '12');
   final TextEditingController _warrantyStartController =
@@ -232,7 +242,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       } else {
         _unitPriceController.text = '0';
       }
-      _warrantyMonthsController.text = (device.guaranteePeriod ?? 12).toString();
+      _warrantyMonthsController.text =
+          (device.guaranteePeriod ?? 12).toString();
       _warrantyStartController.text = device.warrantyStartAtUtc != null
           ? '${device.warrantyStartAtUtc!.day.toString().padLeft(2, '0')}/${device.warrantyStartAtUtc!.month.toString().padLeft(2, '0')}/${device.warrantyStartAtUtc!.year}'
           : 'GG/AA/YYYY';
@@ -275,7 +286,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       existingCustomerId: isRecordCustomer ? _selectedCustomer?.id : null,
       existingCustomerName:
           isRecordCustomer ? _selectedCustomer?.name : _customerController.text,
-      existingCusomerAppUserId: isRecordCustomer ? _selectedCustomer?.appUserId : null,
+      existingCusomerAppUserId:
+          isRecordCustomer ? _selectedCustomer?.appUserId : null,
       existingDeviceId: isRecordDevice ? _selectedDevice?.id : null,
       categoryId: isPurchase ? _selectedStockCategory?.id : null,
       customer: isRecordCustomer
@@ -295,7 +307,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
         barcodeNumber: barcodeValue,
         problemDescription: _noteController.text,
         guaranteePeriod: int.tryParse(_warrantyMonthsController.text) ?? 0,
-        warrantyStartAtUtc: _parseWarrantyStartDate(_warrantyStartController.text),
+        warrantyStartAtUtc:
+            _parseWarrantyStartDate(_warrantyStartController.text),
       ),
       type: _tradeType == 'Satış' ? TradeType.sale : TradeType.purchase,
       paymentMethod: _paymentType == 'Nakit'
@@ -308,7 +321,8 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
       totalAmount: _transactionTotal,
       costPrice: double.tryParse(_unitPriceController.text) ?? 0,
       paidAmount: _transactionTotal,
-      imeiOrSerial: _serialController.text.isNotEmpty ? _serialController.text : null,
+      imeiOrSerial:
+          _serialController.text.isNotEmpty ? _serialController.text : null,
       notes: _noteController.text.isNotEmpty ? _noteController.text : null,
     );
 
@@ -443,6 +457,7 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
     final twoColumn = width >= 1280;
 
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.trades,
       actions: [
         AdminWebActionButton(
@@ -496,8 +511,10 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
                     paymentType: _paymentType,
                     sendReceipt: _sendReceipt,
                     onTradeTypeChanged: _handleTradeTypeChanged,
-                    onPaymentTypeChanged: (value) => setState(() => _paymentType = value),
-                    onSendReceiptChanged: (value) => setState(() => _sendReceipt = value),
+                    onPaymentTypeChanged: (value) =>
+                        setState(() => _paymentType = value),
+                    onSendReceiptChanged: (value) =>
+                        setState(() => _sendReceipt = value),
                     onValuesChanged: () => setState(() {}),
                     selectedStockCategory: _selectedStockCategory,
                     stockCategoriesFuture: _stockCategoriesFuture,
@@ -555,8 +572,10 @@ class _AdminWebTradePageState extends State<AdminWebTradePage> {
               paymentType: _paymentType,
               sendReceipt: _sendReceipt,
               onTradeTypeChanged: _handleTradeTypeChanged,
-              onPaymentTypeChanged: (value) => setState(() => _paymentType = value),
-              onSendReceiptChanged: (value) => setState(() => _sendReceipt = value),
+              onPaymentTypeChanged: (value) =>
+                  setState(() => _paymentType = value),
+              onSendReceiptChanged: (value) =>
+                  setState(() => _sendReceipt = value),
               onValuesChanged: () => setState(() {}),
               selectedStockCategory: _selectedStockCategory,
               stockCategoriesFuture: _stockCategoriesFuture,
@@ -595,14 +614,15 @@ class _TradeBreadcrumb extends StatelessWidget {
       children: [
         Text(
           'Yönetim',
-          style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+          style: TextStyle(fontSize: 12, color: AdminTechColors.textTertiary),
         ),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: AppColors.textTertiary),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
         Text(
           'Hızlı Alım/Satım Modülü',
-          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: AdminTechColors.textSecondary),
         ),
       ],
     );
@@ -626,14 +646,14 @@ class _TradeHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               SizedBox(height: 6),
               Text(
                 'Cihaz ve araçların hızlı alım/satım akışlarını tek ekranda yönetin.',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AdminTechColors.textSecondary,
                   height: 1.45,
                 ),
               ),
@@ -743,7 +763,7 @@ class _TradeEntryPanel extends StatelessWidget {
             title: 'MÜŞTERİ VE İŞLEM BİLGİLERİ',
             trailing: LinearBadge(
               label: 'Anında İşlem',
-              color: AppColors.statusBlue,
+              color: AdminTechColors.statusBlue,
             ),
           ),
           const SizedBox(height: 8),
@@ -751,14 +771,16 @@ class _TradeEntryPanel extends StatelessWidget {
             children: [
               Switch(
                 value: isRecordedCustomer,
-                activeColor: AppColors.accent,
+                activeColor: AdminTechColors.primary,
                 onChanged: onRecordedCustomerChanged,
               ),
               const SizedBox(width: 8),
               Text(
-                isRecordedCustomer ? 'Kayıtlı müşteri seçim' : 'Müşteri bilgileri giriş',
+                isRecordedCustomer
+                    ? 'Kayıtlı müşteri seçim'
+                    : 'Müşteri bilgileri giriş',
                 style: const TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AdminTechColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -797,18 +819,20 @@ class _TradeEntryPanel extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Kayıtlı Müşteri',
                     filled: true,
-                    fillColor: AppColors.bg,
+                    fillColor: AdminTechColors.surface,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 14,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.accent),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.primary),
                     ),
                   ),
                 );
@@ -898,14 +922,16 @@ class _TradeEntryPanel extends StatelessWidget {
             children: [
               Switch(
                 value: isRecordedDevice,
-                activeColor: AppColors.accent,
+                activeColor: AdminTechColors.primary,
                 onChanged: onRecordedDeviceChanged,
               ),
               const SizedBox(width: 8),
               Text(
-                isRecordedDevice ? 'Kayıtlı cihaz seçim' : 'Cihaz bilgileri giriş',
+                isRecordedDevice
+                    ? 'Kayıtlı cihaz seçim'
+                    : 'Cihaz bilgileri giriş',
                 style: const TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AdminTechColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -946,18 +972,20 @@ class _TradeEntryPanel extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Kayıtlı Cihaz',
                     filled: true,
-                    fillColor: AppColors.bg,
+                    fillColor: AdminTechColors.surface,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 14,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.border),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.accent),
+                      borderSide:
+                          const BorderSide(color: AdminTechColors.primary),
                     ),
                   ),
                 );
@@ -1021,7 +1049,7 @@ class _TradeEntryPanel extends StatelessWidget {
                     icon: const Icon(Icons.qr_code_2_rounded, size: 18),
                     label: const Text('Barkod Üret'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AdminTechColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -1047,12 +1075,13 @@ class _TradeEntryPanel extends StatelessWidget {
                   width: 120,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      skuController.text = 'SKU${DateTime.now().millisecondsSinceEpoch}';
+                      skuController.text =
+                          'SKU${DateTime.now().millisecondsSinceEpoch}';
                     },
                     icon: const Icon(Icons.label_rounded, size: 18),
                     label: const Text('SKU Üret'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AdminTechColors.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
@@ -1078,7 +1107,8 @@ class _TradeEntryPanel extends StatelessWidget {
                   child: _FormField(
                     label: 'Birim Fiyat',
                     controller: unitPriceController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onValuesChanged(),
                   ),
                 ),
@@ -1087,7 +1117,8 @@ class _TradeEntryPanel extends StatelessWidget {
                   child: _FormField(
                     label: 'İndirim',
                     controller: discountController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onValuesChanged(),
                   ),
                 ),
@@ -1131,14 +1162,15 @@ class _TradeEntryPanel extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: AppColors.accentBg,
-              border: Border.all(color: AppColors.border),
+              color: AdminTechColors.cyanBg,
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: Row(
               children: [
                 Checkbox(
                   value: sendReceipt,
-                  fillColor: const WidgetStatePropertyAll<Color>(AppColors.accent),
+                  fillColor: const WidgetStatePropertyAll<Color>(
+                      AdminTechColors.primary),
                   onChanged: (value) => onSendReceiptChanged(value ?? false),
                 ),
                 const SizedBox(width: 8),
@@ -1150,7 +1182,7 @@ class _TradeEntryPanel extends StatelessWidget {
                         'Faturayı Otomatik İlet',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: AdminTechColors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 2),
@@ -1158,7 +1190,7 @@ class _TradeEntryPanel extends StatelessWidget {
                         'İşlem tamamlandığında SMS veya e-posta gönderimi için işaretleyin.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: AdminTechColors.textSecondary,
                         ),
                       ),
                     ],
@@ -1209,7 +1241,7 @@ class _TradeSummaryPanel extends StatelessWidget {
             title: 'İŞLEM ÖZETİ',
             trailing: LinearBadge(
               label: 'Tek Kayıt',
-              color: AppColors.statusBlue,
+              color: AdminTechColors.statusBlue,
             ),
           ),
           const SizedBox(height: 8),
@@ -1252,7 +1284,7 @@ class _TradeSummaryPanel extends StatelessWidget {
             label: 'Birim Fiyat',
             value: '₺${unitPrice.toStringAsFixed(2)}',
           ),
-          const Divider(color: AppColors.border),
+          const Divider(color: AdminTechColors.border),
           _SummaryRow(
             label: 'İndirim',
             value: '- ₺${discount.toStringAsFixed(2)}',
@@ -1261,9 +1293,9 @@ class _TradeSummaryPanel extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.bg,
+              color: AdminTechColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: _SummaryRow(
               label: 'Toplam',
@@ -1279,7 +1311,7 @@ class _TradeSummaryPanel extends StatelessWidget {
               icon: const Icon(Icons.point_of_sale_rounded, size: 18),
               label: const Text('İşlemi Tamamla'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
+                backgroundColor: AdminTechColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 0,
@@ -1315,19 +1347,19 @@ class _QuickStatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.accent),
+          Icon(icon, size: 16, color: AdminTechColors.primary),
           const SizedBox(width: 8),
           Text(
             '$label: $value',
             style: const TextStyle(
-              color: AppColors.textPrimary,
+              color: AdminTechColors.textPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -1349,9 +1381,9 @@ class _SelectedCustomerInfo extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Wrap(
         runSpacing: 10,
@@ -1361,7 +1393,9 @@ class _SelectedCustomerInfo extends StatelessWidget {
           _InfoLabel(title: 'E-posta', value: customer.email),
           _InfoLabel(
             title: 'Telefon',
-            value: customer.phoneNumber?.isNotEmpty == true ? customer.phoneNumber! : '-',
+            value: customer.phoneNumber?.isNotEmpty == true
+                ? customer.phoneNumber!
+                : '-',
           ),
         ],
       ),
@@ -1380,9 +1414,9 @@ class _SelectedDeviceInfo extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Wrap(
         runSpacing: 10,
@@ -1393,11 +1427,15 @@ class _SelectedDeviceInfo extends StatelessWidget {
           _InfoLabel(title: 'Seri No', value: device.serialNumber),
           _InfoLabel(
             title: 'Barkod',
-            value: device.barcodeNumber?.isNotEmpty == true ? device.barcodeNumber! : '-',
+            value: device.barcodeNumber?.isNotEmpty == true
+                ? device.barcodeNumber!
+                : '-',
           ),
           _InfoLabel(
             title: 'Garanti',
-            value: device.guaranteePeriod != null ? '${device.guaranteePeriod} ay' : '-',
+            value: device.guaranteePeriod != null
+                ? '${device.guaranteePeriod} ay'
+                : '-',
           ),
           _InfoLabel(title: 'Durum', value: device.status),
         ],
@@ -1422,7 +1460,7 @@ class _InfoLabel extends StatelessWidget {
           title,
           style: const TextStyle(
             fontSize: 11,
-            color: AppColors.textTertiary,
+            color: AdminTechColors.textTertiary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1431,7 +1469,7 @@ class _InfoLabel extends StatelessWidget {
           value,
           style: const TextStyle(
             fontSize: 13,
-            color: AppColors.textPrimary,
+            color: AdminTechColors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1456,7 +1494,8 @@ class _RecentTradesSection extends StatelessWidget {
             title: 'SON HAREKETLER',
             trailing: Text(
               'Bugün',
-              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+              style:
+                  TextStyle(fontSize: 12, color: AdminTechColors.textTertiary),
             ),
           ),
           const SizedBox(height: 8),
@@ -1489,7 +1528,7 @@ class _RecentTradeRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? const Border(
-                bottom: BorderSide(color: AppColors.borderSubtle),
+                bottom: BorderSide(color: AdminTechColors.borderSubtle),
               )
             : null,
       ),
@@ -1499,12 +1538,15 @@ class _RecentTradeRow extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: completed ? AppColors.statusGreenBg : AppColors.statusYellowBg,
+              color:
+                  completed ? AdminTechColors.greenBg : AdminTechColors.amberBg,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               completed ? Icons.check_rounded : Icons.schedule_rounded,
-              color: completed ? AppColors.statusGreen : AppColors.statusYellow,
+              color: completed
+                  ? AdminTechColors.statusGreen
+                  : AdminTechColors.statusAmber,
             ),
           ),
           const SizedBox(width: 12),
@@ -1516,7 +1558,7 @@ class _RecentTradeRow extends StatelessWidget {
                   trade.customer,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AdminTechColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1524,7 +1566,7 @@ class _RecentTradeRow extends StatelessWidget {
                   trade.product,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ],
@@ -1537,7 +1579,7 @@ class _RecentTradeRow extends StatelessWidget {
                 '₺${trade.amount.toStringAsFixed(0)}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 3),
@@ -1545,7 +1587,7 @@ class _RecentTradeRow extends StatelessWidget {
                 '${trade.payment} • ${trade.time}',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: AppColors.textTertiary,
+                  color: AdminTechColors.textTertiary,
                 ),
               ),
             ],
@@ -1553,7 +1595,9 @@ class _RecentTradeRow extends StatelessWidget {
           const SizedBox(width: 12),
           LinearBadge(
             label: trade.status,
-            color: completed ? AppColors.statusGreen : AppColors.statusYellow,
+            color: completed
+                ? AdminTechColors.statusGreen
+                : AdminTechColors.statusAmber,
           ),
         ],
       ),
@@ -1578,21 +1622,27 @@ class _SummaryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: emphasize ? 14 : 13,
-              fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
-              color: emphasize ? AppColors.textPrimary : AppColors.textSecondary,
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: emphasize ? 14 : 13,
+                fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+                color: emphasize
+                    ? AdminTechColors.textPrimary
+                    : AdminTechColors.textSecondary,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
           Text(
             value,
             style: TextStyle(
               fontSize: emphasize ? 16 : 13,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: AdminTechColors.textPrimary,
             ),
           ),
         ],
@@ -1633,7 +1683,7 @@ class _FormField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: AdminTechColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1648,18 +1698,20 @@ class _FormField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hint,
             suffixIcon: suffixIcon != null
-                ? Icon(suffixIcon, size: 18, color: AppColors.textTertiary)
+                ? Icon(suffixIcon,
+                    size: 18, color: AdminTechColors.textTertiary)
                 : null,
             filled: true,
-            fillColor: AppColors.bg,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            fillColor: AdminTechColors.surface,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AdminTechColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.accent),
+              borderSide: const BorderSide(color: AdminTechColors.primary),
             ),
           ),
         ),
@@ -1690,7 +1742,7 @@ class _SelectField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: AdminTechColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1699,15 +1751,16 @@ class _SelectField extends StatelessWidget {
           value: value,
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.bg,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            fillColor: AdminTechColors.surface,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AdminTechColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.accent),
+              borderSide: const BorderSide(color: AdminTechColors.primary),
             ),
           ),
           items: items
@@ -1756,7 +1809,7 @@ class _CategorySelectField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: AppColors.textSecondary,
+            color: AdminTechColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -1766,15 +1819,16 @@ class _CategorySelectField extends StatelessWidget {
           value: validValue,
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.bg,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            fillColor: AdminTechColors.surface,
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderSide: const BorderSide(color: AdminTechColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.accent),
+              borderSide: const BorderSide(color: AdminTechColors.primary),
             ),
           ),
           items: uniqueCategories

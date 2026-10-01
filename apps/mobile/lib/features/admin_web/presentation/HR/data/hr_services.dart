@@ -47,12 +47,13 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) =>
-              HRPerformanceReportResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) => HRPerformanceReportResponse.fromJson(
+              item as Map<String, dynamic>))
           .toList();
     }
 
-    throw Exception('Failed to load performance reports: ${response.statusCode}');
+    throw Exception(
+        'Failed to load performance reports: ${response.statusCode}');
   }
 
   Future<HRPerformanceReportResponse> getEmployeePerformanceReport(
@@ -75,7 +76,8 @@ class HRService {
       return HRPerformanceReportResponse.fromJson(data);
     }
 
-    throw Exception('Failed to load employee performance report: ${response.statusCode}');
+    throw Exception(
+        'Failed to load employee performance report: ${response.statusCode}');
   }
 
   Future<HRLargeLeaveResponseList> getLeaves(
@@ -101,14 +103,17 @@ class HRService {
       return data['id'] as String;
     }
     final data = response.data;
-    return data != null && data is Map<String, dynamic> && data['message'] != null
+    return data != null &&
+            data is Map<String, dynamic> &&
+            data['message'] != null
         ? data['message'] as String
         : 'Failed to create leave: ${response.statusCode}';
   }
 
-  Future<String> requestLeaveByEmployee(HRLeaveRequestByEmployee request) async {
-    final response =
-        await _dio.post('/api/hr/leaves/leave-request-employee', data: request.toJson());
+  Future<String> requestLeaveByEmployee(
+      HRLeaveRequestByEmployee request) async {
+    final response = await _dio.post('/api/hr/leaves/leave-request-employee',
+        data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -116,7 +121,9 @@ class HRService {
       return data['id'] as String;
     }
     final data = response.data;
-    return data != null && data is Map<String, dynamic> && data['message'] != null
+    return data != null &&
+            data is Map<String, dynamic> &&
+            data['message'] != null
         ? data['message'] as String
         : 'Failed to create leave: ${response.statusCode}';
   }
@@ -131,7 +138,9 @@ class HRService {
       return data['message'] as String? ?? 'Leave decision successful';
     }
     final data = response.data;
-    return data != null && data is Map<String, dynamic> && data['message'] != null
+    return data != null &&
+            data is Map<String, dynamic> &&
+            data['message'] != null
         ? data['message'] as String
         : 'Failed to decide leave: ${response.statusCode}';
   }
@@ -143,14 +152,17 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRPositionResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRPositionResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load positions: ${response.statusCode}');
   }
 
-  Future<HRPositionResponse> createPosition(HRCreatePositionRequest request) async {
-    final response = await _dio.post('/api/hr/positions', data: request.toJson());
+  Future<HRPositionResponse> createPosition(
+      HRCreatePositionRequest request) async {
+    final response =
+        await _dio.post('/api/hr/positions', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -167,36 +179,40 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRLeaveDeductionResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRLeaveDeductionResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to load leave deduction settings: ${response.statusCode}');
+    throw Exception(
+        'Failed to load leave deduction settings: ${response.statusCode}');
   }
 
   Future<HRLeaveDeductionResponse> createLeaveDeduction(
       HRCreateLeaveDeductionRequest request) async {
-    final response =
-        await _dio.post('/api/hr/settings/leave-deductions', data: request.toJson());
+    final response = await _dio.post('/api/hr/settings/leave-deductions',
+        data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as Map<String, dynamic>;
       return HRLeaveDeductionResponse.fromJson(data);
     }
-    throw Exception('Failed to create leave deduction setting: ${response.statusCode}');
+    throw Exception(
+        'Failed to create leave deduction setting: ${response.statusCode}');
   }
 
   Future<HRLeaveDeductionResponse> updateLeaveDeduction(
       String id, HRUpdateLeaveDeductionRequest request) async {
-    final response =
-        await _dio.put('/api/hr/settings/leave-deductions/$id', data: request.toJson());
+    final response = await _dio.put('/api/hr/settings/leave-deductions/$id',
+        data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as Map<String, dynamic>;
       return HRLeaveDeductionResponse.fromJson(data);
     }
-    throw Exception('Failed to update leave deduction setting: ${response.statusCode}');
+    throw Exception(
+        'Failed to update leave deduction setting: ${response.statusCode}');
   }
 
   Future<void> deleteLeaveDeduction(String id) async {
@@ -206,7 +222,8 @@ class HRService {
         response.statusCode! < 300) {
       return;
     }
-    throw Exception('Failed to delete leave deduction setting: ${response.statusCode}');
+    throw Exception(
+        'Failed to delete leave deduction setting: ${response.statusCode}');
   }
 
   Future<HRAdvanceSettingsResponse> createAdvanceSettings(
@@ -221,7 +238,8 @@ class HRService {
       final data = response.data as Map<String, dynamic>;
       return HRAdvanceSettingsResponse.fromJson(data);
     }
-    throw Exception('Failed to create advance settings: ${response.statusCode}');
+    throw Exception(
+        'Failed to create advance settings: ${response.statusCode}');
   }
 
   Future<HRAdvanceSettingsResponse> updateAdvanceSettings(
@@ -236,7 +254,8 @@ class HRService {
       final data = response.data as Map<String, dynamic>;
       return HRAdvanceSettingsResponse.fromJson(data);
     }
-    throw Exception('Failed to update advance settings: ${response.statusCode}');
+    throw Exception(
+        'Failed to update advance settings: ${response.statusCode}');
   }
 
   Future<HRAdvanceSettingsResponse> getAdvanceSettingsById(String id) async {
@@ -251,14 +270,16 @@ class HRService {
   }
 
   Future<HRAdvanceSettingsResponse> getCurrentAdvanceSettings() async {
-    final response = await _dio.get('/api/hr/settings/advance-settings/current');
+    final response =
+        await _dio.get('/api/hr/settings/advance-settings/current');
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as Map<String, dynamic>;
       return HRAdvanceSettingsResponse.fromJson(data);
     }
-    throw Exception('Failed to load current advance settings: ${response.statusCode}');
+    throw Exception(
+        'Failed to load current advance settings: ${response.statusCode}');
   }
 
   Future<List<HRDisciplineResponse>> getDisciplines() async {
@@ -268,14 +289,17 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRDisciplineResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRDisciplineResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load disciplines: ${response.statusCode}');
   }
 
-  Future<HRDisciplineResponse> createDiscipline(HRCreateDisciplineRequest request) async {
-    final response = await _dio.post('/api/hr/disciplines', data: request.toJson());
+  Future<HRDisciplineResponse> createDiscipline(
+      HRCreateDisciplineRequest request) async {
+    final response =
+        await _dio.post('/api/hr/disciplines', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -287,7 +311,8 @@ class HRService {
 
   Future<HRDisciplineResponse> updateDiscipline(
       String id, HRUpdateDisciplineRequest request) async {
-    final response = await _dio.put('/api/hr/disciplines/$id', data: request.toJson());
+    final response =
+        await _dio.put('/api/hr/disciplines/$id', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -301,7 +326,8 @@ class HRService {
     String? employeeId,
     String? disciplineId,
   }) async {
-    final response = await _dio.get('/api/hr/disciplines/records', queryParameters: {
+    final response =
+        await _dio.get('/api/hr/disciplines/records', queryParameters: {
       if (employeeId != null) 'employeeId': employeeId,
       if (disciplineId != null) 'disciplineId': disciplineId,
     });
@@ -310,11 +336,12 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) =>
-              HRDisciplineEmployeeRecordResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) => HRDisciplineEmployeeRecordResponse.fromJson(
+              item as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to load discipline records: ${response.statusCode}');
+    throw Exception(
+        'Failed to load discipline records: ${response.statusCode}');
   }
 
   Future<HRDisciplineEmployeeRecordResponse> createDisciplineRecord(
@@ -327,20 +354,22 @@ class HRService {
       final data = response.data as Map<String, dynamic>;
       return HRDisciplineEmployeeRecordResponse.fromJson(data);
     }
-    throw Exception('Failed to create discipline record: ${response.statusCode}');
+    throw Exception(
+        'Failed to create discipline record: ${response.statusCode}');
   }
 
   Future<HRDisciplineEmployeeRecordResponse> updateDisciplineRecord(
       String id, HRUpdateDisciplineEmployeeRecordRequest request) async {
-    final response =
-        await _dio.put('/api/hr/disciplines/records/$id', data: request.toJson());
+    final response = await _dio.put('/api/hr/disciplines/records/$id',
+        data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as Map<String, dynamic>;
       return HRDisciplineEmployeeRecordResponse.fromJson(data);
     }
-    throw Exception('Failed to update discipline record: ${response.statusCode}');
+    throw Exception(
+        'Failed to update discipline record: ${response.statusCode}');
   }
 
   Future<List<HRRewardResponse>> getRewards() async {
@@ -350,7 +379,8 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRRewardResponse.fromJson(item as Map<String, dynamic>))
+          .map(
+              (item) => HRRewardResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load rewards: ${response.statusCode}');
@@ -367,8 +397,10 @@ class HRService {
     throw Exception('Failed to create reward: ${response.statusCode}');
   }
 
-  Future<HRRewardResponse> updateReward(String id, HRUpdateRewardRequest request) async {
-    final response = await _dio.put('/api/hr/rewards/$id', data: request.toJson());
+  Future<HRRewardResponse> updateReward(
+      String id, HRUpdateRewardRequest request) async {
+    final response =
+        await _dio.put('/api/hr/rewards/$id', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -382,7 +414,8 @@ class HRService {
     String? employeeId,
     String? rewardId,
   }) async {
-    final response = await _dio.get('/api/hr/rewards/records', queryParameters: {
+    final response =
+        await _dio.get('/api/hr/rewards/records', queryParameters: {
       if (employeeId != null) 'employeeId': employeeId,
       if (rewardId != null) 'rewardId': rewardId,
     });
@@ -391,8 +424,8 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) =>
-              HRRewardEmployeeRecordResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) => HRRewardEmployeeRecordResponse.fromJson(
+              item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load reward records: ${response.statusCode}');
@@ -400,7 +433,8 @@ class HRService {
 
   Future<HRRewardEmployeeRecordResponse> createRewardRecord(
       HRCreateRewardEmployeeRecordRequest request) async {
-    final response = await _dio.post('/api/hr/rewards/records', data: request.toJson());
+    final response =
+        await _dio.post('/api/hr/rewards/records', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -427,7 +461,8 @@ class HRService {
     String? branchId,
     bool includeClosed = true,
   }) async {
-    final response = await _dio.get('/api/hr/bordro/donemler', queryParameters: {
+    final response =
+        await _dio.get('/api/hr/bordro/donemler', queryParameters: {
       if (branchId != null) 'branchId': branchId,
       'includeClosed': includeClosed,
     });
@@ -436,7 +471,8 @@ class HRService {
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRBordroDonemResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRBordroDonemResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load bordro periods: ${response.statusCode}');
@@ -444,7 +480,8 @@ class HRService {
 
   Future<HRBordroDonemResponse> createBordroDonem(
       HRCreateBordroDonemRequest request) async {
-    final response = await _dio.post('/api/hr/bordro/donemler', data: request.toJson());
+    final response =
+        await _dio.post('/api/hr/bordro/donemler', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
@@ -454,27 +491,34 @@ class HRService {
     throw Exception('Failed to create bordro period: ${response.statusCode}');
   }
 
-  Future<List<HRBordroEmployeeResponse>> calculateBordroDonem(String donemId) async {
-    final response = await _dio.post('/api/hr/bordro/donemler/$donemId/calculate');
+  Future<List<HRBordroEmployeeResponse>> calculateBordroDonem(
+      String donemId) async {
+    final response =
+        await _dio.post('/api/hr/bordro/donemler/$donemId/calculate');
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to calculate bordro period: ${response.statusCode}');
+    throw Exception(
+        'Failed to calculate bordro period: ${response.statusCode}');
   }
 
-  Future<List<HRBordroEmployeeResponse>> getBordroEmployees(String donemId) async {
-    final response = await _dio.get('/api/hr/bordro/donemler/$donemId/employees');
+  Future<List<HRBordroEmployeeResponse>> getBordroEmployees(
+      String donemId) async {
+    final response =
+        await _dio.get('/api/hr/bordro/donemler/$donemId/employees');
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {
       final data = response.data as List<dynamic>;
       return data
-          .map((item) => HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
+          .map((item) =>
+              HRBordroEmployeeResponse.fromJson(item as Map<String, dynamic>))
           .toList();
     }
     throw Exception('Failed to load bordro employees: ${response.statusCode}');
@@ -496,7 +540,8 @@ class HRService {
 
   Future<HREmployeeDetailSalary> createEmployeeSalary(
       HRCreateEmployeeSalaryRequest request) async {
-    final response = await _dio.post('/api/hr/employee-salaries', data: request.toJson());
+    final response =
+        await _dio.post('/api/hr/employee-salaries', data: request.toJson());
     if (response.statusCode != null &&
         response.statusCode! >= 200 &&
         response.statusCode! < 300) {

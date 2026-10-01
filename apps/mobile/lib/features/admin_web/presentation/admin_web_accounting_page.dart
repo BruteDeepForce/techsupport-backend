@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './shared/admin_web_design.dart';
 
 import '../../../core/utils/pdf_blob_opener.dart';
 import '../../accounting/data/accounting_service.dart';
@@ -49,6 +50,7 @@ class _AdminWebAccountingPageState extends State<AdminWebAccountingPage> {
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.accounting,
       actions: [
         AdminWebActionButton(
@@ -93,11 +95,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Muhasebe', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Muhasebe',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -114,12 +121,14 @@ class _Header extends StatelessWidget {
         Text(
           'Muhasebe',
           style: TextStyle(
-              fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF0F172A)),
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: AdminTechColors.textPrimary),
         ),
         SizedBox(height: 5),
         Text(
           'Faturaları, tahsilatları ve cari hareketleri tek yerden izleyin.',
-          style: TextStyle(color: Color(0xFF64748B)),
+          style: TextStyle(color: AdminTechColors.textSecondary),
         ),
       ],
     );
@@ -150,13 +159,14 @@ class _ErrorPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         children: [
-          const Icon(Icons.cloud_off_outlined, size: 38, color: Color(0xFF94A3B8)),
+          const Icon(Icons.cloud_off_outlined,
+              size: 38, color: AdminTechColors.textTertiary),
           const SizedBox(height: 12),
           const Text('Muhasebe verileri yüklenemedi',
               style: TextStyle(fontWeight: FontWeight.w700)),
@@ -165,7 +175,8 @@ class _ErrorPanel extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              style: const TextStyle(
+                  fontSize: 12, color: AdminTechColors.textSecondary)),
           const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: onRetry,

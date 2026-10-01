@@ -549,8 +549,7 @@ class _LoginCard extends StatelessWidget {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const RegisterPage()),
+                MaterialPageRoute<void>(builder: (_) => const RegisterPage()),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,

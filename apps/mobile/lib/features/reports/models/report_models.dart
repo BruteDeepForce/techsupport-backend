@@ -121,8 +121,8 @@ class TenantDashboard {
       metrics: metricsJson is List
           ? metricsJson
               .whereType<Map>()
-              .map((e) => TenantReportMetric.fromJson(
-                  Map<String, dynamic>.from(e)))
+              .map((e) =>
+                  TenantReportMetric.fromJson(Map<String, dynamic>.from(e)))
               .toList()
           : <TenantReportMetric>[],
       plannedOperations: plannedOperationsJson is List
@@ -207,7 +207,8 @@ class PlannedOperationSnapshot {
       title: (json['title'] ?? json['Title'] ?? '').toString(),
       description:
           (json['description'] ?? json['Description'] ?? '').toString(),
-      operationId: (json['operationId'] ?? json['OperationId'] ?? '').toString(),
+      operationId:
+          (json['operationId'] ?? json['OperationId'] ?? '').toString(),
     );
   }
 }
@@ -245,11 +246,9 @@ class TenantReportSummary {
       tenantName: (json['tenantName'] ?? json['TenantName'] ?? '').toString(),
       totalCustomers: asInt('totalCustomers', 'TotalCustomers'),
       totalOperations: asInt('totalOperations', 'TotalOperations'),
-      completedOperations:
-          asInt('completedOperations', 'CompletedOperations'),
+      completedOperations: asInt('completedOperations', 'CompletedOperations'),
       failedOperations: asInt('failedOperations', 'FailedOperations'),
-      deliveredOperations:
-          asInt('deliveredOperations', 'DeliveredOperations'),
+      deliveredOperations: asInt('deliveredOperations', 'DeliveredOperations'),
       openOperations: asInt('openOperations', 'OpenOperations'),
     );
   }

@@ -7,6 +7,8 @@ import 'admin_web_ticket_detail_page.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebTicketsPage extends StatefulWidget {
   const AdminWebTicketsPage({super.key});
@@ -37,80 +39,56 @@ class _AdminWebTicketsPageState extends State<AdminWebTicketsPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child: AdminWebSidebar(
-                    compact: true, radius: 0, active: AdminNavKey.tickets),
-              ),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.tickets),
-            Expanded(
-              child: Column(
-                children: [
-                  const AdminWebTopBar(showMenu: false),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Talep Yönetimi',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Açık talepleri görüntüleyin ve iş emrine dönüştürün',
-                                      style: TextStyle(
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _SecondaryActionButton(
-                                label: 'Yenile',
-                                icon: Icons.refresh,
-                                onPressed: _refreshTickets,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _TicketsTableCard(
-                            ticketsFuture: _ticketsFuture,
-                            onOpenTicket: (ticketId) => Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        AdminWebTicketDetailPage(ticketId: ticketId))),
-                          ),
-                        ],
+    return AdminWebShell(
+      active: AdminNavKey.tickets,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Talep Yönetimi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 6),
+                    Text(
+                      'Açık talepleri görüntüleyin ve iş emrine dönüştürün',
+                      style: TextStyle(
+                        color: AdminTechColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+              _SecondaryActionButton(
+                label: 'Yenile',
+                icon: Icons.refresh,
+                onPressed: _refreshTickets,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _TicketsTableCard(
+            ticketsFuture: _ticketsFuture,
+            onOpenTicket: (ticketId) => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                    builder: (_) =>
+                        AdminWebTicketDetailPage(ticketId: ticketId))),
+          ),
+        ],
       ),
     );
   }
@@ -123,11 +101,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Talep Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Talep Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -177,7 +160,7 @@ class _TicketsTableCard extends StatelessWidget {
           child: Column(
             children: [
               const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              const Divider(height: 1, color: AdminTechColors.border),
               for (final ticket in tickets)
                 _TableRow(
                   id: ticket.id,
@@ -205,9 +188,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: child,
     );
@@ -227,31 +210,41 @@ class _TableHeader extends StatelessWidget {
             flex: 3,
             child: Text('Başlık',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 2,
             child: Text('Kullanıcı',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 1,
             child: Text('Öncelik',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 1,
             child: Text('Durum',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
           Expanded(
             flex: 1,
             child: Text('Tarih',
                 style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AdminTechColors.textSecondary)),
           ),
         ],
       ),
@@ -294,7 +287,7 @@ class _TableRow extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A))),
+                      color: AdminTechColors.textPrimary)),
             ),
             Expanded(
               flex: 2,
@@ -302,7 +295,8 @@ class _TableRow extends StatelessWidget {
                 username ?? '-',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                style: const TextStyle(
+                    fontSize: 12, color: AdminTechColors.textSecondary),
               ),
             ),
             Expanded(
@@ -322,7 +316,8 @@ class _TableRow extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Text(_formatDate(createdAtUtc),
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  style: const TextStyle(
+                      fontSize: 12, color: AdminTechColors.textSecondary)),
             ),
           ],
         ),
@@ -346,7 +341,8 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(label,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w600, color: color)),
     );
   }
 }
@@ -377,13 +373,13 @@ String _statusLabel(String status) {
 Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'closed':
-      return const Color(0xFF10B981);
+      return AdminTechColors.green;
     case 'rejected':
-      return const Color(0xFFEF4444);
+      return AdminTechColors.statusRed;
     default:
-      return const Color(0xFF3B82F6);
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -401,11 +397,11 @@ String _priorityLabel(String priority) {
 Color _priorityColor(String priority) {
   switch (priority.toLowerCase()) {
     case 'urgent':
-      return const Color(0xFFEF4444);
+      return AdminTechColors.statusRed;
     case 'high':
-      return const Color(0xFFF97316);
+      return AdminTechColors.orange;
     default:
-      return const Color(0xFF3B82F6);
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -424,11 +420,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './shared/admin_web_design.dart';
 import '../../offers/data/offer_service.dart';
 import '../../offers/models/offer_models.dart';
 import 'admin_web_offer_detail_page.dart';
@@ -32,6 +33,7 @@ class _AdminWebOffersPageState extends State<AdminWebOffersPage> {
   @override
   Widget build(BuildContext context) {
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.offers,
       actions: [
         AdminWebActionButton(
@@ -76,11 +78,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Teklifler', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Teklifler',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -103,14 +110,14 @@ class _Header extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               SizedBox(height: 6),
               Text(
                 'Teknisyenlerden gelen teklifleri yönetin',
                 style: TextStyle(
-                  color: Color(0xFF64748B),
+                  color: AdminTechColors.textSecondary,
                 ),
               ),
             ],
@@ -146,17 +153,17 @@ class _MetricRow extends StatelessWidget {
             title: 'Toplam Teklif',
             value: total.toString(),
             icon: Icons.local_offer_outlined,
-            color: const Color(0xFF3B82F6)),
+            color: AdminTechColors.statusBlue),
         _MetricCard(
             title: 'Toplam Kalem',
             value: totalItems.toString(),
             icon: Icons.inventory_2_outlined,
-            color: const Color(0xFF22C55E)),
+            color: AdminTechColors.green),
         _MetricCard(
             title: 'Toplam Tutar',
             value: totalAmount.toStringAsFixed(2),
             icon: Icons.payments_outlined,
-            color: const Color(0xFFF59E0B)),
+            color: AdminTechColors.statusAmber),
       ],
     );
   }
@@ -179,9 +186,9 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -202,8 +209,10 @@ class _MetricCard extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A))),
-              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                      color: AdminTechColors.textPrimary)),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 12, color: AdminTechColors.textSecondary)),
             ],
           ),
         ],
@@ -213,7 +222,8 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _OffersTableCard extends StatelessWidget {
-  const _OffersTableCard({required this.offersFuture, required this.onOpenOffer});
+  const _OffersTableCard(
+      {required this.offersFuture, required this.onOpenOffer});
 
   final Future<List<OfferSummary>> offersFuture;
   final ValueChanged<String> onOpenOffer;
@@ -244,7 +254,8 @@ class _OffersTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı',
+                  style: TextStyle(color: AdminTechColors.textTertiary)),
             ),
           );
         }
@@ -252,7 +263,7 @@ class _OffersTableCard extends StatelessWidget {
           child: Column(
             children: [
               const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              const Divider(height: 1, color: AdminTechColors.border),
               for (final offer in offers)
                 _TableRow(
                   offer: offer,
@@ -275,9 +286,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -309,7 +320,7 @@ class _TableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -320,7 +331,7 @@ class _TableHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -346,7 +357,7 @@ class _TableRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
         ),
         child: Row(
           children: [
@@ -363,35 +374,12 @@ class _TableRow extends StatelessWidget {
               ),
             ),
             Expanded(child: Text('$itemCount')),
-            Expanded(child: Text('${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
+            Expanded(
+                child: Text(
+                    '${offer.amount.toStringAsFixed(2)} ${offer.currency}')),
             Expanded(child: Text(_formatTime(offer.createdAt))),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SecondaryActionButton extends StatelessWidget {
-  const _SecondaryActionButton(
-      {required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
       ),
     );
   }
@@ -455,11 +443,11 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'adminapproved':
     case 'customerapproved':
-      return const Color(0xFF22C55E);
+      return AdminTechColors.green;
     case 'adminrejected':
     case 'customerrejected':
-      return const Color(0xFFEF4444);
+      return AdminTechColors.statusRed;
     default:
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './shared/admin_web_design.dart';
 import '../../../core/network/api_client.dart';
 import '../presentation/HR/data/hr_services.dart';
 import '../presentation/HR/model/hr_models.dart';
@@ -95,8 +96,9 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
         final technician = technicianByUserId[employee.userId];
         return _ShiftEmployeeOption(
           employeeId: employee.id,
-          label:
-              technician?.name.isNotEmpty == true ? technician!.name : employee.fullName,
+          label: technician?.name.isNotEmpty == true
+              ? technician!.name
+              : employee.fullName,
           role: employee.positionName ?? 'Teknisyen',
         );
       }).toList()
@@ -147,8 +149,9 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
         final technician = technicianByUserId[employee.userId];
         return _ShiftEmployeeOption(
           employeeId: employee.id,
-          label:
-              technician?.name.isNotEmpty == true ? technician!.name : employee.fullName,
+          label: technician?.name.isNotEmpty == true
+              ? technician!.name
+              : employee.fullName,
           role: employee.positionName ?? 'Teknisyen',
         );
       }).toList()
@@ -189,7 +192,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setDialogState) => Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Container(
               padding: const EdgeInsets.all(20),
               constraints: const BoxConstraints(maxWidth: 560),
@@ -204,7 +208,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A)),
+                          color: AdminTechColors.textPrimary),
                     ),
                     const SizedBox(height: 14),
                     _DialogField(
@@ -246,7 +250,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                     FutureBuilder<List<Experts>>(
                       future: _technicianService.listExpertise(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
                             child: LinearProgressIndicator(minHeight: 2),
@@ -254,12 +259,14 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                         }
                         if (snapshot.hasError) {
                           return const Text('Uzmanlıklar yüklenemedi',
-                              style: TextStyle(color: Color(0xFF94A3B8)));
+                              style: TextStyle(
+                                  color: AdminTechColors.textTertiary));
                         }
                         final experts = snapshot.data ?? [];
                         if (experts.isEmpty) {
                           return const Text('Uzmanlık bulunamadı',
-                              style: TextStyle(color: Color(0xFF94A3B8)));
+                              style: TextStyle(
+                                  color: AdminTechColors.textTertiary));
                         }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +276,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -280,7 +287,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                 for (final e in experts)
                                   FilterChip(
                                     label: Text(e.name),
-                                    selected: selectedExpertiseIds.contains(e.id),
+                                    selected:
+                                        selectedExpertiseIds.contains(e.id),
                                     onSelected: (val) {
                                       setDialogState(() {
                                         if (val) {
@@ -315,8 +323,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                             showDialog(
                               context: context,
                               barrierDismissible: false,
-                              builder: (_) =>
-                                  const Center(child: CircularProgressIndicator()),
+                              builder: (_) => const Center(
+                                  child: CircularProgressIndicator()),
                             );
                             try {
                               await _technicianService.createTechnician(
@@ -328,25 +336,29 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                                 phoneNumber: phoneController.text.trim().isEmpty
                                     ? null
                                     : phoneController.text.trim(),
-                                temporaryPassword: tempPasswordController.text.trim(),
+                                temporaryPassword:
+                                    tempPasswordController.text.trim(),
                                 expertiseIds: selectedExpertiseIds.toList(),
                               );
 
                               if (!context.mounted) return;
 
-                              Navigator.of(context).pop(); // loading dialog kapatır
+                              Navigator.of(context)
+                                  .pop(); // loading dialog kapatır
 
                               _refresh();
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Teknisyen oluşturma başlatıldı'),
+                                  content:
+                                      Text('Teknisyen oluşturma başlatıldı'),
                                 ),
                               );
                             } catch (_) {
                               if (!context.mounted) return;
 
-                              Navigator.of(context).pop(); // loading dialog kapatır
+                              Navigator.of(context)
+                                  .pop(); // loading dialog kapatır
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -356,7 +368,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
+                            backgroundColor: AdminTechColors.statusBlue,
                             foregroundColor: Colors.white,
                           ),
                           child: const Text('Kaydet'),
@@ -381,7 +393,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Container(
             padding: const EdgeInsets.all(20),
             constraints: const BoxConstraints(maxWidth: 420),
@@ -396,7 +409,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A)),
+                        color: AdminTechColors.textPrimary),
                   ),
                   const SizedBox(height: 14),
                   _DialogField(
@@ -425,8 +438,8 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (_) =>
-                                const Center(child: CircularProgressIndicator()),
+                            builder: (_) => const Center(
+                                child: CircularProgressIndicator()),
                           );
                           try {
                             await _technicianService.createExpertise(name);
@@ -439,12 +452,13 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                             if (!mounted) return;
                             navigator.pop();
                             messenger.showSnackBar(
-                              const SnackBar(content: Text('Uzmanlık eklenemedi')),
+                              const SnackBar(
+                                  content: Text('Uzmanlık eklenemedi')),
                             );
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3B82F6),
+                          backgroundColor: AdminTechColors.statusBlue,
                           foregroundColor: Colors.white,
                         ),
                         child: const Text('Kaydet'),
@@ -464,6 +478,7 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return AdminWebShell(
+      dark: true,
       active: AdminNavKey.team,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,14 +497,14 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 6),
                     Text(
                       'Ekibinizi yönetin',
                       style: TextStyle(
-                        color: Color(0xFF64748B),
+                        color: AdminTechColors.textSecondary,
                       ),
                     ),
                   ],
@@ -498,13 +513,13 @@ class _AdminWebTeamPageState extends State<AdminWebTeamPage> {
               Row(
                 children: [
                   if (_activeTab == _TeamPageTab.people) ...[
-                    _SecondaryActionButton(
+                    AdminTechSecondaryButton(
                       label: 'Uzmanlık Alanı',
                       icon: Icons.add_circle_outline,
                       onPressed: () => _showAddExpertiseDialog(context),
                     ),
                     const SizedBox(width: 10),
-                    _PrimaryActionButton(
+                    AdminTechPrimaryButton(
                       label: 'Personel Ekle',
                       icon: Icons.add,
                       onPressed: () => _showAddPersonnelDialog(context),
@@ -648,15 +663,17 @@ class _ShiftManagementOverview extends StatelessWidget {
         return FutureBuilder<List<ShiftAssignmentModel>>(
           future: assignmentsFuture,
           builder: (context, assignmentSnapshot) {
-            final templates = templateSnapshot.data ?? const <ShiftTemplateModel>[];
-            final assignments = assignmentSnapshot.data ?? const <ShiftAssignmentModel>[];
+            final templates =
+                templateSnapshot.data ?? const <ShiftTemplateModel>[];
+            final assignments =
+                assignmentSnapshot.data ?? const <ShiftAssignmentModel>[];
             return Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AdminTechColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: AdminTechColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -672,32 +689,33 @@ class _ShiftManagementOverview extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A),
+                                color: AdminTechColors.textPrimary,
                               ),
                             ),
                             SizedBox(height: 6),
                             Text(
                               'Şablon oluşturun, personel için tekil vardiya/mesai atayın ve bugünkü durumu takip edin.',
-                              style: TextStyle(color: Color(0xFF64748B)),
+                              style: TextStyle(
+                                  color: AdminTechColors.textSecondary),
                             ),
                           ],
                         ),
                       ),
                       Row(
                         children: [
-                          _SecondaryActionButton(
+                          AdminTechSecondaryButton(
                             label: 'Tekil Planla',
                             icon: Icons.event_repeat_outlined,
                             onPressed: onSinglePlan,
                           ),
                           const SizedBox(width: 10),
-                          _SecondaryActionButton(
+                          AdminTechSecondaryButton(
                             label: 'Toplu Planla',
                             icon: Icons.calendar_view_week_outlined,
                             onPressed: onBulkPlan,
                           ),
                           const SizedBox(width: 10),
-                          _PrimaryActionButton(
+                          AdminTechPrimaryButton(
                             label: 'Şablon Oluştur',
                             icon: Icons.schedule_outlined,
                             onPressed: onCreateTemplate,
@@ -713,15 +731,18 @@ class _ShiftManagementOverview extends StatelessWidget {
                     children: [
                       _ShiftMetricCard(
                         title: 'Aktif Şablonlar',
-                        value: templates.where((x) => x.isActive).length.toString(),
+                        value: templates
+                            .where((x) => x.isActive)
+                            .length
+                            .toString(),
                         icon: Icons.copy_all_outlined,
-                        color: const Color(0xFF3B82F6),
+                        color: AdminTechColors.statusBlue,
                       ),
                       _ShiftMetricCard(
                         title: 'Bugün Planlanan',
                         value: assignments.length.toString(),
                         icon: Icons.event_available_outlined,
-                        color: const Color(0xFF16A34A),
+                        color: AdminTechColors.statusGreen,
                       ),
                     ],
                   ),
@@ -752,11 +773,16 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Ekip Yönetimi', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Ekip Yönetimi',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -811,10 +837,10 @@ class _SegmentTab extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFEFF6FF) : Colors.white,
+          color: active ? AdminTechColors.surfaceAlt : AdminTechColors.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: active ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+            color: active ? AdminTechColors.statusBlue : AdminTechColors.border,
           ),
         ),
         child: Row(
@@ -824,7 +850,7 @@ class _SegmentTab extends StatelessWidget {
               width: 6,
               height: 6,
               decoration: BoxDecoration(
-                color: active ? const Color(0xFF3B82F6) : Colors.transparent,
+                color: active ? AdminTechColors.statusBlue : Colors.transparent,
                 shape: BoxShape.circle,
               ),
             ),
@@ -832,7 +858,9 @@ class _SegmentTab extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: active ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                color: active
+                    ? AdminTechColors.primary
+                    : AdminTechColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -844,7 +872,8 @@ class _SegmentTab extends StatelessWidget {
 }
 
 class _MetricRow extends StatelessWidget {
-  const _MetricRow({required this.width, required this.total, required this.activeCount});
+  const _MetricRow(
+      {required this.width, required this.total, required this.activeCount});
 
   final double width;
   final int total;
@@ -875,22 +904,22 @@ class _MetricRow extends StatelessWidget {
             title: 'Toplam Personel',
             value: total.toString(),
             icon: Icons.group_outlined,
-            color: const Color(0xFF3B82F6)),
+            color: AdminTechColors.statusBlue),
         _MetricCard(
             title: 'Aktif Personel',
             value: activeCount.toString(),
             icon: Icons.person_outline,
-            color: const Color(0xFF22C55E)),
+            color: AdminTechColors.green),
         _MetricCard(
             title: 'Teknisyenler',
             value: total.toString(),
             icon: Icons.build_outlined,
-            color: const Color(0xFF2563EB)),
+            color: AdminTechColors.primary),
         _MetricCard(
             title: 'Müsait',
             value: (total - activeCount).toString(),
             icon: Icons.check_circle_outline,
-            color: const Color(0xFF22C55E)),
+            color: AdminTechColors.green),
       ],
     );
   }
@@ -914,9 +943,9 @@ class _MetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -931,18 +960,26 @@ class _MetricCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                const SizedBox(height: 4),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A))),
-              ],
+            // Izgara karsi yuksekligi sabit oldugu icin metin kucultulerek
+            // sigdirilir; tasma olusmaz.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 12, color: AdminTechColors.textSecondary)),
+                  const SizedBox(height: 4),
+                  Text(value,
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AdminTechColors.textPrimary)),
+                ],
+              ),
             ),
           ),
         ],
@@ -963,15 +1000,17 @@ class _FilterRow extends StatelessWidget {
             height: 44,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AdminTechColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: const Row(
               children: [
-                Icon(Icons.search, size: 18, color: Color(0xFF94A3B8)),
+                Icon(Icons.search,
+                    size: 18, color: AdminTechColors.textTertiary),
                 SizedBox(width: 8),
-                Text('Ara', style: TextStyle(color: Color(0xFF94A3B8))),
+                Text('Ara',
+                    style: TextStyle(color: AdminTechColors.textTertiary)),
               ],
             ),
           ),
@@ -996,17 +1035,19 @@ class _DropdownPill extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
           Text(label,
-              style:
-                  const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600)),
+              style: const TextStyle(
+                  color: AdminTechColors.textSecondary,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(width: 8),
-          const Icon(Icons.expand_more, size: 18, color: Color(0xFF94A3B8)),
+          const Icon(Icons.expand_more,
+              size: 18, color: AdminTechColors.textTertiary),
         ],
       ),
     );
@@ -1048,7 +1089,7 @@ class _PeopleTableCard extends StatelessWidget {
               padding: EdgeInsets.all(24),
               child: Text(
                 'Personel bulunamadı',
-                style: TextStyle(color: Color(0xFF94A3B8)),
+                style: TextStyle(color: AdminTechColors.textTertiary),
               ),
             ),
           );
@@ -1084,7 +1125,7 @@ class _PeopleTableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -1095,7 +1136,7 @@ class _PeopleTableHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -1131,7 +1172,7 @@ class _PeopleTableRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
         ),
         child: Row(
           children: [
@@ -1140,12 +1181,12 @@ class _PeopleTableRow extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: const Color(0xFFE2E8F0),
+                    backgroundColor: AdminTechColors.border,
                     child: fullImageUrl == null
                         ? const Icon(
                             Icons.person_outline_rounded,
                             size: 22,
-                            color: Color(0xFF64748B),
+                            color: AdminTechColors.textSecondary,
                           )
                         : ClipOval(
                             child: Image.network(
@@ -1156,7 +1197,7 @@ class _PeopleTableRow extends StatelessWidget {
                               errorBuilder: (_, __, ___) => const Icon(
                                 Icons.person_outline_rounded,
                                 size: 22,
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                               ),
                             ),
                           ),
@@ -1185,8 +1226,8 @@ class _PeopleTableRow extends StatelessWidget {
               child: _StatusBadge(
                 label: technician.isActive == true ? 'Aktif' : 'Pasif',
                 color: technician.isActive == true
-                    ? const Color(0xFF16A34A)
-                    : const Color(0xFF64748B),
+                    ? AdminTechColors.statusGreen
+                    : AdminTechColors.textSecondary,
               ),
             ),
           ],
@@ -1227,10 +1268,14 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                 return FutureBuilder<List<ShiftAssignmentModel>>(
                   future: assignmentsFuture,
                   builder: (context, assignmentSnapshot) {
-                    if (technicianSnapshot.connectionState == ConnectionState.waiting ||
-                        employeeSnapshot.connectionState == ConnectionState.waiting ||
-                        templateSnapshot.connectionState == ConnectionState.waiting ||
-                        assignmentSnapshot.connectionState == ConnectionState.waiting) {
+                    if (technicianSnapshot.connectionState ==
+                            ConnectionState.waiting ||
+                        employeeSnapshot.connectionState ==
+                            ConnectionState.waiting ||
+                        templateSnapshot.connectionState ==
+                            ConnectionState.waiting ||
+                        assignmentSnapshot.connectionState ==
+                            ConnectionState.waiting) {
                       return const _TableCard(
                         child: Padding(
                           padding: EdgeInsets.all(24),
@@ -1248,7 +1293,8 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                       for (final employee in employees) employee.id: employee,
                     };
                     final technicianByUserId = {
-                      for (final technician in technicians) technician.userId: technician,
+                      for (final technician in technicians)
+                        technician.userId: technician,
                     };
                     final templateById = {
                       for (final template in templates) template.id: template,
@@ -1260,7 +1306,8 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                           padding: EdgeInsets.all(24),
                           child: Text(
                             'Planlanmış vardiya bulunamadı',
-                            style: TextStyle(color: Color(0xFF94A3B8)),
+                            style:
+                                TextStyle(color: AdminTechColors.textTertiary),
                           ),
                         ),
                       );
@@ -1274,11 +1321,14 @@ class _PlannedShiftsTableCard extends StatelessWidget {
                             _PlannedShiftRow(
                               assignment: assignment,
                               employee: employeeById[assignment.employeeId],
-                              technician: employeeById[assignment.employeeId] == null
-                                  ? null
-                                  : technicianByUserId[
-                                      employeeById[assignment.employeeId]!.userId],
-                              template: templateById[assignment.shiftTemplateId],
+                              technician:
+                                  employeeById[assignment.employeeId] == null
+                                      ? null
+                                      : technicianByUserId[
+                                          employeeById[assignment.employeeId]!
+                                              .userId],
+                              template:
+                                  templateById[assignment.shiftTemplateId],
                               templates: templates,
                               technicianService: technicianService,
                               onRefresh: onRefresh,
@@ -1315,7 +1365,7 @@ class _PlannedShiftsHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -1326,7 +1376,7 @@ class _PlannedShiftsHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -1358,7 +1408,8 @@ class _PlannedShiftRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final personName = employee?.fullName ?? technician?.name ?? 'Personel bulunamadı';
+    final personName =
+        employee?.fullName ?? technician?.name ?? 'Personel bulunamadı';
     final roleName = employee?.positionName ?? 'Teknisyen';
     final isCheckedIn = _isCheckedInStatus(assignment.status);
     final statusColor = _resolveShiftStatusColor(assignment.status);
@@ -1366,7 +1417,7 @@ class _PlannedShiftRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
       ),
       child: Row(
         children: [
@@ -1385,8 +1436,11 @@ class _PlannedShiftRow extends StatelessWidget {
             ),
           ),
           Expanded(
-              child: Text(_formatDateTime(assignment.plannedStartTimeUtc.toLocal()))),
-          Expanded(child: Text(_formatDateTime(assignment.plannedEndTimeUtc.toLocal()))),
+              child: Text(
+                  _formatDateTime(assignment.plannedStartTimeUtc.toLocal()))),
+          Expanded(
+              child: Text(
+                  _formatDateTime(assignment.plannedEndTimeUtc.toLocal()))),
           Expanded(
             child: Row(
               children: [
@@ -1563,11 +1617,11 @@ bool _isCheckedInStatus(String rawStatus) {
 
 Color _resolveShiftStatusColor(String rawStatus) {
   final value = rawStatus.toLowerCase();
-  if (value.contains('planned')) return const Color(0xFF2563EB);
-  if (value.contains('checkedin')) return const Color(0xFF16A34A);
-  if (value.contains('completed')) return const Color(0xFF64748B);
-  if (value.contains('cancel')) return const Color(0xFFDC2626);
-  return const Color(0xFF64748B);
+  if (value.contains('planned')) return AdminTechColors.primary;
+  if (value.contains('checkedin')) return AdminTechColors.statusGreen;
+  if (value.contains('completed')) return AdminTechColors.textSecondary;
+  if (value.contains('cancel')) return AdminTechColors.red;
+  return AdminTechColors.textSecondary;
 }
 
 class _TableCard extends StatelessWidget {
@@ -1579,9 +1633,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -1614,9 +1668,9 @@ class _ShiftMetricCard extends StatelessWidget {
       width: 220,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -1633,13 +1687,15 @@ class _ShiftMetricCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 12, color: AdminTechColors.textSecondary)),
               const SizedBox(height: 4),
               Text(value,
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A))),
+                      color: AdminTechColors.textPrimary)),
             ],
           ),
         ],
@@ -1660,9 +1716,9 @@ class _ShiftTemplatePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1671,7 +1727,7 @@ class _ShiftTemplatePill extends StatelessWidget {
             template.name,
             style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -1679,7 +1735,7 @@ class _ShiftTemplatePill extends StatelessWidget {
             '$start - $end',
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
             ),
           ),
         ],
@@ -1694,10 +1750,12 @@ class _CreateShiftTemplateDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_CreateShiftTemplateDialog> createState() => _CreateShiftTemplateDialogState();
+  State<_CreateShiftTemplateDialog> createState() =>
+      _CreateShiftTemplateDialogState();
 }
 
-class _CreateShiftTemplateDialogState extends State<_CreateShiftTemplateDialog> {
+class _CreateShiftTemplateDialogState
+    extends State<_CreateShiftTemplateDialog> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
@@ -1800,7 +1858,9 @@ class _CreateShiftTemplateDialogState extends State<_CreateShiftTemplateDialog> 
             ),
             const SizedBox(height: 16),
             _DialogField(
-                label: 'Template Adı', controller: _nameController, requiredField: true),
+                label: 'Template Adı',
+                controller: _nameController,
+                requiredField: true),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -1835,16 +1895,18 @@ class _CreateShiftTemplateDialogState extends State<_CreateShiftTemplateDialog> 
                   child: SwitchListTile(
                     value: _isActive,
                     title: const Text('Aktif'),
-                    onChanged:
-                        _isSubmitting ? null : (v) => setState(() => _isActive = v),
+                    onChanged: _isSubmitting
+                        ? null
+                        : (v) => setState(() => _isActive = v),
                   ),
                 ),
                 Expanded(
                   child: SwitchListTile(
                     value: _isNightShift,
                     title: const Text('Gece Vardiyası'),
-                    onChanged:
-                        _isSubmitting ? null : (v) => setState(() => _isNightShift = v),
+                    onChanged: _isSubmitting
+                        ? null
+                        : (v) => setState(() => _isNightShift = v),
                   ),
                 ),
               ],
@@ -1854,8 +1916,9 @@ class _CreateShiftTemplateDialogState extends State<_CreateShiftTemplateDialog> 
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => Navigator.of(context).pop(false),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => Navigator.of(context).pop(false),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -2013,8 +2076,8 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content:
-                  Text('Bu personel için seçilen tarihte zaten bir vardiya atanmış.')),
+              content: Text(
+                  'Bu personel için seçilen tarihte zaten bir vardiya atanmış.')),
         );
         return;
       }
@@ -2085,14 +2148,14 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: AdminTechColors.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Text(
                   'Şablon saat aralığı: ${_formatDuration(_selectedTemplate!.startTime)} - ${_formatDuration(_selectedTemplate!.endTime)}',
                   style: const TextStyle(
-                    color: Color(0xFF475569),
+                    color: AdminTechColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -2103,13 +2166,16 @@ class _AssignShiftDialogState extends State<_AssignShiftDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => Navigator.of(context).pop(false),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => Navigator.of(context).pop(false),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _isSubmitting || _selectedTemplate == null ? null : _submit,
+                  onPressed: _isSubmitting || _selectedTemplate == null
+                      ? null
+                      : _submit,
                   child: _isSubmitting
                       ? const SizedBox(
                           width: 16,
@@ -2138,7 +2204,8 @@ class _BulkShiftPlanningDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_BulkShiftPlanningDialog> createState() => _BulkShiftPlanningDialogState();
+  State<_BulkShiftPlanningDialog> createState() =>
+      _BulkShiftPlanningDialogState();
 }
 
 class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
@@ -2269,7 +2336,8 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      final response = await widget.technicianService.createBlockShiftAssignments(
+      final response =
+          await widget.technicianService.createBlockShiftAssignments(
         CreateBlockShiftAssignmentPayload(
           branchId: '00000000-0000-0000-0000-000000000000',
           employeeId: _selectedEmployeeId!,
@@ -2312,7 +2380,7 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
             const SizedBox(height: 6),
             const Text(
               'Tek personel için tarih aralığında çoklu vardiya/mesai oluşturur.',
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: AdminTechColors.textSecondary),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -2376,7 +2444,7 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF64748B),
+                color: AdminTechColors.textSecondary,
               ),
             ),
             const SizedBox(height: 8),
@@ -2387,44 +2455,51 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
                 _WeekdayChip(
                   label: 'Pzt',
                   selected: _selectedWeekdays[DateTime.monday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.monday] =
-                      !(_selectedWeekdays[DateTime.monday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.monday] =
+                          !(_selectedWeekdays[DateTime.monday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Sal',
                   selected: _selectedWeekdays[DateTime.tuesday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.tuesday] =
-                      !(_selectedWeekdays[DateTime.tuesday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.tuesday] =
+                          !(_selectedWeekdays[DateTime.tuesday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Çar',
                   selected: _selectedWeekdays[DateTime.wednesday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.wednesday] =
-                      !(_selectedWeekdays[DateTime.wednesday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.wednesday] =
+                          !(_selectedWeekdays[DateTime.wednesday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Per',
                   selected: _selectedWeekdays[DateTime.thursday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.thursday] =
-                      !(_selectedWeekdays[DateTime.thursday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.thursday] =
+                          !(_selectedWeekdays[DateTime.thursday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Cum',
                   selected: _selectedWeekdays[DateTime.friday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.friday] =
-                      !(_selectedWeekdays[DateTime.friday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.friday] =
+                          !(_selectedWeekdays[DateTime.friday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Cmt',
                   selected: _selectedWeekdays[DateTime.saturday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.saturday] =
-                      !(_selectedWeekdays[DateTime.saturday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.saturday] =
+                          !(_selectedWeekdays[DateTime.saturday] ?? false)),
                 ),
                 _WeekdayChip(
                   label: 'Paz',
                   selected: _selectedWeekdays[DateTime.sunday] ?? false,
-                  onTap: () => setState(() => _selectedWeekdays[DateTime.sunday] =
-                      !(_selectedWeekdays[DateTime.sunday] ?? false)),
+                  onTap: () => setState(() =>
+                      _selectedWeekdays[DateTime.sunday] =
+                          !(_selectedWeekdays[DateTime.sunday] ?? false)),
                 ),
               ],
             ),
@@ -2433,15 +2508,15 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: AdminTechColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: AdminTechColors.border),
               ),
               child: Text(
                 'Oluşacak vardiya sayısı: $previewCount',
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF475569),
+                  color: AdminTechColors.textSecondary,
                 ),
               ),
             ),
@@ -2450,7 +2525,8 @@ class _BulkShiftPlanningDialogState extends State<_BulkShiftPlanningDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -2488,10 +2564,12 @@ class _SingleShiftPlanningDialog extends StatefulWidget {
   final TechnicianService technicianService;
 
   @override
-  State<_SingleShiftPlanningDialog> createState() => _SingleShiftPlanningDialogState();
+  State<_SingleShiftPlanningDialog> createState() =>
+      _SingleShiftPlanningDialogState();
 }
 
-class _SingleShiftPlanningDialogState extends State<_SingleShiftPlanningDialog> {
+class _SingleShiftPlanningDialogState
+    extends State<_SingleShiftPlanningDialog> {
   String? _selectedEmployeeId;
   ShiftTemplateModel? _selectedTemplate;
   late DateTime _plannedStart;
@@ -2590,7 +2668,8 @@ class _SingleShiftPlanningDialogState extends State<_SingleShiftPlanningDialog> 
 
     if (!_plannedEnd.isAfter(_plannedStart)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bitiş tarihi/saatı başlangıçtan sonra olmalı.')),
+        const SnackBar(
+            content: Text('Bitiş tarihi/saatı başlangıçtan sonra olmalı.')),
       );
       return;
     }
@@ -2657,7 +2736,7 @@ class _SingleShiftPlanningDialogState extends State<_SingleShiftPlanningDialog> 
             const SizedBox(height: 6),
             const Text(
               'Tek personel için tek bir vardiya/mesai oluşturur.',
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: AdminTechColors.textSecondary),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -2717,7 +2796,8 @@ class _SingleShiftPlanningDialogState extends State<_SingleShiftPlanningDialog> 
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.of(context).pop(),
                   child: const Text('İptal'),
                 ),
                 const SizedBox(width: 8),
@@ -2762,16 +2842,20 @@ class _WeekdayChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFEFF6FF) : Colors.white,
+          color:
+              selected ? AdminTechColors.surfaceAlt : AdminTechColors.surface,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: selected ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+            color:
+                selected ? AdminTechColors.statusBlue : AdminTechColors.border,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+            color: selected
+                ? AdminTechColors.primary
+                : AdminTechColors.textSecondary,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -2800,14 +2884,14 @@ class _TimeField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
+          fillColor: AdminTechColors.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            borderSide: const BorderSide(color: AdminTechColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            borderSide: const BorderSide(color: AdminTechColors.border),
           ),
         ),
         child: Text(value),
@@ -2865,62 +2949,15 @@ class _DialogField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
-      ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton(
-      {required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF3B82F6),
-        foregroundColor: Colors.white,
-      ),
-    );
-  }
-}
-
-class _SecondaryActionButton extends StatelessWidget {
-  const _SecondaryActionButton(
-      {required this.label, required this.icon, required this.onPressed});
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
       ),
     );
   }

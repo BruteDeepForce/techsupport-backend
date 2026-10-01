@@ -141,14 +141,10 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
       showBack: true,
       tabBar: const LinearTabBar(
         items: [
+          LinearTabItem(icon: Icons.assignment_outlined, label: 'İş Emirleri'),
           LinearTabItem(
-              icon: Icons.assignment_outlined, label: 'İş Emirleri'),
-          LinearTabItem(
-              icon: Icons.inventory_2_outlined,
-              label: 'Stok',
-              active: true),
-          LinearTabItem(
-              icon: Icons.devices_other_outlined, label: 'Cihazlar'),
+              icon: Icons.inventory_2_outlined, label: 'Stok', active: true),
+          LinearTabItem(icon: Icons.devices_other_outlined, label: 'Cihazlar'),
           LinearTabItem(icon: Icons.logout_rounded, label: 'Çıkış'),
         ],
       ),
@@ -177,8 +173,7 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
                           ),
                         )
                         .toList(),
-                    onChanged: (v) =>
-                        setState(() => _selectedOperationId = v),
+                    onChanged: (v) => setState(() => _selectedOperationId = v),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppColors.bgElevated,
@@ -281,7 +276,8 @@ class _TechnicianStockPageState extends State<TechnicianStockPage> {
                         onRemove: () => _decItem(item),
                       ),
                       if (item != items.last)
-                        const Divider(height: 16, color: AppColors.borderSubtle),
+                        const Divider(
+                            height: 16, color: AppColors.borderSubtle),
                     ],
                   ],
                 ),

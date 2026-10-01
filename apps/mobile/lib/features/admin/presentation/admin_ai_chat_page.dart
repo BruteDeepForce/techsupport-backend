@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/design/admin_design.dart';
 import '../../../core/design/app_design.dart';
 
 class AdminAIChatPage extends StatefulWidget {
@@ -138,7 +139,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.md),
           child: Material(
-            color: AppColors.bgSurface,
+            color: AdminTechColors.surface,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -149,7 +150,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
                     width: 32,
                     height: 3,
                     decoration: BoxDecoration(
-                      color: AppColors.borderSubtle,
+                      color: AdminTechColors.borderSubtle,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -157,7 +158,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
                   Text(
                     'Hızlı Sorular',
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AdminTechColors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -189,98 +190,102 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
   Widget build(BuildContext context) {
     const deepBlue = Color(0xFF1E3A8A);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: deepBlue,
-        body: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 16,
-                left: 20,
-                right: 20,
-                bottom: 24,
-              ),
-              color: deepBlue,
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.arrow_back_rounded,
-                          color: Colors.white, size: 20),
-                    ),
+    return AdminDarkScope(
+      child: Builder(builder: (context) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: Scaffold(
+            backgroundColor: AdminTechColors.canvas,
+            body: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 16,
+                    left: 20,
+                    right: 20,
+                    bottom: 24,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'AI Asistan',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Soru & Komut',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: AppColors.bg,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(32)),
-                  child: Column(
+                  color: deepBlue,
+                  child: Row(
                     children: [
-                      Expanded(
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.only(
-                              top: 16, bottom: 100, left: 8, right: 8),
-                          itemCount: _messages.length + (_isTyping ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == _messages.length && _isTyping) {
-                              return const _TypingIndicator();
-                            }
-                            final msg = _messages[index];
-                            return _buildMessage(msg);
-                          },
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.arrow_back_rounded,
+                              color: Colors.white, size: 20),
                         ),
                       ),
-                      _buildInputArea(),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'AI Asistan',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Soru & Komut',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AdminTechColors.canvas,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(32)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(32)),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.only(
+                                  top: 16, bottom: 100, left: 8, right: 8),
+                              itemCount: _messages.length + (_isTyping ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == _messages.length && _isTyping) {
+                                  return const _TypingIndicator();
+                                }
+                                final msg = _messages[index];
+                                return _buildMessage(msg);
+                              },
+                            ),
+                          ),
+                          _buildInputArea(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 
@@ -289,8 +294,8 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.78),
+        constraints:
+            BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
         child: isUser ? _buildUserMessage(message) : _buildAIMessage(message),
       ),
@@ -302,7 +307,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.accent, AppColors.accentMuted],
+          colors: [AdminTechColors.primary, AdminTechColors.cyan],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -337,21 +342,21 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(AppRadius.md),
           topRight: Radius.circular(AppRadius.md),
           bottomRight: Radius.circular(AppRadius.md),
           bottomLeft: const Radius.circular(4),
         ),
-        border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+        border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
       ),
       child: isMarkdown
           ? _buildMarkdownMessage(message.text)
           : Text(
               message.text,
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AdminTechColors.textSecondary,
                 fontSize: 14,
                 height: 1.4,
               ),
@@ -373,7 +378,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
             child: Text(
               line.replaceAll('**', ''),
               style: const TextStyle(
-                color: AppColors.textPrimary,
+                color: AdminTechColors.textPrimary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -389,19 +394,19 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
                 Text(
                   '•',
                   style: TextStyle(
-                    color: AppColors.accent,
+                    color: AdminTechColors.primary,
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
-              child: Text(
-                  line.substring(1).trim(),
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
+                  child: Text(
+                    line.substring(1).trim(),
+                    style: const TextStyle(
+                      color: AdminTechColors.textSecondary,
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -418,7 +423,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
             child: Text(
               cleaned,
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: AdminTechColors.textSecondary,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -444,21 +449,21 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
         top: 8,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: AdminTechColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.borderSubtle, width: 0.5),
+          top: BorderSide(color: AdminTechColors.borderSubtle, width: 0.5),
         ),
       ),
       child: Row(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: AppColors.accentBg,
+              color: AdminTechColors.cyanBg,
               shape: BoxShape.circle,
             ),
             child: IconButton(
               icon: const Icon(Icons.auto_awesome,
-                  color: AppColors.accent, size: 22),
+                  color: AdminTechColors.primary, size: 22),
               onPressed: _showQuickActions,
             ),
           ),
@@ -470,33 +475,34 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.bgElevated.withValues(alpha: 0.7),
+                    color: AdminTechColors.surfaceRaised.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(
-                        color: AppColors.borderSubtle, width: 0.5),
+                        color: AdminTechColors.borderSubtle, width: 0.5),
                   ),
-            child: TextField(
-              controller: _textController,
-              onChanged: (_) => setState(() {}),
-              onSubmitted: (v) {
-                if (hasText && !_isTyping) _sendMessage(v);
-              },
-              maxLines: 4,
-              minLines: 1,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
-              ),
-              decoration: InputDecoration(
-                hintText: 'AI Asistan\'a sorun...',
-                hintStyle: TextStyle(
-                  color: AppColors.textTertiary.withValues(alpha: 0.6),
-                  fontSize: 14,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
-              ),
+                  child: TextField(
+                    controller: _textController,
+                    onChanged: (_) => setState(() {}),
+                    onSubmitted: (v) {
+                      if (hasText && !_isTyping) _sendMessage(v);
+                    },
+                    maxLines: 4,
+                    minLines: 1,
+                    style: const TextStyle(
+                      color: AdminTechColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'AI Asistan\'a sorun...',
+                      hintStyle: TextStyle(
+                        color:
+                            AdminTechColors.textTertiary.withValues(alpha: 0.6),
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                    ),
                   ),
                 ),
               ),
@@ -510,14 +516,14 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
               shape: BoxShape.circle,
               gradient: hasText && !_isTyping
                   ? LinearGradient(
-                      colors: [AppColors.accent, AppColors.accentMuted],
+                      colors: [AdminTechColors.primary, AdminTechColors.cyan],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     )
                   : null,
               color: (hasText && !_isTyping)
                   ? null
-                  : AppColors.bgElevated.withValues(alpha: 0.5),
+                  : AdminTechColors.surfaceRaised.withValues(alpha: 0.5),
             ),
             child: IconButton(
               icon: _isTyping
@@ -526,18 +532,17 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: AppColors.accent,
+                        color: AdminTechColors.primary,
                       ),
                     )
                   : Icon(
                       Icons.send_rounded,
                       color: hasText && !_isTyping
                           ? Colors.white
-                          : AppColors.textTertiary,
+                          : AdminTechColors.textTertiary,
                       size: 20,
                     ),
-              onPressed:
-                  (hasText && !_isTyping) ? _handleSend : null,
+              onPressed: (hasText && !_isTyping) ? _handleSend : null,
             ),
           ),
         ],
@@ -574,25 +579,25 @@ class _TypingIndicator extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.bgSurface,
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(AppRadius.md),
             topRight: const Radius.circular(AppRadius.md),
             bottomRight: const Radius.circular(AppRadius.md),
             bottomLeft: const Radius.circular(4),
           ),
-          border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+          border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             for (var i = 0; i < 3; i++)
               Container(
-              margin: EdgeInsets.only(left: i == 0 ? 0 : 6),
+                margin: EdgeInsets.only(left: i == 0 ? 0 : 6),
                 width: 6,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: AppColors.textTertiary,
+                  color: AdminTechColors.textTertiary,
                   shape: BoxShape.circle,
                 ),
               ).animate(i),
@@ -634,16 +639,16 @@ class _QuickChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.bgElevated,
+          color: AdminTechColors.surfaceRaised,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+          border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
         ),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-            ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: AdminTechColors.textSecondary,
+            fontSize: 12,
+          ),
         ),
       ),
     );

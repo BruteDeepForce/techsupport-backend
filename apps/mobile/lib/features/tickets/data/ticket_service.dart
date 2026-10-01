@@ -30,8 +30,8 @@ class TicketService {
   }
 
   Future<Ticket> createTicket(TicketCreateRequest request) async {
-    final res = await _dio.post('/api/operations/tickets',
-        data: request.toJson());
+    final res =
+        await _dio.post('/api/operations/tickets', data: request.toJson());
     if (res.statusCode == 200) {
       return Ticket.fromJson(res.data as Map<String, dynamic>);
     }
@@ -51,8 +51,8 @@ class TicketService {
   }
 
   Future<Ticket> rejectTicket(String id, String reason) async {
-    final res = await _dio.post('/api/operations/tickets/$id/reject',
-        data: {'Reason': reason});
+    final res = await _dio
+        .post('/api/operations/tickets/$id/reject', data: {'Reason': reason});
     if (res.statusCode == 200) {
       return Ticket.fromJson(res.data as Map<String, dynamic>);
     }

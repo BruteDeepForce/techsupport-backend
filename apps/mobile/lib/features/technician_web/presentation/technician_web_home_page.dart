@@ -147,8 +147,8 @@ class _OpCard extends StatelessWidget {
               _Pill(label: priority, color: priorityColor),
               const Spacer(),
               Text(createdAt,
-                  style: const TextStyle(
-                      fontSize: 12, color: Color(0xFF94A3B8))),
+                  style:
+                      const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
             ],
           ),
           const SizedBox(height: 8),

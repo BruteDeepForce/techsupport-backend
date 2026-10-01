@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 class AdminWebHROptionsSection extends StatefulWidget {
   const AdminWebHROptionsSection({super.key});
 
   @override
-  State<AdminWebHROptionsSection> createState() => _AdminWebHROptionsSectionState();
+  State<AdminWebHROptionsSection> createState() =>
+      _AdminWebHROptionsSectionState();
 }
 
 class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
@@ -89,7 +91,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
     }
   }
 
-  Future<void> _showLeaveDeductionDialog({HRLeaveDeductionResponse? initialValue}) async {
+  Future<void> _showLeaveDeductionDialog(
+      {HRLeaveDeductionResponse? initialValue}) async {
     final changed = await showDialog<bool>(
       context: context,
       builder: (context) => _LeaveDeductionDialog(
@@ -109,7 +112,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
     final shouldDelete = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: const Text('Kesinti Ayarını Sil'),
             content: Text(
               '${_leaveTypeLabel(item.deductionType)} kesinti ayarı silinsin mi?',
@@ -160,21 +164,22 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                colors: [AdminTechColors.surface, AdminTechColors.surfaceAlt],
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: AdminTechColors.border),
             ),
             child: const Text(
               'İnsan kaynakları modülüne ait genel ayarlar ve konfigürasyonlar bu bölümde yer alır. '
               'Pozisyon yönetimi, izin ayarları ve disiplin ayarları gibi temel yapılandırmalar buradan yapılabilir.',
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: AdminTechColors.textSecondary),
             ),
           ),
           const SizedBox(height: 18),
           _SettingsSectionShell(
             title: 'Pozisyon Ayarları',
-            subtitle: 'Pozisyonları görüntüleyin, yönetin ve yeni pozisyon ekleyin.',
+            subtitle:
+                'Pozisyonları görüntüleyin, yönetin ve yeni pozisyon ekleyin.',
             action: OutlinedButton.icon(
               onPressed: _showCreatePositionDialog,
               icon: const Icon(Icons.add, size: 16),
@@ -203,7 +208,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                     padding: EdgeInsets.all(24),
                     child: Text(
                       'Henüz pozisyon kaydı bulunmuyor.',
-                      style: TextStyle(color: Color(0xFF64748B)),
+                      style: TextStyle(color: AdminTechColors.textSecondary),
                     ),
                   );
                 }
@@ -211,7 +216,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                 return Column(
                   children: [
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       child: Row(
                         children: [
                           Expanded(
@@ -219,7 +225,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                             child: Text(
                               'Pozisyon',
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -229,7 +235,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                             child: Text(
                               'Açıklama',
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -238,7 +244,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                             child: Text(
                               'Durum',
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -247,7 +253,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                             child: Text(
                               'Oluşturulma Tarihi',
                               style: TextStyle(
-                                color: Color(0xFF64748B),
+                                color: AdminTechColors.textSecondary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -255,11 +261,11 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                         ],
                       ),
                     ),
-                    const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                    const Divider(height: 1, color: AdminTechColors.border),
                     for (var i = 0; i < positions.length; i++) ...[
                       _PositionRow(position: positions[i]),
                       if (i != positions.length - 1)
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                        const Divider(height: 1, color: AdminTechColors.border),
                     ],
                   ],
                 );
@@ -289,17 +295,19 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                 if (snapshot.hasError) {
                   return Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Text('İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
+                    child: Text(
+                        'İzin kesinti ayarları yüklenemedi: ${snapshot.error}'),
                   );
                 }
 
-                final items = snapshot.data ?? const <HRLeaveDeductionResponse>[];
+                final items =
+                    snapshot.data ?? const <HRLeaveDeductionResponse>[];
                 if (items.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(24),
                     child: Text(
                       'Henüz izin kesinti ayarı bulunmuyor.',
-                      style: TextStyle(color: Color(0xFF64748B)),
+                      style: TextStyle(color: AdminTechColors.textSecondary),
                     ),
                   );
                 }
@@ -311,7 +319,8 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                       for (var i = 0; i < items.length; i++) ...[
                         _LeaveDeductionRow(
                           item: items[i],
-                          onEdit: () => _showLeaveDeductionDialog(initialValue: items[i]),
+                          onEdit: () =>
+                              _showLeaveDeductionDialog(initialValue: items[i]),
                           onDelete: () => _deleteLeaveDeduction(items[i]),
                         ),
                         if (i != items.length - 1) const SizedBox(height: 12),
@@ -332,8 +341,9 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
               runSpacing: 8,
               children: [
                 OutlinedButton.icon(
-                  onPressed:
-                      _isAdvanceSettingsLoading ? null : _loadCurrentAdvanceSettings,
+                  onPressed: _isAdvanceSettingsLoading
+                      ? null
+                      : _loadCurrentAdvanceSettings,
                   icon: const Icon(Icons.refresh_rounded, size: 16),
                   label: const Text('Yenile'),
                 ),
@@ -344,7 +354,9 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
                     size: 16,
                   ),
                   label: Text(
-                    _advanceSettings == null ? 'Ayar Oluştur' : 'Ayarı Güncelle',
+                    _advanceSettings == null
+                        ? 'Ayar Oluştur'
+                        : 'Ayarı Güncelle',
                   ),
                 ),
               ],
@@ -365,7 +377,7 @@ class _AdminWebHROptionsSectionState extends State<AdminWebHROptionsSection> {
               padding: EdgeInsets.all(24),
               child: Text(
                 'Disiplin ayarları bölümü bir sonraki adımda genişletilecek.',
-                style: TextStyle(color: Color(0xFF64748B)),
+                style: TextStyle(color: AdminTechColors.textSecondary),
               ),
             ),
           ),
@@ -446,10 +458,13 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                    colors: [
+                      AdminTechColors.surface,
+                      AdminTechColors.surfaceAlt
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Row(
                   children: [
@@ -462,21 +477,23 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
+                              color: AdminTechColors.textPrimary,
                             ),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'İnsan kaynakları modülünde kullanılacak yeni pozisyon kaydını oluşturun.',
-                            style: TextStyle(color: Color(0xFF64748B)),
+                            style:
+                                TextStyle(color: AdminTechColors.textSecondary),
                           ),
                         ],
                       ),
                     ),
                     _MiniPill(
                       label: _isActive ? 'Aktif' : 'Pasif',
-                      color:
-                          _isActive ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+                      color: _isActive
+                          ? AdminTechColors.statusGreen
+                          : AdminTechColors.textSecondary,
                     ),
                   ],
                 ),
@@ -485,9 +502,9 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: AdminTechColors.surface,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Column(
                   children: [
@@ -503,31 +520,32 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AdminTechColors.surface,
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(color: AdminTechColors.border),
                             ),
                             child: Row(
                               children: [
                                 const Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Durum',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Color(0xFF64748B),
+                                          color: AdminTechColors.textSecondary,
                                         ),
                                       ),
                                       SizedBox(height: 4),
                                       Text(
                                         'Pozisyon kaydı aktif olarak açılsın',
                                         style: TextStyle(
-                                          color: Color(0xFF0F172A),
+                                          color: AdminTechColors.textPrimary,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -538,7 +556,8 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                                   value: _isActive,
                                   onChanged: _isSubmitting
                                       ? null
-                                      : (value) => setState(() => _isActive = value),
+                                      : (value) =>
+                                          setState(() => _isActive = value),
                                 ),
                               ],
                             ),
@@ -563,8 +582,9 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed:
-                        _isSubmitting ? null : () => Navigator.of(context).pop(false),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(false),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),
@@ -598,11 +618,11 @@ class _CreatePositionDialogState extends State<_CreatePositionDialog> {
       fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderSide: const BorderSide(color: AdminTechColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderSide: const BorderSide(color: AdminTechColors.border),
       ),
     );
   }
@@ -701,8 +721,9 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(_isEdit ? 'Kesinti ayarı güncellendi.' : 'Kesinti ayarı oluşturuldu.'),
+          content: Text(_isEdit
+              ? 'Kesinti ayarı güncellendi.'
+              : 'Kesinti ayarı oluşturuldu.'),
         ),
       );
       Navigator.of(context).pop(true);
@@ -739,10 +760,13 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                    colors: [
+                      AdminTechColors.surface,
+                      AdminTechColors.surfaceAlt
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Row(
                   children: [
@@ -757,20 +781,21 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
+                              color: AdminTechColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
                           const Text(
                             'İzin tipine bağlı kesinti tutarını ve hesaplama periyodunu yönetin.',
-                            style: TextStyle(color: Color(0xFF64748B)),
+                            style:
+                                TextStyle(color: AdminTechColors.textSecondary),
                           ),
                         ],
                       ),
                     ),
                     _MiniPill(
                       label: _leaveTypeLabel(_selectedLeaveType),
-                      color: const Color(0xFF2563EB),
+                      color: AdminTechColors.primary,
                     ),
                   ],
                 ),
@@ -779,9 +804,9 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: AdminTechColors.surface,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Column(
                   children: [
@@ -860,14 +885,14 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: AdminTechColors.surfaceAlt,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFBFDBFE)),
+                        border: Border.all(color: AdminTechColors.surfaceAlt),
                       ),
                       child: const Text(
                         'Saatlik kesinti hesaplama akışı henüz aktif değildir. Bu form şimdilik günlük kesinti ayarı için kullanılmalıdır.',
                         style: TextStyle(
-                          color: Color(0xFF1D4ED8),
+                          color: AdminTechColors.cyan,
                           fontSize: 13,
                         ),
                       ),
@@ -880,8 +905,9 @@ class _LeaveDeductionDialogState extends State<_LeaveDeductionDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed:
-                        _isSubmitting ? null : () => Navigator.of(context).pop(false),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(false),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),
@@ -926,9 +952,9 @@ class _SettingsSectionShell extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         children: [
@@ -945,13 +971,14 @@ class _SettingsSectionShell extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         subtitle,
-                        style: const TextStyle(color: Color(0xFF64748B)),
+                        style: const TextStyle(
+                            color: AdminTechColors.textSecondary),
                       ),
                     ],
                   ),
@@ -960,7 +987,7 @@ class _SettingsSectionShell extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1, color: AdminTechColors.border),
           child,
         ],
       ),
@@ -980,13 +1007,13 @@ class _AdvanceSettingsCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: AdminTechColors.border),
         ),
         child: const Text(
           'Advance settings henüz yüklenmedi. İlk kurulum için ayar oluşturun veya mevcut ayarı id ile yükleyin.',
-          style: TextStyle(color: Color(0xFF64748B)),
+          style: TextStyle(color: AdminTechColors.textSecondary),
         ),
       );
     }
@@ -995,9 +1022,9 @@ class _AdvanceSettingsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1005,10 +1032,12 @@ class _AdvanceSettingsCard extends StatelessWidget {
           Row(
             children: [
               _MiniPill(
-                label: setting!.allowFutureAdvances ? 'Taksitli Açık' : 'Taksitli Kapalı',
+                label: setting!.allowFutureAdvances
+                    ? 'Taksitli Açık'
+                    : 'Taksitli Kapalı',
                 color: setting!.allowFutureAdvances
-                    ? const Color(0xFF16A34A)
-                    : const Color(0xFF64748B),
+                    ? AdminTechColors.statusGreen
+                    : AdminTechColors.textSecondary,
               ),
             ],
           ),
@@ -1019,7 +1048,8 @@ class _AdvanceSettingsCard extends StatelessWidget {
             children: [
               _SettingsMetricPill(
                 label: 'Kişi Başı Limit',
-                value: '${setting!.maxAdvanceAmountPerPerson.toStringAsFixed(2)} ₺',
+                value:
+                    '${setting!.maxAdvanceAmountPerPerson.toStringAsFixed(2)} ₺',
               ),
               _SettingsMetricPill(
                 label: 'Yıllık Avans Hakkı',
@@ -1058,7 +1088,8 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
   void initState() {
     super.initState();
     _maxAmountController = TextEditingController(
-      text: widget.initialValue?.maxAdvanceAmountPerPerson.toStringAsFixed(2) ?? '',
+      text: widget.initialValue?.maxAdvanceAmountPerPerson.toStringAsFixed(2) ??
+          '',
     );
     _maxCountController = TextEditingController(
       text: widget.initialValue?.maxAdvanceCountPerYear.toString() ?? '',
@@ -1115,7 +1146,9 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEdit ? 'Advance settings güncellendi.' : 'Advance settings oluşturuldu.',
+            _isEdit
+                ? 'Advance settings güncellendi.'
+                : 'Advance settings oluşturuldu.',
           ),
         ),
       );
@@ -1153,10 +1186,13 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                    colors: [
+                      AdminTechColors.surface,
+                      AdminTechColors.surfaceAlt
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Row(
                   children: [
@@ -1171,13 +1207,14 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
+                              color: AdminTechColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
                           const Text(
                             'Kişi başı maksimum avans limiti, yıllık avans hakkı ve taksitli avans iznini yönetin.',
-                            style: TextStyle(color: Color(0xFF64748B)),
+                            style:
+                                TextStyle(color: AdminTechColors.textSecondary),
                           ),
                         ],
                       ),
@@ -1187,8 +1224,8 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                           ? 'Taksitli Avans Açık'
                           : 'Taksitli Avans Kapalı',
                       color: _allowFutureAdvances
-                          ? const Color(0xFF16A34A)
-                          : const Color(0xFF64748B),
+                          ? AdminTechColors.statusGreen
+                          : AdminTechColors.textSecondary,
                     ),
                   ],
                 ),
@@ -1197,9 +1234,9 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: AdminTechColors.surface,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Column(
                   children: [
@@ -1232,11 +1269,12 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AdminTechColors.surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: AdminTechColors.border),
                       ),
                       child: Row(
                         children: [
@@ -1248,14 +1286,14 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                                   'Taksitli Avans',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                   ),
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   'Personel taksitli avans alabilsin mi?',
                                   style: TextStyle(
-                                    color: Color(0xFF0F172A),
+                                    color: AdminTechColors.textPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -1266,12 +1304,15 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                             value: _allowFutureAdvances,
                             onChanged: _isSubmitting
                                 ? null
-                                : (value) => setState(() => _allowFutureAdvances = value),
+                                : (value) => setState(
+                                    () => _allowFutureAdvances = value),
                           ),
                         ],
                       ),
                     ),
-                    if (widget.initialValue != null) ...[const SizedBox(height: 14)],
+                    if (widget.initialValue != null) ...[
+                      const SizedBox(height: 14)
+                    ],
                   ],
                 ),
               ),
@@ -1280,7 +1321,9 @@ class _AdvanceSettingsDialogState extends State<_AdvanceSettingsDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                    onPressed: _isSubmitting
+                        ? null
+                        : () => Navigator.of(context).pop(),
                     child: const Text('İptal'),
                   ),
                   const SizedBox(width: 8),
@@ -1321,9 +1364,9 @@ class _SettingsMetricPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1332,7 +1375,7 @@ class _SettingsMetricPill extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -1340,7 +1383,7 @@ class _SettingsMetricPill extends StatelessWidget {
             value,
             style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
         ],
@@ -1365,9 +1408,9 @@ class _LeaveDeductionRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Row(
         children: [
@@ -1377,13 +1420,16 @@ class _LeaveDeductionRow extends StatelessWidget {
             alignment: Alignment.center,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFE0EAFF), Color(0xFFF1F5F9)],
+                colors: [
+                  AdminTechColors.surfaceAlt,
+                  AdminTechColors.surfaceAlt
+                ],
               ),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.payments_outlined,
-              color: Color(0xFF2563EB),
+              color: AdminTechColors.primary,
               size: 22,
             ),
           ),
@@ -1401,7 +1447,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -1409,7 +1455,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                     const SizedBox(width: 10),
                     _MiniPill(
                       label: _periodLabel(item.deductionPeriod),
-                      color: const Color(0xFF2563EB),
+                      color: AdminTechColors.primary,
                     ),
                   ],
                 ),
@@ -1418,7 +1464,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                   item.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: const TextStyle(color: AdminTechColors.textSecondary),
                 ),
               ],
             ),
@@ -1432,7 +1478,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 const Text(
                   'Kesinti Tutarı',
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1441,7 +1487,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 Text(
                   _formatCurrency(item.deductionAmount),
                   style: const TextStyle(
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1457,7 +1503,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 const Text(
                   'Güncelleme',
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1465,7 +1511,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   _formatDate(item.updatedAtUtc),
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: const TextStyle(color: AdminTechColors.textSecondary),
                 ),
               ],
             ),
@@ -1478,7 +1524,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 onPressed: onEdit,
                 icon: const Icon(
                   Icons.edit_outlined,
-                  color: Color(0xFF334155),
+                  color: AdminTechColors.textPrimary,
                 ),
               ),
               IconButton(
@@ -1486,7 +1532,7 @@ class _LeaveDeductionRow extends StatelessWidget {
                 onPressed: onDelete,
                 icon: const Icon(
                   Icons.delete_outline,
-                  color: Color(0xFFDC2626),
+                  color: AdminTechColors.red,
                 ),
               ),
             ],
@@ -1504,8 +1550,9 @@ class _PositionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badgeColor =
-        position.isActive ? const Color(0xFF16A34A) : const Color(0xFF64748B);
+    final badgeColor = position.isActive
+        ? AdminTechColors.statusGreen
+        : AdminTechColors.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -1521,7 +1568,10 @@ class _PositionRow extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFFE0EAFF), Color(0xFFF1F5F9)],
+                      colors: [
+                        AdminTechColors.surfaceAlt,
+                        AdminTechColors.surfaceAlt
+                      ],
                     ),
                     shape: BoxShape.circle,
                   ),
@@ -1530,7 +1580,7 @@ class _PositionRow extends StatelessWidget {
                         ? position.name.substring(0, 1).toUpperCase()
                         : '?',
                     style: const TextStyle(
-                      color: Color(0xFF2563EB),
+                      color: AdminTechColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -1545,7 +1595,7 @@ class _PositionRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -1564,7 +1614,7 @@ class _PositionRow extends StatelessWidget {
                   : 'Açıklama girilmemiş.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Color(0xFF475569)),
+              style: const TextStyle(color: AdminTechColors.textSecondary),
             ),
           ),
           Expanded(
@@ -1579,7 +1629,7 @@ class _PositionRow extends StatelessWidget {
           Expanded(
             child: Text(
               _formatDate(position.createdAtUtc),
-              style: const TextStyle(color: Color(0xFF475569)),
+              style: const TextStyle(color: AdminTechColors.textSecondary),
             ),
           ),
         ],
@@ -1644,11 +1694,11 @@ class _DropdownField extends StatelessWidget {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
       child: DropdownButtonHideUnderline(
@@ -1671,11 +1721,11 @@ InputDecoration _inputDecoration(String label, String hint) {
     fillColor: Colors.white,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+      borderSide: const BorderSide(color: AdminTechColors.border),
     ),
   );
 }

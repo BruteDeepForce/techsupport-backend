@@ -38,7 +38,9 @@ class TechnicianService {
     final res = await _dio.get('/api/technicians');
     if (res.statusCode == 200) {
       final list = (res.data as List).cast<dynamic>();
-      return list.map((e) => Technician.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => Technician.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Failed to load technicians: ${res.statusCode}');
   }
@@ -103,7 +105,8 @@ class TechnicianService {
     throw Exception('Failed to create technician: ${res.statusCode}');
   }
 
-  Future<Map<String, dynamic>?> getProvisioningStatus(String correlationId) async {
+  Future<Map<String, dynamic>?> getProvisioningStatus(
+      String correlationId) async {
     final res = await _dio.get('/api/technicians/provisioning/$correlationId');
     if (res.statusCode == 200) {
       return (res.data as Map<String, dynamic>);
@@ -112,15 +115,16 @@ class TechnicianService {
   }
 
   Future<void> setActive(String id, bool isActive) async {
-    final res =
-        await _dio.patch('/api/technicians/$id/active', data: {'isActive': isActive});
+    final res = await _dio
+        .patch('/api/technicians/$id/active', data: {'isActive': isActive});
     if (res.statusCode != 204 && res.statusCode != 200) {
       throw Exception('Failed to set active: ${res.statusCode}');
     }
   }
 
   Future<void> createExpertise(String name) async {
-    final res = await _dio.post('/api/technicians/createExperts', data: {'Name': name});
+    final res =
+        await _dio.post('/api/technicians/createExperts', data: {'Name': name});
     if (res.statusCode != 200 && res.statusCode != 201) {
       throw Exception('Failed to create expertise: ${res.statusCode}');
     }
@@ -130,7 +134,9 @@ class TechnicianService {
     final res = await _dio.get('/api/technicians/experts');
     if (res.statusCode == 200) {
       final list = (res.data as List).cast<dynamic>();
-      return list.map((e) => Experts.fromJson(e as Map<String, dynamic>)).toList();
+      return list
+          .map((e) => Experts.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
     throw Exception('Failed to load expertise: ${res.statusCode}');
   }
@@ -163,7 +169,8 @@ class TechnicianService {
     }
 
     final formData = FormData.fromMap(formMap);
-    final res = await _dio.put('/api/technicians/update-profile', data: formData);
+    final res =
+        await _dio.put('/api/technicians/update-profile', data: formData);
     if (res.statusCode == 200) {
       return Technician.fromJson(res.data as Map<String, dynamic>);
     }
@@ -196,7 +203,9 @@ class TechnicianService {
       '/api/hr/shifts/templates',
       data: payload.toJson(),
     );
-    if (res.statusCode != null && res.statusCode! >= 200 && res.statusCode! < 300) {
+    if (res.statusCode != null &&
+        res.statusCode! >= 200 &&
+        res.statusCode! < 300) {
       return ShiftTemplateModel.fromJson(res.data as Map<String, dynamic>);
     }
     throw Exception('Failed to create shift template: ${res.statusCode}');
@@ -229,7 +238,9 @@ class TechnicianService {
         '/api/hr/shifts/assignments',
         data: payload.toJson(),
       );
-      if (res.statusCode != null && res.statusCode! >= 200 && res.statusCode! < 300) {
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
         return ShiftAssignmentModel.fromJson(res.data as Map<String, dynamic>);
       }
     } catch (e) {
@@ -247,13 +258,17 @@ class TechnicianService {
       '/api/hr/shifts/assignments/block-insert',
       data: payload.toJson(),
     );
-    if (res.statusCode != null && res.statusCode! >= 200 && res.statusCode! < 300) {
+    if (res.statusCode != null &&
+        res.statusCode! >= 200 &&
+        res.statusCode! < 300) {
       final list = (res.data as List).cast<dynamic>();
       return list
-          .map((e) => BlockShiftAssignmentResponse.fromJson(e as Map<String, dynamic>))
+          .map((e) =>
+              BlockShiftAssignmentResponse.fromJson(e as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to create block shift assignments: ${res.statusCode}');
+    throw Exception(
+        'Failed to create block shift assignments: ${res.statusCode}');
   }
 
   Future<List<ShiftAssignmentModel>> getMyShiftAssignments() async {
@@ -273,7 +288,9 @@ class TechnicianService {
         '/api/hr/attendance/check-in',
         data: payload.toJson(),
       );
-      if (res.statusCode != null && res.statusCode! >= 200 && res.statusCode! < 300) {
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
         return;
       }
     } catch (e) {
@@ -293,7 +310,9 @@ class TechnicianService {
         '/api/hr/attendance/check-out',
         data: payload.toJson(),
       );
-      if (res.statusCode != null && res.statusCode! >= 200 && res.statusCode! < 300) {
+      if (res.statusCode != null &&
+          res.statusCode! >= 200 &&
+          res.statusCode! < 300) {
         return;
       }
     } catch (e) {

@@ -92,6 +92,7 @@ class DeviceService {
     if (response.statusCode == 200) {
       return DeviceRecord.fromJson(response.data as Map<String, dynamic>);
     }
-    throw Exception('Failed to create inventory device: ${response.statusCode}');
+    throw Exception(
+        'Failed to create inventory device: ${response.statusCode}');
   }
 }

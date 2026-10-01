@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 class AdminWebHrLeaveSectionPage extends StatefulWidget {
   const AdminWebHrLeaveSectionPage({
@@ -11,10 +12,12 @@ class AdminWebHrLeaveSectionPage extends StatefulWidget {
   final VoidCallback onOpenLeaves;
 
   @override
-  State<AdminWebHrLeaveSectionPage> createState() => _AdminWebHrLeaveSectionPageState();
+  State<AdminWebHrLeaveSectionPage> createState() =>
+      _AdminWebHrLeaveSectionPageState();
 }
 
-class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage> {
+class _AdminWebHrLeaveSectionPageState
+    extends State<AdminWebHrLeaveSectionPage> {
   final HRService _hrService = HRService();
   late final Future<HRLargeLeaveResponseList> _leavesFuture;
   late final Future<HREmployeeLargeDetailResponse> _employeesFuture;
@@ -55,7 +58,8 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
             Text('Durum: ${_statusLabel(leave.status)}'),
             if (leave.reason.isNotEmpty) ...[
               const SizedBox(height: 12),
-              const Text('Açıklama:', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('Açıklama:',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text(leave.reason),
             ],
@@ -72,7 +76,8 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
           ElevatedButton(
             onPressed: () async {
               try {
-                final message = await _hrService.decideLeave(leave.id, 'Approved');
+                final message =
+                    await _hrService.decideLeave(leave.id, 'Approved');
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(message)),
@@ -115,13 +120,14 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          final message =
-                              await _hrService.decideLeave(leave.id, 'Rejected');
+                          final message = await _hrService.decideLeave(
+                              leave.id, 'Rejected');
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(message)),
                           );
-                          Navigator.of(context).pop(); // Nedeni girme dialogunu kapat
+                          Navigator.of(context)
+                              .pop(); // Nedeni girme dialogunu kapat
                           Navigator.of(context).pop(); // Detay dialogunu kapat
                           setState(() {
                             _leavesFuture = _hrService.getLeaves();
@@ -201,7 +207,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                           title: 'Bekleyen Talepler',
                           value: pendingCount.toString(),
                           subtitle: 'Aksiyon bekleyen izin kayıtları',
-                          accent: const Color(0xFFD97706),
+                          accent: AdminTechColors.amber,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -210,7 +216,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                           title: 'Onaylananlar',
                           value: approvedCount.toString(),
                           subtitle: 'Tamamlanan izin kararları',
-                          accent: const Color(0xFF16A34A),
+                          accent: AdminTechColors.statusGreen,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -219,7 +225,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                           title: 'Reddedilenler',
                           value: rejectedCount.toString(),
                           subtitle: 'Uygun bulunmayan talepler',
-                          accent: const Color(0xFFDC2626),
+                          accent: AdminTechColors.red,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -228,7 +234,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                           title: 'Önizleme',
                           value: activePreviewCount.toString(),
                           subtitle: 'Bu listede bekleyen kayıt sayısı',
-                          accent: const Color(0xFF2563EB),
+                          accent: AdminTechColors.primary,
                         ),
                       ),
                     ],
@@ -236,9 +242,9 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                   const SizedBox(height: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: AdminTechColors.surface,
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AdminTechColors.border),
                     ),
                     child: Column(
                       children: [
@@ -249,21 +255,23 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                               const Expanded(
                                 child: _SectionTitle(
                                   title: 'Son izin talep ve durumları',
-                                  subtitle: 'Hızlı inceleme için son kayıt önizlemeleri',
+                                  subtitle:
+                                      'Hızlı inceleme için son kayıt önizlemeleri',
                                 ),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: AdminTechColors.surface,
                                   borderRadius: BorderRadius.circular(999),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  border:
+                                      Border.all(color: AdminTechColors.border),
                                 ),
                                 child: Text(
                                   '${previewLeaves.length} kayıt',
                                   style: const TextStyle(
-                                    color: Color(0xFF475569),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -271,9 +279,10 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                             ],
                           ),
                         ),
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                        const Divider(height: 1, color: AdminTechColors.border),
                         const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 14),
                           child: Row(
                             children: [
                               Expanded(
@@ -281,7 +290,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                                 child: Text(
                                   'Personel',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -291,7 +300,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                                 child: Text(
                                   'İzin Türü',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -301,7 +310,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                                 child: Text(
                                   'Tarih Aralığı',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -310,7 +319,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                                 child: Text(
                                   'Durum',
                                   style: TextStyle(
-                                    color: Color(0xFF64748B),
+                                    color: AdminTechColors.textSecondary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -319,7 +328,7 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                             ],
                           ),
                         ),
-                        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                        const Divider(height: 1, color: AdminTechColors.border),
                         //! previewRow buradan gönderiyoruz.
                         for (var i = 0; i < previewLeaves.length; i++) ...[
                           _LeavePreviewRow(
@@ -328,7 +337,8 @@ class _AdminWebHrLeaveSectionPageState extends State<AdminWebHrLeaveSectionPage>
                                 _showLeaveDetailDialog(previewLeaves[i]);
                               }),
                           if (i != previewLeaves.length - 1)
-                            const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                            const Divider(
+                                height: 1, color: AdminTechColors.border),
                         ],
                       ],
                     ),
@@ -399,9 +409,9 @@ class _LeaveStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,7 +425,7 @@ class _LeaveStatCard extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -425,7 +435,7 @@ class _LeaveStatCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -435,7 +445,7 @@ class _LeaveStatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
             ),
           ),
         ],
@@ -472,14 +482,17 @@ class _LeavePreviewRow extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFFE0EAFF), Color(0xFFF1F5F9)],
+                        colors: [
+                          AdminTechColors.surfaceAlt,
+                          AdminTechColors.surfaceAlt
+                        ],
                       ),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       avatar,
                       style: const TextStyle(
-                        color: Color(0xFF2563EB),
+                        color: AdminTechColors.primary,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -494,7 +507,7 @@ class _LeavePreviewRow extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF0F172A),
+                            color: AdminTechColors.textPrimary,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -503,7 +516,8 @@ class _LeavePreviewRow extends StatelessWidget {
                           leave.reason,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Color(0xFF64748B)),
+                          style: const TextStyle(
+                              color: AdminTechColors.textSecondary),
                         ),
                       ],
                     ),
@@ -516,7 +530,7 @@ class _LeavePreviewRow extends StatelessWidget {
               child: Text(
                 _AdminWebHrLeaveSectionPageState._typeLabel(leave.type),
                 style: const TextStyle(
-                  color: Color(0xFF334155),
+                  color: AdminTechColors.textPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -525,14 +539,15 @@ class _LeavePreviewRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 '${_AdminWebHrLeaveSectionPageState._formatDate(leave.startDate)} - ${_AdminWebHrLeaveSectionPageState._formatDate(leave.endDate)}',
-                style: const TextStyle(color: Color(0xFF475569)),
+                style: const TextStyle(color: AdminTechColors.textSecondary),
               ),
             ),
             Expanded(
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -551,7 +566,7 @@ class _LeavePreviewRow extends StatelessWidget {
               width: 44,
               child: Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
+                color: AdminTechColors.textTertiary,
               ),
             ),
           ],
@@ -563,13 +578,13 @@ class _LeavePreviewRow extends StatelessWidget {
   Color _statusColor(String value) {
     switch (value.toLowerCase()) {
       case 'pending':
-        return const Color(0xFFD97706);
+        return AdminTechColors.amber;
       case 'approved':
-        return const Color(0xFF15803D);
+        return AdminTechColors.green;
       case 'rejected':
-        return const Color(0xFFDC2626);
+        return AdminTechColors.red;
       default:
-        return const Color(0xFF475569);
+        return AdminTechColors.textSecondary;
     }
   }
 }
@@ -663,7 +678,8 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
               );
             }
 
-            final employees = snapshot.data?.employees ?? const <EmployeeResponse>[];
+            final employees =
+                snapshot.data?.employees ?? const <EmployeeResponse>[];
 
             return SingleChildScrollView(
               child: Column(
@@ -676,10 +692,13 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                        colors: [
+                          AdminTechColors.surface,
+                          AdminTechColors.surfaceAlt
+                        ],
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AdminTechColors.border),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -694,13 +713,14 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0F172A),
+                                  color: AdminTechColors.textPrimary,
                                 ),
                               ),
                               SizedBox(height: 8),
                               Text(
                                 'Personel için yeni izin talebi oluşturun. Formu eksiksiz doldurup kaydedin.',
-                                style: TextStyle(color: Color(0xFF64748B)),
+                                style: TextStyle(
+                                    color: AdminTechColors.textSecondary),
                               ),
                             ],
                           ),
@@ -713,8 +733,10 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                               Expanded(
                                 child: _DialogInfoCard(
                                   title: 'Seçilen Personel',
-                                  value: _selectedEmployeeId == null ? 'Yok' : 'Hazır',
-                                  accent: const Color(0xFF2563EB),
+                                  value: _selectedEmployeeId == null
+                                      ? 'Yok'
+                                      : 'Hazır',
+                                  accent: AdminTechColors.primary,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -724,7 +746,7 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                                   value: _startDate != null && _endDate != null
                                       ? 'Tanımlı'
                                       : 'Bekleniyor',
-                                  accent: const Color(0xFF0F766E),
+                                  accent: AdminTechColors.teal,
                                 ),
                               ),
                             ],
@@ -737,9 +759,9 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: AdminTechColors.surface,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: AdminTechColors.border),
                     ),
                     child: Column(
                       children: [
@@ -771,18 +793,23 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                                 decoration: _inputDecoration('İzin Türü'),
                                 items: const [
                                   DropdownMenuItem(
-                                      value: 'Vacation', child: Text('Yıllık İzin')),
+                                      value: 'Vacation',
+                                      child: Text('Yıllık İzin')),
                                   DropdownMenuItem(
-                                      value: 'SickLeave', child: Text('Hastalık')),
+                                      value: 'SickLeave',
+                                      child: Text('Hastalık')),
                                   DropdownMenuItem(
-                                      value: 'PersonalLeave', child: Text('Mazeret')),
+                                      value: 'PersonalLeave',
+                                      child: Text('Mazeret')),
                                   DropdownMenuItem(
-                                      value: 'MaternityLeave', child: Text('Doğum İzni')),
+                                      value: 'MaternityLeave',
+                                      child: Text('Doğum İzni')),
                                   DropdownMenuItem(
                                       value: 'PaternityLeave',
                                       child: Text('Babalık İzni')),
                                   DropdownMenuItem(
-                                      value: 'UnpaidLeave', child: Text('Ücretsiz İzin')),
+                                      value: 'UnpaidLeave',
+                                      child: Text('Ücretsiz İzin')),
                                 ],
                                 onChanged: (value) {
                                   setState(() => _leaveType = value);
@@ -797,7 +824,8 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                             Expanded(
                               child: TextFormField(
                                 readOnly: true,
-                                decoration: _inputDecoration('Başlangıç Tarihi'),
+                                decoration:
+                                    _inputDecoration('Başlangıç Tarihi'),
                                 onTap: () async {
                                   final pickedDate = await showDatePicker(
                                     context: context,
@@ -857,8 +885,9 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed:
-                            _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('İptal'),
                       ),
                       const SizedBox(width: 8),
@@ -890,14 +919,14 @@ class _CreateLeaveDialogState extends State<_CreateLeaveDialog> {
     return InputDecoration(
       labelText: label,
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
+      fillColor: AdminTechColors.surface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderSide: const BorderSide(color: AdminTechColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        borderSide: const BorderSide(color: AdminTechColors.border),
       ),
     );
   }
@@ -919,9 +948,9 @@ class _DialogInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -936,7 +965,7 @@ class _DialogInfoCard extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -945,7 +974,7 @@ class _DialogInfoCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
         ],
@@ -968,9 +997,11 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+        Text(subtitle,
+            style: const TextStyle(color: AdminTechColors.textSecondary)),
       ],
     );
   }
@@ -986,9 +1017,9 @@ class _CardShell extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: child,
     );

@@ -53,8 +53,8 @@ class _CustomerWebTicketPageState extends State<CustomerWebTicketPage> {
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Talep oluşturulamadı')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Talep oluşturulamadı')));
       }
     }
   }
@@ -80,7 +80,8 @@ class _CustomerWebTicketPageState extends State<CustomerWebTicketPage> {
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF0F172A))),
                   const SizedBox(height: 6),
-                  const Text('Yeni iş talebi oluşturun ve taleplerinizi takip edin',
+                  const Text(
+                      'Yeni iş talebi oluşturun ve taleplerinizi takip edin',
                       style: TextStyle(color: Color(0xFF64748B))),
                   const SizedBox(height: 20),
                   _Card(
@@ -89,8 +90,7 @@ class _CustomerWebTicketPageState extends State<CustomerWebTicketPage> {
                       children: [
                         const Text('Yeni Talep',
                             style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600)),
+                                fontSize: 16, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 12),
                         TextField(
                           controller: _titleController,
@@ -114,9 +114,12 @@ class _CustomerWebTicketPageState extends State<CustomerWebTicketPage> {
                         DropdownButtonFormField<String>(
                           value: _priority,
                           items: const [
-                            DropdownMenuItem(value: 'Normal', child: Text('Normal')),
-                            DropdownMenuItem(value: 'High', child: Text('Yüksek')),
-                            DropdownMenuItem(value: 'Urgent', child: Text('Acil')),
+                            DropdownMenuItem(
+                                value: 'Normal', child: Text('Normal')),
+                            DropdownMenuItem(
+                                value: 'High', child: Text('Yüksek')),
+                            DropdownMenuItem(
+                                value: 'Urgent', child: Text('Acil')),
                           ],
                           onChanged: (val) {
                             if (val != null) setState(() => _priority = val);

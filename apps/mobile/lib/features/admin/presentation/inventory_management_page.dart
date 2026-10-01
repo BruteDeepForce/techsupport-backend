@@ -9,43 +9,115 @@ import 'admin_devices_page.dart';
 import 'admin_team_page.dart';
 import 'admin_work_orders_page.dart';
 import 'admin_accounting_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class InventoryManagementPage extends StatefulWidget {
   const InventoryManagementPage({super.key});
 
   @override
-  State<InventoryManagementPage> createState() => _InventoryManagementPageState();
+  State<InventoryManagementPage> createState() =>
+      _InventoryManagementPageState();
 }
 
 class _InventoryManagementPageState extends State<InventoryManagementPage> {
   String? _selectedCategory;
 
   final List<Map<String, dynamic>> _allInventory = [
-    {'id': 'GPU-001', 'title': 'NVIDIA RTX 4090', 'category': 'Ekran Kartı', 'stock': 3, 'statusColor': AppColors.statusYellow, 'isCritical': true},
-    {'id': 'GPU-002', 'title': 'AMD Radeon RX 7900 XTX', 'category': 'Ekran Kartı', 'stock': 5, 'statusColor': AppColors.statusGreen},
-    {'id': 'GPU-003', 'title': 'RTX 3060 Ti', 'category': 'Ekran Kartı', 'stock': 12, 'statusColor': AppColors.statusGreen},
-    
-    {'id': 'LAP-001', 'title': 'MacBook Pro 16" M3 Max', 'category': 'Laptop', 'stock': 12, 'statusColor': AppColors.statusGreen},
-    {'id': 'LAP-002', 'title': 'Dell XPS 15 9530', 'category': 'Laptop', 'stock': 0, 'statusColor': AppColors.statusGray, 'label': 'Sipariş Edildi', 'labelColor': AppColors.statusBlue},
-    {'id': 'LAP-003', 'title': 'ASUS ROG Zephyrus G14', 'category': 'Laptop', 'stock': 4, 'statusColor': AppColors.statusYellow},
-
-    {'id': 'CPU-001', 'title': 'Intel Core i9-14900K', 'category': 'İşlemci', 'stock': 8, 'statusColor': AppColors.statusGreen},
-    {'id': 'CPU-002', 'title': 'AMD Ryzen 9 7950X3D', 'category': 'İşlemci', 'stock': 2, 'statusColor': AppColors.statusRed, 'isCritical': true},
-    {'id': 'CPU-003', 'title': 'Intel Core i5-13600K', 'category': 'İşlemci', 'stock': 15, 'statusColor': AppColors.statusGreen},
-
-    {'id': 'MISC-001', 'title': 'Logitech MX Master 3S', 'category': 'Diğer', 'stock': 25, 'statusColor': AppColors.statusGreen},
-    {'id': 'MISC-002', 'title': 'Keychron Q1 Wireless', 'category': 'Diğer', 'stock': 6, 'statusColor': AppColors.statusGreen},
+    {
+      'id': 'GPU-001',
+      'title': 'NVIDIA RTX 4090',
+      'category': 'Ekran Kartı',
+      'stock': 3,
+      'statusColor': AdminTechColors.statusAmber,
+      'isCritical': true
+    },
+    {
+      'id': 'GPU-002',
+      'title': 'AMD Radeon RX 7900 XTX',
+      'category': 'Ekran Kartı',
+      'stock': 5,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'GPU-003',
+      'title': 'RTX 3060 Ti',
+      'category': 'Ekran Kartı',
+      'stock': 12,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'LAP-001',
+      'title': 'MacBook Pro 16" M3 Max',
+      'category': 'Laptop',
+      'stock': 12,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'LAP-002',
+      'title': 'Dell XPS 15 9530',
+      'category': 'Laptop',
+      'stock': 0,
+      'statusColor': AdminTechColors.statusGray,
+      'label': 'Sipariş Edildi',
+      'labelColor': AdminTechColors.statusBlue
+    },
+    {
+      'id': 'LAP-003',
+      'title': 'ASUS ROG Zephyrus G14',
+      'category': 'Laptop',
+      'stock': 4,
+      'statusColor': AdminTechColors.statusAmber
+    },
+    {
+      'id': 'CPU-001',
+      'title': 'Intel Core i9-14900K',
+      'category': 'İşlemci',
+      'stock': 8,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'CPU-002',
+      'title': 'AMD Ryzen 9 7950X3D',
+      'category': 'İşlemci',
+      'stock': 2,
+      'statusColor': AdminTechColors.statusRed,
+      'isCritical': true
+    },
+    {
+      'id': 'CPU-003',
+      'title': 'Intel Core i5-13600K',
+      'category': 'İşlemci',
+      'stock': 15,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'MISC-001',
+      'title': 'Logitech MX Master 3S',
+      'category': 'Diğer',
+      'stock': 25,
+      'statusColor': AdminTechColors.statusGreen
+    },
+    {
+      'id': 'MISC-002',
+      'title': 'Keychron Q1 Wireless',
+      'category': 'Diğer',
+      'stock': 6,
+      'statusColor': AdminTechColors.statusGreen
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filteredItems = _selectedCategory == null 
-      ? [] 
-      : _allInventory.where((item) => item['category'] == _selectedCategory).toList();
+    List<Map<String, dynamic>> filteredItems = _selectedCategory == null
+        ? []
+        : _allInventory
+            .where((item) => item['category'] == _selectedCategory)
+            .toList();
 
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: _selectedCategory ?? 'Stok Yönetimi',
-      subtitle: _selectedCategory == null ? 'Admin Portal' : 'Kategori Filtresi',
+      subtitle:
+          _selectedCategory == null ? 'Admin Portal' : 'Kategori Filtresi',
       trailing: Container(
         width: 32,
         height: 32,
@@ -54,61 +126,63 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 18),
+        child: const Icon(Icons.notifications_none_rounded,
+            color: Colors.white, size: 18),
       ),
       tabBar: LinearTabBar(
         items: [
           LinearTabItem(
-              icon: Icons.grid_view_rounded,
-              label: 'Bakış',
-              onTap: () => Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AdminHomePage(),
-                  transitionDuration: Duration.zero,
-                ),
+            icon: Icons.grid_view_rounded,
+            label: 'Bakış',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminHomePage(),
+                transitionDuration: Duration.zero,
               ),
+            ),
           ),
           LinearTabItem(
-              icon: Icons.confirmation_number_outlined,
-              label: 'Talep',
-              count: 6,
-              onTap: () => Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AdminTicketsPage(),
-                  transitionDuration: Duration.zero,
-                ),
+            icon: Icons.confirmation_number_outlined,
+            label: 'Talep',
+            count: 6,
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminTicketsPage(),
+                transitionDuration: Duration.zero,
               ),
+            ),
           ),
           LinearTabItem(
-              icon: Icons.assignment_rounded, 
-              label: 'İş Emri',
-              onTap: () => Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AdminWorkOrdersPage(),
-                  transitionDuration: Duration.zero,
-                ),
+            icon: Icons.assignment_rounded,
+            label: 'İş Emri',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminWorkOrdersPage(),
+                transitionDuration: Duration.zero,
               ),
+            ),
           ),
           LinearTabItem(
-              icon: Icons.devices_other_outlined, 
-              label: 'Cihaz',
-              onTap: () => Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AdminDevicesPage(),
-                  transitionDuration: Duration.zero,
-                ),
+            icon: Icons.devices_other_outlined,
+            label: 'Cihaz',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminDevicesPage(),
+                transitionDuration: Duration.zero,
               ),
+            ),
           ),
-          const LinearTabItem(icon: Icons.inventory_2_rounded, label: 'Stok', active: true),
+          const LinearTabItem(
+              icon: Icons.inventory_2_rounded, label: 'Stok', active: true),
           LinearTabItem(
-              icon: Icons.group_outlined, 
-              label: 'Ekip',
-              onTap: () => Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => const AdminTeamPage(),
-                  transitionDuration: Duration.zero,
-                ),
+            icon: Icons.group_outlined,
+            label: 'Ekip',
+            onTap: () => Navigator.of(context).pushReplacement(
+              PageRouteBuilder(
+                pageBuilder: (_, __, ___) => const AdminTeamPage(),
+                transitionDuration: Duration.zero,
               ),
+            ),
           ),
           LinearTabItem(
             icon: Icons.account_balance_wallet_outlined,
@@ -130,20 +204,35 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
             child: IntrinsicHeight(
               child: Row(
                 children: [
-                  _MetricCell(value: '${_allInventory.length}', label: 'Toplam Parça', color: AppColors.textPrimary),
-                  const VerticalDivider(width: 1, thickness: 1, color: AppColors.borderSubtle),
-                  _MetricCell(value: '3', label: 'Kritik Seviye', color: AppColors.statusRed),
-                  const VerticalDivider(width: 1, thickness: 1, color: AppColors.borderSubtle),
-                  _MetricCell(value: '12', label: 'Yolda', color: AppColors.statusBlue),
+                  _MetricCell(
+                      value: '${_allInventory.length}',
+                      label: 'Toplam Parça',
+                      color: AdminTechColors.textPrimary),
+                  const VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: AdminTechColors.borderSubtle),
+                  _MetricCell(
+                      value: '3',
+                      label: 'Kritik Seviye',
+                      color: AdminTechColors.statusRed),
+                  const VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: AdminTechColors.borderSubtle),
+                  _MetricCell(
+                      value: '12',
+                      label: 'Yolda',
+                      color: AdminTechColors.statusBlue),
                 ],
               ),
             ),
           ),
-          
+
           const SizedBox(height: 24),
           const LinearSection(title: 'KATEGORİLER'),
           const SizedBox(height: 12),
-          
+
           // ── Category Grid ─────────────────────────────────────────
           GridView.count(
             crossAxisCount: 2,
@@ -156,25 +245,32 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
               _CategoryCard(
                 title: 'Ekran Kartı',
                 icon: Icons.memory_rounded,
-                count: _allInventory.where((e) => e['category'] == 'Ekran Kartı').length,
+                count: _allInventory
+                    .where((e) => e['category'] == 'Ekran Kartı')
+                    .length,
                 onTap: () => setState(() => _selectedCategory = 'Ekran Kartı'),
               ),
               _CategoryCard(
                 title: 'Laptop',
                 icon: Icons.laptop_mac_rounded,
-                count: _allInventory.where((e) => e['category'] == 'Laptop').length,
+                count: _allInventory
+                    .where((e) => e['category'] == 'Laptop')
+                    .length,
                 onTap: () => setState(() => _selectedCategory = 'Laptop'),
               ),
               _CategoryCard(
                 title: 'İşlemci',
                 icon: Icons.developer_board_rounded,
-                count: _allInventory.where((e) => e['category'] == 'İşlemci').length,
+                count: _allInventory
+                    .where((e) => e['category'] == 'İşlemci')
+                    .length,
                 onTap: () => setState(() => _selectedCategory = 'İşlemci'),
               ),
               _CategoryCard(
                 title: 'Diğer',
                 icon: Icons.more_horiz_rounded,
-                count: _allInventory.where((e) => e['category'] == 'Diğer').length,
+                count:
+                    _allInventory.where((e) => e['category'] == 'Diğer').length,
                 onTap: () => setState(() => _selectedCategory = 'Diğer'),
               ),
             ],
@@ -188,26 +284,35 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
                 onTap: () => setState(() => _selectedCategory = null),
                 child: Row(
                   children: const [
-                    Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: AppColors.accent),
+                    Icon(Icons.arrow_back_ios_new_rounded,
+                        size: 14, color: AdminTechColors.primary),
                     SizedBox(width: 6),
-                    Text('Tüm Kategoriler', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('Tüm Kategoriler',
+                        style: TextStyle(
+                            color: AdminTechColors.primary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13)),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.1),
+                  color: AdminTechColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: Text(
                   '${filteredItems.length} Ürün',
-                  style: const TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      color: AdminTechColors.primary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 20),
 
           // ── Search & Actions ──────────────────────────────────────
@@ -218,13 +323,14 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
                   height: 40,
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.bgSurface,
+                    color: AdminTechColors.surface,
                     borderRadius: BorderRadius.circular(AppRadius.sm),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AdminTechColors.border),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 18),
+                      const Icon(Icons.search_rounded,
+                          color: AdminTechColors.textTertiary, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
@@ -235,8 +341,9 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
                             focusedBorder: InputBorder.none,
                             contentPadding: EdgeInsets.only(bottom: 12),
                           ),
-                          style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
-                          cursorColor: AppColors.accent,
+                          style: const TextStyle(
+                              fontSize: 13, color: AdminTechColors.textPrimary),
+                          cursorColor: AdminTechColors.primary,
                         ),
                       ),
                     ],
@@ -248,11 +355,12 @@ class _InventoryManagementPageState extends State<InventoryManagementPage> {
                 height: 40,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: AdminTechColors.primary,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                child: const Icon(Icons.add_rounded,
+                    color: Colors.white, size: 20),
               ),
             ],
           ),
@@ -307,9 +415,9 @@ class _CategoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderSubtle),
+          border: Border.all(color: AdminTechColors.borderSubtle),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
@@ -325,10 +433,10 @@ class _CategoryCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.08),
+                color: AdminTechColors.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: AppColors.accent, size: 22),
+              child: Icon(icon, color: AdminTechColors.primary, size: 22),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,7 +444,7 @@ class _CategoryCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AdminTechColors.textPrimary,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -344,7 +452,7 @@ class _CategoryCard extends StatelessWidget {
                 Text(
                   '$count Çeşit',
                   style: const TextStyle(
-                    color: AppColors.textTertiary,
+                    color: AdminTechColors.textTertiary,
                     fontSize: 11,
                   ),
                 ),
@@ -389,7 +497,7 @@ class _MetricCell extends StatelessWidget {
             Text(
               label,
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AdminTechColors.textSecondary,
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -433,7 +541,8 @@ class _InventoryRow extends StatelessWidget {
         decoration: BoxDecoration(
           border: showDivider
               ? const Border(
-                  bottom: BorderSide(color: AppColors.borderSubtle, width: 1))
+                  bottom:
+                      BorderSide(color: AdminTechColors.borderSubtle, width: 1))
               : null,
         ),
         child: Row(
@@ -456,7 +565,7 @@ class _InventoryRow extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AdminTechColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -467,7 +576,7 @@ class _InventoryRow extends StatelessWidget {
                       Text(
                         id,
                         style: const TextStyle(
-                          color: AppColors.textTertiary,
+                          color: AdminTechColors.textTertiary,
                           fontSize: 11,
                         ),
                       ),
@@ -475,7 +584,7 @@ class _InventoryRow extends StatelessWidget {
                       Text(
                         '•  $category',
                         style: const TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AdminTechColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
@@ -495,7 +604,9 @@ class _InventoryRow extends StatelessWidget {
                 Text(
                   '$stock',
                   style: TextStyle(
-                    color: isCritical ? AppColors.statusRed : AppColors.textPrimary,
+                    color: isCritical
+                        ? AdminTechColors.statusRed
+                        : AdminTechColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -503,7 +614,7 @@ class _InventoryRow extends StatelessWidget {
                 Text(
                   'Adet',
                   style: const TextStyle(
-                    color: AppColors.textTertiary,
+                    color: AdminTechColors.textTertiary,
                     fontSize: 10,
                   ),
                 ),

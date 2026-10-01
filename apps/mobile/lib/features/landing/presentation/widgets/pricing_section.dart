@@ -68,7 +68,8 @@ class PricingSection extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: isCompact ? 64 : 100, horizontal: 24),
+      padding:
+          EdgeInsets.symmetric(vertical: isCompact ? 64 : 100, horizontal: 24),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
@@ -107,7 +108,8 @@ class PricingSection extends StatelessWidget {
                 child: TextButton.icon(
                   onPressed: onScrollToFaq,
                   icon: const Icon(Icons.help_outline_rounded, size: 18),
-                  label: const Text('Fiyatlandırma hakkında sık sorulan sorular'),
+                  label:
+                      const Text('Fiyatlandırma hakkında sık sorulan sorular'),
                 ),
               ),
             ],
@@ -161,11 +163,14 @@ class PricingSectionHeader extends StatelessWidget {
           spacing: 16,
           runSpacing: 8,
           children: const [
-            _TrustNote(icon: Icons.verified_user_outlined, label: 'KVKK uyumlu'),
+            _TrustNote(
+                icon: Icons.verified_user_outlined, label: 'KVKK uyumlu'),
             _TrustNote(icon: Icons.devices_outlined, label: 'Web ve mobil'),
             _TrustNote(
-                icon: Icons.cloud_upload_outlined, label: 'Ücretsiz veri aktarımı'),
-            _TrustNote(icon: Icons.support_agent_rounded, label: 'Türkçe destek'),
+                icon: Icons.cloud_upload_outlined,
+                label: 'Ücretsiz veri aktarımı'),
+            _TrustNote(
+                icon: Icons.support_agent_rounded, label: 'Türkçe destek'),
           ],
         ),
       ],

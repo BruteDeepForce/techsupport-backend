@@ -9,6 +9,7 @@ import 'admin_devices_page.dart';
 import 'admin_work_orders_page.dart';
 import 'admin_accounting_page.dart';
 import 'inventory_management_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminTeamPage extends StatefulWidget {
   const AdminTeamPage({super.key});
@@ -189,10 +190,10 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: AppColors.bgElevated,
+        fillColor: AdminTechColors.surfaceRaised,
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.sm),
-            borderSide: BorderSide(color: AppColors.border)),
+            borderSide: BorderSide(color: AdminTechColors.border)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
@@ -203,7 +204,7 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'Ekip',
       subtitle: 'Admin Portal',
       trailing: GestureDetector(
@@ -330,10 +331,10 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
                               ? 'Bilinmiyor'
                               : (t.isActive! ? 'Aktif' : 'Pasif'),
                           statusColor: t.isActive == null
-                              ? AppColors.statusGray
+                              ? AdminTechColors.statusGray
                               : (t.isActive!
-                                  ? AppColors.statusGreen
-                                  : AppColors.statusGray),
+                                  ? AdminTechColors.statusGreen
+                                  : AdminTechColors.statusGray),
                           showDivider: i != _technicians.length - 1,
                           onToggleActive: null,
                           onViewDetails: null,
@@ -352,13 +353,13 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
                 label: 'Çözülen',
                 value: '24',
                 icon: Icons.check_circle_outline_rounded,
-                color: AppColors.statusGreen),
+                color: AdminTechColors.statusGreen),
             const SizedBox(width: 12),
             _StatCard(
                 label: 'Geciken',
                 value: '2',
                 icon: Icons.access_time_rounded,
-                color: AppColors.statusRed),
+                color: AdminTechColors.statusRed),
           ],
         ),
 
@@ -371,7 +372,7 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
             children: [
               const Text('Ekip Doluluk Oranı',
                   style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: AdminTechColors.textPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
@@ -383,16 +384,16 @@ class _AdminTeamPageState extends State<AdminTeamPage> {
                       child: const LinearProgressIndicator(
                         value: 0.7,
                         minHeight: 8,
-                        backgroundColor: AppColors.bg,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(AppColors.accent),
+                        backgroundColor: AdminTechColors.canvas,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            AdminTechColors.primary),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   const Text('70%',
                       style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AdminTechColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500)),
                 ],
@@ -437,7 +438,8 @@ class _TeamMemberRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? const Border(
-                bottom: BorderSide(color: AppColors.borderSubtle, width: 1))
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
             : null,
       ),
       child: Row(
@@ -446,11 +448,12 @@ class _TeamMemberRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: const BoxDecoration(
-                color: AppColors.bg, shape: BoxShape.circle),
+                color: AdminTechColors.canvas, shape: BoxShape.circle),
             alignment: Alignment.center,
             child: Text(name.substring(0, 1),
                 style: const TextStyle(
-                    color: AppColors.accent, fontWeight: FontWeight.bold)),
+                    color: AdminTechColors.primary,
+                    fontWeight: FontWeight.bold)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -461,14 +464,14 @@ class _TeamMemberRow extends StatelessWidget {
                   onTap: onViewDetails,
                   child: Text(name,
                       style: const TextStyle(
-                          color: AppColors.textPrimary,
+                          color: AdminTechColors.textPrimary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600)),
                 ),
                 const SizedBox(height: 2),
                 Text(role,
                     style: const TextStyle(
-                        color: AppColors.textTertiary, fontSize: 11)),
+                        color: AdminTechColors.textTertiary, fontSize: 11)),
               ],
             ),
           ),
@@ -477,7 +480,7 @@ class _TeamMemberRow extends StatelessWidget {
             children: [
               Text('$tasks Görev',
                   style: const TextStyle(
-                      color: AppColors.textSecondary,
+                      color: AdminTechColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w500)),
               const SizedBox(height: 2),
@@ -519,7 +522,7 @@ class _TeamMemberRow extends StatelessWidget {
                                   : 'Aktif Yap')),
                       ],
                       child: const Icon(Icons.more_vert,
-                          size: 18, color: AppColors.textTertiary),
+                          size: 18, color: AdminTechColors.textTertiary),
                     ),
                 ],
               ),
@@ -556,12 +559,12 @@ class _StatCard extends StatelessWidget {
               children: [
                 Text(value,
                     style: const TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AdminTechColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w700)),
                 Text(label,
                     style: const TextStyle(
-                        color: AppColors.textTertiary, fontSize: 11)),
+                        color: AdminTechColors.textTertiary, fontSize: 11)),
               ],
             ),
           ],

@@ -57,7 +57,10 @@ class _RegisterPageState extends State<RegisterPage> {
     final tenantName = _tenantNameController.text.trim();
     final branchName = _branchNameController.text.trim();
 
-    if (email.isEmpty || userName.isEmpty || password.isEmpty || tenantName.isEmpty) {
+    if (email.isEmpty ||
+        userName.isEmpty ||
+        password.isEmpty ||
+        tenantName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Lütfen tüm alanları doldurun')));
       return;
@@ -244,7 +247,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: _selectedRole,
                         dropdownColor: Colors.white,
                         items: const [
-                          DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                          DropdownMenuItem(
+                              value: 'admin', child: Text('Admin')),
                           DropdownMenuItem(
                               value: 'customer', child: Text('Müşteri')),
                           DropdownMenuItem(

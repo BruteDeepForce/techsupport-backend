@@ -10,6 +10,7 @@ import 'admin_work_orders_page.dart';
 import 'inventory_management_page.dart';
 import 'admin_ticket_detail_page.dart';
 import 'admin_accounting_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminTicketsPage extends StatefulWidget {
   const AdminTicketsPage({super.key});
@@ -22,7 +23,12 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
   final TicketService _ticketService = TicketService();
   late Future<List<Ticket>> _ticketsFuture;
   int _selectedFilterIndex = 0;
-  static const List<String> _filterLabels = ['Hepsi', 'Acil', 'Kritik', 'Normal'];
+  static const List<String> _filterLabels = [
+    'Hepsi',
+    'Acil',
+    'Kritik',
+    'Normal'
+  ];
 
   @override
   void initState() {
@@ -38,7 +44,7 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'Talepler',
       subtitle: 'Admin Portal',
       trailing: Container(
@@ -170,23 +176,23 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
                         _TicketMetric(
                             value: openCount.toString(),
                             label: 'Açık',
-                            color: AppColors.statusYellow),
+                            color: AdminTechColors.statusAmber),
                         const VerticalDivider(
                             width: 1,
                             thickness: 1,
-                            color: AppColors.borderSubtle),
+                            color: AdminTechColors.borderSubtle),
                         _TicketMetric(
                             value: inProgressCount.toString(),
                             label: 'Devam',
-                            color: AppColors.statusBlue),
+                            color: AdminTechColors.statusBlue),
                         const VerticalDivider(
                             width: 1,
                             thickness: 1,
-                            color: AppColors.borderSubtle),
+                            color: AdminTechColors.borderSubtle),
                         _TicketMetric(
                             value: closedCount.toString(),
                             label: 'Çözüldü',
-                            color: AppColors.statusGreen),
+                            color: AdminTechColors.statusGreen),
                       ],
                     ),
                   ),
@@ -199,20 +205,20 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
                         height: 40,
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          color: AppColors.bgSurface,
+                          color: AdminTechColors.surface,
                           borderRadius: BorderRadius.circular(AppRadius.sm),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: AdminTechColors.border),
                         ),
                         child: Row(
                           children: const [
                             Icon(Icons.search_rounded,
-                                color: AppColors.textTertiary, size: 18),
+                                color: AdminTechColors.textTertiary, size: 18),
                             SizedBox(width: 8),
                             Expanded(
                               child: Text('Talep no veya başlık ara...',
                                   style: TextStyle(
                                       fontSize: 13,
-                                      color: AppColors.textTertiary)),
+                                      color: AdminTechColors.textTertiary)),
                             ),
                           ],
                         ),
@@ -225,12 +231,12 @@ class _AdminTicketsPageState extends State<AdminTicketsPage> {
                         height: 40,
                         width: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.bgSurface,
+                          color: AdminTechColors.surface,
                           borderRadius: BorderRadius.circular(AppRadius.sm),
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: AdminTechColors.border),
                         ),
                         child: const Icon(Icons.refresh_rounded,
-                            color: AppColors.textSecondary, size: 18),
+                            color: AdminTechColors.textSecondary, size: 18),
                       ),
                     ),
                   ],
@@ -321,9 +327,9 @@ class _TicketFilterTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: AdminTechColors.border, width: 0.5),
       ),
       child: Row(
         children: List.generate(labels.length, (i) {
@@ -335,7 +341,9 @@ class _TicketFilterTabs extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.bgElevated : Colors.transparent,
+                  color: selected
+                      ? AdminTechColors.surfaceRaised
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.xs),
                 ),
                 alignment: Alignment.center,
@@ -343,8 +351,8 @@ class _TicketFilterTabs extends StatelessWidget {
                   labels[i],
                   style: TextStyle(
                     color: selected
-                        ? AppColors.textPrimary
-                        : AppColors.textTertiary,
+                        ? AdminTechColors.textPrimary
+                        : AdminTechColors.textTertiary,
                     fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                     fontSize: 12,
                   ),
@@ -377,24 +385,24 @@ bool _isClosed(String status) {
 Color _priorityColor(String priority) {
   switch (priority.toLowerCase()) {
     case 'urgent':
-      return AppColors.statusRed;
+      return AdminTechColors.statusRed;
     case 'high':
-      return AppColors.statusOrange;
+      return AdminTechColors.orange;
     default:
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
   }
 }
 
 Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'createdoperation':
-      return AppColors.statusYellow;
+      return AdminTechColors.statusAmber;
     case 'closed':
-      return AppColors.statusGreen;
+      return AdminTechColors.statusGreen;
     case 'rejected':
-      return AppColors.statusRed;
+      return AdminTechColors.statusRed;
     default:
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
   }
 }
 
@@ -431,7 +439,7 @@ class _TicketMetric extends StatelessWidget {
             const SizedBox(height: 4),
             Text(label,
                 style: const TextStyle(
-                    color: AppColors.textTertiary, fontSize: 11)),
+                    color: AdminTechColors.textTertiary, fontSize: 11)),
           ],
         ),
       ),

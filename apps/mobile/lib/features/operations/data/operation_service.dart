@@ -60,7 +60,8 @@ class OperationService {
       'ScheduledAtUtc': scheduledAtUtc?.toUtc().toIso8601String(),
     }..removeWhere((k, v) => v == null || (v is String && v.isEmpty));
 
-    debugPrint('OperationService.createOperation POST /api/operations $payload');
+    debugPrint(
+        'OperationService.createOperation POST /api/operations $payload');
 
     final res = await _dio.post('/api/operations', data: payload);
     if (res.statusCode == 200) {

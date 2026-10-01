@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 class AdminWebHrPerformanceSectionPage extends StatefulWidget {
   const AdminWebHrPerformanceSectionPage({
@@ -112,25 +113,26 @@ class _AdminWebHrPerformanceSectionPageState
 
         final data = snapshot.data!;
         final employeeMap = {
-          for (final employee in data.employees.employees) employee.id: employee,
+          for (final employee in data.employees.employees)
+            employee.id: employee,
         };
 
         final rows = data.reports
             .map(
               (report) => _PerformanceRowData(
                 employeeId: report.employeeId,
-                employeeName:
-                    employeeMap[report.employeeId]?.fullName ?? 'Personel bulunamadı',
-                positionName:
-                    employeeMap[report.employeeId]?.positionName ?? 'Pozisyon atanmadı',
+                employeeName: employeeMap[report.employeeId]?.fullName ??
+                    'Personel bulunamadı',
+                positionName: employeeMap[report.employeeId]?.positionName ??
+                    'Pozisyon atanmadı',
                 status: _resolvePerformanceStatus(
                     report.totalOverdueTasks, report.penaltyCount),
                 report: report,
               ),
             )
             .toList()
-          ..sort((a, b) =>
-              b.report.totalCompletedTasks.compareTo(a.report.totalCompletedTasks));
+          ..sort((a, b) => b.report.totalCompletedTasks
+              .compareTo(a.report.totalCompletedTasks));
 
         final totalCompleted = data.reports.fold<int>(
           0,
@@ -162,10 +164,13 @@ class _AdminWebHrPerformanceSectionPageState
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFF8FBFF), Color(0xFFF1F5F9)],
+                    colors: [
+                      AdminTechColors.surface,
+                      AdminTechColors.surfaceAlt
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  border: Border.all(color: AdminTechColors.border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,9 +243,9 @@ class _AdminWebHrPerformanceSectionPageState
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AdminTechColors.surface,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: AdminTechColors.border),
                         ),
                         child: Row(
                           children: [
@@ -248,12 +253,12 @@ class _AdminWebHrPerformanceSectionPageState
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFEFF6FF),
+                                color: AdminTechColors.surfaceAlt,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: const Icon(
                                 Icons.workspace_premium_outlined,
-                                color: Color(0xFF2563EB),
+                                color: AdminTechColors.primary,
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -264,7 +269,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   const Text(
                                     'Dönemin Öne Çıkan Personeli',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -274,7 +279,7 @@ class _AdminWebHrPerformanceSectionPageState
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF0F172A),
+                                      color: AdminTechColors.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -283,7 +288,7 @@ class _AdminWebHrPerformanceSectionPageState
                             Text(
                               '${topPerformer.report.totalCompletedTasks} tamamlanan iş',
                               style: const TextStyle(
-                                color: Color(0xFF2563EB),
+                                color: AdminTechColors.primary,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -314,7 +319,7 @@ class _AdminWebHrPerformanceSectionPageState
                           title: 'Raporlanan Personel',
                           value: data.reports.length.toString(),
                           note: 'Seçili ay için snapshot üretilen kayıt',
-                          accent: const Color(0xFF2563EB),
+                          accent: AdminTechColors.primary,
                           icon: Icons.groups_2_outlined,
                         ),
                       ),
@@ -324,7 +329,7 @@ class _AdminWebHrPerformanceSectionPageState
                           title: 'Tamamlanan İş',
                           value: totalCompleted.toString(),
                           note: 'Toplam tamamlanan görev sayısı',
-                          accent: const Color(0xFF16A34A),
+                          accent: AdminTechColors.statusGreen,
                           icon: Icons.task_alt_outlined,
                         ),
                       ),
@@ -335,7 +340,7 @@ class _AdminWebHrPerformanceSectionPageState
                           value:
                               '$totalPending / ${data.reports.fold<int>(0, (sum, item) => sum + item.totalOverdueTasks)}',
                           note: 'Aksiyon gerektiren görev yoğunluğu',
-                          accent: const Color(0xFFD97706),
+                          accent: AdminTechColors.amber,
                           icon: Icons.pending_actions_outlined,
                         ),
                       ),
@@ -345,7 +350,7 @@ class _AdminWebHrPerformanceSectionPageState
                           title: 'Ceza / Mesai Devam',
                           value: '$totalPenalties / $totalAttendance',
                           note: 'Disiplin ve vardiya devam özeti',
-                          accent: const Color(0xFF7C3AED),
+                          accent: AdminTechColors.violet,
                           icon: Icons.analytics_outlined,
                         ),
                       ),
@@ -363,21 +368,22 @@ class _AdminWebHrPerformanceSectionPageState
                         const Expanded(
                           child: _PerformanceSectionTitle(
                             title: 'Personel Performans Listesi',
-                            subtitle: 'Satıra tıklayarak detay metrik görünümünü açın.',
+                            subtitle:
+                                'Satıra tıklayarak detay metrik görünümünü açın.',
                           ),
                         ),
                         Container(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF8FAFC),
+                            color: AdminTechColors.surface,
                             borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            border: Border.all(color: AdminTechColors.border),
                           ),
                           child: Text(
                             '${rows.length} kayıt',
                             style: const TextStyle(
-                              color: Color(0xFF475569),
+                              color: AdminTechColors.textSecondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -387,14 +393,15 @@ class _AdminWebHrPerformanceSectionPageState
                     const SizedBox(height: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
+                        color: AdminTechColors.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: AdminTechColors.border),
                       ),
                       child: Column(
                         children: [
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 14),
                             child: Row(
                               children: [
                                 Expanded(
@@ -402,7 +409,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Personel',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -411,7 +418,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Tamamlanan',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -420,7 +427,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Bekleyen',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -429,7 +436,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Ceza / Ödül',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -438,7 +445,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Devam',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -447,7 +454,7 @@ class _AdminWebHrPerformanceSectionPageState
                                   child: Text(
                                     'Durum',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -456,25 +463,28 @@ class _AdminWebHrPerformanceSectionPageState
                               ],
                             ),
                           ),
-                          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          const Divider(
+                              height: 1, color: AdminTechColors.border),
                           if (rows.isEmpty)
                             const Padding(
                               padding: EdgeInsets.all(20),
                               child: Text(
                                 'Seçili ay için performans snapshot kaydı bulunamadı.',
-                                style: TextStyle(color: Color(0xFF64748B)),
+                                style: TextStyle(
+                                    color: AdminTechColors.textSecondary),
                               ),
                             )
                           else
                             for (var i = 0; i < rows.length; i++) ...[
                               _PerformanceTableRow(
                                 data: rows[i],
-                                onTap: () => _showPerformanceDetailDialog(rows[i]),
+                                onTap: () =>
+                                    _showPerformanceDetailDialog(rows[i]),
                               ),
                               if (i != rows.length - 1)
                                 const Divider(
                                   height: 1,
-                                  color: Color(0xFFE2E8F0),
+                                  color: AdminTechColors.border,
                                 ),
                             ],
                         ],
@@ -559,9 +569,9 @@ class _PerformanceDetailDialog extends StatelessWidget {
         width: 760,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: AdminTechColors.border),
           boxShadow: const [
             BoxShadow(
               color: Color(0x0F0F172A),
@@ -697,9 +707,9 @@ class _PerformanceTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = switch (data.status) {
-      'Riskli' => const Color(0xFFDC2626),
-      'İzleniyor' => const Color(0xFFD97706),
-      _ => const Color(0xFF16A34A),
+      'Riskli' => AdminTechColors.red,
+      'İzleniyor' => AdminTechColors.amber,
+      _ => AdminTechColors.statusGreen,
     };
 
     return InkWell(
@@ -717,13 +727,14 @@ class _PerformanceTableRow extends StatelessWidget {
                     data.employeeName,
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: AdminTechColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     data.positionName,
-                    style: const TextStyle(color: Color(0xFF64748B)),
+                    style:
+                        const TextStyle(color: AdminTechColors.textSecondary),
                   ),
                 ],
               ),
@@ -744,7 +755,8 @@ class _PerformanceTableRow extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999),
@@ -765,7 +777,7 @@ class _PerformanceTableRow extends StatelessWidget {
             IconButton(
               onPressed: onTap,
               icon: const Icon(Icons.chevron_right_rounded),
-              color: const Color(0xFF94A3B8),
+              color: AdminTechColors.textTertiary,
             ),
           ],
         ),
@@ -794,9 +806,9 @@ class _PerformanceStatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x080F172A),
@@ -834,7 +846,7 @@ class _PerformanceStatCard extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -845,14 +857,14 @@ class _PerformanceStatCard extends StatelessWidget {
               fontSize: 28,
               height: 1.05,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             note,
             style: const TextStyle(
-              color: Color(0xFF94A3B8),
+              color: AdminTechColors.textTertiary,
               fontSize: 13,
             ),
           ),
@@ -877,9 +889,9 @@ class _DetailMetricCard extends StatelessWidget {
       width: 158,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -887,7 +899,7 @@ class _DetailMetricCard extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -897,7 +909,7 @@ class _DetailMetricCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
         ],
@@ -916,9 +928,9 @@ class _PerformanceCardShell extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x080F172A),
@@ -953,7 +965,7 @@ class _PerformanceSectionTitle extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(color: Color(0xFF64748B)),
+          style: const TextStyle(color: AdminTechColors.textSecondary),
         ),
       ],
     );
@@ -971,9 +983,9 @@ class _PerformanceFilterBox extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Center(child: child),
     );

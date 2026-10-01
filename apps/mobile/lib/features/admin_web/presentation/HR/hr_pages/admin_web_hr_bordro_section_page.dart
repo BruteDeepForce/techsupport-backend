@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:techsupport_mobile/core/utils/pdf_blob_opener.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/data/hr_services.dart';
 import 'package:techsupport_mobile/features/admin_web/presentation/HR/model/hr_models.dart';
+import '../../shared/admin_web_design.dart';
 
 class AdminWebHrBordroSectionPage extends StatefulWidget {
   const AdminWebHrBordroSectionPage({super.key});
 
   @override
-  State<AdminWebHrBordroSectionPage> createState() => _AdminWebHrBordroSectionPageState();
+  State<AdminWebHrBordroSectionPage> createState() =>
+      _AdminWebHrBordroSectionPageState();
 }
 
-class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPage> {
+class _AdminWebHrBordroSectionPageState
+    extends State<AdminWebHrBordroSectionPage> {
   final HRService _hrService = HRService();
   late Future<List<HRBordroDonemResponse>> _donemlerFuture;
 
@@ -194,11 +197,13 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                     const Center(child: CircularProgressIndicator())
                   else if (snapshot.hasError)
                     _InlineMessage(
-                      message: 'Bordro dönemleri yüklenemedi: ${snapshot.error}',
+                      message:
+                          'Bordro dönemleri yüklenemedi: ${snapshot.error}',
                     )
                   else if (donemler.isEmpty)
                     const _InlineMessage(
-                      message: 'Henüz bordro dönemi yok. Önce dönem oluşturmalısınız.',
+                      message:
+                          'Henüz bordro dönemi yok. Önce dönem oluşturmalısınız.',
                     )
                   else
                     Wrap(
@@ -253,7 +258,8 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                     const Center(child: CircularProgressIndicator())
                   else if (_selectedDonem == null)
                     const _InlineMessage(
-                      message: 'Bordro çalışanlarını görmek için bir dönem seçin.',
+                      message:
+                          'Bordro çalışanlarını görmek için bir dönem seçin.',
                     )
                   else if (_bordroEmployees.isEmpty)
                     const _InlineMessage(
@@ -263,14 +269,15 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                   else
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
+                        color: AdminTechColors.surface,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        border: Border.all(color: AdminTechColors.border),
                       ),
                       child: Column(
                         children: [
                           const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 14),
                             child: Row(
                               children: [
                                 Expanded(
@@ -278,7 +285,7 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                                   child: Text(
                                     'Personel',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -287,7 +294,7 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                                   child: Text(
                                     'Kazanç',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -296,7 +303,7 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                                   child: Text(
                                     'Kesinti',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -305,7 +312,7 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                                   child: Text(
                                     'Net',
                                     style: TextStyle(
-                                      color: Color(0xFF64748B),
+                                      color: AdminTechColors.textSecondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -314,14 +321,17 @@ class _AdminWebHrBordroSectionPageState extends State<AdminWebHrBordroSectionPag
                               ],
                             ),
                           ),
-                          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                          const Divider(
+                              height: 1, color: AdminTechColors.border),
                           for (var i = 0; i < _bordroEmployees.length; i++) ...[
                             _BordroEmployeeRow(
                               employee: _bordroEmployees[i],
-                              onViewPdf: () => _handleOpenPdf(_bordroEmployees[i]),
+                              onViewPdf: () =>
+                                  _handleOpenPdf(_bordroEmployees[i]),
                             ),
                             if (i != _bordroEmployees.length - 1)
-                              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                              const Divider(
+                                  height: 1, color: AdminTechColors.border),
                           ],
                         ],
                       ),
@@ -342,7 +352,8 @@ class _CreateBordroDonemDialog extends StatefulWidget {
   final HRService hrService;
 
   @override
-  State<_CreateBordroDonemDialog> createState() => _CreateBordroDonemDialogState();
+  State<_CreateBordroDonemDialog> createState() =>
+      _CreateBordroDonemDialogState();
 }
 
 class _CreateBordroDonemDialogState extends State<_CreateBordroDonemDialog> {
@@ -431,7 +442,6 @@ class _CreateBordroDonemDialogState extends State<_CreateBordroDonemDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: const Text(
         'Bordro Dönemi Oluştur',
@@ -503,7 +513,7 @@ class _CreateBordroDonemDialogState extends State<_CreateBordroDonemDialog> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _submitError!,
-                    style: const TextStyle(color: Color(0xFFDC2626)),
+                    style: const TextStyle(color: AdminTechColors.red),
                   ),
                 ),
               ],
@@ -520,7 +530,7 @@ class _CreateBordroDonemDialogState extends State<_CreateBordroDonemDialog> {
           onPressed: _isSubmitting ? null : _submit,
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: AdminTechColors.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             shape: RoundedRectangleBorder(
@@ -570,12 +580,12 @@ class _HeroPanel extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFF8FBFF),
-            Color(0xFFF1F5F9),
+            AdminTechColors.surface,
+            AdminTechColors.surfaceAlt,
           ],
         ),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0A0F172A),
@@ -595,7 +605,7 @@ class _HeroPanel extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: AdminTechColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -603,7 +613,7 @@ class _HeroPanel extends StatelessWidget {
                   selectedDonem == null
                       ? 'Önce dönem oluşturun, sonra hakedişleri hesaplayın.'
                       : '${selectedDonem!.periodLabel} • $status',
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: const TextStyle(color: AdminTechColors.textSecondary),
                 ),
                 const SizedBox(height: 18),
                 Wrap(
@@ -641,9 +651,10 @@ class _HeroPanel extends StatelessWidget {
                 onPressed: isCalculating ? null : onCalculate,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: AdminTechColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -684,9 +695,9 @@ class _MetricPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,7 +706,7 @@ class _MetricPill extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF64748B),
+              color: AdminTechColors.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -703,7 +714,7 @@ class _MetricPill extends StatelessWidget {
             value,
             style: const TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: AdminTechColors.textPrimary,
             ),
           ),
         ],
@@ -732,10 +743,10 @@ class _DonemChip extends StatelessWidget {
         duration: const Duration(milliseconds: 160),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2563EB) : Colors.white,
+          color: selected ? AdminTechColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+            color: selected ? AdminTechColors.primary : AdminTechColors.border,
           ),
         ),
         child: Column(
@@ -745,15 +756,16 @@ class _DonemChip extends StatelessWidget {
               donem.periodLabel,
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: selected ? Colors.white : const Color(0xFF0F172A),
+                color: selected ? Colors.white : AdminTechColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               '${_formatDate(donem.baslangicTarihi)} - ${_formatDate(donem.bitisTarihi)}',
               style: TextStyle(
-                color:
-                    selected ? Colors.white.withOpacity(0.82) : const Color(0xFF64748B),
+                color: selected
+                    ? Colors.white.withOpacity(0.82)
+                    : AdminTechColors.textSecondary,
               ),
             ),
           ],
@@ -787,7 +799,10 @@ class _BordroEmployeeRow extends StatelessWidget {
                   height: 42,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFFE0EAFF), Color(0xFFF1F5F9)],
+                      colors: [
+                        AdminTechColors.surfaceAlt,
+                        AdminTechColors.surfaceAlt
+                      ],
                     ),
                     shape: BoxShape.circle,
                   ),
@@ -798,7 +813,7 @@ class _BordroEmployeeRow extends StatelessWidget {
                         : employee.employeeName.substring(0, 1).toUpperCase(),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF2563EB),
+                      color: AdminTechColors.primary,
                     ),
                   ),
                 ),
@@ -811,7 +826,7 @@ class _BordroEmployeeRow extends StatelessWidget {
                         employee.employeeName,
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: AdminTechColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -819,7 +834,8 @@ class _BordroEmployeeRow extends StatelessWidget {
                         employee.employeeId,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Color(0xFF64748B)),
+                        style: const TextStyle(
+                            color: AdminTechColors.textSecondary),
                       ),
                     ],
                   ),
@@ -832,7 +848,7 @@ class _BordroEmployeeRow extends StatelessWidget {
               _formatCurrency(employee.totalEarnings),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0F766E),
+                color: AdminTechColors.teal,
               ),
             ),
           ),
@@ -841,7 +857,7 @@ class _BordroEmployeeRow extends StatelessWidget {
               _formatCurrency(employee.totalDeductions),
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFDC2626),
+                color: AdminTechColors.red,
               ),
             ),
           ),
@@ -850,7 +866,7 @@ class _BordroEmployeeRow extends StatelessWidget {
               _formatCurrency(employee.netPay),
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF0F172A),
+                color: AdminTechColors.textPrimary,
               ),
             ),
           ),
@@ -893,14 +909,14 @@ class _DialogTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
     );
@@ -926,9 +942,9 @@ class _DateField extends StatelessWidget {
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: AdminTechColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: AdminTechColors.border),
         ),
         child: Row(
           children: [
@@ -940,7 +956,7 @@ class _DateField extends StatelessWidget {
                     label,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF64748B),
+                      color: AdminTechColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -948,13 +964,14 @@ class _DateField extends StatelessWidget {
                     value,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A),
+                      color: AdminTechColors.textPrimary,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
+            const Icon(Icons.calendar_today_outlined,
+                size: 18, color: AdminTechColors.textSecondary),
           ],
         ),
       ),
@@ -973,9 +990,9 @@ class _CardShell extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: child,
     );
@@ -1003,7 +1020,7 @@ class _SectionTitle extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(color: Color(0xFF64748B)),
+          style: const TextStyle(color: AdminTechColors.textSecondary),
         ),
       ],
     );
@@ -1021,13 +1038,13 @@ class _InlineMessage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Text(
         message,
-        style: const TextStyle(color: Color(0xFF475569)),
+        style: const TextStyle(color: AdminTechColors.textSecondary),
       ),
     );
   }

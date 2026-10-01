@@ -56,98 +56,98 @@ class SplashPage extends StatelessWidget {
               ),
             ),
 
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Hero ─────────────────────────────────────────
-                  LinearCard(
-                    padding: const EdgeInsets.all(20),
-                    color: AppColors.accentBg,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        LinearBadge(
-                          label: 'Enterprise Service',
-                          color: AppColors.accent,
-                          bgColor: AppColors.bgElevated,
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          'Servis operasyonlarını\ntek yüzeyde topla.',
-                          style: theme.textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Operasyon görünürlüğü, cihaz takibi ve ekip koordinasyonu.',
-                          style: theme.textTheme.bodyLarge,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            const LinearStatPill(
-                                value: '%98',
-                                label: 'SLA',
-                                color: AppColors.statusGreen),
-                            const SizedBox(width: 8),
-                            const LinearStatPill(
-                                value: '126',
-                                label: 'Aktif Op.',
-                                color: AppColors.accent),
-                          ],
-                        ),
-                      ],
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Hero ─────────────────────────────────────────
+                    LinearCard(
+                      padding: const EdgeInsets.all(20),
+                      color: AppColors.accentBg,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          LinearBadge(
+                            label: 'Enterprise Service',
+                            color: AppColors.accent,
+                            bgColor: AppColors.bgElevated,
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Servis operasyonlarını\ntek yüzeyde topla.',
+                            style: theme.textTheme.headlineMedium,
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Operasyon görünürlüğü, cihaz takibi ve ekip koordinasyonu.',
+                            style: theme.textTheme.bodyLarge,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              const LinearStatPill(
+                                  value: '%98',
+                                  label: 'SLA',
+                                  color: AppColors.statusGreen),
+                              const SizedBox(width: 8),
+                              const LinearStatPill(
+                                  value: '126',
+                                  label: 'Aktif Op.',
+                                  color: AppColors.accent),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
-                  const LinearSection(title: 'Öne çıkanlar'),
+                    const SizedBox(height: 16),
+                    const LinearSection(title: 'Öne çıkanlar'),
 
-                  LinearCard(
-                    padding: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        _FeatureRow(
-                          icon: Icons.person_outline_rounded,
-                          title: 'Müşteri görünümü',
-                          subtitle: 'Cihaz ve operasyon takibi',
-                        ),
-                        _FeatureRow(
-                          icon: Icons.engineering_outlined,
-                          title: 'Teknisyen görünümü',
-                          subtitle: 'Görev kuyruğu ve saha aksiyonları',
-                        ),
-                        _FeatureRow(
-                          icon: Icons.dashboard_outlined,
-                          title: 'Admin dashboard',
-                          subtitle: 'KPI ve operasyon analizi',
-                          showDivider: false,
-                        ),
-                      ],
+                    LinearCard(
+                      padding: EdgeInsets.zero,
+                      child: Column(
+                        children: [
+                          _FeatureRow(
+                            icon: Icons.person_outline_rounded,
+                            title: 'Müşteri görünümü',
+                            subtitle: 'Cihaz ve operasyon takibi',
+                          ),
+                          _FeatureRow(
+                            icon: Icons.engineering_outlined,
+                            title: 'Teknisyen görünümü',
+                            subtitle: 'Görev kuyruğu ve saha aksiyonları',
+                          ),
+                          _FeatureRow(
+                            icon: Icons.dashboard_outlined,
+                            title: 'Admin dashboard',
+                            subtitle: 'KPI ve operasyon analizi',
+                            showDivider: false,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute<void>(
-                              builder: (_) => const RoleSelectionPage()),
-                        );
-                      },
-                      child: const Text('Demo deneyimi aç'),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute<void>(
+                                builder: (_) => const RoleSelectionPage()),
+                          );
+                        },
+                        child: const Text('Demo deneyimi aç'),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -175,8 +175,7 @@ class _FeatureRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? const Border(
-                bottom:
-                    BorderSide(color: AppColors.borderSubtle, width: 0.5))
+                bottom: BorderSide(color: AppColors.borderSubtle, width: 0.5))
             : null,
       ),
       child: Row(

@@ -15,6 +15,8 @@ import 'admin_web_route.dart';
 import 'shared/admin_web_nav.dart';
 import 'shared/admin_web_sidebar.dart';
 import 'shared/admin_web_topbar.dart';
+import 'package:techsupport_mobile/features/admin_web/presentation/shared/admin_web_design.dart';
+import 'shared/admin_web_shell.dart';
 
 class AdminWebOperationsPage extends StatefulWidget {
   const AdminWebOperationsPage({super.key});
@@ -115,7 +117,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setLocalState) {
           return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Container(
               padding: const EdgeInsets.all(20),
               constraints: const BoxConstraints(maxWidth: 560),
@@ -131,7 +134,7 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A)),
+                            color: AdminTechColors.textPrimary),
                       ),
                       const SizedBox(height: 14),
                       DropdownButtonFormField<String>(
@@ -149,7 +152,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           selectedDeviceId = null;
                           selectedCustomerName = null; //!
                           if (v != null) {
-                            final match = customers.where((e) => e.id == v).toList();
+                            final match =
+                                customers.where((e) => e.id == v).toList();
                             if (match.isNotEmpty) {
                               selectedCustomerUserId = match.first.appUserId;
                               selectedCustomerName = match.first.name;
@@ -166,14 +170,16 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           }
                           setLocalState(() {});
                         },
-                        validator: (v) => v == null || v.isEmpty ? 'Müşteri seçin' : null,
+                        validator: (v) =>
+                            v == null || v.isEmpty ? 'Müşteri seçin' : null,
                         decoration: InputDecoration(
                           labelText: 'Müşteri',
                           filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
+                          fillColor: AdminTechColors.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide:
+                                const BorderSide(color: AdminTechColors.border),
                           ),
                         ),
                       ),
@@ -184,7 +190,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         FutureBuilder<List<DeviceRecord>>(
                           future: devicesFuture,
                           builder: (context, snap) {
-                            if (snap.connectionState == ConnectionState.waiting) {
+                            if (snap.connectionState ==
+                                ConnectionState.waiting) {
                               return const _HintBox('Cihazlar yükleniyor...');
                             }
                             if (snap.hasError) {
@@ -192,7 +199,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             }
                             final devices = snap.data ?? [];
                             if (devices.isEmpty) {
-                              return const _HintBox('Müşteriye bağlı cihaz bulunamadı');
+                              return const _HintBox(
+                                  'Müşteriye bağlı cihaz bulunamadı');
                             }
                             return DropdownButtonFormField<String>(
                               value: selectedDeviceId,
@@ -201,7 +209,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                   DropdownMenuItem(
                                     value: d.id,
                                     child: ConstrainedBox(
-                                      constraints: const BoxConstraints(maxWidth: 420),
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 420),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
@@ -217,9 +226,10 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                                 horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
                                               color: _isWarrantyCovered(d)
-                                                  ? const Color(0xFFDCFCE7)
-                                                  : const Color(0xFFFEE2E2),
-                                              borderRadius: BorderRadius.circular(999),
+                                                  ? AdminTechColors.surfaceAlt
+                                                  : AdminTechColors.redBg,
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
                                             ),
                                             child: Text(
                                               _isWarrantyCovered(d)
@@ -229,8 +239,9 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w600,
                                                 color: _isWarrantyCovered(d)
-                                                    ? const Color(0xFF166534)
-                                                    : const Color(0xFF991B1B),
+                                                    ? AdminTechColors
+                                                        .statusGreen
+                                                    : AdminTechColors.statusRed,
                                               ),
                                             ),
                                           ),
@@ -248,10 +259,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                               decoration: InputDecoration(
                                 labelText: 'Cihaz',
                                 filled: true,
-                                fillColor: const Color(0xFFF8FAFC),
+                                fillColor: AdminTechColors.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(
+                                      color: AdminTechColors.border),
                                 ),
                               ),
                             );
@@ -290,8 +302,9 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           if (v == null) {
                             selectedTechnicianName = null;
                           } else {
-                            final match =
-                                technicians.where((e) => e.userId == v).toList();
+                            final match = technicians
+                                .where((e) => e.userId == v)
+                                .toList();
                             selectedTechnicianName =
                                 match.isEmpty ? null : match.first.name;
                           }
@@ -300,10 +313,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         decoration: InputDecoration(
                           labelText: 'Teknisyen (Opsiyonel)',
                           filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
+                          fillColor: AdminTechColors.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide:
+                                const BorderSide(color: AdminTechColors.border),
                           ),
                         ),
                       ),
@@ -311,9 +325,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                       DropdownButtonFormField<String>(
                         value: future,
                         items: const [
-                          DropdownMenuItem(value: 'None', child: Text('Hemen oluştur')),
                           DropdownMenuItem(
-                              value: 'Scheduled', child: Text('İleri tarihli planlı')),
+                              value: 'None', child: Text('Hemen oluştur')),
+                          DropdownMenuItem(
+                              value: 'Scheduled',
+                              child: Text('İleri tarihli planlı')),
                         ],
                         onChanged: (v) {
                           setLocalState(() {
@@ -326,10 +342,11 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                         decoration: InputDecoration(
                           labelText: 'Plan Durumu',
                           filled: true,
-                          fillColor: const Color(0xFFF8FAFC),
+                          fillColor: AdminTechColors.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                            borderSide:
+                                const BorderSide(color: AdminTechColors.border),
                           ),
                         ),
                       ),
@@ -342,19 +359,21 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             decoration: InputDecoration(
                               labelText: 'Plan Tarihi ve Saati',
                               filled: true,
-                              fillColor: const Color(0xFFF8FAFC),
-                              suffixIcon: const Icon(Icons.calendar_month_outlined),
+                              fillColor: AdminTechColors.surface,
+                              suffixIcon:
+                                  const Icon(Icons.calendar_month_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                borderSide: const BorderSide(
+                                    color: AdminTechColors.border),
                               ),
                             ),
                             child: Text(
                               formatScheduled(scheduledLocal),
                               style: TextStyle(
                                 color: scheduledLocal == null
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF0F172A),
+                                    ? AdminTechColors.textTertiary
+                                    : AdminTechColors.textPrimary,
                               ),
                             ),
                           ),
@@ -370,20 +389,25 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             child: DropdownButtonFormField<String>(
                               value: priority,
                               items: const [
-                                DropdownMenuItem(value: 'Low', child: Text('Düşük')),
-                                DropdownMenuItem(value: 'Normal', child: Text('Normal')),
-                                DropdownMenuItem(value: 'High', child: Text('Yüksek')),
-                                DropdownMenuItem(value: 'Urgent', child: Text('Acil')),
+                                DropdownMenuItem(
+                                    value: 'Low', child: Text('Düşük')),
+                                DropdownMenuItem(
+                                    value: 'Normal', child: Text('Normal')),
+                                DropdownMenuItem(
+                                    value: 'High', child: Text('Yüksek')),
+                                DropdownMenuItem(
+                                    value: 'Urgent', child: Text('Acil')),
                               ],
                               onChanged: (v) =>
                                   setLocalState(() => priority = v ?? 'Normal'),
                               decoration: InputDecoration(
                                 labelText: 'Öncelik',
                                 filled: true,
-                                fillColor: const Color(0xFFF8FAFC),
+                                fillColor: AdminTechColors.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(
+                                      color: AdminTechColors.border),
                                 ),
                               ),
                             ),
@@ -393,20 +417,24 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                             child: DropdownButtonFormField<String>(
                               value: type,
                               items: const [
-                                DropdownMenuItem(value: 'Repair', child: Text('Onarım')),
+                                DropdownMenuItem(
+                                    value: 'Repair', child: Text('Onarım')),
                                 DropdownMenuItem(
                                     value: 'Maintenance', child: Text('Bakım')),
                                 DropdownMenuItem(
-                                    value: 'Installation', child: Text('Kurulum')),
+                                    value: 'Installation',
+                                    child: Text('Kurulum')),
                               ],
-                              onChanged: (v) => setLocalState(() => type = v ?? 'Repair'),
+                              onChanged: (v) =>
+                                  setLocalState(() => type = v ?? 'Repair'),
                               decoration: InputDecoration(
                                 labelText: 'Tür',
                                 filled: true,
-                                fillColor: const Color(0xFFF8FAFC),
+                                fillColor: AdminTechColors.surface,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                                  borderSide: const BorderSide(
+                                      color: AdminTechColors.border),
                                 ),
                               ),
                             ),
@@ -424,17 +452,19 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () async {
-                              if (!(formKey.currentState?.validate() ?? false)) {
+                              if (!(formKey.currentState?.validate() ??
+                                  false)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content:
-                                          Text('Lütfen zorunlu alanları kontrol edin')),
+                                      content: Text(
+                                          'Lütfen zorunlu alanları kontrol edin')),
                                 );
                                 return;
                               }
                               if (selectedCustomerId == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Müşteri seçin')),
+                                  const SnackBar(
+                                      content: Text('Müşteri seçin')),
                                 );
                                 return;
                               }
@@ -449,15 +479,16 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                     selectedTechnicianId!.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text('Planlı iş için teknisyen seçin')),
+                                        content: Text(
+                                            'Planlı iş için teknisyen seçin')),
                                   );
                                   return;
                                 }
                                 if (scheduledLocal == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content:
-                                            Text('Planlı iş için tarih ve saat seçin')),
+                                        content: Text(
+                                            'Planlı iş için tarih ve saat seçin')),
                                   );
                                   return;
                                 }
@@ -470,7 +501,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 useRootNavigator: true,
                                 builder: (ctx) {
                                   loadingCtx = ctx;
-                                  return const Center(child: CircularProgressIndicator());
+                                  return const Center(
+                                      child: CircularProgressIndicator());
                                 },
                               );
                               //! operation create try-catch
@@ -482,11 +514,13 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                       customerId: selectedCustomerId!,
                                       deviceId: selectedDeviceId!,
                                       title: titleController.text.trim(),
-                                      description: descriptionController.text.trim(),
-                                      internalNote:
-                                          internalNoteController.text.trim().isEmpty
-                                              ? null
-                                              : internalNoteController.text.trim(),
+                                      description:
+                                          descriptionController.text.trim(),
+                                      internalNote: internalNoteController.text
+                                              .trim()
+                                              .isEmpty
+                                          ? null
+                                          : internalNoteController.text.trim(),
                                       technicianId: selectedTechnicianId,
                                       technicianName: selectedTechnicianName,
                                       customerName: selectedCustomerName, //!
@@ -499,7 +533,8 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 if (mounted) {
                                   _refresh();
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('İş emri oluşturuldu')),
+                                    const SnackBar(
+                                        content: Text('İş emri oluşturuldu')),
                                   );
                                 }
                               } on TimeoutException {
@@ -514,17 +549,19 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                        content: Text('İş emri oluşturulamadı')),
+                                        content:
+                                            Text('İş emri oluşturulamadı')),
                                   );
                                 }
                               } finally {
                                 if (loadingCtx != null) {
-                                  Navigator.of(loadingCtx!, rootNavigator: true).pop();
+                                  Navigator.of(loadingCtx!, rootNavigator: true)
+                                      .pop();
                                 }
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF3B82F6),
+                              backgroundColor: AdminTechColors.statusBlue,
                               foregroundColor: Colors.white,
                             ),
                             child: const Text('Kaydet'),
@@ -548,91 +585,67 @@ class _AdminWebOperationsPageState extends State<AdminWebOperationsPage> {
     final showSidebar = width >= 1100;
     final textTheme = GoogleFonts.dmSansTextTheme(Theme.of(context).textTheme);
 
-    return Theme(
-      data: Theme.of(context).copyWith(textTheme: textTheme),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF7F8FB),
-        drawer: showSidebar
-            ? null
-            : const Drawer(
-                child: AdminWebSidebar(
-                    compact: true, radius: 0, active: AdminNavKey.operations),
-              ),
-        body: Row(
-          children: [
-            if (showSidebar) const AdminWebSidebarPanel(active: AdminNavKey.operations),
-            Expanded(
-              child: Column(
-                children: [
-                  const AdminWebTopBar(showMenu: false),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _Breadcrumb(),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Operasyon Yönetimi',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                    SizedBox(height: 6),
-                                    Text(
-                                      'Tüm iş emirlerini görüntüleyin ve takip edin',
-                                      style: TextStyle(
-                                        color: Color(0xFF64748B),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _SecondaryActionButton(
-                                label: 'Yenile',
-                                icon: Icons.refresh,
-                                onPressed: _refresh,
-                              ),
-                              const SizedBox(width: 10),
-                              ElevatedButton.icon(
-                                onPressed: _showCreateOperationDialog,
-                                icon: const Icon(Icons.add, size: 16),
-                                label: const Text('İş Emri Oluştur'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF3B82F6),
-                                  foregroundColor: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _OperationsTableCard(
-                            opsFuture: _opsFuture,
-                            onOpenOperation: (id) => Navigator.of(context).push(
-                              adminWebRoute(
-                                AdminWebOperationDetailPage(operationId: id),
-                              ),
-                            ),
-                          ),
-                        ],
+    return AdminWebShell(
+      active: AdminNavKey.operations,
+      dark: true,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 32),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _Breadcrumb(),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Operasyon Yönetimi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AdminTechColors.textPrimary,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 6),
+                    Text(
+                      'Tüm iş emirlerini görüntüleyin ve takip edin',
+                      style: TextStyle(
+                        color: AdminTechColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              _SecondaryActionButton(
+                label: 'Yenile',
+                icon: Icons.refresh,
+                onPressed: _refresh,
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                onPressed: _showCreateOperationDialog,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('İş Emri Oluştur'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AdminTechColors.statusBlue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _OperationsTableCard(
+            opsFuture: _opsFuture,
+            onOpenOperation: (id) => Navigator.of(context).push(
+              adminWebRoute(
+                AdminWebOperationDetailPage(operationId: id),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -645,18 +658,24 @@ class _Breadcrumb extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Text('Yönetim', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+        Text('Yönetim',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textTertiary)),
         SizedBox(width: 6),
-        Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+        Icon(Icons.chevron_right,
+            size: 14, color: AdminTechColors.textTertiary),
         SizedBox(width: 6),
-        Text('Operasyonlar', style: TextStyle(fontSize: 12, color: Color(0xFF475569))),
+        Text('Operasyonlar',
+            style:
+                TextStyle(fontSize: 12, color: AdminTechColors.textSecondary)),
       ],
     );
   }
 }
 
 class _OperationsTableCard extends StatelessWidget {
-  const _OperationsTableCard({required this.opsFuture, required this.onOpenOperation});
+  const _OperationsTableCard(
+      {required this.opsFuture, required this.onOpenOperation});
 
   final Future<List<OperationRecord>> opsFuture;
   final ValueChanged<String> onOpenOperation;
@@ -687,7 +706,8 @@ class _OperationsTableCard extends StatelessWidget {
           return const _TableCard(
             child: Padding(
               padding: EdgeInsets.all(20),
-              child: Text('Kayıt bulunamadı', style: TextStyle(color: Color(0xFF94A3B8))),
+              child: Text('Kayıt bulunamadı',
+                  style: TextStyle(color: AdminTechColors.textTertiary)),
             ),
           );
         }
@@ -695,7 +715,7 @@ class _OperationsTableCard extends StatelessWidget {
           child: Column(
             children: [
               const _TableHeader(),
-              const Divider(height: 1, color: Color(0xFFE2E8F0)),
+              const Divider(height: 1, color: AdminTechColors.border),
               for (final op in ops)
                 _TableRow(
                   id: _shortId(op.id),
@@ -705,8 +725,9 @@ class _OperationsTableCard extends StatelessWidget {
                   priority: _priorityLabel(op.priority),
                   customer: _shortId(op.customerName),
                   device: _shortId(op.deviceId),
-                  technician:
-                      op.technicianName.isEmpty ? '-' : _shortId(op.technicianName),
+                  technician: op.technicianName.isEmpty
+                      ? '-'
+                      : _shortId(op.technicianName),
                   time: _formatTime(op.occurredAtUtc),
                   onTap: () => onOpenOperation(op.id),
                 ),
@@ -727,9 +748,9 @@ class _TableCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0F0F172A),
@@ -761,7 +782,7 @@ class _TableHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+        border: Border(bottom: BorderSide(color: AdminTechColors.border)),
       ),
       child: Row(
         children: headers
@@ -772,7 +793,7 @@ class _TableHeader extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF64748B),
+                    color: AdminTechColors.textSecondary,
                   ),
                 ),
               ),
@@ -815,12 +836,13 @@ class _TableRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+          border: Border(bottom: BorderSide(color: AdminTechColors.surfaceAlt)),
         ),
         child: Row(
           children: [
             Expanded(
-                child: Text(id, style: const TextStyle(fontWeight: FontWeight.w600))),
+                child: Text(id,
+                    style: const TextStyle(fontWeight: FontWeight.w600))),
             Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
             Expanded(
               child: Row(
@@ -828,7 +850,8 @@ class _TableRow extends StatelessWidget {
                   Container(
                     width: 6,
                     height: 6,
-                    decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                        color: statusColor, shape: BoxShape.circle),
                   ),
                   const SizedBox(width: 6),
                   Text(status),
@@ -862,11 +885,11 @@ class _SecondaryActionButton extends StatelessWidget {
       icon: Icon(icon, size: 16),
       label: Text(label),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F172A),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+        foregroundColor: AdminTechColors.textPrimary,
+        side: const BorderSide(color: AdminTechColors.border),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        backgroundColor: Colors.white,
+        backgroundColor: AdminTechColors.surface,
       ),
     );
   }
@@ -893,14 +916,14 @@ class _DialogField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: AdminTechColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: const BorderSide(color: AdminTechColors.border),
         ),
       ),
     );
@@ -918,13 +941,14 @@ class _HintBox extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: AdminTechColors.border),
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+        style:
+            const TextStyle(fontSize: 12, color: AdminTechColors.textSecondary),
       ),
     );
   }
@@ -965,16 +989,16 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'completed':
     case 'delivered':
-      return const Color(0xFF22C55E);
+      return AdminTechColors.green;
     case 'waitingforapproval':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'repairing':
     case 'testing':
-      return const Color(0xFFF59E0B);
+      return AdminTechColors.statusAmber;
     case 'diagnosing':
-      return const Color(0xFF3B82F6);
+      return AdminTechColors.statusBlue;
     default:
-      return const Color(0xFF64748B);
+      return AdminTechColors.textSecondary;
   }
 }
 

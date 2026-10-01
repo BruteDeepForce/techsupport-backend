@@ -9,6 +9,7 @@ import 'admin_devices_page.dart';
 import 'admin_team_page.dart';
 import 'admin_accounting_page.dart';
 import 'inventory_management_page.dart';
+import 'package:techsupport_mobile/core/design/admin_design.dart';
 
 class AdminWorkOrdersPage extends StatefulWidget {
   const AdminWorkOrdersPage({super.key});
@@ -68,7 +69,7 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LinearPageShell(
+    return LinearPageShell.dark(
       title: 'İş Emirleri',
       subtitle: 'Admin Portal',
       trailing: InkWell(
@@ -82,7 +83,8 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
-          child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
+          child:
+              const Icon(Icons.refresh_rounded, color: Colors.white, size: 18),
         ),
       ),
       tabBar: LinearTabBar(
@@ -159,14 +161,17 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.accent, AppColors.accent.withValues(alpha: 0.8)],
+              colors: [
+                const Color.fromARGB(255, 8, 0, 168),
+                AdminTechColors.primary.withValues(alpha: 0.8)
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(AppRadius.md),
             boxShadow: [
               BoxShadow(
-                color: AppColors.accent.withValues(alpha: 0.2),
+                color: AdminTechColors.primary.withValues(alpha: 0.2),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -178,9 +183,11 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('İş Emri Yönetimi', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 4),
-                    Text('Operasyon kayıtları backend üzerinden listelenir.', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text('İş Emri Yönetimi',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -192,13 +199,17 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.accent,
+                  backgroundColor: const Color.fromARGB(255, 0, 27, 92),
+                  foregroundColor: AdminTechColors.textOnAccent,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xs)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xs)),
                 ),
-                child: const Text('Hızlı Giriş', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                child: const Text('Hızlı Giriş',
+                    style:
+                        TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -228,7 +239,8 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
                   children: [
                     const Text('İş emirleri yüklenemedi'),
                     const SizedBox(height: 12),
-                    OutlinedButton(onPressed: _refresh, child: const Text('Tekrar dene')),
+                    OutlinedButton(
+                        onPressed: _refresh, child: const Text('Tekrar dene')),
                   ],
                 ),
               );
@@ -238,7 +250,9 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
             final filtered = _filterOperations(operations);
             return Column(
               children: [
-                LinearSection(title: _filterLabels[_selectedFilterIndex], count: filtered.length),
+                LinearSection(
+                    title: _filterLabels[_selectedFilterIndex],
+                    count: filtered.length),
                 LinearCard(
                   padding: EdgeInsets.zero,
                   child: filtered.isEmpty
@@ -252,7 +266,9 @@ class _AdminWorkOrdersPageState extends State<AdminWorkOrdersPage> {
                               _WorkOrderRow(
                                 id: _shortId(filtered[i].id),
                                 title: filtered[i].title,
-                                tech: filtered[i].technicianName.isEmpty ? '-' : filtered[i].technicianName,
+                                tech: filtered[i].technicianName.isEmpty
+                                    ? '-'
+                                    : filtered[i].technicianName,
                                 status: _statusLabel(filtered[i].status),
                                 statusColor: _statusColor(filtered[i].status),
                                 customer: filtered[i].customerName,
@@ -297,14 +313,21 @@ class _WorkOrderRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: showDivider ? const Border(bottom: BorderSide(color: AppColors.borderSubtle, width: 1)) : null,
+        border: showDivider
+            ? const Border(
+                bottom:
+                    BorderSide(color: AdminTechColors.borderSubtle, width: 1))
+            : null,
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(AppRadius.xs)),
-            child: Icon(Icons.build_circle_outlined, color: statusColor, size: 20),
+            decoration: BoxDecoration(
+                color: AdminTechColors.canvas,
+                borderRadius: BorderRadius.circular(AppRadius.xs)),
+            child:
+                Icon(Icons.build_circle_outlined, color: statusColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -313,29 +336,40 @@ class _WorkOrderRow extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(id, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11, fontWeight: FontWeight.w600)),
+                    Text(id,
+                        style: const TextStyle(
+                            color: AdminTechColors.textTertiary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600)),
                     const SizedBox(width: 8),
                     LinearBadge(label: status, color: statusColor),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(title, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(title,
+                    style: const TextStyle(
+                        color: AdminTechColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text(
                   'Müşteri: ${customer == null || customer!.isEmpty ? '-' : customer} • Teknisyen: $tech',
-                  style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                  style: const TextStyle(
+                      color: AdminTechColors.textTertiary, fontSize: 11),
                 ),
                 if (scheduledAtUtc != null) ...[
                   const SizedBox(height: 2),
                   Text(
                     'Plan: ${_formatDateTime(scheduledAtUtc!)}',
-                    style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                    style: const TextStyle(
+                        color: AdminTechColors.textTertiary, fontSize: 11),
                   ),
                 ],
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.border, size: 20),
+          const Icon(Icons.chevron_right_rounded,
+              color: AdminTechColors.border, size: 20),
         ],
       ),
     );
@@ -358,9 +392,9 @@ class _WorkOrderFilterTabs extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: AdminTechColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: AppColors.border, width: 0.5),
+        border: Border.all(color: AdminTechColors.border, width: 0.5),
       ),
       child: Row(
         children: List.generate(labels.length, (i) {
@@ -372,7 +406,9 @@ class _WorkOrderFilterTabs extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 7),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.bgElevated : Colors.transparent,
+                  color: selected
+                      ? AdminTechColors.surfaceRaised
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.xs),
                 ),
                 alignment: Alignment.center,
@@ -380,8 +416,8 @@ class _WorkOrderFilterTabs extends StatelessWidget {
                   labels[i],
                   style: TextStyle(
                     color: selected
-                        ? AppColors.textPrimary
-                        : AppColors.textTertiary,
+                        ? AdminTechColors.textPrimary
+                        : AdminTechColors.textTertiary,
                     fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                     fontSize: 12,
                   ),
@@ -423,15 +459,15 @@ Color _statusColor(String status) {
   switch (status.toLowerCase()) {
     case 'completed':
     case 'delivered':
-      return AppColors.statusGreen;
+      return AdminTechColors.statusGreen;
     case 'waitingforapproval':
     case 'repairing':
     case 'testing':
-      return AppColors.statusOrange;
+      return AdminTechColors.orange;
     case 'diagnosing':
-      return AppColors.statusBlue;
+      return AdminTechColors.statusBlue;
     default:
-      return AppColors.statusGreen;
+      return AdminTechColors.statusGreen;
   }
 }
 

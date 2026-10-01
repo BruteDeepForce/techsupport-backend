@@ -52,8 +52,8 @@ class StockItem {
       unitPrice: _parseDouble(json['unitPrice'] ?? json['UnitPrice']),
       categoryId: (json['categoryId'] ?? json['CategoryId'])?.toString(),
       categoryName: (json['categoryName'] ?? json['CategoryName'])?.toString(),
-      quantityAvailable: _parseInt(
-          json['quantityAvailable'] ?? json['QuantityAvailable']),
+      quantityAvailable:
+          _parseInt(json['quantityAvailable'] ?? json['QuantityAvailable']),
       quantityReserved:
           _parseInt(json['quantityReserved'] ?? json['QuantityReserved']),
       createdAtUtc: DateTime.parse(
@@ -74,4 +74,3 @@ double? _parseDouble(dynamic v) {
   if (v is int) return v.toDouble();
   return double.tryParse(v.toString());
 }
-
