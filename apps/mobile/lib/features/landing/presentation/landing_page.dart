@@ -250,7 +250,8 @@ class _LandingPageState extends State<LandingPage> {
                             builder: (context) => IconButton(
                               icon: const Icon(Icons.menu_rounded,
                                   color: AppColors.textPrimary),
-                              onPressed: () => Scaffold.of(context).openDrawer(),
+                              onPressed: () =>
+                                  Scaffold.of(context).openDrawer(),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -317,8 +318,8 @@ class _LandingPageState extends State<LandingPage> {
                         if (!isDesktop)
                           IconButton(
                             onPressed: _navigateToLogin,
-                            icon:
-                                const Icon(Icons.login_rounded, color: AppColors.accent),
+                            icon: const Icon(Icons.login_rounded,
+                                color: AppColors.accent),
                             tooltip: 'Giriş Yap',
                           ),
                       ],
@@ -400,7 +401,8 @@ class _LandingPageState extends State<LandingPage> {
               child: Container(
                 key: _featuresKey,
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
@@ -510,7 +512,8 @@ class _LandingPageState extends State<LandingPage> {
                 key: _howKey,
                 width: double.infinity,
                 color: AppColors.bgSurface,
-                padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
@@ -537,7 +540,8 @@ class _LandingPageState extends State<LandingPage> {
                 key: _pricingKey,
                 width: double.infinity,
                 color: AppColors.bgSurface,
-                child: PricingSection(onScrollToFaq: () => _scrollToKey(_faqKey)),
+                child:
+                    PricingSection(onScrollToFaq: () => _scrollToKey(_faqKey)),
               ),
             ),
 
@@ -578,10 +582,12 @@ class _LandingPageState extends State<LandingPage> {
                           ),
                           const SizedBox(height: 48),
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: isMobile ? 12 : 0),
                             child: isMobile
                                 ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       _PremiumButton(
                                         onPressed: _demoRequest,
@@ -620,7 +626,8 @@ class _LandingPageState extends State<LandingPage> {
             ),
 
             _AnimatedSection(
-              child: _AIFeaturesSection(key: _aiKey, scrollController: _scrollController),
+              child: _AIFeaturesSection(
+                  key: _aiKey, scrollController: _scrollController),
             ),
 
             // ── FAQ Section ───────────────────────────────────────────────
@@ -630,7 +637,8 @@ class _LandingPageState extends State<LandingPage> {
             _AnimatedSection(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 120, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 120, horizontal: 24),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
@@ -676,7 +684,8 @@ class _LandingPageState extends State<LandingPage> {
                           const SizedBox(height: 48),
                           isMobile
                               ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     _PremiumButton(
                                       onPressed: _demoRequest,
@@ -762,8 +771,10 @@ class _HeroContent extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isMobile = size.width < 800;
     final textAlign = isMobile ? TextAlign.center : TextAlign.start;
-    final crossAlign = isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start;
-    final buttonMainAlign = isMobile ? MainAxisAlignment.center : MainAxisAlignment.start;
+    final crossAlign =
+        isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start;
+    final buttonMainAlign =
+        isMobile ? MainAxisAlignment.center : MainAxisAlignment.start;
     final titleFontSize = isMobile ? 38.0 : 56.0;
 
     return Column(
@@ -805,10 +816,12 @@ class _HeroContent extends StatelessWidget {
                 onPressed: onWatchProduct,
                 icon: const Icon(Icons.play_circle_outline, size: 32),
                 label: const Text('Ürünü İzle',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.textPrimary,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
                 ),
               ),
             ],
@@ -1007,8 +1020,14 @@ class _WorkflowGraphic extends StatelessWidget {
 
     final steps = [
       {'number': '1', 'description': 'Müşteri Talebi Alınır ve Kaydedilir'},
-      {'number': '2', 'description': 'Yapay Zeka ile En Yakın Teknisyene Atanır'},
-      {'number': '3', 'description': 'Saha Ekibi İşe Başlar ve Dijital Form Doldurur'},
+      {
+        'number': '2',
+        'description': 'Yapay Zeka ile En Yakın Teknisyene Atanır'
+      },
+      {
+        'number': '3',
+        'description': 'Saha Ekibi İşe Başlar ve Dijital Form Doldurur'
+      },
       {'number': '4', 'description': 'Müşteri Onayı ve Dijital İmza Alınır'},
       {'number': '5', 'description': 'Otomatik Raporlama ve Faturalandırma'},
     ];
@@ -1075,7 +1094,8 @@ class _WorkflowGraphic extends StatelessWidget {
 
 class _WorkflowStep extends StatelessWidget {
   final String number;
-  final String description; // Changed from title and description to just description
+  final String
+      description; // Changed from title and description to just description
 
   const _WorkflowStep({
     required this.number,
@@ -1119,7 +1139,8 @@ class _WorkflowDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 12),
-      child: Icon(Icons.arrow_forward_rounded, color: AppColors.border, size: 24),
+      child:
+          Icon(Icons.arrow_forward_rounded, color: AppColors.border, size: 24),
     );
   }
 }
@@ -1163,8 +1184,10 @@ class _Footer extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('© 2026 ${SiteContact.companyName}. Tüm hakları saklıdır.',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    Text(
+                        '© 2026 ${SiteContact.companyName}. Tüm hakları saklıdır.',
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 13)),
                   ],
                 ),
                 Flexible(
@@ -1202,7 +1225,8 @@ class _Footer extends StatelessWidget {
                 const LinearLogo(size: 32),
                 const SizedBox(height: 12),
                 const Text('Lineer Destek',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 24),
                 // Dar ekranlarda beş bağlantı yan yana sığmayacağı için
                 // alt satıra kayabilen Wrap kullanılır.
@@ -1236,7 +1260,8 @@ class _Footer extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text('© 2026 ${SiteContact.companyName}. Tüm hakları saklıdır.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
     );
@@ -1548,7 +1573,8 @@ class _AIFeaturesSection extends StatelessWidget {
                       ? 3
                       : (constraints.maxWidth >= 620 ? 2 : 1);
                   final cardWidth =
-                      (constraints.maxWidth - spacing * (columns - 1)) / columns;
+                      (constraints.maxWidth - spacing * (columns - 1)) /
+                          columns;
 
                   return Wrap(
                     spacing: spacing,
@@ -1565,11 +1591,13 @@ class _AIFeaturesSection extends StatelessWidget {
               ),
               const SizedBox(height: 56),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                 decoration: BoxDecoration(
                   color: AppColors.accentBg,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.18)),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.18)),
                 ),
                 child: Row(
                   children: [
@@ -1755,7 +1783,8 @@ class _FAQSection extends StatelessWidget {
               ),
               const SizedBox(height: 60),
               _FAQItem(
-                question: 'Yapay Zeka (AI) operasyonlarımızı nasıl kolaylaştırır?',
+                question:
+                    'Yapay Zeka (AI) operasyonlarımızı nasıl kolaylaştırır?',
                 answer:
                     'Lineer AI, gelen servis taleplerini analiz ederek en uygun teknisyeni otomatik atar, yedek parça ihtiyacını önceden tahmin eder ve teknisyenlerinize arıza çözümünde akıllı ipuçları sunarak verimliliği %40 artırır.',
               ),
@@ -1813,7 +1842,8 @@ class _FAQItemState extends State<_FAQItem> {
         children: [
           ListTile(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             title: Text(
               widget.question,
               style: const TextStyle(
@@ -1872,8 +1902,8 @@ class _PremiumButton extends StatelessWidget {
               : const BorderSide(color: AppColors.accent, width: 1.5),
         ),
       ),
-      child:
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(label,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 }

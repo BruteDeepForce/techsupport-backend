@@ -27,7 +27,7 @@ jobs:
         working-directory: apps/mobile
 
       - name: Build web release
-        run: flutter build web --release
+        run: flutter build web --release --dart-define=API_BASE_URL=https://lineerdestek.cyber2tech.com
         working-directory: apps/mobile
 
       - name: Deploy to GitHub Pages
