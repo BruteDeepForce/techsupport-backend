@@ -107,6 +107,7 @@ public static class ModuleExtensions
         services.AddScoped<AccountingActionTool>();
         services.AddScoped<CustomerActionTool>();
         services.AddScoped<HrActionTool>();
+        services.AddScoped<PdfGeneratorTool>();
 
 
         return services;

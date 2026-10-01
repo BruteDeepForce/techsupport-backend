@@ -26,6 +26,8 @@ namespace Ai.Services
         private readonly AccountingActionTool _accountingActionTool;
         private readonly CustomerActionTool _customerActionTool;
         private readonly HrActionTool _hrActionTool;
+
+        private readonly PdfGeneratorTool _pdfGeneratorTool;
         private readonly AiKernelRequestContext _requestContext;  //! context tenant bazlı olarak injekti bize sağlar
 
         private readonly AiDbContext _dbContext;
@@ -33,7 +35,7 @@ namespace Ai.Services
 
         private readonly IChatCompletionService _chatCompletionService;
 
-        public SemanticKernelOrchestrator(Kernel kernel, OperationActionTool operationActionTool, TechnicianActionTool technicianActionTool, StockActionTool stockActionTool, AccountingActionTool accountingActionTool, CustomerActionTool customerActionTool, HrActionTool hrActionTool, AiDbContext dbContext, AiKernelRequestContext requestContext)
+        public SemanticKernelOrchestrator(Kernel kernel, OperationActionTool operationActionTool, TechnicianActionTool technicianActionTool, StockActionTool stockActionTool, AccountingActionTool accountingActionTool, CustomerActionTool customerActionTool, HrActionTool hrActionTool, PdfGeneratorTool pdfGeneratorTool, AiDbContext dbContext, AiKernelRequestContext requestContext)
         {
             _kernel = kernel;
             _operationActionTool = operationActionTool;
@@ -42,6 +44,7 @@ namespace Ai.Services
             _accountingActionTool = accountingActionTool;
             _customerActionTool = customerActionTool;
             _hrActionTool = hrActionTool;
+            _pdfGeneratorTool = pdfGeneratorTool;
             _dbContext = dbContext;
             _requestContext = requestContext;
 
@@ -53,6 +56,7 @@ namespace Ai.Services
             _kernel.Plugins.AddFromObject(_accountingActionTool);
             _kernel.Plugins.AddFromObject(_customerActionTool);
             _kernel.Plugins.AddFromObject(_hrActionTool);
+            _kernel.Plugins.AddFromObject(_pdfGeneratorTool);
 
 
         }
