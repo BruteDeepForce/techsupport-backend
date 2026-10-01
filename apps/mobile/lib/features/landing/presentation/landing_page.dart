@@ -1,8 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:techsupport_mobile/core/design/app_design.dart';
 import 'package:techsupport_mobile/features/auth/presentation/login_page.dart';
 import 'package:techsupport_mobile/features/auth/presentation/register_page.dart';
+import '../data/site_contact.dart';
+import 'widgets/ai_chat_preview.dart';
+import 'widgets/landing_actions.dart';
+import 'widgets/legal_document_page.dart';
+import 'widgets/pricing_section.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -66,6 +72,8 @@ class _LandingPageState extends State<LandingPage> {
   final GlobalKey _howKey = GlobalKey();
   final GlobalKey _aiKey = GlobalKey();
   final GlobalKey _contactKey = GlobalKey();
+  final GlobalKey _pricingKey = GlobalKey();
+  final GlobalKey _faqKey = GlobalKey();
 
   bool _isScrolled = false;
 
@@ -114,6 +122,18 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
+  void _demoRequest() => LandingActions.demoRequest(context);
+
+  void _talkToSales() => LandingActions.talkToSales(context);
+
+  void _openLegal(LegalDocument document) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LegalDocumentPage(document: document),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -125,69 +145,78 @@ class _LandingPageState extends State<LandingPage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       extendBodyBehindAppBar: true,
-      drawer: isDesktop ? null : Drawer(
-        child: Container(
-          color: AppColors.bg,
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: Column(
-            children: [
-              const LinearLogo(size: 48),
-              const SizedBox(height: 40),
-              _DrawerLink(
-                label: 'Özellikler',
-                onTap: () {
-                  Navigator.pop(context);
-                  _scrollToKey(_featuresKey);
-                },
-              ),
-              _DrawerLink(
-                label: 'Nasıl Çalışır?',
-                onTap: () {
-                  Navigator.pop(context);
-                  _scrollToKey(_howKey);
-                },
-              ),
-              _DrawerLink(
-                label: 'Lineer AI',
-                onTap: () {
-                  Navigator.pop(context);
-                  _scrollToKey(_aiKey);
-                },
-              ),
-              _DrawerLink(
-                label: 'İletişim',
-                onTap: () {
-                  Navigator.pop(context);
-                  _scrollToKey(_contactKey);
-                },
-              ),
-              const Spacer(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: _PremiumButton(
-                    onPressed: _navigateToRegister,
-                    label: 'Kayıt Ol',
-                  ),
+      drawer: isDesktop
+          ? null
+          : Drawer(
+              child: Container(
+                color: AppColors.bg,
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Column(
+                  children: [
+                    const LinearLogo(size: 48),
+                    const SizedBox(height: 40),
+                    _DrawerLink(
+                      label: 'Özellikler',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _scrollToKey(_featuresKey);
+                      },
+                    ),
+                    _DrawerLink(
+                      label: 'Nasıl Çalışır?',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _scrollToKey(_howKey);
+                      },
+                    ),
+                    _DrawerLink(
+                      label: 'Lineer AI',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _scrollToKey(_aiKey);
+                      },
+                    ),
+                    _DrawerLink(
+                      label: 'Fiyatlandırma',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _scrollToKey(_pricingKey);
+                      },
+                    ),
+                    _DrawerLink(
+                      label: 'İletişim',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _scrollToKey(_contactKey);
+                      },
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: _PremiumButton(
+                          onPressed: _navigateToRegister,
+                          label: 'Kayıt Ol',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: _PremiumButton(
+                          onPressed: _navigateToLogin,
+                          label: 'Giriş Yap',
+                          isPrimary: false,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: _PremiumButton(
-                    onPressed: _navigateToLogin,
-                    label: 'Giriş Yap',
-                    isPrimary: false,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: ClipRect(
@@ -199,8 +228,8 @@ class _LandingPageState extends State<LandingPage> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               decoration: BoxDecoration(
-                color: _isScrolled 
-                    ? AppColors.bgSurface.withValues(alpha: 0.8) 
+                color: _isScrolled
+                    ? AppColors.bgSurface.withValues(alpha: 0.8)
                     : Colors.transparent,
                 border: Border(
                   bottom: BorderSide(
@@ -219,7 +248,8 @@ class _LandingPageState extends State<LandingPage> {
                         if (!isDesktop) ...[
                           Builder(
                             builder: (context) => IconButton(
-                              icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+                              icon: const Icon(Icons.menu_rounded,
+                                  color: AppColors.textPrimary),
                               onPressed: () => Scaffold.of(context).openDrawer(),
                             ),
                           ),
@@ -238,23 +268,40 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                         const Spacer(),
                         if (isDesktop) ...[
-                          _NavLink(
-                            label: 'Özellikler',
-                            onTap: () => _scrollToKey(_featuresKey),
+                          // Dar masaüstü genişliklerde nav satırının taşmaması
+                          // için esneme + kaydırma uygulanır.
+                          Flexible(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _NavLink(
+                                    label: 'Özellikler',
+                                    onTap: () => _scrollToKey(_featuresKey),
+                                  ),
+                                  _NavLink(
+                                    label: 'Nasıl Çalışır?',
+                                    onTap: () => _scrollToKey(_howKey),
+                                  ),
+                                  _NavLink(
+                                    label: 'Yapay Zeka',
+                                    onTap: () => _scrollToKey(_aiKey),
+                                  ),
+                                  _NavLink(
+                                    label: 'Fiyatlandırma',
+                                    onTap: () => _scrollToKey(_pricingKey),
+                                  ),
+                                  _NavLink(
+                                    label: 'İletişim',
+                                    onTap: () => _scrollToKey(_contactKey),
+                                  ),
+                                  const SizedBox(width: 24),
+                                ],
+                              ),
+                            ),
                           ),
-                          _NavLink(
-                            label: 'Nasıl Çalışır?',
-                            onTap: () => _scrollToKey(_howKey),
-                          ),
-                          _NavLink(
-                            label: 'Yapay Zeka',
-                            onTap: () => _scrollToKey(_aiKey),
-                          ),
-                          _NavLink(
-                            label: 'İletişim',
-                            onTap: () => _scrollToKey(_contactKey),
-                          ),
-                          const SizedBox(width: 24),
+                          const SizedBox(width: 12),
                           _PremiumButton(
                             onPressed: _navigateToRegister,
                             label: 'Kayıt Ol',
@@ -270,7 +317,8 @@ class _LandingPageState extends State<LandingPage> {
                         if (!isDesktop)
                           IconButton(
                             onPressed: _navigateToLogin,
-                            icon: const Icon(Icons.login_rounded, color: AppColors.accent),
+                            icon:
+                                const Icon(Icons.login_rounded, color: AppColors.accent),
                             tooltip: 'Giriş Yap',
                           ),
                       ],
@@ -291,7 +339,8 @@ class _LandingPageState extends State<LandingPage> {
               child: Container(
                 key: _heroKey,
                 width: double.infinity,
-                padding: EdgeInsets.only(top: isDesktop ? 160 : 120, bottom: isDesktop ? 80 : 40),
+                padding: EdgeInsets.only(
+                    top: isDesktop ? 160 : 120, bottom: isDesktop ? 80 : 40),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -310,7 +359,11 @@ class _LandingPageState extends State<LandingPage> {
                       child: isDesktop
                           ? Row(
                               children: [
-                                Expanded(child: _HeroContent(onRegister: _navigateToRegister)),
+                                Expanded(
+                                    child: _HeroContent(
+                                  onRegister: _navigateToRegister,
+                                  onWatchProduct: _navigateToRegister,
+                                )),
                                 const SizedBox(width: 80),
                                 Expanded(
                                   child: ClipRRect(
@@ -325,7 +378,10 @@ class _LandingPageState extends State<LandingPage> {
                             )
                           : Column(
                               children: [
-                                _HeroContent(onRegister: _navigateToRegister),
+                                _HeroContent(
+                                  onRegister: _navigateToRegister,
+                                  onWatchProduct: _navigateToRegister,
+                                ),
                                 const SizedBox(height: 60),
                                 _HeroImage(),
                               ],
@@ -353,72 +409,91 @@ class _LandingPageState extends State<LandingPage> {
                         const _SectionHeader(
                           tag: 'Özellikler',
                           title: 'İşinizi Kolaylaştıran Çözümler',
-                          subtitle: 'Lineer Destek ile teknik servis süreçlerinizi uçtan uca dijitalleştirin.',
+                          subtitle:
+                              'Lineer Destek ile teknik servis süreçlerinizi uçtan uca dijitalleştirin.',
                         ),
                         const SizedBox(height: 60),
                         Column(
                           children: [
                             _FeatureRow(
-                              title: 'Yapay Zeka Atama',
-                              description: 'Talepleri konuma ve uzmanlığa göre en uygun teknisyene anında yönlendirin.',
+                              title: 'Lineer AI Asistan',
+                              description:
+                                  'Operasyon, stok, muhasebe, müşteri ve insan kaynakları verilerinizi doğal dilde sorgulayın; tek ekrandan analiz edin.',
                               imagePath: 'assets/photos/7.png',
                               isReversed: false,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
-                              title: 'Saha Takibi',
-                              description: 'Teknisyenlerinizi harita üzerinde canlı izleyin ve rota optimizasyonu yapın.',
+                              title: 'Ticket ve İş Emri Yönetimi',
+                              description:
+                                  'Müşteri taleplerini kaydedin, teknisyene atayın ve saha sürecini tek akışta yönetin.',
                               imagePath: 'assets/photos/4.png',
                               isReversed: true,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
                               title: 'Stok Yönetimi',
-                              description: 'Araçlardaki ve ana depodaki yedek parçaları gerçek zamanlı kontrol edin.',
+                              description:
+                                  'Araçlardaki ve ana depodaki yedek parçaları gerçek zamanlı kontrol edin.',
                               imagePath: 'assets/photos/8.png',
                               isReversed: false,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
                               title: 'Gelişmiş Raporlama',
-                              description: 'Servis performansını, maliyetleri ve müşteri memnuniyetini anlık izleyin.',
+                              description:
+                                  'Servis performansını, maliyetleri ve müşteri memnuniyetini anlık izleyin.',
                               imagePath: 'assets/photos/5.png',
                               isReversed: true,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
                               title: 'Dijital Onay ve İmza',
-                              description: 'Servis formlarını sahada dijital imza ile anında onaylatın ve PDF yapın.',
+                              description:
+                                  'Servis formlarını sahada dijital imza ile anında onaylatın ve PDF yapın.',
                               imagePath: 'assets/photos/9.png',
                               isReversed: false,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
-                              title: 'SLA Takibi',
-                              description: 'Müşteri sözleşmelerine göre müdahale ve çözüm sürelerini garanti altına alın.',
+                              title: 'İnsan Kaynakları',
+                              description:
+                                  'Çalışan, izin, avans ve performans kayıtlarını tek panelden yönetin.',
                               imagePath: 'assets/photos/4.png',
                               isReversed: true,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
-                              title: 'Müşteri Portalı',
-                              description: 'Müşterileriniz kendi taleplerini açsın ve sürecini şeffafça takip etsin.',
+                              title: 'Cihaz ve Garanti Takibi',
+                              description:
+                                  'Müşteri cihazlarını seri numarası, arıza geçmişi ve garanti süresiyle birlikte izleyin.',
                               imagePath: 'assets/photos/3.png',
                               isReversed: false,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
-                              title: 'Rota Optimizasyonu',
-                              description: 'Teknisyenleriniz için en kısa ve verimli günlük çalışma rotasını oluşturun.',
+                              title: 'Muhasebe ve Faturalama',
+                              description:
+                                  'Alacak, borç, fatura ve tahsilat kayıtlarını cari hesap ekstreleriyle birlikte yönetin.',
                               imagePath: 'assets/photos/2.png',
                               isReversed: true,
+                              onDetailTap: _talkToSales,
                             ),
                             const SizedBox(height: 80),
                             _FeatureRow(
-                              title: 'Hakediş & Faturalama',
-                              description: 'Teknisyen hakedişlerini ve servis maliyetlerini otomatik olarak hesaplayın.',
+                              title: 'Saha Süreç Yönetimi',
+                              description:
+                                  'Servis formu, kullanılan parça ve dijital müşteri onayını operasyon kaydında toplayın.',
                               imagePath: 'assets/photos/10.png',
                               isReversed: false,
+                              onDetailTap: _talkToSales,
                             ),
                           ],
                         ),
@@ -444,7 +519,8 @@ class _LandingPageState extends State<LandingPage> {
                         const _SectionHeader(
                           tag: 'Süreç',
                           title: 'Nasıl Çalışır?',
-                          subtitle: 'Talepten rapora kadar süreci saniyeler içinde tamamlayın.',
+                          subtitle:
+                              'Talepten rapora kadar süreci saniyeler içinde tamamlayın.',
                         ),
                         const SizedBox(height: 80),
                         _WorkflowGraphic(),
@@ -452,6 +528,16 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                   ),
                 ),
+              ),
+            ),
+
+            // ── Pricing Section ──────────────────────────────────────────
+            _AnimatedSection(
+              child: Container(
+                key: _pricingKey,
+                width: double.infinity,
+                color: AppColors.bgSurface,
+                child: PricingSection(onScrollToFaq: () => _scrollToKey(_faqKey)),
               ),
             ),
 
@@ -478,7 +564,7 @@ class _LandingPageState extends State<LandingPage> {
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               letterSpacing: -1.5,
-              height: 1.1,
+                              height: 1.1,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -498,14 +584,14 @@ class _LandingPageState extends State<LandingPage> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       _PremiumButton(
-                                        onPressed: () {},
+                                        onPressed: _demoRequest,
                                         label: 'Demo Talep Et',
                                         isPrimary: false,
                                       ),
                                       const SizedBox(height: 12),
                                       _OutlinedHeroButton(
-                                        onPressed: () {},
-                                        label: 'Satışla Konuş',
+                                        onPressed: _talkToSales,
+                                        label: 'Bilgi Alınız',
                                       ),
                                     ],
                                   )
@@ -513,14 +599,14 @@ class _LandingPageState extends State<LandingPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       _PremiumButton(
-                                        onPressed: () {},
+                                        onPressed: _demoRequest,
                                         label: 'Demo Talep Et',
                                         isPrimary: false,
                                       ),
                                       const SizedBox(width: 16),
                                       _OutlinedHeroButton(
-                                        onPressed: () {},
-                                        label: 'Satışla Konuş',
+                                        onPressed: _talkToSales,
+                                        label: 'Bilgi Alınız',
                                       ),
                                     ],
                                   ),
@@ -534,11 +620,11 @@ class _LandingPageState extends State<LandingPage> {
             ),
 
             _AnimatedSection(
-              child: _AIFeaturesSection(key: _aiKey),
+              child: _AIFeaturesSection(key: _aiKey, scrollController: _scrollController),
             ),
 
             // ── FAQ Section ───────────────────────────────────────────────
-            _AnimatedSection(child: _FAQSection()),
+            _AnimatedSection(child: _FAQSection(sectionKey: _faqKey)),
 
             // ── CTA Section ───────────────────────────────────────────────
             _AnimatedSection(
@@ -549,7 +635,8 @@ class _LandingPageState extends State<LandingPage> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 80, horizontal: isDesktop ? 60 : 24),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 80, horizontal: isDesktop ? 60 : 24),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.accent, Color(0xFF4F46E5)],
@@ -568,7 +655,10 @@ class _LandingPageState extends State<LandingPage> {
                           Text(
                             'Saha Operasyonlarınızı\nBugün Dijitalleştirin',
                             textAlign: TextAlign.center,
-                            style: (isMobile ? theme.textTheme.headlineLarge : theme.textTheme.displayMedium)?.copyWith(
+                            style: (isMobile
+                                    ? theme.textTheme.headlineLarge
+                                    : theme.textTheme.displayMedium)
+                                ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w900,
                             ),
@@ -589,13 +679,13 @@ class _LandingPageState extends State<LandingPage> {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     _PremiumButton(
-                                      onPressed: () {},
+                                      onPressed: _demoRequest,
                                       label: 'Demo Talep Et',
                                       isPrimary: false,
                                     ),
                                     const SizedBox(height: 16),
                                     _OutlinedHeroButton(
-                                      onPressed: () {},
+                                      onPressed: _talkToSales,
                                       label: 'Satışla Konuş',
                                     ),
                                   ],
@@ -604,13 +694,13 @@ class _LandingPageState extends State<LandingPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _PremiumButton(
-                                      onPressed: () {},
+                                      onPressed: _demoRequest,
                                       label: 'Demo Talep Et',
                                       isPrimary: false,
                                     ),
                                     const SizedBox(width: 16),
                                     _OutlinedHeroButton(
-                                      onPressed: () {},
+                                      onPressed: _talkToSales,
                                       label: 'Satışla Konuş',
                                     ),
                                   ],
@@ -624,14 +714,17 @@ class _LandingPageState extends State<LandingPage> {
             ),
 
             // ── Footer ───────────────────────────────────────────────────
-            _Footer(width: size.width),
+            _Footer(
+              width: size.width,
+              onOpenLegal: _openLegal,
+              onSupport: _talkToSales,
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 class _NavLink extends StatelessWidget {
   final String label;
@@ -658,7 +751,11 @@ class _NavLink extends StatelessWidget {
 
 class _HeroContent extends StatelessWidget {
   final VoidCallback onRegister;
-  const _HeroContent({required this.onRegister});
+  final VoidCallback onWatchProduct;
+  const _HeroContent({
+    required this.onRegister,
+    required this.onWatchProduct,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -705,9 +802,9 @@ class _HeroContent extends StatelessWidget {
             if (!isMobile) ...[
               const SizedBox(width: 20),
               TextButton.icon(
-                onPressed: () {},
+                onPressed: onWatchProduct,
                 icon: const Icon(Icons.play_circle_outline, size: 32),
-                label: const Text('Ürünü İzle', 
+                label: const Text('Ürünü İzle',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.textPrimary,
@@ -720,9 +817,9 @@ class _HeroContent extends StatelessWidget {
         if (isMobile) ...[
           const SizedBox(height: 16),
           TextButton.icon(
-            onPressed: () {},
+            onPressed: onWatchProduct,
             icon: const Icon(Icons.play_circle_outline, size: 28),
-            label: const Text('Ürünü İzle', 
+            label: const Text('Ürünü İzle',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textPrimary,
@@ -815,18 +912,19 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-
 class _FeatureRow extends StatelessWidget {
   final String title;
   final String description;
   final String imagePath;
   final bool isReversed;
+  final VoidCallback onDetailTap;
 
   const _FeatureRow({
     required this.title,
     required this.description,
     required this.imagePath,
     required this.isReversed,
+    required this.onDetailTap,
   });
 
   @override
@@ -858,7 +956,7 @@ class _FeatureRow extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         _OutlinedHeroButton(
-          onPressed: () {},
+          onPressed: onDetailTap,
           label: 'Detayları İncele',
         ),
       ],
@@ -917,38 +1015,43 @@ class _WorkflowGraphic extends StatelessWidget {
 
     if (isMobile) {
       return Column(
-        children: steps.map((step) => Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: AppColors.accent,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    step['number']!,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        children: steps
+            .map((step) => Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: const BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            step['number']!,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          step['description']!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  step['description']!,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        )).toList(),
+                ))
+            .toList(),
       );
     }
 
@@ -986,7 +1089,7 @@ class _WorkflowStep extends StatelessWidget {
       child: Column(
         children: [
           Text(
-             number,
+            number,
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.w900,
@@ -999,7 +1102,10 @@ class _WorkflowStep extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary), // Adjusted style
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: AppColors.textPrimary), // Adjusted style
           ),
         ],
       ),
@@ -1020,7 +1126,14 @@ class _WorkflowDivider extends StatelessWidget {
 
 class _Footer extends StatelessWidget {
   final double width;
-  const _Footer({required this.width});
+  final void Function(LegalDocument document) onOpenLegal;
+  final VoidCallback onSupport;
+
+  const _Footer({
+    required this.width,
+    required this.onOpenLegal,
+    required this.onSupport,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1034,7 +1147,7 @@ class _Footer extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: isDesktop 
+      child: isDesktop
           ? Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1043,22 +1156,44 @@ class _Footer extends StatelessWidget {
                   children: [
                     const Row(
                       children: [
-                         LinearLogo(size: 24),
-                         SizedBox(width: 8),
-                         Text('Lineer Destek', style: TextStyle(fontWeight: FontWeight.bold)),
+                        LinearLogo(size: 24),
+                        SizedBox(width: 8),
+                        Text('Lineer Destek',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('© 2026 Lineer Destek. Tüm hakları saklıdır.', 
+                    Text('© 2026 ${SiteContact.companyName}. Tüm hakları saklıdır.',
                         style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                   ],
                 ),
-                Row(
-                  children: [
-                    TextButton(onPressed: () {}, child: const Text('Gizlilik')),
-                    TextButton(onPressed: () {}, child: const Text('Kullanım Şartları')),
-                    TextButton(onPressed: () {}, child: const Text('Destek')),
-                  ],
+                Flexible(
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 4,
+                    children: [
+                      TextButton(
+                        onPressed: () => onOpenLegal(LegalDocument.privacy),
+                        child: const Text('Gizlilik'),
+                      ),
+                      TextButton(
+                        onPressed: () => onOpenLegal(LegalDocument.kvkk),
+                        child: const Text('KVKK'),
+                      ),
+                      TextButton(
+                        onPressed: () => onOpenLegal(LegalDocument.terms),
+                        child: const Text('Kullanım Şartları'),
+                      ),
+                      TextButton(
+                        onPressed: () => onOpenLegal(LegalDocument.cookies),
+                        child: const Text('Çerez Politikası'),
+                      ),
+                      TextButton(
+                        onPressed: onSupport,
+                        child: const Text('Destek'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             )
@@ -1066,24 +1201,48 @@ class _Footer extends StatelessWidget {
               children: [
                 const LinearLogo(size: 32),
                 const SizedBox(height: 12),
-                const Text('Lineer Destek', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                const Text('Lineer Destek',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Dar ekranlarda beş bağlantı yan yana sığmayacağı için
+                // alt satıra kayabilen Wrap kullanılır.
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 4,
+                  runSpacing: 4,
                   children: [
-                    TextButton(onPressed: () {}, child: const Text('Gizlilik')),
-                    TextButton(onPressed: () {}, child: const Text('Şartlar')),
-                    TextButton(onPressed: () {}, child: const Text('Destek')),
+                    TextButton(
+                      onPressed: () => onOpenLegal(LegalDocument.privacy),
+                      child: const Text('Gizlilik'),
+                    ),
+                    TextButton(
+                      onPressed: () => onOpenLegal(LegalDocument.terms),
+                      child: const Text('Şartlar'),
+                    ),
+                    TextButton(
+                      onPressed: () => onOpenLegal(LegalDocument.kvkk),
+                      child: const Text('KVKK'),
+                    ),
+                    TextButton(
+                      onPressed: () => onOpenLegal(LegalDocument.cookies),
+                      child: const Text('Çerezler'),
+                    ),
+                    TextButton(
+                      onPressed: onSupport,
+                      child: const Text('Destek'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
-                Text('© 2026 Lineer Destek. Tüm hakları saklıdır.', 
+                Text('© 2026 ${SiteContact.companyName}. Tüm hakları saklıdır.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
     );
   }
 }
+
 class _AnimatedSection extends StatefulWidget {
   final Widget child;
   const _AnimatedSection({required this.child});
@@ -1175,7 +1334,184 @@ class _StatsSection extends StatelessWidget {
 }
 
 class _AIFeaturesSection extends StatelessWidget {
-  const _AIFeaturesSection({super.key});
+  const _AIFeaturesSection({super.key, required this.scrollController});
+
+  /// Yığın efekti bu sayfanın kaydırma konumuna bağlıdır.
+  final ScrollController scrollController;
+
+  // Kaydırma ile değişen altı gerçek AI sohbet önizlemesi.
+  static final List<AIChatPreviewCard> _aiPreviewCards = [
+    AIChatPreviewCard(
+      title: 'Teknisyen performansı',
+      messages: [
+        (
+          'Bu ay hangi teknisyenler en çok iş tamamladı?',
+          'Mert Yılmaz 46, Elif Demir 41 ve Can Kaya 38 tamamlanan iş ile öne çıkıyor. '
+              'Mert Yılmaz\'ın tamamlama oranı %96.',
+          true,
+        ),
+        (
+          'Onun uzmanlıkları neler?',
+          'Asansör, yangın güvenlik ve periyodik bakım alanlarında uzman. '
+              '5 yıllık saha deneyimi var.',
+          false,
+        ),
+      ],
+    ),
+    AIChatPreviewCard(
+      title: 'Stok uyarısı',
+      messages: [
+        (
+          'Kritik seviyedeki parçaları listele.',
+          '4 parça kritik seviyede. En acil olan Asansör Rulman Seti: 4 adet kaldı, '
+              'son 3 çalışmada kullanıldı.',
+          true,
+        ),
+        (
+          'Bu parçanın son hareketleri neler?',
+          'Son 30 günde 2 kez tüketilmiş, 1 kez depoya giriş yapılmış. '
+              'Tedarikçideki mevcut miktar sorunuzda belirtilmiyor.',
+          false,
+        ),
+      ],
+    ),
+    AIChatPreviewCard(
+      title: 'Muhasebe durumu',
+      messages: [
+        (
+          'Vadesi geçen faturaları listele.',
+          '3 fatura listeleniyor. Toplam alacak ₺48.200, en eski vade 12 gün önce.',
+          true,
+        ),
+        (
+          'Toplam alacağımız ne kadar?',
+          'Toplam alacak ₺312.400, ödenmiş tutar ₺264.200. Kasa bakiyesi ₺87.900.',
+          false,
+        ),
+      ],
+    ),
+    AIChatPreviewCard(
+      title: 'Ticket ve operasyon',
+      messages: [
+        (
+          'Yeni açılan ticketları göster.',
+          'Son 24 saatte 7 ticket açıldı. 3 tanesi henüz atanmamış, en eskisi 6 saat önce.',
+          true,
+        ),
+        (
+          'Atanmamış asansör ticketını Mert Yılmaz\'a ata.',
+          'Mert Yılmaz asansör uzmanı ve şu an 2 bekleyen işi var. '
+              'Ticket atandı ve operasyon başlatıldı.',
+          false,
+        ),
+      ],
+    ),
+    AIChatPreviewCard(
+      title: 'Müşteri ve cihaz takibi',
+      messages: [
+        (
+          'ABC Teknoloji müşterisinin garanti bitimi yaklaşan cihazlarını göster.',
+          'ABC Teknoloji için 3 cihazın garantisi 30 gün içinde bitiyor. '
+              'En yakın bitiş: SN-AX220 cihazında 12 gün kaldı.',
+          true,
+        ),
+        (
+          'SN-AX220 için son arıza kaydı nedir?',
+          'SN-AX220 için son kayıt 9 gün önce açılmış: "soğutma performansı düşük". '
+              'Yerinde bakım tamamlandı, durum kapalı.',
+          false,
+        ),
+      ],
+    ),
+    AIChatPreviewCard(
+      title: 'İnsan kaynakları özeti',
+      messages: [
+        (
+          'Bu ay izinli personel ve açık avans taleplerini özetle.',
+          'Bu ay 6 personel izinli görünüyor. 2 açık avans talebi var; '
+              'toplam talep tutarı ₺18.500.',
+          true,
+        ),
+        (
+          'Geciken iş sayısı yüksek olan ekip hangisi?',
+          'Saha Operasyon Ekibi-2, 14 geciken iş ile en yüksek değerde. '
+              'Aynı ekipte tamamlanan iş oranı %82.',
+          false,
+        ),
+      ],
+    ),
+  ];
+
+  // AI'ın gerçekten yapabildiği işler. Her kart, üründe çalışan bir
+  // yeteneği anlatır; vaat edilen ama uygulanmayan özellikler yoktur.
+  static const List<_AIDomain> _domains = [
+    _AIDomain(
+      icon: Icons.assignment_outlined,
+      title: 'Operasyon ve Ticket Yönetimi',
+      description:
+          'Açık ticketları, iş emirlerini ve durumlarını listeler. Müşteri adına yeni bir ticket açabilir, mevcut talebi teknisyene atayarak operasyona dönüştürebilir.',
+      capabilities: [
+        'Açık ticket listesi ve durum takibi',
+        'Ticket detayı ve işlem geçmişi',
+        'Ticket\'ı teknisyene atama ve operasyon başlatma',
+      ],
+    ),
+    _AIDomain(
+      icon: Icons.engineering_outlined,
+      title: 'Teknisyen Yönetimi',
+      description:
+          'Teknisyenleri ad, uzmanlık alanı, iletişim bilgisi ve iş yüküne göre arar. Tek bir teknisyenin profilini, tamamlama oranını ve son işlerini detaylı verir.',
+      capabilities: [
+        'Uzmanlık ve iş yüküne göre teknisyen listesi',
+        'Teknisyen detayı: deneyim, iletişim, performans',
+        'Aktif, tamamlanan ve bekleyen iş dağılımı',
+      ],
+    ),
+    _AIDomain(
+      icon: Icons.inventory_2_outlined,
+      title: 'Stok ve Yedek Parça',
+      description:
+          'Kritik stok seviyesini, mevcut ve rezerve miktarları raporlar. Parça hareketlerini ve rezervasyon durumunu tarih aralığına göre inceler.',
+      capabilities: [
+        'Kritik stok ve toplam envanter özeti',
+        'Stok kartı, birim fiyat ve miktar sorgusu',
+        'Stok giriş/çıkış hareketleri ve rezervasyonlar',
+      ],
+    ),
+    _AIDomain(
+      icon: Icons.receipt_long_outlined,
+      title: 'Muhasebe ve Finans',
+      description:
+          'Alacak, borç, fatura ve tahsilat toplamlarını verir. Vadesi geçen faturaları, cari hesap bakiyelerini ve ekstre hareketlerini sorgular.',
+      capabilities: [
+        'Alacak, borç ve tahsilat özeti',
+        'Vadesi geçen fatura listesi',
+        'Cari hesap bakiyesi ve ekstre hareketleri',
+      ],
+    ),
+    _AIDomain(
+      icon: Icons.people_alt_outlined,
+      title: 'Müşteri ve Cihaz',
+      description:
+          'Müşteri sayısını, cihaz envanterini ve garanti durumunu raporlar. Bir müşterinin cihazlarını arıza kaydı ve garanti bitiş tarihiyle listeler.',
+      capabilities: [
+        'Müşteri ve cihaz sayıları, garanti dağılımı',
+        'Müşteri arama ve detay sorgusu',
+        'Cihaz arıza geçmişi ve garanti bitiş tarihi',
+      ],
+    ),
+    _AIDomain(
+      icon: Icons.badge_outlined,
+      title: 'İnsan Kaynakları',
+      description:
+          'Çalışan sayısını, izin durumunu ve avans taleplerini özetler. Aylık performans raporlarını tamamlanan, geciken iş ve ödül/ceza verileriyle verir.',
+      capabilities: [
+        'Çalışan, izin ve avans özeti',
+        'Departman ve unvan bazında personel listesi',
+        'Aylık performans ve gecikme analizi',
+      ],
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -1189,62 +1525,70 @@ class _AIFeaturesSection extends StatelessWidget {
           child: Column(
             children: [
               const _SectionHeader(
-                tag: 'YAPAY ZEKA GÜCÜ',
-                title: 'Lineer AI: Otonom Saha Yönetimi',
-                subtitle: 'Geleneksel teknik servis yönetimini unutun. Yapay zeka ile işlerinizi otomatize edin, hataları sıfırlayın.',
+                tag: 'LINEER AI',
+                title: 'Kurumunuzun verisini konuşan asistan',
+                subtitle:
+                    'Lineer AI, operasyon, stok, muhasebe, müşteri ve insan kaynakları '
+                    'verilerinize doğrudan erişir. Rapor hazırlamak için menülerde '
+                    'dolaşmak yerine tek cümleyle sorun; cevabı anında alın.',
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: 32),
+              AIChatPreviewStack(
+                scrollController: scrollController,
+                cards: _aiPreviewCards,
+              ),
+              const SizedBox(height: 72),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final isMobile = constraints.maxWidth < 600;
-                  final isTablet = constraints.maxWidth < 1000;
-                  
-                  return GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
-                    mainAxisSpacing: 32,
-                    crossAxisSpacing: 32,
-                    childAspectRatio: isMobile ? 1.5 : 1.2,
-                    children: const [
-                      _AIFeatureCard(
-                        icon: Icons.auto_awesome_motion,
-                        title: 'Akıllı İş Atama & Rotalama',
-                        description: 'Yapay zeka, teknisyen konumu, uzmanlığı ve parça durumunu analiz ederek en doğru atamayı anında yapar.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.inventory_2,
-                        title: 'Otonom Stok & Tedarik',
-                        description: 'Cihaz geçmişini analiz eder, azalan parçaları belirler ve tedarikçilere otomatik talep e-postaları hazırlar.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.forum_rounded,
-                        title: 'Yapay Zeka Müşteri Temsilcisi',
-                        description: 'Müşterileriniz ile doğal dilde konuşarak arıza detaylarını alır ve saniyeler içinde servis kaydı oluşturur.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.psychology,
-                        title: 'Duygu & Aciliyet Analizi',
-                        description: 'Müşterinin ses tonu ve mesajlarındaki duygu durumunu analiz ederek gerçek aciliyet seviyesine göre öncelik atar.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.query_stats_rounded,
-                        title: 'Öngörücü Bakım & Fiyatlama',
-                        description: 'Arıza belirtilerine göre parça maliyetini ve işçilik süresini önceden tahmin ederek doğru fiyat sunmanızı sağlar.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.assignment_turned_in,
-                        title: 'Teknisyen Performans Analitiği',
-                        description: 'İş bitirme hızı ve başarı oranı verilerini analiz ederek ekibin verimliliğini artıracak içgörüler sunar.',
-                      ),
-                      _AIFeatureCard(
-                        icon: Icons.analytics_rounded,
-                        title: 'Kronik Arıza & Parça İzleme',
-                        description: 'Hangi markada hangi parçanın ne zaman arıza yapacağını tahmin eder, yedek parça stratejinizi optimize eder.',
-                      ),
+                  // Kart yüksekliği içeriğe göre belirlensin diye GridView
+                  // yerine Wrap kullanılır; sabit en-boy oranı uzun
+                  // metinlerde dikey taşma üretiyordu.
+                  const spacing = 24.0;
+                  final columns = constraints.maxWidth >= 1000
+                      ? 3
+                      : (constraints.maxWidth >= 620 ? 2 : 1);
+                  final cardWidth =
+                      (constraints.maxWidth - spacing * (columns - 1)) / columns;
+
+                  return Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: [
+                      for (final domain in _domains)
+                        SizedBox(
+                          width: cardWidth,
+                          child: _AIDomainCard(domain: domain),
+                        ),
                     ],
                   );
                 },
+              ),
+              const SizedBox(height: 56),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                decoration: BoxDecoration(
+                  color: AppColors.accentBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.18)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline_rounded,
+                        color: AppColors.accent, size: 22),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        'Lineer AI yalnızca size ait verileri görür. Tüm sorgular '
+                        'kiracınıza özeldir ve başka firmalarla paylaşılmaz.',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1254,71 +1598,108 @@ class _AIFeaturesSection extends StatelessWidget {
   }
 }
 
-class _AIFeatureCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-
-  const _AIFeatureCard({
+/// AI'ın yapabildiği bir iş alanını tanımlar.
+class _AIDomain {
+  const _AIDomain({
     required this.icon,
     required this.title,
     required this.description,
+    required this.capabilities,
   });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final List<String> capabilities;
+}
+
+class _AIDomainCard extends StatelessWidget {
+  const _AIDomainCard({required this.domain});
+
+  final _AIDomain domain;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: AppColors.bg,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.accent.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.12)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withValues(alpha: 0.05),
-            blurRadius: 40,
-            offset: const Offset(0, 10),
+            color: AppColors.accent.withValues(alpha: 0.04),
+            blurRadius: 30,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(icon, color: AppColors.accent, size: 32),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(domain.icon, color: AppColors.accent, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  domain.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                    height: 1.25,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Text(
-            title,
+            domain.description,
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              height: 1.2,
+              fontSize: 14,
+              height: 1.6,
+              color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Text(
-              description,
-              style: TextStyle(
-                fontSize: 15,
-                height: 1.6,
-                color: AppColors.textSecondary.withValues(alpha: 0.8),
+          const SizedBox(height: 16),
+          for (final capability in domain.capabilities)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.check_circle_rounded,
+                      size: 16, color: AppColors.statusGreen),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      capability,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
+/// AI sohbet arayüzünün gerçek bir örneğini gösteren tanıtım bloğu.
 class _StatItem extends StatelessWidget {
   final String label;
   final String value;
@@ -1353,10 +1734,14 @@ class _StatItem extends StatelessWidget {
 }
 
 class _FAQSection extends StatelessWidget {
-  const _FAQSection({super.key});
+  const _FAQSection({super.key, required this.sectionKey});
+
+  final Key sectionKey;
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: sectionKey,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
       child: Center(
@@ -1371,23 +1756,28 @@ class _FAQSection extends StatelessWidget {
               const SizedBox(height: 60),
               _FAQItem(
                 question: 'Yapay Zeka (AI) operasyonlarımızı nasıl kolaylaştırır?',
-                answer: 'Lineer AI, gelen servis taleplerini analiz ederek en uygun teknisyeni otomatik atar, yedek parça ihtiyacını önceden tahmin eder ve teknisyenlerinize arıza çözümünde akıllı ipuçları sunarak verimliliği %40 artırır.',
+                answer:
+                    'Lineer AI, gelen servis taleplerini analiz ederek en uygun teknisyeni otomatik atar, yedek parça ihtiyacını önceden tahmin eder ve teknisyenlerinize arıza çözümünde akıllı ipuçları sunarak verimliliği %40 artırır.',
               ),
               _FAQItem(
                 question: 'Lineer Destek hangi sektörler için uygun?',
-                answer: 'Beyaz eşya, iklimlendirme, asansör, güvenlik sistemleri ve saha operasyonu yürüten tüm teknik servisler için özel olarak tasarlanmıştır.',
+                answer:
+                    'Beyaz eşya, iklimlendirme, asansör, güvenlik sistemleri ve saha operasyonu yürüten tüm teknik servisler için özel olarak tasarlanmıştır.',
               ),
               _FAQItem(
                 question: 'Dijital imza yasal olarak geçerli mi?',
-                answer: 'Evet, servis formları üzerinde alınan biyometrik dijital imzalar, onay süreçlerinde standart servis dökümanı olarak kabul görmektedir.',
+                answer:
+                    'Evet, servis formları üzerinde alınan biyometrik dijital imzalar, onay süreçlerinde standart servis dökümanı olarak kabul görmektedir.',
               ),
               _FAQItem(
                 question: 'Mevcut verilerimi sisteme aktarabilir miyim?',
-                answer: 'Evet, Excel veya API servislerimiz aracılığıyla mevcut müşteri ve envanter verilerinizi dakikalar içinde Lineer Destek\'e taşıyabilirsiniz.',
+                answer:
+                    'Evet, Excel veya API servislerimiz aracılığıyla mevcut müşteri ve envanter verilerinizi dakikalar içinde Lineer Destek\'e taşıyabilirsiniz.',
               ),
               _FAQItem(
                 question: 'Offline (internet yokken) çalışma desteği var mı?',
-                answer: 'Evet, mobil uygulamamız internet kesildiğinde verileri saklar ve ilk bağlantıda otomatik olarak bulut sunucularımızla senkronize eder.',
+                answer:
+                    'Evet, mobil uygulamamız internet kesildiğinde verileri saklar ve ilk bağlantıda otomatik olarak bulut sunucularımızla senkronize eder.',
               ),
             ],
           ),
@@ -1477,13 +1867,13 @@ class _PremiumButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 22),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.full),
-          side: isPrimary ? BorderSide.none : const BorderSide(color: AppColors.accent, width: 1.5),
+          side: isPrimary
+              ? BorderSide.none
+              : const BorderSide(color: AppColors.accent, width: 1.5),
         ),
       ),
-      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child:
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 }
-
-
-

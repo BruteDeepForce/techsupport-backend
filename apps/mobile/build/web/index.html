@@ -1,60 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>Lineer Destek - Teknik Servis Takip Yazılımı</title>
   <meta name="description" content="Lineer Destek; teknik servis ekipleri için iş emri, müşteri, cihaz, stok, teklif, muhasebe ve saha operasyonlarını web ve mobilde yöneten servis takip yazılımıdır.">
-  <meta name="keywords" content="Lineer Destek, teknik servis programı, servis takip yazılımı, iş emri yönetimi, saha servis yönetimi, müşteri destek sistemi">
-  <meta name="robots" content="index, follow">
+  <meta name="keywords" content="Lineer Destek, teknik servis programı, servis takip yazılımı, iş emri yönetimi, saha servis yönetimi, müşteri destek sistemi, teknik servis yazılımı, iş emari yazılımı">
+  <meta name="author" content="Lineer Destek">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#4F46E5">
   <link rel="canonical" href="https://www.lineerdestek.com/">
+
+  <!-- Open Graph / Twitter -->
   <meta property="og:site_name" content="Lineer Destek">
+  <meta property="og:locale" content="tr_TR">
   <meta property="og:title" content="Lineer Destek - Teknik Servis Takip Yazılımı">
   <meta property="og:description" content="Teknik servis ekipleri için iş emri, müşteri, cihaz, stok, teklif, muhasebe ve saha operasyonlarını tek panelden yönetin.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.lineerdestek.com/">
-  <meta property="og:image" content="https://www.lineerdestek.com/assets/assets/branding/logo.png">
+  <meta property="og:image" content="https://www.lineerdestek.com/assets/og/og-cover.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Lineer Destek - Teknik Servis Takip Yazılımı">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lineer Destek - Teknik Servis Takip Yazılımı">
   <meta name="twitter:description" content="Web ve mobil uyumlu teknik servis takip, iş emri ve saha operasyon yönetimi.">
-  <meta name="twitter:image" content="https://www.lineerdestek.com/assets/assets/branding/logo.png">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="twitter:image" content="https://www.lineerdestek.com/assets/og/og-cover.jpg">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Lineer Destek",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, Android, iOS",
+    "url": "https://www.lineerdestek.com/",
+    "inLanguage": "tr-TR",
+    "description": "Teknik servis ekipleri için iş emri, müşteri, cihaz, stok, teklif, muhasebe ve saha operasyonlarını yöneten servis takip yazılımı.",
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "TRY",
+      "lowPrice": "2490",
+      "highPrice": "5990",
+      "offerCount": "3"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "sales",
+      "email": "info@lineerdestek.com",
+      "telephone": "+90-850-000-00-00",
+      "availableLanguage": "Turkish"
+    }
+  }
+  </script>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="techsupport_mobile">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lineer Destek">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png"/>
+  <link rel="shortcut icon" href="favicon.ico"/>
 
-  <title>Lineer Destek - Teknik Servis Takip Yazılımı</title>
+  <!-- Performans: Flutter bootstrap erken yüklenir -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
+    JavaScript çalışmayan tarayıcılar ve JS desteklemeyen arama motorları için
+    düz HTML özeti. <noscript> içinde olduğu için JavaScript açıkken HİÇ render
+    edilmez; uygulama yüklenirken içerik flaşı olmaz.
   -->
+  <noscript>
+    <div style="max-width:760px;margin:0 auto;padding:32px 20px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#0F172A;line-height:1.6">
+      <h1 style="font-size:28px;margin:0 0 12px">Teknik Servislerinizi Lineer Hızda Yönetin</h1>
+      <p style="margin:0 0 16px">
+        Lineer Destek; teknik servis ekipleri için iş emri, müşteri, cihaz, stok, teklif,
+        muhasebe ve saha operasyonlarını tek panelden yöneten bir servis takip yazılımıdır.
+        Web, Android ve iOS üzerinden çalışır.
+      </p>
+      <h2 style="font-size:20px;margin:24px 0 8px">Öne çıkan özellikler</h2>
+      <ul style="margin:0 0 16px;padding-left:20px">
+        <li>Yapay zeka destekli iş atama ve rota planlama</li>
+        <li>Saha takibi ve dijital onay / imza</li>
+        <li>Stok ve depo yönetimi</li>
+        <li>Gelişmiş raporlama ve performans analitiği</li>
+        <li>Hakediş, faturalama ve muhasebe entegrasyonu</li>
+        <li>Müşteri portalı</li>
+      </ul>
+      <h2 style="font-size:20px;margin:24px 0 8px">Fiyatlandırma</h2>
+      <p style="margin:0 0 16px">
+        Başlangıç ₺2.490/ay, Kurumsal ₺5.990/ay, Kurumsal Plus özel fiyatlandırma.
+        Yıllık ödemede 2 ay ücretsiz.
+      </p>
+      <h2 style="font-size:20px;margin:24px 0 8px">İletişim</h2>
+      <p style="margin:0">
+        E-posta: <a href="mailto:info@lineerdestek.com">info@lineerdestek.com</a><br>
+        Telefon: <a href="tel:+908500000000">+90 850 000 00 00</a>
+      </p>
+    </div>
+  </noscript>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
