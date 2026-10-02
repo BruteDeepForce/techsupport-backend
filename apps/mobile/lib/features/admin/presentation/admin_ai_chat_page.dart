@@ -1,10 +1,15 @@
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/design/admin_design.dart';
 import '../../../core/design/app_design.dart';
+import '../../../core/utils/guid_generator.dart';
+import '../../ai/data/ai_chat_service.dart';
 
 class AdminAIChatPage extends StatefulWidget {
   const AdminAIChatPage({super.key});
@@ -13,11 +18,36 @@ class AdminAIChatPage extends StatefulWidget {
   State<AdminAIChatPage> createState() => _AdminAIChatPageState();
 }
 
-class _AdminAIChatPageState extends State<AdminAIChatPage> {
+class _AdminAIChatPageState extends State<AdminAIChatPage>
+    with SingleTickerProviderStateMixin {
+  /// Kelime başına hedef süre. Toplam süre yanıt uzunluğuna göre kırpılır.
+  static const int _msPerWord = 120;
+  static const int _minRevealMs = 2600;
+  static const int _maxRevealMs = 16000;
+
+  final AiChatService _service = AiChatService();
+
+  /// Backend bu id ile konuşma geçmişini tutar; sayfa açık kaldığı
+  /// sürece aynı değer gönderilir.
+  final String _conversationId = GuidGenerator.newGuid();
+
   final List<_ChatMessage> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
+
+  /// Ticker ilk kullanımda oluşturulur; `late final` alan `dispose`
+  /// sırasında ağaç sökülmüşken TickerMode arayabiliyordu.
+  Ticker? _revealTicker;
+
+  /// Yazma animasyonu süren mesajın id'si.
+  String? _revealTargetId;
+  int _revealedWords = 0;
+  int _revealDurationMs = _minRevealMs;
+
+  bool get _isRevealing => _revealTargetId != null;
+
+  Ticker get _reveal => _revealTicker ??= createTicker(_onRevealTick);
 
   @override
   void initState() {
@@ -35,13 +65,19 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
 
   @override
   void dispose() {
+    _revealTicker?.dispose();
+    _revealTicker = null;
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _sendMessage(String text) {
-    if (text.trim().isEmpty) return;
+    if (text.trim().isEmpty || _isTyping) return;
+
+    // Kullanıcı yazma sırasında yeni mesaj gönderirse mevcut yanıtı
+    // anında tamamla.
+    if (_isRevealing) _finishReveal();
 
     setState(() {
       _messages.add(_ChatMessage(
@@ -55,74 +91,160 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
     _textController.clear();
     _scrollToBottom();
 
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      final response = _getAIResponse(text.trim());
+    _ask(text.trim());
+  }
+
+  Future<void> _ask(String input) async {
+    try {
+      final reply = await _service.sendMessage(
+        conversationId: _conversationId,
+        input: input,
+      );
+      if (!mounted) return;
+      final message = _ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: reply,
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+      setState(() {
+        _messages.add(message);
+        _isTyping = false;
+      });
+      _startReveal(message);
+    } on AiChatException catch (e) {
+      if (!mounted) return;
       setState(() {
         _messages.add(_ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          text: response,
+          text: e.message,
           isUser: false,
           timestamp: DateTime.now(),
+          isFailed: true,
         ));
         _isTyping = false;
       });
       _scrollToBottom();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _messages.add(_ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          text: 'Asistan yanıt veremedi. Bağlantınızı kontrol edin.',
+          isUser: false,
+          timestamp: DateTime.now(),
+          isFailed: true,
+        ));
+        _isTyping = false;
+      });
+      _scrollToBottom();
+    }
+  }
+
+  /// Yanıtı kelime kelime ekrana yazar.
+  void _startReveal(_ChatMessage message) {
+    _reveal.stop();
+    setState(() {
+      _revealTargetId = message.id;
+      _revealedWords = 0;
+      _revealDurationMs = (_wordCount(message.text) * _msPerWord)
+          .clamp(_minRevealMs, _maxRevealMs);
     });
+
+    if (message.text.trim().isEmpty) {
+      _finishReveal();
+      return;
+    }
+    _reveal.start();
   }
 
-  String _getAIResponse(String message) {
-    final lower = message.toLowerCase();
-    if (lower.contains('stok') || lower.contains('parça')) {
-      return '📊 **Stok Durumu Raporu**\n\n'
-          'Toplam stok: 1.247 adet\n'
-          'Kritik seviye: 23 parça (4 farklı ürün)\n'
-          'Rezerve edilmiş: 89 adet\n\n'
-          'En düşük stokta olanlar:\n'
-          '• USB-C Kablo (3 adet)\n'
-          '• HDMI Kartı (2 adet)\n'
-          '• SSD 1TB (5 adet)\n\n'
-          'Bu parçlar için otomatik yeniden sipariş önerisinde bulunmamı ister misiniz?';
+  void _onRevealTick(Duration elapsed) {
+    final target = _revealingMessage;
+    if (target == null) {
+      _reveal.stop();
+      return;
     }
-    if (lower.contains('teknisyen') || lower.contains('atama')) {
-      return '👷 **Uzman Teknisyen Analizi**\n\n'
-          'Aktif teknisyenler: 8\n'
-          'Ortalama iş başına aylık: 12.4 tamamlanmış\n\n'
-          'Önerilen atama: **Mehmet Kaya** \n'
-          'Neden? • 4 yıl deneyim • Ağırlıklık: Donanım • Güncel iş yükü en düşük\n\n'
-          'Alternatif: Ayşe Yılmaz (2.5 yıl, Donanım, ort. yük: 11)';
+
+    final total = _wordCount(target.text);
+    if (total == 0) {
+      _finishReveal();
+      return;
     }
-    if (lower.contains('müşteri') || lower.contains('analiz')) {
-      return '👥 **Müşteri Analizi**\n\n'
-          'Toplam müşteri: 342\n'
-          'Aktif (30g): 127\n'
-          'Satisf. puanı: 4.7/5\n\n'
-          'Bu ay 3 müşteri çok memnuniyetsiz (tekrarlayan şikayetler).\n'
-          'İlgili talepler: #TS-102, #TS-245, #TS-301\n\n'
-          'Detaylı raporu görüntülemek ister misiniz?';
+
+    final progress =
+        (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
+    final words = (total * progress).floor();
+
+    if (words >= total) {
+      _finishReveal();
+      return;
     }
-    if (lower.contains('rapor') || lower.contains('özet')) {
-      return '📈 **Aylık Operasyon Raporu**\n\n'
-          'Haziran 2026\n'
-          '• Toplam tamamlanan: 156\n'
-          '• Ortalama süre: 2.3 gün\n'
-          '• Çözüm oranı: 97.4%\n'
-          '• Kritik arızalar: 12\n'
-          '• Tekrar gelenler: 3\n\n'
-          'Geçen aya göre %8.2 iyileşme sağlandı.';
-    }
-    return '🤖 AI Asistanınız burada. Sorularınız için hazırım. '
-        'Örneğin: "Stok durumu nedir?", "En iyi teknisyen kim?" veya "Rapor ver"';
+
+    setState(() => _revealedWords = words);
+    // Her karede yumuşatma animasyonu başlatmak birbirini kesiyor;
+    // yazma sırasında anında kaydırılır.
+    _scrollToBottom(animate: false);
   }
 
-  void _scrollToBottom() {
+  /// Yazma animasyonunu anında tamamlar (balona dokununca).
+  void _finishReveal() {
+    _reveal.stop();
+    if (_revealTargetId == null) return;
+    setState(() {
+      _revealedWords = _wordCount(_revealingMessage?.text ?? '');
+      _revealTargetId = null;
+    });
+    _scrollToBottom();
+  }
+
+  _ChatMessage? get _revealingMessage {
+    final id = _revealTargetId;
+    if (id == null) return null;
+    for (final message in _messages) {
+      if (message.id == id) return message;
+    }
+    return null;
+  }
+
+  static final RegExp _wordPattern = RegExp(r'\S+');
+
+  static int _wordCount(String text) => _wordPattern.allMatches(text).length;
+
+  /// [wordCount] kelimenin bittiği yere kadar metni keser; kısmi
+  /// kelime gösterilmez.
+  static String _textUpToWord(String text, int wordCount) {
+    if (wordCount <= 0) return '';
+    final matches = _wordPattern.allMatches(text).toList();
+    if (matches.isEmpty) return '';
+    final index = wordCount.clamp(0, matches.length) - 1;
+    return text.substring(0, matches[index].end);
+  }
+
+  /// Hatalı yanıtın altındaki "Tekrar dene" bağlantısı.
+  void _retry(_ChatMessage failed) {
+    final index = _messages.indexWhere((m) => m.id == failed.id);
+    final previous = index > 0 ? _messages[index - 1].text : null;
+    setState(() => _messages.removeWhere((m) => m.id == failed.id));
+    if (previous == null) return;
+    setState(() => _isTyping = true);
+    _ask(previous);
+  }
+
+  void _scrollToBottom({bool animate = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+      if (!_scrollController.hasClients) return;
+
+      final target = _scrollController.position.maxScrollExtent;
+      if (!animate) {
+        _scrollController.jumpTo(target);
+        return;
       }
+
+      _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     });
   }
 
@@ -188,8 +310,6 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    const deepBlue = Color(0xFF1E3A8A);
-
     return AdminDarkScope(
       child: Builder(builder: (context) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -198,56 +318,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
             backgroundColor: AdminTechColors.canvas,
             body: Column(
               children: [
-                Container(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 16,
-                    left: 20,
-                    right: 20,
-                    bottom: 24,
-                  ),
-                  color: deepBlue,
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.arrow_back_rounded,
-                              color: Colors.white, size: 20),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'AI Asistan',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Soru & Komut',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader(context),
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(
@@ -289,6 +360,104 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
     );
   }
 
+  /// Teknolojik koyu başlık: degrade zemin, ızgara çizgileri ve
+  /// canlı durum noktası.
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 16,
+        left: 20,
+        right: 20,
+        bottom: 22,
+      ),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1B2A6B), Color(0xFF101A3D)],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(painter: _GridPainter()),
+          ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_back_rounded,
+                      color: Colors.white, size: 20),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: const LinearGradient(
+                    colors: [AdminTechColors.primary, AdminTechColors.cyan],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Icon(Icons.auto_awesome,
+                    color: Colors.white, size: 18),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'AI Asistan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF34D399),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _isTyping ? 'Düşünüyor...' : 'Çevrimiçi',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMessage(_ChatMessage message) {
     final isUser = message.isUser;
     return Align(
@@ -307,7 +476,10 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AdminTechColors.primary, AdminTechColors.cyan],
+          colors: [
+            const Color.fromARGB(255, 0, 92, 138),
+            const Color.fromARGB(255, 21, 189, 214)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -330,112 +502,69 @@ class _AdminAIChatPageState extends State<AdminAIChatPage> {
   }
 
   Widget _buildAIMessage(_ChatMessage message) {
-    final isMarkdown = message.text.contains('**') ||
-        message.text.contains('\n') ||
-        message.text.contains('•') ||
-        message.text.contains('📊') ||
-        message.text.contains('👷') ||
-        message.text.contains('👥') ||
-        message.text.contains('📈') ||
-        message.text.contains('🤖');
+    final isRevealing = message.id == _revealTargetId;
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AdminTechColors.surface,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(AppRadius.md),
-          topRight: Radius.circular(AppRadius.md),
-          bottomRight: Radius.circular(AppRadius.md),
-          bottomLeft: const Radius.circular(4),
+    // Yazma sırasında balon yalnızca o ana kadar gelen kelimeleri gösterir.
+    final visible = isRevealing
+        ? _textUpToWord(message.text, _revealedWords)
+        : message.text;
+
+    return GestureDetector(
+      onTap: isRevealing ? _finishReveal : null,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AdminTechColors.surface,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppRadius.md),
+            topRight: Radius.circular(AppRadius.md),
+            bottomRight: Radius.circular(AppRadius.md),
+            bottomLeft: const Radius.circular(4),
+          ),
+          border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
         ),
-        border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
+        child: message.isFailed
+            ? _buildFailedMessage(message)
+            : _AssistantRichText(visible, isRevealing: isRevealing),
       ),
-      child: isMarkdown
-          ? _buildMarkdownMessage(message.text)
-          : Text(
-              message.text,
-              style: const TextStyle(
-                color: AdminTechColors.textSecondary,
-                fontSize: 14,
-                height: 1.4,
-              ),
-            ),
     );
   }
 
-  Widget _buildMarkdownMessage(String text) {
-    final List<Widget> widgets = [];
-    final lines = text.split('\n');
-
-    for (var i = 0; i < lines.length; i++) {
-      final line = lines[i];
-
-      if (line.startsWith('**') && line.endsWith('**')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              line.replaceAll('**', ''),
-              style: const TextStyle(
-                color: AdminTechColors.textPrimary,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        );
-      } else if (line.startsWith('•') || line.startsWith('-')) {
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(left: 8, bottom: 4),
-            child: Row(
-              children: [
-                Text(
-                  '•',
-                  style: TextStyle(
-                    color: AdminTechColors.primary,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    line.substring(1).trim(),
-                    style: const TextStyle(
-                      color: AdminTechColors.textSecondary,
-                      fontSize: 13,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      } else if (line.trim().isEmpty) {
-        widgets.add(const SizedBox(height: 6));
-      } else {
-        final cleaned = line.replaceAll(RegExp(r'\*\*(.*?)\*\*'), '\$1');
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Text(
-              cleaned,
-              style: TextStyle(
-                color: AdminTechColors.textSecondary,
-                fontSize: 13,
-                height: 1.4,
-              ),
-            ),
-          ),
-        );
-      }
-    }
-
+  Widget _buildFailedMessage(_ChatMessage message) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: widgets,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.error_outline,
+                color: AdminTechColors.statusRed, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message.text,
+                style: const TextStyle(
+                  color: AdminTechColors.statusRed,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        GestureDetector(
+          onTap: () => _retry(message),
+          child: const Text(
+            'Tekrar dene',
+            style: TextStyle(
+              color: AdminTechColors.cyan,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -561,47 +690,378 @@ class _ChatMessage {
     required this.text,
     required this.isUser,
     required this.timestamp,
+    this.isFailed = false,
   });
 
   final String id;
   final String text;
   final bool isUser;
   final DateTime timestamp;
+
+  /// Mesaj gönderildi ancak yanıt alınamadıysa true olur.
+  final bool isFailed;
 }
 
-class _TypingIndicator extends StatelessWidget {
+/// Asistan yanıtını `SelectableText.rich` için span ağacına çevirir.
+///
+/// Web panelindeki davranışla aynı: `**kalın**` kalınlaştırılır, satır
+/// başındaki `•` madde işareti olur ve bağlantılar tıklanabilir hâle
+/// gelir. Bağlantılar tarayıcıda açılır.
+class _AssistantRichText extends StatefulWidget {
+  const _AssistantRichText(this.text, {required this.isRevealing});
+
+  final String text;
+
+  /// Yanıt hâlâ yazılıyorsa yanıp sönen imleç gösterilir.
+  final bool isRevealing;
+
+  @override
+  State<_AssistantRichText> createState() => _AssistantRichTextState();
+}
+
+class _AssistantRichTextState extends State<_AssistantRichText>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _caret = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  );
+
+  static final RegExp _urlPattern = RegExp(
+    r'(?:https?://|www\.)[^\s<>"' '""]+',
+    caseSensitive: false,
+  );
+
+  /// Cümle sonu noktalama bağlantının parçası değildir.
+  static const String _trailingPunctuation = '.,;:!?)]}»""\'';
+
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isRevealing) _caret.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_AssistantRichText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isRevealing && !_caret.isAnimating) {
+      _caret.repeat(reverse: true);
+    } else if (!widget.isRevealing && _caret.isAnimating) {
+      _caret.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _caret.dispose();
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  Future<void> _openExternally(String raw) async {
+    final uri = Uri.tryParse(
+      raw.toLowerCase().startsWith('www.') ? 'https://$raw' : raw,
+    );
+    if (uri == null) return;
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Bağlantı açılamadı: $raw')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // `AnimatedBuilder` bir Widget döndürdüğü için span ağacının *içine*
+    // konulamaz; bu yüzden tüm metin imleç için her karede kurulur.
+    return AnimatedBuilder(
+      animation: _caret,
+      builder: (context, _) => SelectableText.rich(
+        _compose(context),
+        cursorColor: AdminTechColors.cyan,
+        selectionColor: AdminTechColors.cyan.withValues(alpha: 0.25),
+      ),
+    );
+  }
+
+  /// Satırları ve satır içi biçimleri tek bir span ağacına döker.
+  TextSpan _compose(BuildContext context) {
+    _disposeRecognizers();
+
+    final children = <InlineSpan>[];
+
+    final lines = widget.text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      children.addAll(_lineSpans(lines[i], isFirst: i == 0));
+    }
+
+    if (widget.isRevealing) {
+      children.add(TextSpan(
+        text: '\u258d',
+        style: TextStyle(
+          color: AdminTechColors.cyan
+              .withValues(alpha: 0.35 + (_caret.value * 0.65)),
+          fontSize: 13.5,
+          height: 1.55,
+        ),
+      ));
+    }
+
+    return TextSpan(
+      style: const TextStyle(
+        color: AdminTechColors.textSecondary,
+        fontSize: 13.5,
+        height: 1.55,
+      ),
+      children: children,
+    );
+  }
+
+  List<InlineSpan> _lineSpans(String line, {required bool isFirst}) {
+    const base = TextStyle(
+      color: AdminTechColors.textSecondary,
+      fontSize: 13.5,
+      height: 1.55,
+    );
+
+    final spans = <InlineSpan>[];
+
+    if (!isFirst) {
+      // Satır sonu ve boş satırlar arası nefes payı.
+      spans.add(const TextSpan(text: '\n', style: base));
+    }
+
+    final trimmed = line.trimLeft();
+    if (trimmed.isEmpty) {
+      spans.add(const TextSpan(text: '\n', style: base));
+      return spans;
+    }
+
+    var body = line;
+    TextStyle lineStyle = base;
+
+    if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+      final indent = line.length - trimmed.length;
+      spans.add(TextSpan(
+          text: '${' ' * indent}•  ',
+          style: base.copyWith(color: AdminTechColors.primary)));
+      body = trimmed.substring(1);
+    } else if (trimmed.startsWith('#')) {
+      lineStyle = base.copyWith(
+        color: AdminTechColors.textPrimary,
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+        height: 1.4,
+      );
+      body = trimmed.replaceFirst(RegExp(r'^#+\s*'), '');
+    }
+
+    spans.addAll(_inlineSpans(body, lineStyle));
+    return spans;
+  }
+
+  /// Satır içindeki `**kalın**` ve bağlantıları işler.
+  List<InlineSpan> _inlineSpans(String text, TextStyle style) {
+    final spans = <InlineSpan>[];
+    final bold = RegExp(r'\*\*(.+?)\*\*');
+
+    var cursor = 0;
+
+    for (final match in bold.allMatches(text)) {
+      if (match.start > cursor) {
+        spans.addAll(_linkSpans(text.substring(cursor, match.start), style));
+      }
+      spans.add(TextSpan(
+        text: match.group(1),
+        style: style.copyWith(
+          color: AdminTechColors.textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ));
+      cursor = match.end;
+    }
+
+    if (cursor < text.length) {
+      spans.addAll(_linkSpans(text.substring(cursor), style));
+    }
+
+    return spans;
+  }
+
+  List<InlineSpan> _linkSpans(String text, TextStyle style) {
+    final spans = <InlineSpan>[];
+
+    if (text.isEmpty) return spans;
+
+    var cursor = 0;
+
+    for (final match in _urlPattern.allMatches(text)) {
+      var url = match.group(0)!;
+      var consumedTo = match.end;
+
+      while (url.isNotEmpty &&
+          _trailingPunctuation.contains(url[url.length - 1])) {
+        url = url.substring(0, url.length - 1);
+        consumedTo -= 1;
+      }
+
+      if (url.isEmpty) continue;
+
+      if (match.start > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, match.start)));
+      }
+
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () => _openExternally(url);
+      _recognizers.add(recognizer);
+
+      spans.add(TextSpan(
+        text: url,
+        recognizer: recognizer,
+        style: style.copyWith(
+          color: AdminTechColors.cyan,
+          decoration: TextDecoration.underline,
+          decorationColor: AdminTechColors.cyan,
+        ),
+      ));
+
+      cursor = consumedTo;
+    }
+
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor)));
+    }
+
+    return spans;
+  }
+}
+
+/// Yanıt gelene kadar hareket eden balon.
+///
+/// Üç parça birlikte çalışır: kenarı dolaşan ışık, nefes alan yüzey ve
+/// sırayla yükselen noktalar. Sürekli döngüde olduğu için cevap
+/// gelene kadar "canlı" görünür.
+class _TypingIndicator extends StatefulWidget {
   const _TypingIndicator();
+
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _loop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _loop.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AdminTechColors.surface,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(AppRadius.md),
-            topRight: const Radius.circular(AppRadius.md),
-            bottomRight: const Radius.circular(AppRadius.md),
-            bottomLeft: const Radius.circular(4),
-          ),
-          border: Border.all(color: AdminTechColors.borderSubtle, width: 0.5),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < 3; i++)
-              Container(
-                margin: EdgeInsets.only(left: i == 0 ? 0 : 6),
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: AdminTechColors.textTertiary,
-                  shape: BoxShape.circle,
+      child: AnimatedBuilder(
+        animation: _loop,
+        builder: (context, _) {
+          final t = _loop.value;
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            decoration: BoxDecoration(
+              color: AdminTechColors.surface,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(AppRadius.md),
+                topRight: const Radius.circular(AppRadius.md),
+                bottomRight: const Radius.circular(AppRadius.md),
+                bottomLeft: const Radius.circular(4),
+              ),
+              border: Border.all(
+                color: Color.lerp(
+                  AdminTechColors.borderSubtle,
+                  AdminTechColors.cyan,
+                  t,
+                )!,
+                width: 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      AdminTechColors.cyan.withValues(alpha: 0.10 + 0.14 * t),
+                  blurRadius: 10 + 10 * t,
+                  spreadRadius: -2,
                 ),
-              ).animate(i),
-          ],
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Dönen "düşünüyor" halkası.
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.8,
+                    value: t,
+                    backgroundColor:
+                        AdminTechColors.borderSubtle.withValues(alpha: 0.5),
+                    valueColor: AlwaysStoppedAnimation(AdminTechColors.cyan),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                for (var i = 0; i < 3; i++) _Dot(phase: t, index: i),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Sırayla yükselip alçalan nokta.
+class _Dot extends StatelessWidget {
+  const _Dot({required this.phase, required this.index});
+
+  final double phase;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    // Her nokta döngü içinde kendi penceresine sahip; böylece sırayla
+    // hareket ediyormuş gibi görünürler.
+    final offset = (phase * 3 - index).clamp(-1.0, 2.0);
+    final wave = offset < 0 ? 0.0 : (offset > 1 ? 1.0 : offset);
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 5),
+      child: Transform.translate(
+        offset: Offset(0, -3.5 * wave),
+        child: Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              AdminTechColors.textTertiary,
+              AdminTechColors.cyan,
+              wave,
+            ),
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
@@ -653,4 +1113,24 @@ class _QuickChip extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Başlıktaki ince ızgara dokusu; teknolojik his verir.
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.05)
+      ..strokeWidth = 1;
+
+    for (double x = 0; x < size.width; x += 22) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += 22) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GridPainter oldDelegate) => false;
 }

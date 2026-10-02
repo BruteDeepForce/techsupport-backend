@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import './shared/admin_web_design.dart';
 
 import '../../../core/utils/guid_generator.dart';
@@ -841,7 +843,19 @@ class _AnimatedText extends StatefulWidget {
 
 class _AnimatedTextState extends State<_AnimatedText>
     with SingleTickerProviderStateMixin {
+  /// AI yanıtındaki S3 ve diğer bağlantıları yakalar.
+  static final RegExp _urlPattern = RegExp(
+    r'(?:https?://|www\.)[^\s<>"''“”]+',
+    caseSensitive: false,
+  );
+
+  /// Cümle sonundaki noktalama bağlantının parçası değildir.
+  static const String _trailingPunctuation = '.,;:!?)]}»”\'…';
+
   late final AnimationController _caret;
+
+  /// Her derlemede yeniden üretilir; [dispose] ile serbest bırakılır.
+  final List<TapGestureRecognizer> _recognizers = [];
 
   @override
   void initState() {
@@ -862,23 +876,92 @@ class _AnimatedTextState extends State<_AnimatedText>
 
   @override
   void dispose() {
+    _disposeRecognizers();
     _caret.dispose();
     super.dispose();
   }
 
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  /// Metni bağlantı olan ve olmayan parçalara ayırır. Bağlantılar
+  /// tıklanabilir ve altı çizili olur; kalan metin normal görünür.
+  List<InlineSpan> _buildLinkSpans(String text, TextStyle base) {
+    _disposeRecognizers();
+
+    final spans = <InlineSpan>[];
+    var cursor = 0;
+
+    for (final match in _urlPattern.allMatches(text)) {
+      var url = match.group(0)!;
+      var consumedTo = match.end;
+
+      while (url.isNotEmpty && _trailingPunctuation.contains(url[url.length - 1])) {
+        url = url.substring(0, url.length - 1);
+        consumedTo -= 1;
+      }
+
+      if (url.isEmpty) continue;
+
+      if (match.start > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, match.start)));
+      }
+
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () => _openExternally(url);
+      _recognizers.add(recognizer);
+
+      spans.add(TextSpan(
+        text: url,
+        recognizer: recognizer,
+        style: const TextStyle(
+          color: _AiChatColors.link,
+          decoration: TextDecoration.underline,
+          decorationColor: _AiChatColors.link,
+        ),
+      ));
+
+      cursor = consumedTo;
+    }
+
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor)));
+    }
+
+    return spans;
+  }
+
+  Future<void> _openExternally(String raw) async {
+    final uri = Uri.tryParse(
+      raw.toLowerCase().startsWith('www.') ? 'https://$raw' : raw,
+    );
+    if (uri == null) return;
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Bağlantı açılamadı: $raw')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text.rich(
+    const base = TextStyle(
+      color: AdminTechColors.textPrimary,
+      fontSize: 13.5,
+      height: 1.65,
+    );
+
+    return SelectableText.rich(
       TextSpan(
+        style: base,
         children: [
-          TextSpan(
-            text: widget.text,
-            style: const TextStyle(
-              color: AdminTechColors.textPrimary,
-              fontSize: 13.5,
-              height: 1.65,
-            ),
-          ),
+          ..._buildLinkSpans(widget.text, base),
           if (widget.isRevealing)
             TextSpan(
               text: '▍',
@@ -892,6 +975,8 @@ class _AnimatedTextState extends State<_AnimatedText>
             ),
         ],
       ),
+      cursorColor: _AiChatColors.accent,
+      selectionColor: _AiChatColors.accent.withValues(alpha: 0.28),
     );
   }
 }
@@ -1194,4 +1279,5 @@ abstract class _AiChatColors {
   static const border = AdminTechColors.border;
   static const textPrimary = AdminTechColors.textPrimary;
   static const textTertiary = AdminTechColors.textTertiary;
+  static const link = AdminTechColors.cyan;
 }
