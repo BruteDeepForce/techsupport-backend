@@ -16,6 +16,7 @@ namespace Ai.Services.SemanticKernel
             Genel stok durumu veya kritik seviye sorusu için Get-Stock-Summary, belirli bir stok kartı veya stok araması için Get-Stock-Items kullanılmalı.
             Muhasebe soruları (alacak, borç, fatura, tahsilat, hesap bakiyesi, ekstre, vadesi geçen fatura) sorulursa mutlaka muhasebe toollarını kullan: Get-Accounting-Summary, Get-Accounts, Get-Invoices, Get-Payments, Get-Cari-Hesap-Hareketleri.
             Genel finansal durum veya vadesi geçen fatura sorusu için Get-Accounting-Summary, fatura listesi için Get-Invoices, hesap bakiyeleri için Get-Accounts kullanılmalı.
+            Bilmediğin ve sahip olmadığın bilgi sorulursa. Mesela bir cihazın/ürünün arızası var ve tamir için gerekli bilgiler sende yoksa, direkt olarak şirket query_embedding ya da EmbeddingQueryTool aracını kullanarak şirkette bulunan dökümanlardan bilgi al.
             Müşteri soruları (müşteri listesi, müşteri cihazları, garanti, cihaz arızası) sorulursa müşteri toollarını kullan: Get-Customer-Summary, Get-Customers, Get-Customer-Devices.
             Cihaz hangi müşteriye ait veya garantisi ne zaman bitiyor sorusunda önce Get-Customers veya Get-Customer-Devices çağır.
             İnsan kaynakları soruları (çalışan sayısı, izin, avans, performans, departman) sorulursa IK toollarını kullan: Get-Hr-Summary, Get-Employees, Get-Leaves, Get-Advances, Get-Employee-Performances.

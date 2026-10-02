@@ -37,7 +37,7 @@ namespace TechSupport.Operation.AI
                 o.Title,
                 o.Description,
                 o.Status.ToString(),
-                o.InternalNote,
+                o.InternalNote ?? string.Empty,
                 o.CustomerFullName,
                 o.TechnicianFullName,
                 o.Priority.ToString(),
@@ -74,7 +74,7 @@ namespace TechSupport.Operation.AI
                 t.CreatedByUserId,
                 t.CreatedAtUtc,
                 t.UpdatedAtUtc,
-                t.Attachments.Select(a => new TicketAttachment(
+                t.Attachments == null ? new List<TicketAttachment>() : t.Attachments.Select(a => new TicketAttachment(
                     a.Id,
                     a.FileName,
                     a.Url,

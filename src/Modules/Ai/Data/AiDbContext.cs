@@ -11,6 +11,7 @@ public class AiDbContext : DbContext
     }
 
     public DbSet<EmbeddingRecord> Embeddings => Set<EmbeddingRecord>();
+    public DbSet<PolicyEmbeddingChunk> PolicyEmbeddingChunks => Set<PolicyEmbeddingChunk>();
     public DbSet<KernelConversation> KernelChatHistories => Set<KernelConversation>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
@@ -25,6 +26,18 @@ public class AiDbContext : DbContext
         modelBuilder.Entity<EmbeddingRecord>(b =>
         {
             b.ToTable("embeddings");     
+        });
+
+        modelBuilder.Entity<PolicyEmbeddingChunk>(b =>
+        {
+            b.ToTable("policy_embedding_chunks");
+
+            b.Property(x => x.DocumentName).IsRequired();
+            b.Property(x => x.ChunkText).IsRequired();
+            b.Property(x => x.EmbeddingModel).IsRequired();
+
+            b.HasIndex(x => new { x.TenantId, x.DocumentId });
+            b.HasIndex(x => new { x.DocumentId, x.ChunkIndex }).IsUnique();
         });
 
         modelBuilder.Entity<KernelConversation>(b =>

@@ -28,8 +28,8 @@ namespace TechSupport.Ai.Services.SemanticKernel.S3
             var bucketName = _configuration["AWS:S3BucketName"];
             using var fileStream = file.OpenReadStream();
 
-            var s3Key = $"lineer-ai-pdf/{key}"; 
-            
+            var s3Key = $"lineer-ai-pdf/{key}";
+
             var putRequest = new PutObjectRequest
             {
                 BucketName = bucketName,
@@ -48,5 +48,41 @@ namespace TechSupport.Ai.Services.SemanticKernel.S3
                 throw new Exception("Failed to upload file to S3");
             }
         }
+
+        public async Task<IReadOnlyCollection<PolicyDocument>> GetDocumentsFromS3Async(Guid tenantId, CancellationToken cancellationToken)
+        {
+            var bucketName = _configuration["AWS:S3BucketName"];
+
+            var result = await _s3Client.ListObjectsV2Async(new ListObjectsV2Request
+            {
+                BucketName = bucketName,
+                Prefix = $"lineer-ai-pdf/policy/{tenantId}"
+            }, cancellationToken);
+
+            var documents = result.S3Objects.Select(o =>
+            {
+                var urlRequest = new GetPreSignedUrlRequest
+                {
+                    BucketName = bucketName,
+                    Key = o.Key,
+                    Expires = DateTime.UtcNow.AddMinutes(15)
+                };
+
+                return new PolicyDocument(
+                    Title: Path.GetFileNameWithoutExtension(o.Key).Split('_').LastOrDefault(),
+                    Key: o.Key,
+                    Url: _s3Client.GetPreSignedURL(urlRequest)
+                );
+            }).ToList();
+
+            if (documents.Count == 0)
+            {
+                throw new Exception("No documents found in S3");
+            }
+
+            return documents;
+        }
+
+        public sealed record PolicyDocument(string? Title, string Key, string Url);
     }
 }

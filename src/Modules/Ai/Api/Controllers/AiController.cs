@@ -19,7 +19,8 @@ public class AiController : ControllerBase
 
             // private readonly IAIResponseFormatter _aiResponseFormatter;
 
-    public AiController(ISemanticKernelOrchestrator semanticKernelOrchestrator)
+    public AiController(
+        ISemanticKernelOrchestrator semanticKernelOrchestrator)
     {
         _semanticKernelOrchestrator = semanticKernelOrchestrator;
     }
@@ -113,4 +114,5 @@ public class AiController : ControllerBase
         [Required]
         public Guid ConversationId { get; set; }
     }
+
 }

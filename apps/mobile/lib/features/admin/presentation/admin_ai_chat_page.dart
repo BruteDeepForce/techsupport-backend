@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -316,6 +317,11 @@ class _AdminAIChatPageState extends State<AdminAIChatPage>
           value: SystemUiOverlayStyle.light,
           child: Scaffold(
             backgroundColor: AdminTechColors.canvas,
+            // Gövde kısaltılmayacak; klavye yüksekliği input alanının
+            // kendi dolgusu olarak uygulanıyor. İkisi birlikte çalışırsa
+            // klavye yüksekliği iki kez sayılır ve input ekranın tepesine
+            // fırlar.
+            resizeToAvoidBottomInset: false,
             body: Column(
               children: [
                 _buildHeader(context),
@@ -335,7 +341,7 @@ class _AdminAIChatPageState extends State<AdminAIChatPage>
                             child: ListView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.only(
-                                  top: 16, bottom: 100, left: 8, right: 8),
+                                  top: 16, bottom: 12, left: 8, right: 8),
                               itemCount: _messages.length + (_isTyping ? 1 : 0),
                               itemBuilder: (context, index) {
                                 if (index == _messages.length && _isTyping) {
@@ -570,9 +576,19 @@ class _AdminAIChatPageState extends State<AdminAIChatPage>
 
   Widget _buildInputArea() {
     final hasText = _textController.text.trim().isNotEmpty;
+
+    // Klavye kapalıyken alt güvenli alan (home indicator) kullanılır;
+    // açıkken klavye yüksekliği. `Scaffold.resizeToAvoidBottomInset` bu
+    // yüzden kapalıdır, aksi hâlde ikisi toplanır.
+    final media = MediaQuery.of(context);
+    final bottomInset = math.max(
+      media.viewInsets.bottom,
+      media.padding.bottom,
+    );
+
     return Container(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+        bottom: bottomInset + 12,
         left: 12,
         right: 12,
         top: 8,

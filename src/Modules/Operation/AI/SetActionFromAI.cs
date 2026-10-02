@@ -37,6 +37,14 @@ namespace TechSupport.Operation.AI
             };
 
             var operation = await _ticketService.ConvertAsync(tenantId, ticketId, adminUserId, techinicanInfo, operationType, "AI Assignment to Technician", operationPriority, ct);
+
+            if (operation is null)
+            {
+                throw new InvalidOperationException("Ticket operation'a donusturulemedi veya daha once donusturulmus olabilir.");
+            }
+
+            var occurredAt = operation.AssignedAtUtc ?? operation.CreatedAtUtc;
+
             return new TechSupport.Operation.Contracts.AI.ResponseOperation(
                 operation.Id,
                 operation.TenantId,
@@ -47,15 +55,15 @@ namespace TechSupport.Operation.AI
                 operation.Title,
                 operation.Description,
                 operation.Status.ToString(),
-                operation.InternalNote,
+                operation.InternalNote ?? string.Empty,
                 operation.CustomerFullName,
                 operation.TechnicianFullName,
                 operation.Priority.ToString(),
-                operation.AssignedAtUtc ?? DateTimeOffset.UtcNow,
+                occurredAt,
                 operation.Type.ToString(),
                 operation.MaintenanceTemplateId,
                 operation.Future.ToString(),
-                operation.PlannedOperation.ScheduledAtUtc
+                operation.PlannedOperation?.ScheduledAtUtc
 
             );
 

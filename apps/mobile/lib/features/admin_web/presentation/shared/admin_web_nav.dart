@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../admin_web_customers_page.dart';
 import '../admin_web_device_page.dart';
+import '../admin_web_documents_page.dart';
 import '../admin_web_home_page.dart';
 import '../HR/hr_pages/admin_web_hr_page.dart';
 import '../admin_web_trade_page.dart';
@@ -26,6 +27,7 @@ enum AdminNavKey {
   devices,
   stock,
   accounting,
+  documents,
   aiChat
 }
 
@@ -110,6 +112,12 @@ List<AdminNavItem> adminNavItems() {
       label: 'Muhasebe',
       icon: Icons.account_balance_wallet_outlined,
       pageBuilder: (_) => const AdminWebAccountingPage(),
+    ),
+    AdminNavItem(
+      key: AdminNavKey.documents,
+      label: 'Dosya / Klasör Yönetimi',
+      icon: Icons.folder_open_outlined,
+      pageBuilder: (_) => const AdminWebDocumentsPage(),
     ),
     AdminNavItem(
       key: AdminNavKey.aiChat,

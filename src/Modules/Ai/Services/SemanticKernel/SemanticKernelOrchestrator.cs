@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Ai.Domain.Entities;
 using Ai.Services.SemanticKernel;
 using Ai.Services.SemanticKernel.Tools;
+using Ai.Services.SemanticKernel.Tools.Embedding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -28,6 +29,8 @@ namespace Ai.Services
         private readonly HrActionTool _hrActionTool;
 
         private readonly PdfGeneratorTool _pdfGeneratorTool;
+
+        private readonly EmbeddingQueryTool _embeddingQueryTool;
         private readonly AiKernelRequestContext _requestContext;  //! context tenant bazlı olarak injekti bize sağlar
 
         private readonly AiDbContext _dbContext;
@@ -35,7 +38,12 @@ namespace Ai.Services
 
         private readonly IChatCompletionService _chatCompletionService;
 
-        public SemanticKernelOrchestrator(Kernel kernel, OperationActionTool operationActionTool, TechnicianActionTool technicianActionTool, StockActionTool stockActionTool, AccountingActionTool accountingActionTool, CustomerActionTool customerActionTool, HrActionTool hrActionTool, PdfGeneratorTool pdfGeneratorTool, AiDbContext dbContext, AiKernelRequestContext requestContext)
+        public SemanticKernelOrchestrator(Kernel kernel, OperationActionTool operationActionTool, 
+        TechnicianActionTool technicianActionTool, StockActionTool stockActionTool, 
+        AccountingActionTool accountingActionTool, CustomerActionTool customerActionTool, 
+        HrActionTool hrActionTool, PdfGeneratorTool pdfGeneratorTool, 
+        EmbeddingQueryTool embeddingQueryTool, AiDbContext dbContext, 
+        AiKernelRequestContext requestContext)
         {
             _kernel = kernel;
             _operationActionTool = operationActionTool;
@@ -46,6 +54,7 @@ namespace Ai.Services
             _hrActionTool = hrActionTool;
             _pdfGeneratorTool = pdfGeneratorTool;
             _dbContext = dbContext;
+            _embeddingQueryTool = embeddingQueryTool;
             _requestContext = requestContext;
 
             _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
@@ -57,7 +66,7 @@ namespace Ai.Services
             _kernel.Plugins.AddFromObject(_customerActionTool);
             _kernel.Plugins.AddFromObject(_hrActionTool);
             _kernel.Plugins.AddFromObject(_pdfGeneratorTool);
-
+            _kernel.Plugins.AddFromObject(_embeddingQueryTool);
 
         }
 

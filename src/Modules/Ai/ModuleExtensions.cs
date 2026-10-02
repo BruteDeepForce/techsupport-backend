@@ -13,6 +13,8 @@ using Pgvector.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Ai.Services.SemanticKernel;
 using Ai.Services.SemanticKernel.Tools;
+using TechSupport.Ai.Services.PolicyDocuments;
+using Ai.Services.SemanticKernel.Tools.Embedding;
 
 namespace TechSupport.Ai;
 
@@ -60,6 +62,21 @@ public static class ModuleExtensions
         // });
 
         services.AddHttpClient();
+
+        var embeddingDeploymentName = configuration["AzureSemanticKernel:OpenAI:EmbeddingModelName"]
+                                      ?? deploymenTName;
+
+        services.AddSingleton<EmbeddingClient>(_ =>
+        {
+            var openAiClient = new OpenAIClient(
+                new ApiKeyCredential(apiKey),
+                new OpenAIClientOptions
+                {
+                    Endpoint = new Uri(endpoint)
+                });
+
+            return openAiClient.GetEmbeddingClient(embeddingDeploymentName);
+        });
 
         services.AddHttpClient("OpenAI", client =>
         {
@@ -111,6 +128,10 @@ public static class ModuleExtensions
         services.AddScoped<HrActionTool>();
         services.AddScoped<PdfGeneratorTool>();
         services.AddScoped<Services.SemanticKernel.S3.S3Service>(c => new Services.SemanticKernel.S3.S3Service(configuration));
+        services.AddScoped<IPolicyDocumentIngestionService, PolicyDocumentIngestionService>();
+        services.AddScoped<IPolicyChunkingService, PolicyChunkingService>();
+        services.AddScoped<IPolicyEmbeddingGenerationService, PolicyEmbeddingGenerationService>();
+        services.AddScoped<EmbeddingQueryTool>();
 
 
         return services;

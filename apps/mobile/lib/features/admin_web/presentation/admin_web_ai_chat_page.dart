@@ -22,10 +22,10 @@ class AdminWebAiChatPage extends StatefulWidget {
 
 class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     with SingleTickerProviderStateMixin {
-  /// Harf başına hedef süre. Toplam süre metin uzunluğuna göre kırpılır.
-  static const int _msPerChar = 100;
-  static const int _minRevealMs = 3300;
-  static const int _maxRevealMs = 12000;
+  /// Kelime başına hedef süre. Toplam süre yanıt uzunluğuna göre kırpılır.
+  static const int _msPerWord = 120;
+  static const int _minRevealMs = 2600;
+  static const int _maxRevealMs = 16000;
 
   final AiChatService _service = AiChatService();
   final TextEditingController _controller = TextEditingController();
@@ -45,7 +45,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
   Ticker? _revealTicker;
 
   String? _revealTargetId;
-  int _revealedChars = 0;
+  int _revealedWords = 0;
   int _revealDurationMs = _minRevealMs;
 
   bool get _isRevealing => _revealTargetId != null;
@@ -147,20 +147,20 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     setState(() {
       _messages.clear();
       _revealTargetId = null;
-      _revealedChars = 0;
+      _revealedWords = 0;
       _conversationId = GuidGenerator.newGuid();
     });
     _focusNode.requestFocus();
   }
 
-  /// Yanıtı harf harf ekrana yazar.
+  /// Yanıtı kelime kelime ekrana yazar.
   void _startReveal(AiChatMessage message) {
     _reveal.stop();
     setState(() {
       _revealTargetId = message.id;
-      _revealedChars = 0;
-      _revealDurationMs = (message.content.length * _msPerChar)
-          .clamp(_minRevealMs, _maxRevealMs);
+      _revealedWords = 0;
+      _revealDurationMs =
+          (_wordCount(message.content) * _msPerWord).clamp(_minRevealMs, _maxRevealMs);
     });
 
     if (message.content.isEmpty) {
@@ -177,17 +177,22 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
       return;
     }
 
-    final total = target.content.length;
-    final progress =
-        (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
-    final chars = (total * progress).round();
-
-    if (chars >= total) {
+    final total = _wordCount(target.content);
+    if (total == 0) {
       _finishReveal();
       return;
     }
 
-    setState(() => _revealedChars = chars);
+    final progress =
+        (elapsed.inMilliseconds / _revealDurationMs).clamp(0.0, 1.0);
+    final words = (total * progress).floor();
+
+    if (words >= total) {
+      _finishReveal();
+      return;
+    }
+
+    setState(() => _revealedWords = words);
     _scrollToBottom(animate: false);
   }
 
@@ -196,7 +201,7 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     _reveal.stop();
     if (_revealTargetId == null) return;
     setState(() {
-      _revealedChars = _revealingMessage?.content.length ?? 0;
+      _revealedWords = _wordCount(_revealingMessage?.content ?? '');
       _revealTargetId = null;
     });
     _scrollToBottom();
@@ -211,13 +216,24 @@ class _AdminWebAiChatPageState extends State<AdminWebAiChatPage>
     return null;
   }
 
+  static final RegExp _wordPattern = RegExp(r'\S+');
+
+  static int _wordCount(String text) => _wordPattern.allMatches(text).length;
+
   /// Yazılırken balonda gösterilecek metin.
+  ///
+  /// Kısmi kelime gösterilmez; metin her zaman bir kelimenin bittiği
+  /// yerde kesilir.
   String _visibleText(AiChatMessage message) {
     if (message.id != _revealTargetId || message.isFailed) {
       return message.content;
     }
-    return message.content
-        .substring(0, _revealedChars.clamp(0, message.content.length));
+
+    final matches = _wordPattern.allMatches(message.content).toList();
+    if (matches.isEmpty || _revealedWords <= 0) return '';
+
+    final index = _revealedWords.clamp(0, matches.length) - 1;
+    return message.content.substring(0, matches[index].end);
   }
 
   void _scrollToBottom({bool animate = true}) {
@@ -981,8 +997,30 @@ class _AnimatedTextState extends State<_AnimatedText>
   }
 }
 
-class _ThinkingBubble extends StatelessWidget {
+/// Yanıt gelene kadar hareket eden balon.
+///
+/// Mobil paneldekiyle aynı: döner halka, nefes alan kenar ve sırayla
+/// yükselen noktalar. Sürekli döngüde olduğu için cevap gelene kadar
+/// "canlı" görünür.
+class _ThinkingBubble extends StatefulWidget {
   const _ThinkingBubble();
+
+  @override
+  State<_ThinkingBubble> createState() => _ThinkingBubbleState();
+}
+
+class _ThinkingBubbleState extends State<_ThinkingBubble>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _loop = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _loop.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -993,28 +1031,61 @@ class _ThinkingBubble extends StatelessWidget {
         children: [
           const _AiAvatar(),
           const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: AdminTechColors.surface,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(4),
-                topRight: Radius.circular(14),
-                bottomLeft: Radius.circular(14),
-                bottomRight: Radius.circular(14),
-              ),
-              border: Border.all(color: _AiChatColors.border),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _Dot(delay: 0),
-                SizedBox(width: 5),
-                _Dot(delay: 160),
-                SizedBox(width: 5),
-                _Dot(delay: 320),
-              ],
-            ),
+          AnimatedBuilder(
+            animation: _loop,
+            builder: (context, _) {
+              final t = _loop.value;
+
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AdminTechColors.surface,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(14),
+                    bottomLeft: Radius.circular(14),
+                    bottomRight: Radius.circular(14),
+                  ),
+                  border: Border.all(
+                    color: Color.lerp(
+                      AdminTechColors.borderSubtle,
+                      AdminTechColors.cyan,
+                      t,
+                    )!,
+                    width: 0.8,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AdminTechColors.cyan
+                          .withValues(alpha: 0.10 + 0.14 * t),
+                      blurRadius: 10 + 10 * t,
+                      spreadRadius: -2,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Dönen "düşünüyor" halkası.
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.8,
+                        value: t,
+                        backgroundColor: AdminTechColors.borderSubtle
+                            .withValues(alpha: 0.5),
+                        valueColor:
+                            AlwaysStoppedAnimation(AdminTechColors.cyan),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    for (var i = 0; i < 3; i++) _Dot(phase: t, index: i),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -1022,46 +1093,35 @@ class _ThinkingBubble extends StatelessWidget {
   }
 }
 
-class _Dot extends StatefulWidget {
-  const _Dot({required this.delay});
+/// Sırayla yükselip alçalkan nokta.
+class _Dot extends StatelessWidget {
+  const _Dot({required this.phase, required this.index});
 
-  final int delay;
-
-  @override
-  State<_Dot> createState() => _DotState();
-}
-
-class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1100),
-    )..repeat(reverse: true);
-    Future.delayed(Duration(milliseconds: widget.delay), () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final double phase;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0.25, end: 1).animate(_controller),
-      child: Container(
-        width: 6,
-        height: 6,
-        decoration: const BoxDecoration(
-          color: _AiChatColors.textTertiary,
-          shape: BoxShape.circle,
+    // Her nokta döngü içinde kendi penceresine sahip; böylece sırayla
+    // hareket ediyormuş gibi görünürler.
+    final offset = (phase * 3 - index).clamp(-1.0, 2.0);
+    final wave = offset < 0 ? 0.0 : (offset > 1 ? 1.0 : offset);
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 5),
+      child: Transform.translate(
+        offset: Offset(0, -3.5 * wave),
+        child: Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              AdminTechColors.textTertiary,
+              AdminTechColors.cyan,
+              wave,
+            ),
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );
